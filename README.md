@@ -2,4 +2,4 @@
 
 # js-idp2p
 
-> This project is WIP and is currently being specified. You can check out the spec [here](https://www.notion.so/threebox/IDP2P-IDW-2-0-e713338a094a44758ce2c3f21cdce27e).
+> This project is WIP. Read and contribute to the spec [here](https://www.notion.so/threebox/IDP2P-IDW-2-0-e713338a094a44758ce2c3f21cdce27e).
