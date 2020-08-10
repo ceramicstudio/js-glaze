@@ -1,19 +1,39 @@
 {
-  "name": "idp2p",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ceramicstudio/js-idp2p.git"
-  },
+  "name": "js-idp2p",
   "author": "Ceramic Studio",
+  "version": "0.1.0",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ceramicstudio/js-idp2p/issues"
+  "main": "dist/index.js",
+  "module": "dist/idp2p.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
   },
-  "homepage": "https://github.com/ceramicstudio/js-idp2p#readme"
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build"
+  },
+  "dependencies": {
+    "@ceramicnetwork/ceramic-common": "^0.2.8",
+    "dids": "^0.1.0"
+  },
+  "devDependencies": {
+    "eslint-config-3box": "^0.1.2",
+    "husky": "^4.2.5",
+    "tsdx": "^0.13.2",
+    "tslib": "^2.0.1",
+    "typescript": "^3.9.7"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  }
 }
