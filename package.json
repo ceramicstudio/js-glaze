@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ceramicnetwork/ceramic-common": "^0.2.8",
+    "@ceramicnetwork/ceramic-http-client": "^0.2.8",
     "dids": "^0.1.0"
   },
   "devDependencies": {
