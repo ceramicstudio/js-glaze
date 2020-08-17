@@ -5,4 +5,4 @@
 
 > This project is WIP. Read and contribute to the spec [here](https://www.notion.so/threebox/IDP2P-IDW-2-0-e713338a094a44758ce2c3f21cdce27e).
 
-**IDX-Ceramic** is a JavaScript library for managing decentralized identities. It provides high-level APIs for interacting with various open decentralized identity standards such as DIDs, IDX, and more.
+**IDX-Ceramic** is a JavaScript library for managing decentralized identities. It provides high-level APIs for interacting with various open decentralized identity standards implemented on the Ceramic network such as 3ID DIDs, IDX, profiles, and more.
