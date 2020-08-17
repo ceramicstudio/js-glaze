@@ -1,34 +1,43 @@
-import { Doctype } from '@ceramicnetwork/ceramic-common'
+import { ThreeIDDocument, getResolver } from '@ceramicnetwork/3id-did-resolver'
+import { CeramicApi, DIDProvider, Doctype } from '@ceramicnetwork/ceramic-common'
+import { DIDResolver, Resolver } from 'did-resolver'
 import { DID } from 'dids'
 
 import { Accessors, createAccessors } from './accessors'
-import { IDX_DOCTYPE_CONFIGS, IdxDoctypeName } from './doctypes'
-import { AuthProvider, NewCeramicApi } from './types'
+import { IDX_DOCTYPE_CONFIGS, DoctypeProxy, IdxDoctypeName } from './doctypes'
+
+type ResolverRegistry = Record<string, DIDResolver>
 
 export interface Idp2pOptions {
-  ceramic: NewCeramicApi
+  ceramic: CeramicApi
+  resolverRegistry?: ResolverRegistry
 }
 
 export interface AuthenticateOptions {
   paths?: Array<string>
-  provider?: AuthProvider
+  provider?: DIDProvider
 }
 
 export class Idp2p {
-  _ceramic: NewCeramicApi
-  _docQueue: Record<string, Promise<Doctype>> = {}
+  _ceramic: CeramicApi
+  _docProxy: Record<string, DoctypeProxy<Doctype>> = {}
+  _resolver: Resolver
   _rootDocId: string | undefined
 
   accounts: Accessors
+  collections: Accessors
   profiles: Accessors
 
-  constructor({ ceramic }: Idp2pOptions) {
+  constructor({ ceramic, resolverRegistry = {} }: Idp2pOptions) {
     this._ceramic = ceramic
+    this._resolver = new Resolver({ ...resolverRegistry, ...getResolver(ceramic) })
+
     this.accounts = createAccessors('accounts', this)
+    this.collections = createAccessors('collections', this)
     this.profiles = createAccessors('profiles', this)
   }
 
-  get ceramic(): NewCeramicApi {
+  get ceramic(): CeramicApi {
     return this._ceramic
   }
 
@@ -40,55 +49,40 @@ export class Idp2p {
   }
 
   async authenticate(options: AuthenticateOptions = {}): Promise<void> {
-    let provider = this._ceramic.getDIDProvider()
-    if (provider == null) {
+    if (this._ceramic.user == null) {
       if (options.provider == null) {
         throw new Error('Not provider available')
       } else {
-        // Use provider and attach it to Ceramic instance
-        provider = options.provider
-        this._ceramic.setDIDProvider(provider)
+        await this._ceramic.setDIDProvider(options.provider)
       }
-    } else if (options.provider != null && options.provider !== provider) {
-      throw new Error('A different provider is already attached to the Ceramic instance')
     }
-
-    let user = this._ceramic.user
-    if (user == null) {
-      // @ts-ignore: provider type
-      user = new DID(provider)
-      this._ceramic.setUser(user)
-    }
-
-    await user.authenticate()
   }
 
-  async getUserDocument(): Promise<Doctype> {
-    const cid = this.user.DID.split(':')[2]
-    return await this._ceramic.loadDocument(`ceramic://${cid}`)
+  async getUserDocument(): Promise<ThreeIDDocument | null> {
+    return await this._resolver.resolve(this.user.DID)
   }
 
   async getIdxDocument(name: IdxDoctypeName): Promise<Doctype> {
-    const existing = this._docQueue[name]
-    if (existing != null) {
-      return await existing
-    }
-
-    const getOrCreate = name === 'root' ? this._getOrCreateRootDoc() : this._getOrCreateIdxDoc(name)
-    this._docQueue[name] = getOrCreate
-    getOrCreate.catch(() => {
-      delete this._docQueue[name]
-    })
-
-    return await getOrCreate
+    return await this._getProxy(name).get()
   }
 
   async changeIdxDocument<T = any>(name: IdxDoctypeName, change: (content: T) => T): Promise<void> {
-    const queue = this.getIdxDocument(name).then(doc => {
-      return doc.change({ content: change(doc.content) }).then(() => doc)
-    })
-    this._docQueue[name] = queue
-    await queue
+    const mutation = async (doc: Doctype): Promise<Doctype> => {
+      await doc.change({ content: change(doc.content) })
+      return doc
+    }
+    return await this._getProxy(name).change(mutation)
+  }
+
+  _getProxy(name: IdxDoctypeName): DoctypeProxy<Doctype> {
+    if (this._docProxy[name] == null) {
+      const getRemote =
+        name === 'root'
+          ? (): Promise<Doctype> => this._getOrCreateRootDoc()
+          : (): Promise<Doctype> => this._getOrCreateIdxDoc(name)
+      this._docProxy[name] = new DoctypeProxy(getRemote)
+    }
+    return this._docProxy[name]
   }
 
   async _getOrCreateRootDoc(): Promise<Doctype> {
@@ -102,9 +96,9 @@ export class Idp2p {
     }
 
     const userDoc = await this.getUserDocument()
-    if (userDoc.content.idx != null) {
-      this._rootDocId = userDoc.content.idx
-      return await this._ceramic.loadDocument(userDoc.content.idx)
+    if (userDoc?.idx != null) {
+      this._rootDocId = userDoc.idx
+      return await this._ceramic.loadDocument(userDoc.idx)
     }
 
     return null
@@ -121,13 +115,6 @@ export class Idp2p {
       }
     })
     this._rootDocId = doctype.id
-
-    const userDoc = await this.getUserDocument()
-    await userDoc.change({
-      content: { ...userDoc.content, idx: doctype.id },
-      metadata: userDoc.metadata
-    })
-
     return doctype
   }
 
