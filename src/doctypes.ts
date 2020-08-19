@@ -16,7 +16,7 @@ export const IDX_DOCTYPE_CONFIGS: Record<string, DoctypeConfig> = {
   settings: { schema: undefined, tags: [] }
 }
 
-export type IdxDoctypeName = keyof typeof IDX_DOCTYPE_CONFIGS
+export type IDXDoctypeName = keyof typeof IDX_DOCTYPE_CONFIGS
 
 export type MutationFunc<T = Doctype> = (current: T) => Promise<T>
 
