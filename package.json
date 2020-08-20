@@ -25,8 +25,8 @@
     "@ceramicnetwork/ceramic-common": "^0.2.8",
     "@ceramicnetwork/ceramic-http-client": "^0.2.8",
     "dataloader": "^2.0.0",
-    "did-resolver": "^2.1.0",
-    "dids": "^0.2.0"
+    "did-resolver": "^2.1.1",
+    "dids": "^0.2.1"
   },
   "devDependencies": {
     "eslint-config-3box": "^0.1.2",

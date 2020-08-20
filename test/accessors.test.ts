@@ -80,33 +80,60 @@ describe('accessors', () => {
     })
 
     test('get unauthenticated', async () => {
-      const doc = { content: { type: 'Ceramic doc', another: 'one' } }
-      const loadCeramicDocument = jest.fn(() => Promise.resolve(doc))
       const rootDoc = { content: { accounts: 'ceramic://accountsId' } }
       const getRootDocument = jest.fn(() => Promise.resolve(rootDoc))
+
+      const accountsDoc = { content: { basic: 'ceramic://basicAccountId' } }
+      const basicAccountDoc = { content: { name: 'test' } }
+      const loadCeramicDocument = jest.fn(id => {
+        if (id === 'ceramic://accountsId') return Promise.resolve(accountsDoc)
+        if (id === 'ceramic://basicAccountId') return Promise.resolve(basicAccountDoc)
+        return Promise.resolve({ content: {} })
+      })
+
       const idx = ({ getRootDocument, loadCeramicDocument } as unknown) as IDX
       const accessors = createAccessors('accounts', idx)
-      await expect(accessors.get('did:any:test', 'another')).resolves.toBe('one')
+      await expect(accessors.get('did:any:test', 'basic')).resolves.toEqual({ name: 'test' })
     })
 
     test('get authenticated', async () => {
-      const doc = { content: { type: 'Ceramic doc', test: 'test' } }
-      const getOwnDocument = jest.fn(() => Promise.resolve(doc))
-      const idx = ({ authenticated: true, getOwnDocument } as unknown) as IDX
+      const accountsDoc = { content: { basic: 'ceramic://basicAccountId' } }
+      const getOwnDocument = jest.fn(() => Promise.resolve(accountsDoc))
+
+      const basicAccountDoc = { content: { name: 'test' } }
+      const loadCeramicDocument = jest.fn(id => {
+        if (id === 'ceramic://basicAccountId') return Promise.resolve(basicAccountDoc)
+        return Promise.resolve({ content: {} })
+      })
+
+      const idx = ({ authenticated: true, getOwnDocument, loadCeramicDocument } as unknown) as IDX
       const accessors = createAccessors('accounts', idx)
-      await expect(accessors.get('test')).resolves.toBe('test')
+      await expect(accessors.get('basic')).resolves.toEqual({ name: 'test' })
     })
 
     test('set', async () => {
-      const content = { hello: 'test' }
+      const createDocument = jest.fn(() => Promise.resolve({ id: 'ceramic://newDocId' }))
       const changeOwnDocument = jest.fn((name, changeFunc) => {
-        return changeFunc(content)
+        return changeFunc({})
       })
-      const idx = ({ changeOwnDocument } as unknown) as IDX
+      const idx = ({
+        ceramic: { createDocument },
+        changeOwnDocument,
+        user: { DID: 'did:test:user' }
+      } as unknown) as IDX
       const accessors = createAccessors('accounts', idx)
-      await accessors.set('hello', 'world')
+
+      await accessors.set('basic', { name: 'bob' })
+      expect(createDocument).toBeCalledWith('tile', {
+        content: { name: 'bob' },
+        metadata: {
+          owners: ['did:test:user'],
+          schema: undefined,
+          tags: []
+        }
+      })
       expect(changeOwnDocument).toBeCalledWith('accounts', expect.any(Function))
-      expect(changeOwnDocument).toReturnWith({ hello: 'world' })
+      expect(changeOwnDocument).toReturnWith({ basic: 'ceramic://newDocId' })
     })
 
     test('remove', async () => {

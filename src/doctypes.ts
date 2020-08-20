@@ -5,6 +5,7 @@ export interface DoctypeConfig {
   tags: Array<string>
 }
 
+// See https://github.com/ceramicnetwork/CIP/issues/3
 export const IDX_DOCTYPE_CONFIGS: Record<string, DoctypeConfig> = {
   root: { schema: undefined, tags: ['RootIndex', 'DocIdMap'] },
   profiles: { schema: undefined, tags: ['ProfilesIndex', 'DocIdMap'] },

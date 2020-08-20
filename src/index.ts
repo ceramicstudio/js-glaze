@@ -1,21 +1,21 @@
-import { getResolver } from '@ceramicnetwork/3id-did-resolver'
-import { CeramicApi, DIDProvider, Doctype } from '@ceramicnetwork/ceramic-common'
+import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
+import { CeramicApi, Doctype } from '@ceramicnetwork/ceramic-common'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
-import { DID, ResolverOptions } from 'dids'
+import { DID, DIDProvider, ResolverOptions } from 'dids'
 
 import { Accessors, createAccessors } from './accessors'
 import { IDX_DOCTYPE_CONFIGS, DoctypeProxy, IDXDoctypeName } from './doctypes'
 import { getIDXRoot } from './utils'
 
-export interface IDXOptions {
-  ceramic: CeramicApi
-  resolver?: ResolverOptions
-}
-
 export interface AuthenticateOptions {
   paths?: Array<string>
   provider?: DIDProvider
+}
+
+export interface IDXOptions {
+  ceramic: CeramicApi
+  resolver?: ResolverOptions
 }
 
 export class IDX {
@@ -35,7 +35,7 @@ export class IDX {
       return await Promise.all(docIds.map(async docId => await this._ceramic.loadDocument(docId)))
     })
 
-    const ceramicResolver = getResolver(ceramic)
+    const ceramicResolver = ThreeIDResolver.getResolver(ceramic)
     const registry = resolver.registry
       ? { ...resolver.registry, ...ceramicResolver }
       : ceramicResolver
@@ -54,15 +54,15 @@ export class IDX {
     return this._ceramic
   }
 
+  get resolver(): Resolver {
+    return this._resolver
+  }
+
   get user(): DID {
     if (this._ceramic.user == null) {
       throw new Error('User is not authenticated')
     }
     return this._ceramic.user
-  }
-
-  get resolver(): Resolver {
-    return this._resolver
   }
 
   async authenticate(options: AuthenticateOptions = {}): Promise<void> {
