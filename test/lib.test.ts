@@ -18,13 +18,13 @@ describe('IDX', () => {
     expect(idx.ceramic).toBe(ceramic)
   })
 
-  test('`user` property', () => {
+  test('`did` property', () => {
     const idx1 = new IDX({ ceramic: {} as any })
-    expect(() => idx1.user).toThrow('User is not authenticated')
+    expect(() => idx1.did).toThrow('Ceramic instance is not authenticated')
 
-    const user = {}
-    const idx2 = new IDX({ ceramic: { user } as any })
-    expect(idx2.user).toBe(user)
+    const did = {}
+    const idx2 = new IDX({ ceramic: { user: did } as any })
+    expect(idx2.did).toBe(did)
   })
 
   test('`resolver` property', async () => {
@@ -220,7 +220,7 @@ describe('IDX', () => {
 
   test('_getOwnRootDoc', async () => {
     const getRootDocument = jest.fn()
-    const idx = new IDX({ ceramic: { user: { DID: 'did:test:user' } } as any })
+    const idx = new IDX({ ceramic: { user: { id: 'did:test:user' } } as any })
     idx.getRootDocument = getRootDocument
     await idx._getOwnRootDoc()
     expect(getRootDocument).toHaveBeenCalledTimes(1)
@@ -230,7 +230,7 @@ describe('IDX', () => {
   test('_createOwnRootDoc', async () => {
     const doctype = { id: 'rootDocId' }
     const createDocument = jest.fn(() => Promise.resolve(doctype))
-    const idx = new IDX({ ceramic: { createDocument, user: { DID: 'did:test:user' } } as any })
+    const idx = new IDX({ ceramic: { createDocument, user: { id: 'did:test:user' } } as any })
 
     const content = { root: true }
     const config = IDX_DOCTYPE_CONFIGS.root
@@ -290,7 +290,7 @@ describe('IDX', () => {
     test('creates the document and set it to the root doc', async () => {
       const doctype = { id: 'testDocId' }
       const createDocument = jest.fn(() => Promise.resolve(doctype))
-      const idx = new IDX({ ceramic: { createDocument, user: { DID: 'did:test:user' } } as any })
+      const idx = new IDX({ ceramic: { createDocument, user: { id: 'did:test:user' } } as any })
 
       const changeRoot = jest.fn()
       // @ts-expect-error

@@ -19,7 +19,7 @@ describe('accessors', () => {
       const getOwnDocument = jest.fn(() => Promise.resolve(ownDoc))
       const idx = ({
         authenticated: true,
-        user: { DID: 'did:any:test' },
+        did: { id: 'did:any:test' },
         getOwnDocument
       } as unknown) as IDX
       await expect(loadIDXDoc(idx, 'accounts')).resolves.toBe(ownDoc)
@@ -31,7 +31,7 @@ describe('accessors', () => {
       const getOwnDocument = jest.fn(() => Promise.resolve(ownDoc))
       const idx = ({
         authenticated: true,
-        user: { DID: 'did:any:test' },
+        did: { id: 'did:any:test' },
         getOwnDocument
       } as unknown) as IDX
       await expect(loadIDXDoc(idx, 'accounts', 'did:any:test')).resolves.toBe(ownDoc)
@@ -45,7 +45,7 @@ describe('accessors', () => {
       const getRootDocument = jest.fn(() => Promise.resolve(rootDoc))
       const idx = ({
         authenticated: true,
-        user: { DID: 'did:any:other' },
+        did: { id: 'did:any:other' },
         getRootDocument,
         loadCeramicDocument
       } as unknown) as IDX
@@ -93,7 +93,7 @@ describe('accessors', () => {
 
       const idx = ({ getRootDocument, loadCeramicDocument } as unknown) as IDX
       const accessors = createAccessors('accounts', idx)
-      await expect(accessors.get('did:any:test', 'basic')).resolves.toEqual({ name: 'test' })
+      await expect(accessors.get('basic', 'did:any:test')).resolves.toEqual({ name: 'test' })
     })
 
     test('get authenticated', async () => {
@@ -111,25 +111,51 @@ describe('accessors', () => {
       await expect(accessors.get('basic')).resolves.toEqual({ name: 'test' })
     })
 
-    test('set', async () => {
+    test('set existing', async () => {
+      const getOwnDocument = jest.fn(() => {
+        return Promise.resolve({ content: { basic: 'ceramic://existingDocId' } })
+      })
+      const changeDoc = jest.fn()
+      const loadCeramicDocument = jest.fn(() => {
+        return Promise.resolve({ change: changeDoc })
+      })
+      const idx = ({
+        getOwnDocument,
+        loadCeramicDocument,
+        did: { id: 'did:test:user' }
+      } as unknown) as IDX
+      const accessors = createAccessors('accounts', idx)
+
+      await expect(accessors.set('basic', { name: 'bob' })).resolves.toBe('ceramic://existingDocId')
+      expect(getOwnDocument).toBeCalledWith('accounts')
+      expect(loadCeramicDocument).toBeCalledWith('ceramic://existingDocId')
+      expect(changeDoc).toBeCalledWith({ content: { name: 'bob' } })
+    })
+
+    test('set new', async () => {
+      const getOwnDocument = jest.fn(() => Promise.resolve({ content: {} }))
       const createDocument = jest.fn(() => Promise.resolve({ id: 'ceramic://newDocId' }))
       const changeOwnDocument = jest.fn((name, changeFunc) => {
         return changeFunc({})
       })
       const idx = ({
         ceramic: { createDocument },
+        getOwnDocument,
         changeOwnDocument,
-        user: { DID: 'did:test:user' }
+        did: { id: 'did:test:user' }
       } as unknown) as IDX
       const accessors = createAccessors('accounts', idx)
 
-      await accessors.set('basic', { name: 'bob' })
+      await expect(accessors.set('basic', { name: 'bob' }, { tags: ['test'] })).resolves.toBe(
+        'ceramic://newDocId'
+      )
+      expect(getOwnDocument).toBeCalledWith('accounts')
       expect(createDocument).toBeCalledWith('tile', {
         content: { name: 'bob' },
         metadata: {
           owners: ['did:test:user'],
           schema: undefined,
-          tags: []
+          tags: ['test']
         }
       })
       expect(changeOwnDocument).toBeCalledWith('accounts', expect.any(Function))

@@ -58,9 +58,9 @@ export class IDX {
     return this._resolver
   }
 
-  get user(): DID {
+  get did(): DID {
     if (this._ceramic.user == null) {
-      throw new Error('User is not authenticated')
+      throw new Error('Ceramic instance is not authenticated')
     }
     return this._ceramic.user
   }
@@ -121,7 +121,7 @@ export class IDX {
   }
 
   async _getOwnRootDoc(): Promise<Doctype | null> {
-    return await this.getRootDocument(this.user.DID)
+    return await this.getRootDocument(this.did.id)
   }
 
   async _createOwnRootDoc(content = {}): Promise<Doctype> {
@@ -129,12 +129,12 @@ export class IDX {
     const doctype = await this._ceramic.createDocument('tile', {
       content,
       metadata: {
-        owners: [this.user.DID],
+        owners: [this.did.id],
         schema: config.schema,
         tags: config.tags
       }
     })
-    this._did2rootId[this.user.DID] = doctype.id
+    this._did2rootId[this.did.id] = doctype.id
     return doctype
   }
 
@@ -158,7 +158,7 @@ export class IDX {
     const doctype = await this._ceramic.createDocument('tile', {
       content,
       metadata: {
-        owners: [this.user.DID],
+        owners: [this.did.id],
         schema: config.schema,
         tags: config.tags
       }
