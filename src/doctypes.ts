@@ -1,24 +1,5 @@
 import { Doctype } from '@ceramicnetwork/ceramic-common'
 
-export interface DoctypeConfig {
-  schema: string | undefined
-  tags: Array<string>
-}
-
-// See https://github.com/ceramicnetwork/CIP/issues/3
-export const IDX_DOCTYPE_CONFIGS: Record<string, DoctypeConfig> = {
-  root: { schema: undefined, tags: ['RootIndex', 'DocIdMap'] },
-  profiles: { schema: undefined, tags: ['ProfilesIndex', 'DocIdMap'] },
-  keychains: { schema: undefined, tags: [] },
-  accounts: { schema: undefined, tags: ['AccountsIndex', 'DocIdMap'] },
-  connections: { schema: undefined, tags: [] },
-  collections: { schema: undefined, tags: ['CollectionsIndex', 'DocIdDocIdMap'] },
-  services: { schema: undefined, tags: [] },
-  settings: { schema: undefined, tags: [] }
-}
-
-export type IDXDoctypeName = keyof typeof IDX_DOCTYPE_CONFIGS
-
 export type MutationFunc<T = Doctype> = (current: T) => Promise<T>
 
 type RejectFunc = (error: Error) => void
