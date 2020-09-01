@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { Doctype } from '@ceramicnetwork/ceramic-common'
 
 import { DoctypeProxy } from '../src/doctypes'
