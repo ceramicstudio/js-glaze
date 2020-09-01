@@ -9,7 +9,7 @@ type QueueItem<T = Doctype> = {
   run: (value: T) => Promise<void>
 }
 
-export class DoctypeProxy<T = Doctype> {
+export class DoctypeProxy<T extends Doctype = Doctype> {
   _getRemote: () => Promise<T>
   _getPromise: Promise<T> | null = null
   _queue: Array<QueueItem<T>> = []
@@ -42,9 +42,17 @@ export class DoctypeProxy<T = Doctype> {
 
       this._queue.push({ reject, run })
       if (this._queue.length === 1) {
-        this._start()
+        void this._start()
       }
     })
+  }
+
+  async changeContent<U>(change: (content: U) => U): Promise<void> {
+    const mutation = async (doc: T): Promise<T> => {
+      await doc.change({ content: change(doc.content) })
+      return doc
+    }
+    return await this.change(mutation)
   }
 
   async get(): Promise<T> {
@@ -70,7 +78,7 @@ export class DoctypeProxy<T = Doctype> {
     if (item == null) {
       this._end(value)
     } else {
-      item.run(value)
+      void item.run(value)
     }
   }
 

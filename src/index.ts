@@ -4,24 +4,12 @@ import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
 
-import { DoctypeProxy } from './doctypes'
-import { getIDXRoot } from './utils'
+import { RootIndex } from './indexes'
+import { Definition, DefinitionsAliases, DocID } from './types'
 
-type DocID = string
+const DEFINITIONS: DefinitionsAliases = {}
 
-type CollectionsIndex = Record<string, DocID>
-
-const COLLECTIONS_INDEX: CollectionsIndex = {
-  'idx:profiles.basic': '' // docId of collection definition doc
-}
-
-export interface CollectionDefinition<T extends Record<string, any> = {}> {
-  name: string
-  schema: string // docId
-  description?: string
-  url?: string
-  config?: T
-}
+export * from './types'
 
 export interface AuthenticateOptions {
   paths?: Array<string>
@@ -30,21 +18,20 @@ export interface AuthenticateOptions {
 
 export interface IDXOptions {
   ceramic: CeramicApi
-  collections?: CollectionsIndex
+  definitions?: DefinitionsAliases
   resolver?: ResolverOptions
 }
 
 export class IDX {
   _ceramic: CeramicApi
-  _collections: CollectionsIndex
-  _did2rootId: Record<string, string | null> = {}
+  _definitions: DefinitionsAliases
   _docLoader: DataLoader<string, Doctype>
   _resolver: Resolver
-  _rootDocProxy: DoctypeProxy<Doctype>
+  _rootIndex: RootIndex
 
-  constructor({ ceramic, collections = {}, resolver = {} }: IDXOptions) {
+  constructor({ ceramic, definitions = {}, resolver = {} }: IDXOptions) {
     this._ceramic = ceramic
-    this._collections = { ...collections, ...COLLECTIONS_INDEX }
+    this._definitions = { ...definitions, ...DEFINITIONS }
 
     this._docLoader = new DataLoader(async (docIds: ReadonlyArray<string>) => {
       return await Promise.all(docIds.map(async docId => await this._ceramic.loadDocument(docId)))
@@ -56,11 +43,11 @@ export class IDX {
       : ceramicResolver
     this._resolver = new Resolver(registry, resolver.cache)
 
-    this._rootDocProxy = new DoctypeProxy(this._getOrCreateOwnRootDoc.bind(this))
+    this._rootIndex = new RootIndex(this)
   }
 
   get authenticated(): boolean {
-    return this._ceramic.user != null
+    return this._ceramic.did != null
   }
 
   get ceramic(): CeramicApi {
@@ -72,14 +59,18 @@ export class IDX {
   }
 
   get did(): DID {
-    if (this._ceramic.user == null) {
+    if (this._ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this._ceramic.user
+    return this._ceramic.did
+  }
+
+  get id(): string {
+    return this.did.id
   }
 
   async authenticate(options: AuthenticateOptions = {}): Promise<void> {
-    if (this._ceramic.user == null) {
+    if (this._ceramic.did == null) {
       if (options.provider == null) {
         throw new Error('Not provider available')
       } else {
@@ -90,7 +81,7 @@ export class IDX {
 
   // Ceramic APIs wrappers
 
-  async createDocument<T = any>(content: T, meta: Record<string, any> = {}): Promise<Doctype> {
+  async createDocument(content: unknown, meta: Record<string, unknown> = {}): Promise<Doctype> {
     return await this._ceramic.createDocument('tile', {
       content,
       metadata: { ...meta, owners: [this.did.id] }
@@ -104,79 +95,70 @@ export class IDX {
   // High-level APIs
 
   async has(name: string, did?: string): Promise<boolean> {
-    const id = this._toCollectionId(name)
-    const docId = await this.getCollectionId(id, did ?? this.did.id)
+    const id = this._toDefintionId(name)
+    const docId = await this.getEntryId(id, did)
     return docId != null
   }
 
-  async get<T = any>(name: string, did?: string): Promise<T | null> {
-    const id = this._toCollectionId(name)
-    return await this.getCollection(id, did ?? this.did.id)
+  async get<T = unknown>(name: string, did?: string): Promise<T | null> {
+    const id = this._toDefintionId(name)
+    return await this.getEntry(id, did)
   }
 
-  async set<T = any>(name: string, content: T): Promise<DocID> {
-    const id = this._toCollectionId(name)
-    return await this.setCollection(id, content)
+  async set(name: string, content: unknown): Promise<DocID> {
+    const id = this._toDefintionId(name)
+    return await this.setEntry(id, content)
   }
 
   async remove(name: string): Promise<void> {
-    const id = this._toCollectionId(name)
-    await this.removeCollection(id)
+    const id = this._toDefintionId(name)
+    await this.removeEntry(id)
   }
 
-  _toCollectionId(name: string): DocID {
-    if (!name.includes(':')) {
-      name = `idx:${name}`
-    }
-    const id = this._collections[name]
+  _toDefintionId(name: string): DocID {
+    const id = this._definitions[name] ?? this._definitions[`idx:${name}`]
     if (id == null) {
       throw new Error(`Invalid name: ${name}`)
     }
     return id
   }
 
-  // Collection definitions APIs
+  // Definition APIs
 
-  async createCollectionDefinition(content: CollectionDefinition): Promise<DocID> {
+  async createDefinition(content: Definition): Promise<DocID> {
     // TODO: add schema
     const doctype = await this.createDocument(content)
     return doctype.id
   }
 
-  async getCollectionDefinition(id: DocID): Promise<CollectionDefinition> {
+  async getDefinition(id: DocID): Promise<Definition> {
     const doc = await this.loadDocument(id)
-    // TODO: ensure schema metadata matches collection definition
-    return doc.content
+    // TODO: ensure schema metadata matches definition
+    return doc.content as Definition
   }
 
-  // Collection APIs
+  // Entry APIs
 
-  async getCollectionId(definitionId: DocID, did: string): Promise<DocID | null> {
-    const rootIndex = await this.getRootDocument(did)
-    return rootIndex?.content[definitionId] ?? null
+  async getEntryId(definitionId: DocID, did?: string): Promise<DocID | null> {
+    return await this._rootIndex.get(definitionId, did ?? this.did.id)
   }
 
-  async getCollection<T = any>(definitionId: DocID, did: string): Promise<T | null> {
-    const docId = await this.getCollectionId(definitionId, did)
+  async getEntry<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
+    const docId = await this.getEntryId(definitionId, did)
     if (docId == null) {
       return null
     } else {
       const doc = await this.loadDocument(docId)
-      return doc.content
+      return doc.content as T
     }
   }
 
-  async setCollectionId(definitionId: DocID, docId: DocID): Promise<void> {
-    await this._changeRootIndex(content => ({ ...content, [definitionId]: docId }))
-  }
-
-  async setCollection<T = any>(definitionId: DocID, content: T): Promise<DocID> {
-    const root = await this._rootDocProxy.get()
-    const existingId = root.content[definitionId]
+  async setEntry<T = unknown>(definitionId: DocID, content: T): Promise<DocID> {
+    const existingId = await this.getEntryId(definitionId, this.did.id)
     if (existingId == null) {
-      const definition = await this.getCollectionDefinition(definitionId)
-      const docId = await this._createCollection(definition, content)
-      await this.setCollectionId(definitionId, docId)
+      const definition = await this.getDefinition(definitionId)
+      const docId = await this._createEntry(definition, content)
+      await this._setEntryId(definitionId, docId)
       return docId
     } else {
       const doc = await this.loadDocument(existingId)
@@ -185,61 +167,25 @@ export class IDX {
     }
   }
 
-  async addCollection<T = any>(definition: CollectionDefinition, content: T): Promise<DocID> {
+  async addEntry<T = unknown>(definition: Definition, content: T): Promise<DocID> {
     const [definitionId, docId] = await Promise.all([
-      this.createCollectionDefinition(definition),
-      this._createCollection(definition, content)
+      this.createDefinition(definition),
+      this._createEntry(definition, content)
     ])
-    await this.setCollectionId(definitionId, docId)
+    await this._setEntryId(definitionId, docId)
     return docId
   }
 
-  async removeCollection(id: DocID): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    await this._changeRootIndex(({ [id]: _remove, ...content }) => content)
+  async removeEntry(definitionId: DocID): Promise<void> {
+    await this._rootIndex.remove(definitionId)
   }
 
-  async _createCollection<T = any>(definition: CollectionDefinition, content: T): Promise<DocID> {
+  async _createEntry<T = unknown>(definition: Definition, content: T): Promise<DocID> {
     const doctype = await this.createDocument(content, { schema: definition.schema })
     return doctype.id
   }
 
-  // Root document
-
-  async getRootDocument(did: string): Promise<Doctype | null> {
-    let rootId = this._did2rootId[did]
-    if (rootId === null) {
-      return null
-    }
-    if (rootId == null) {
-      const userDoc = await this._resolver.resolve(did)
-      rootId = getIDXRoot(userDoc) ?? null
-      this._did2rootId[did] = rootId
-    }
-    return rootId ? await this.loadDocument(rootId) : null
-  }
-
-  async _getOrCreateOwnRootDoc(): Promise<Doctype> {
-    const doc = await this._getOwnRootDoc()
-    return doc ?? (await this._createOwnRootDoc())
-  }
-
-  async _getOwnRootDoc(): Promise<Doctype | null> {
-    return await this.getRootDocument(this.did.id)
-  }
-
-  async _createOwnRootDoc(content = {}): Promise<Doctype> {
-    // TODO: schema
-    const doctype = await this.createDocument(content, { tags: ['RootIndex', 'DocIdMap'] })
-    this._did2rootId[this.did.id] = doctype.id
-    return doctype
-  }
-
-  async _changeRootIndex<T = any>(change: (content: T) => T): Promise<void> {
-    const mutation = async (doc: Doctype): Promise<Doctype> => {
-      await doc.change({ content: change(doc.content) })
-      return doc
-    }
-    return await this._rootDocProxy.change(mutation)
+  async _setEntryId(definitionId: DocID, collectionId: DocID): Promise<void> {
+    await this._rootIndex.set(definitionId, collectionId)
   }
 }
