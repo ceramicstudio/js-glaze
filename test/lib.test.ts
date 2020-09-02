@@ -4,33 +4,33 @@ import { IDX } from '../src/index'
 
 describe('IDX', () => {
   test('`authenticated` property', () => {
-    const idx1 = new IDX({ ceramic: {} as any })
+    const idx1 = new IDX({ ceramic: {} } as any)
     expect(idx1.authenticated).toBe(false)
 
-    const idx2 = new IDX({ ceramic: { did: {} } as any })
+    const idx2 = new IDX({ ceramic: { did: {} } } as any)
     expect(idx2.authenticated).toBe(true)
   })
 
   test('`ceramic` property', () => {
-    const ceramic = {} as any
-    const idx = new IDX({ ceramic })
+    const ceramic = {}
+    const idx = new IDX({ ceramic } as any)
     expect(idx.ceramic).toBe(ceramic)
   })
 
   test('`did` property', () => {
-    const idx1 = new IDX({ ceramic: {} as any })
+    const idx1 = new IDX({ ceramic: {} } as any)
     expect(() => idx1.did).toThrow('Ceramic instance is not authenticated')
 
     const did = {}
-    const idx2 = new IDX({ ceramic: { did } as any })
+    const idx2 = new IDX({ ceramic: { did } } as any)
     expect(idx2.did).toBe(did)
   })
 
   test('`id` property', () => {
-    const idx1 = new IDX({ ceramic: {} as any })
+    const idx1 = new IDX({ ceramic: {} } as any)
     expect(() => idx1.id).toThrow('Ceramic instance is not authenticated')
 
-    const idx2 = new IDX({ ceramic: { did: { id: 'did:test' } } as any })
+    const idx2 = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
     expect(idx2.id).toBe('did:test')
   })
 
@@ -38,7 +38,7 @@ describe('IDX', () => {
     const registry = {
       test: jest.fn(() => Promise.resolve({}))
     } as any
-    const idx = new IDX({ ceramic: {} as any, resolver: { registry } })
+    const idx = new IDX({ ceramic: {}, resolver: { registry } } as any)
     await idx.resolver.resolve('did:test:123')
     expect(registry.test).toHaveBeenCalledTimes(1)
   })
@@ -46,7 +46,7 @@ describe('IDX', () => {
   describe('authenticate', () => {
     test('does nothing if the ceramic instance already has a DID', async () => {
       const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider, did: {} } as any })
+      const idx = new IDX({ ceramic: { setDIDProvider, did: {} } } as any)
       await idx.authenticate({ provider: {} as any })
       expect(setDIDProvider).toHaveBeenCalledTimes(0)
     })
@@ -54,14 +54,14 @@ describe('IDX', () => {
     test('attaches the provider to the ceramic instance', async () => {
       const provider = {} as any
       const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider } as any })
+      const idx = new IDX({ ceramic: { setDIDProvider } } as any)
       await idx.authenticate({ provider })
       expect(setDIDProvider).toHaveBeenCalledTimes(1)
       expect(setDIDProvider).toHaveBeenCalledWith(provider)
     })
 
     test('throws an error if there is no DID and provider', async () => {
-      const idx = new IDX({ ceramic: {} as any })
+      const idx = new IDX({ ceramic: {} } as any)
       await expect(idx.authenticate()).rejects.toThrow('Not provider available')
     })
   })
@@ -69,7 +69,7 @@ describe('IDX', () => {
   describe('Ceramic API wrappers', () => {
     test('createDocument', async () => {
       const createDocument = jest.fn()
-      const idx = new IDX({ ceramic: { createDocument, did: { id: 'did:test' } } as any })
+      const idx = new IDX({ ceramic: { createDocument, did: { id: 'did:test' } } } as any)
       await idx.createDocument({ hello: 'test' }, { tags: ['test'] })
       expect(createDocument).toBeCalledWith('tile', {
         content: { hello: 'test' },
@@ -82,7 +82,7 @@ describe('IDX', () => {
 
     test('loadDocument', async () => {
       const loadDocument = jest.fn()
-      const idx = new IDX({ ceramic: { loadDocument } as any })
+      const idx = new IDX({ ceramic: { loadDocument } } as any)
       await Promise.all([idx.loadDocument('one'), idx.loadDocument('one'), idx.loadDocument('two')])
       expect(loadDocument).toBeCalledTimes(2)
     })
@@ -91,7 +91,10 @@ describe('IDX', () => {
   describe('Definition APIs', () => {
     test('createDefinition', async () => {
       const createDocument = jest.fn(() => Promise.resolve({ id: 'ceramic://test' }))
-      const idx = new IDX({ ceramic: { createDocument, did: { id: 'did:test' } } as any })
+      const idx = new IDX({
+        ceramic: { createDocument, did: { id: 'did:test' } },
+        schemas: { Definition: 'ceramic://definition' }
+      } as any)
       await expect(idx.createDefinition({ name: 'test', schema: 'test' })).resolves.toBe(
         'ceramic://test'
       )
@@ -99,8 +102,16 @@ describe('IDX', () => {
     })
 
     test('getDefinition', async () => {
-      const loadDocument = jest.fn(() => Promise.resolve({ content: { name: 'definition' } }))
-      const idx = new IDX({ ceramic: { loadDocument } as any })
+      const loadDocument = jest.fn(() =>
+        Promise.resolve({
+          content: { name: 'definition' },
+          metadata: { schema: 'ceramic://definition' }
+        })
+      )
+      const idx = new IDX({
+        ceramic: { loadDocument },
+        schemas: { Definition: 'ceramic://definition' }
+      } as any)
       await expect(idx.getDefinition('ceramic://test')).resolves.toEqual({
         name: 'definition'
       })
@@ -192,7 +203,7 @@ describe('IDX', () => {
 
       const definition = { name: 'test', schema: 'docId' }
       const content = { test: true }
-      await idx.addEntry(definition, content)
+      await expect(idx.addEntry(definition, content)).resolves.toBe('defId')
       expect(createDefinition).toBeCalledWith(definition)
       expect(createEntry).toBeCalledWith(definition, content)
       expect(setEntryId).toBeCalledWith('defId', 'docId')
@@ -224,6 +235,6 @@ describe('IDX', () => {
     test.todo('get')
     test.todo('set')
     test.todo('remove')
-    test.todo('_toCollectionId')
+    test.todo('_toDefinitionId')
   })
 })

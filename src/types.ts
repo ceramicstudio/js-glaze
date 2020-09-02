@@ -9,3 +9,12 @@ export interface Definition<T extends Record<string, unknown> = Record<string, u
 }
 
 export type DefinitionsAliases = Record<string, DocID>
+
+export type SchemaType =
+  | 'BasicProfile'
+  | 'Definition'
+  | 'DocIdDocIdMap'
+  | 'DocIdList'
+  | 'DocIdMap'
+  | 'StringMap'
+export type SchemasAliases = Record<SchemaType, DocID>

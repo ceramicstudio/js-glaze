@@ -14,29 +14,6 @@
 npm install @ceramicstudio/idx
 ```
 
-## Example
-
-```ts
-import Ceramic from '@ceramicnetwork/ceramic-http-client'
-import { IDX } from '@ceramicstudio/idx'
-import IdentityWallet from 'identity-wallet'
-
-const ceramic = new Ceramic('http://localhost:7007')
-const aliceIndex = new IDX({ ceramic })
-const wallet = new IdentityWallet(...)
-
-// IDX instance needs to authenticate using a provider to create Ceramic documents
-await aliceIndex.authenticate({ provider: wallet.getDidProvider() })
-await aliceIndex.profiles.set('basic', { name: 'Alice' })
-
-// Alice's DID she can share with others
-const aliceDID = aliceIndex.did.id
-
-// Another client connecting to Ceramic
-const idx = new IDX({ ceramic })
-const aliceProfile = await idx.profiles.get(aliceDID, 'basic')
-```
-
 ## Interfaces and types
 
 ### CeramicApi
@@ -89,6 +66,24 @@ interface Definition<T extends Record<string, unknown> = Record<string, unknown>
 type DefinitionsAliases = Record<string, DocID>
 ```
 
+### SchemaType
+
+```ts
+type SchemaType =
+  | 'BasicProfile'
+  | 'Definition'
+  | 'DocIdDocIdMap'
+  | 'DocIdList'
+  | 'DocIdMap'
+  | 'StringMap'
+```
+
+### SchemasAliases
+
+```ts
+type SchemasAliases = Record<SchemaType, DocID>
+```
+
 ### AuthenticateOptions
 
 ```ts
@@ -105,6 +100,7 @@ interface IDXOptions {
   ceramic: CeramicApi
   definitions?: DefinitionsAliases
   resolver?: ResolverOptions
+  schemas: SchemasAliases
 }
 ```
 
@@ -116,7 +112,7 @@ interface IDXOptions {
 
 **Arguments**
 
-1. `options?: IDXOptions`
+1. `options: IDXOptions`
 
 ### .authenticate
 
@@ -149,6 +145,66 @@ interface IDXOptions {
 > Accessing this property will throw an error if the instance is not authenticated
 
 **Returns** `string`
+
+#### .createDefinition
+
+**Arguments**
+
+1. `definition: Definition`
+
+**Returns** `Promise<DocID>`
+
+#### .getDefinition
+
+**Arguments**
+
+1. `id: DocID`
+
+**Returns** `Promise<Definition>`
+
+#### .getEntryId
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `did?: string`
+
+**Returns** `Promise<DocID | null>`
+
+#### .getEntry
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `did?: string`
+
+**Returns** `Promise<unknown | null>`
+
+#### .setEntry
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `content: unknown`
+
+**Returns** `Promise<DocID>` the `DocID` of the created content document
+
+#### .addEntry
+
+**Arguments**
+
+1. `definition: Definition`
+1. `content: unknown`
+
+**Returns** `Promise<DocID>` the `DocID` of the created definition document
+
+#### .removeEntry
+
+**Arguments**
+
+1. `definitionId: DocID`
+
+**Returns** `Promise<void>`
 
 ## License
 

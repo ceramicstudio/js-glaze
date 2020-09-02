@@ -1,4 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { DoctypeProxy } from '../src/doctypes'
+
+async function wrapSettle(promise) {
+  try {
+    const value = await promise
+    return { status: 'fulfilled', value }
+  } catch (reason) {
+    return { status: 'rejected', reason }
+  }
+}
 
 describe('DoctypeProxy', () => {
   test('calls the getRemote function to get the value when the queue is empty', async () => {
@@ -59,11 +70,10 @@ describe('DoctypeProxy', () => {
     const mutateSecond = jest.fn()
 
     const proxy = new DoctypeProxy(getRemote)
-    // @ts-ignore Promise.allSettled
-    const results = await Promise.allSettled([
-      proxy.change(mutateFirst),
-      proxy.change(mutateSecond),
-      proxy.get()
+    const results = await Promise.all([
+      wrapSettle(proxy.change(mutateFirst)),
+      wrapSettle(proxy.change(mutateSecond)),
+      wrapSettle(proxy.get())
     ])
     for (const res of results) {
       expect(res.status).toBe('rejected')
@@ -78,11 +88,10 @@ describe('DoctypeProxy', () => {
     const mutateSecond = jest.fn(() => Promise.resolve('second'))
 
     const proxy = new DoctypeProxy(getRemote)
-    // @ts-ignore Promise.allSettled
-    const [resFirst, resSecond, resGet] = await Promise.allSettled([
-      proxy.change(mutateFirst),
-      proxy.change(mutateSecond),
-      proxy.get()
+    const [resFirst, resSecond, resGet] = await Promise.all([
+      wrapSettle(proxy.change(mutateFirst)),
+      wrapSettle(proxy.change(mutateSecond)),
+      wrapSettle(proxy.get())
     ])
 
     expect(resFirst.status).toBe('rejected')
