@@ -175,7 +175,7 @@ export class IDX {
       this._createEntry(definition, content)
     ])
     await this._setEntryId(definitionId, docId)
-    return docId
+    return definitionId
   }
 
   async removeEntry(definitionId: DocID): Promise<void> {
