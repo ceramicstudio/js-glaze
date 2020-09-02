@@ -63,7 +63,7 @@ export class IDX {
     if (this._ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this._ceramic.did as DID
+    return this._ceramic.did
   }
 
   get id(): string {

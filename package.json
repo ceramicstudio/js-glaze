@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@ceramicnetwork/ceramic-common": "^0.5.9",
-    "@ceramicstudio/idx-schemas": "^0.1.0",
+    "@ceramicstudio/idx-schemas": "^0.1.1",
     "@types/jest": "^26.0.12",
     "eslint-config-3box": "^0.1.2",
     "husky": "^4.2.5",
