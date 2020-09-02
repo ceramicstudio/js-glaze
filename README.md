@@ -1,4 +1,4 @@
-![IDX header image](https://uploads-ssl.webflow.com/5ebcbef3ac4954196dcdc7b5/5f22e627441c167654b742ba_idp2p.jpg)
+![IDX header image](https://camo.githubusercontent.com/05a4ba66c346c7d52bc46ce8526c6a7d3f227880/68747470733a2f2f75706c6f6164732d73736c2e776562666c6f772e636f6d2f3565626362656633616334393534313936646364633762352f3566316565353133316335343165316364623837633132315f69646b7468696e322e6a7067)
 
 # js-idx
 
@@ -12,29 +12,6 @@
 
 ```sh
 npm install @ceramicstudio/idx
-```
-
-## Example
-
-```ts
-import Ceramic from '@ceramicnetwork/ceramic-http-client'
-import { IDX } from '@ceramicstudio/idx'
-import IdentityWallet from 'identity-wallet'
-
-const ceramic = new Ceramic('http://localhost:7007')
-const aliceIndex = new IDX({ ceramic })
-const wallet = new IdentityWallet(...)
-
-// IDX instance needs to authenticate using a provider to create Ceramic documents
-await aliceIndex.authenticate({ provider: wallet.getDidProvider() })
-await aliceIndex.profiles.set('basic', { name: 'Alice' })
-
-// Alice's DID she can share with others
-const aliceDID = aliceIndex.did.id
-
-// Another client connecting to Ceramic
-const idx = new IDX({ ceramic })
-const aliceProfile = await idx.profiles.get(aliceDID, 'basic')
 ```
 
 ## Interfaces and types
@@ -59,15 +36,52 @@ Doctype interface exported by the [`@ceramicnetwork/ceramic-common` library](htt
 
 `Resolver` instance exported by the [`did-resolver` library](https://github.com/decentralized-identity/did-resolver)
 
-#### Accessors
+### ResolverOptions
+
+`ResolverOptions` interface exported by the [`dids` library](https://github.com/ceramicnetwork/js-did)
+
+### DocID
+
+The ID of a Ceramic document.
 
 ```ts
-interface Accessors {
-  list: (id?: string) => Promise<Array<string>>
-  get: <T = any>(idOrKey: string, key?: string) => Promise<T>
-  set: <T = any>(key: string, value: T) => Promise<void>
-  remove: (key: string) => Promise<void>
+type DocID = string
+```
+
+### Definition
+
+```ts
+interface Definition<T extends Record<string, unknown> = Record<string, unknown>> {
+  name: string
+  schema: DocID
+  description?: string
+  url?: string
+  config?: T
 }
+```
+
+### DefinitionsAliases
+
+```ts
+type DefinitionsAliases = Record<string, DocID>
+```
+
+### SchemaType
+
+```ts
+type SchemaType =
+  | 'BasicProfile'
+  | 'Definition'
+  | 'DocIdDocIdMap'
+  | 'DocIdList'
+  | 'DocIdMap'
+  | 'StringMap'
+```
+
+### SchemasAliases
+
+```ts
+type SchemasAliases = Record<SchemaType, DocID>
 ```
 
 ### AuthenticateOptions
@@ -84,65 +98,13 @@ interface AuthenticateOptions {
 ```ts
 interface IDXOptions {
   ceramic: CeramicApi
+  definitions?: DefinitionsAliases
   resolver?: ResolverOptions
+  schemas: SchemasAliases
 }
 ```
 
 ## API
-
-### Accessor functions
-
-The following functions are used to interact with a given IDX directory.
-
-#### list
-
-Lists all the keys present in the directory. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `id?: string`
-
-**Returns** `Promise<Array<string>>`
-
-#### get
-
-Gets the directory content for the given `name`. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-1. `id?: string`
-
-**Returns** `Promise<any>`
-
-#### set
-
-Sets the `content` for the given `name` in the directory owned by the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-1. `content: any`
-
-**Returns** `Promise<string>` the document ID
-
-#### remove
-
-Removes the `name` field from the directory of the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-
-**Returns** `Promise<void>`
 
 ### IDX class
 
@@ -150,7 +112,7 @@ Removes the `name` field from the directory of the authenticated DID.
 
 **Arguments**
 
-1. `options?: IDXOptions`
+1. `options: IDXOptions`
 
 ### .authenticate
 
@@ -172,171 +134,75 @@ Removes the `name` field from the directory of the authenticated DID.
 
 **Returns** `Resolver`
 
-#### .user
+#### .did
 
 > Accessing this property will throw an error if the instance is not authenticated
 
 **Returns** `DID`
 
-### .accounts
+#### .id
 
-**Returns** `Accessors` for the [Accounts Index](https://github.com/ceramicnetwork/CIP/issues/14)
+> Accessing this property will throw an error if the instance is not authenticated
 
-#### .accounts.list
+**Returns** `string`
 
-Lists all the keys present in the directory. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
+#### .createDefinition
 
 **Arguments**
 
-1. `id?: string`
+1. `definition: Definition`
 
-**Returns** `Promise<Array<string>>`
+**Returns** `Promise<DocID>`
 
-#### .accounts.get
-
-Gets the account with the given `name`. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
+#### .getDefinition
 
 **Arguments**
 
-1. `name: string`
-1. `id?: string`
+1. `id: DocID`
 
-**Returns** `Promise<any>`
+**Returns** `Promise<Definition>`
 
-#### .accounts.set
-
-Sets the authenticated DID account `content` for the given `name`.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
+#### .getEntryId
 
 **Arguments**
 
-1. `name: string`
-1. `content: any`
+1. `definitionId: DocID`
+1. `did?: string`
 
-**Returns** `Promise<string>` the document ID of the account
+**Returns** `Promise<DocID | null>`
 
-#### .accounts.remove
-
-Removes the account with the given `name` from the directory of the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
+#### .getEntry
 
 **Arguments**
 
-1. `name: string`
+1. `definitionId: DocID`
+1. `did?: string`
 
-**Returns** `Promise<void>`
+**Returns** `Promise<unknown | null>`
 
-### .collections
-
-**Returns** `Accessors` for the [Collections Index](https://github.com/ceramicnetwork/CIP/issues/26)
-
-#### .collections.list
-
-Lists all the collections. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
+#### .setEntry
 
 **Arguments**
 
-1. `id?: string`
+1. `definitionId: DocID`
+1. `content: unknown`
 
-**Returns** `Promise<Array<string>>`
+**Returns** `Promise<DocID>` the `DocID` of the created content document
 
-#### .collections.get
-
-Gets the collection with the given `name`. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
+#### .addEntry
 
 **Arguments**
 
-1. `name: string`
-1. `id?: string`
+1. `definition: Definition`
+1. `content: unknown`
 
-**Returns** `Promise<any>`
+**Returns** `Promise<DocID>` the `DocID` of the created definition document
 
-#### .collections.set
-
-Sets the collection `content` for the given `name` in the directory owned by the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
+#### .removeEntry
 
 **Arguments**
 
-1. `name: string`
-1. `content: any`
-
-**Returns** `Promise<string>` the document ID of the collection
-
-#### .collections.remove
-
-Removes the collection with the given `name` field from the directory of the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-
-**Returns** `Promise<void>`
-
-### .profiles
-
-**Returns** `Accessors` for the [Profiles Index](https://github.com/ceramicnetwork/CIP/issues/12)
-
-#### .profiles.list
-
-Lists all the profiles present in the directory. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `id?: string`
-
-**Returns** `Promise<Array<string>>`
-
-#### .profiles.get
-
-Gets the profile with the given `name`. If the `id` argument is not provided, the authenticated DID is used.
-
-> Calling this function without the `id` argument or an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-1. `id?: string`
-
-**Returns** `Promise<any>`
-
-#### .profiles.set
-
-Sets the profile `content` for the given `name` in the directory owned by the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
-1. `content: any`
-
-**Returns** `Promise<string>` the document ID of the profile
-
-#### .profiles.remove
-
-Removes the profile with the `name` field from the directory of the authenticated DID.
-
-> Calling this function without an authenticated Ceramic instance will throw an error.
-
-**Arguments**
-
-1. `name: string`
+1. `definitionId: DocID`
 
 **Returns** `Promise<void>`
 

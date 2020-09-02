@@ -1,12 +1,13 @@
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
-import { CeramicApi, Doctype } from '@ceramicnetwork/ceramic-common'
+import { CeramicApi, Doctype, DocMetadata } from '@ceramicnetwork/ceramic-common'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
 
-import { Accessors, createAccessors } from './accessors'
-import { IDX_DOCTYPE_CONFIGS, DoctypeProxy, IDXDoctypeName } from './doctypes'
-import { getIDXRoot } from './utils'
+import { RootIndex } from './indexes'
+import { Definition, DefinitionsAliases, DocID, SchemasAliases } from './types'
+
+export * from './types'
 
 export interface AuthenticateOptions {
   paths?: Array<string>
@@ -15,22 +16,24 @@ export interface AuthenticateOptions {
 
 export interface IDXOptions {
   ceramic: CeramicApi
+  definitions?: DefinitionsAliases
   resolver?: ResolverOptions
+  schemas: SchemasAliases
 }
 
 export class IDX {
   _ceramic: CeramicApi
-  _did2rootId: Record<string, string | null> = {}
+  _definitions: DefinitionsAliases
   _docLoader: DataLoader<string, Doctype>
-  _docProxy: Record<string, DoctypeProxy<Doctype>> = {}
   _resolver: Resolver
+  _rootIndex: RootIndex
+  _schemas: SchemasAliases
 
-  accounts: Accessors
-  collections: Accessors
-  profiles: Accessors
-
-  constructor({ ceramic, resolver = {} }: IDXOptions) {
+  constructor({ ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
     this._ceramic = ceramic
+    this._definitions = definitions
+    this._schemas = schemas
+
     this._docLoader = new DataLoader(async (docIds: ReadonlyArray<string>) => {
       return await Promise.all(docIds.map(async docId => await this._ceramic.loadDocument(docId)))
     })
@@ -41,13 +44,11 @@ export class IDX {
       : ceramicResolver
     this._resolver = new Resolver(registry, resolver.cache)
 
-    this.accounts = createAccessors('accounts', this)
-    this.collections = createAccessors('collections', this)
-    this.profiles = createAccessors('profiles', this)
+    this._rootIndex = new RootIndex(this)
   }
 
   get authenticated(): boolean {
-    return this._ceramic.user != null
+    return this._ceramic.did != null
   }
 
   get ceramic(): CeramicApi {
@@ -59,14 +60,18 @@ export class IDX {
   }
 
   get did(): DID {
-    if (this._ceramic.user == null) {
+    if (this._ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this._ceramic.user
+    return this._ceramic.did
+  }
+
+  get id(): string {
+    return this.did.id
   }
 
   async authenticate(options: AuthenticateOptions = {}): Promise<void> {
-    if (this._ceramic.user == null) {
+    if (this._ceramic.did == null) {
       if (options.provider == null) {
         throw new Error('Not provider available')
       } else {
@@ -75,96 +80,114 @@ export class IDX {
     }
   }
 
-  async loadCeramicDocument(docId: string): Promise<Doctype> {
-    return await this._docLoader.load(docId)
+  // Ceramic APIs wrappers
+
+  async createDocument(content: unknown, meta: Partial<DocMetadata> = {}): Promise<Doctype> {
+    return await this._ceramic.createDocument('tile', {
+      content,
+      metadata: { owners: [this.id], ...meta }
+    })
   }
 
-  async getRootDocument(did: string): Promise<Doctype | null> {
-    let rootId = this._did2rootId[did]
-    if (rootId === null) {
+  async loadDocument(id: DocID): Promise<Doctype> {
+    return await this._docLoader.load(id)
+  }
+
+  // High-level APIs
+
+  async has(name: string, did?: string): Promise<boolean> {
+    const id = this._toDefinitionId(name)
+    const docId = await this.getEntryId(id, did)
+    return docId != null
+  }
+
+  async get<T = unknown>(name: string, did?: string): Promise<T | null> {
+    const id = this._toDefinitionId(name)
+    return await this.getEntry(id, did)
+  }
+
+  async set(name: string, content: unknown): Promise<DocID> {
+    const id = this._toDefinitionId(name)
+    return await this.setEntry(id, content)
+  }
+
+  async remove(name: string): Promise<void> {
+    const id = this._toDefinitionId(name)
+    await this.removeEntry(id)
+  }
+
+  _toDefinitionId(name: string): DocID {
+    const id = this._definitions[name] ?? this._definitions[`idx:${name}`]
+    if (id == null) {
+      throw new Error(`Invalid name: ${name}`)
+    }
+    return id
+  }
+
+  // Definition APIs
+
+  async createDefinition(content: Definition): Promise<DocID> {
+    const doctype = await this.createDocument(content, { schema: this._schemas.Definition })
+    return doctype.id
+  }
+
+  async getDefinition(id: DocID): Promise<Definition> {
+    const doc = await this.loadDocument(id)
+    if (doc.metadata.schema !== this._schemas.Definition) {
+      throw new Error('Invalid definition')
+    }
+    return doc.content as Definition
+  }
+
+  // Entry APIs
+
+  async getEntryId(definitionId: DocID, did?: string): Promise<DocID | null> {
+    return await this._rootIndex.get(definitionId, did ?? this.id)
+  }
+
+  async getEntry<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
+    const docId = await this.getEntryId(definitionId, did)
+    if (docId == null) {
       return null
+    } else {
+      const doc = await this.loadDocument(docId)
+      return doc.content as T
     }
-    if (rootId == null) {
-      const userDoc = await this._resolver.resolve(did)
-      rootId = getIDXRoot(userDoc) ?? null
-      this._did2rootId[did] = rootId
+  }
+
+  async setEntry(definitionId: DocID, content: unknown): Promise<DocID> {
+    const existingId = await this.getEntryId(definitionId, this.id)
+    if (existingId == null) {
+      const definition = await this.getDefinition(definitionId)
+      const docId = await this._createEntry(definition, content)
+      await this._setEntryId(definitionId, docId)
+      return docId
+    } else {
+      const doc = await this.loadDocument(existingId)
+      await doc.change({ content })
+      return doc.id
     }
-    return rootId ? await this.loadCeramicDocument(rootId) : null
   }
 
-  async getOwnDocument(name: IDXDoctypeName): Promise<Doctype> {
-    return await this._getProxy(name).get()
+  async addEntry(definition: Definition, content: unknown): Promise<DocID> {
+    const [definitionId, docId] = await Promise.all([
+      this.createDefinition(definition),
+      this._createEntry(definition, content)
+    ])
+    await this._setEntryId(definitionId, docId)
+    return definitionId
   }
 
-  async changeOwnDocument<T = any>(name: IDXDoctypeName, change: (content: T) => T): Promise<void> {
-    const mutation = async (doc: Doctype): Promise<Doctype> => {
-      await doc.change({ content: change(doc.content) })
-      return doc
-    }
-    return await this._getProxy(name).change(mutation)
+  async removeEntry(definitionId: DocID): Promise<void> {
+    await this._rootIndex.remove(definitionId)
   }
 
-  _getProxy(name: IDXDoctypeName): DoctypeProxy<Doctype> {
-    if (this._docProxy[name] == null) {
-      const getRemote =
-        name === 'root'
-          ? (): Promise<Doctype> => this._getOrCreateOwnRootDoc()
-          : (): Promise<Doctype> => this._getOrCreateOwnDoc(name)
-      this._docProxy[name] = new DoctypeProxy(getRemote)
-    }
-    return this._docProxy[name]
+  async _createEntry(definition: Definition, content: unknown): Promise<DocID> {
+    const doctype = await this.createDocument(content, { schema: definition.schema })
+    return doctype.id
   }
 
-  async _getOrCreateOwnRootDoc(): Promise<Doctype> {
-    const doc = await this._getOwnRootDoc()
-    return doc ?? (await this._createOwnRootDoc())
-  }
-
-  async _getOwnRootDoc(): Promise<Doctype | null> {
-    return await this.getRootDocument(this.did.id)
-  }
-
-  async _createOwnRootDoc(content = {}): Promise<Doctype> {
-    const config = IDX_DOCTYPE_CONFIGS.root
-    const doctype = await this._ceramic.createDocument('tile', {
-      content,
-      metadata: {
-        owners: [this.did.id],
-        schema: config.schema,
-        tags: config.tags
-      }
-    })
-    this._did2rootId[this.did.id] = doctype.id
-    return doctype
-  }
-
-  async _getOrCreateOwnDoc(name: IDXDoctypeName): Promise<Doctype> {
-    const doc = await this._getOwnDoc(name)
-    return doc ?? (await this._createOwnDoc(name))
-  }
-
-  async _getOwnDoc(name: IDXDoctypeName): Promise<Doctype | null> {
-    const rootDoc = await this.getOwnDocument('root')
-    const docId = rootDoc.content[name]
-    return docId ? await this.loadCeramicDocument(docId) : null
-  }
-
-  async _createOwnDoc(name: IDXDoctypeName, content = {}): Promise<Doctype> {
-    const config = IDX_DOCTYPE_CONFIGS[name]
-    if (config == null) {
-      throw new Error(`Unsupported IDX name: ${name}`)
-    }
-
-    const doctype = await this._ceramic.createDocument('tile', {
-      content,
-      metadata: {
-        owners: [this.did.id],
-        schema: config.schema,
-        tags: config.tags
-      }
-    })
-    await this.changeOwnDocument('root', content => ({ ...content, [name]: doctype.id }))
-
-    return doctype
+  async _setEntryId(definitionId: DocID, collectionId: DocID): Promise<void> {
+    await this._rootIndex.set(definitionId, collectionId)
   }
 }

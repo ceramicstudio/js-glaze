@@ -1,45 +1,52 @@
-import { Doctype } from '@ceramicnetwork/ceramic-common'
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
-import { IDX_DOCTYPE_CONFIGS, DoctypeProxy } from '../src/doctypes'
 import { IDX } from '../src/index'
 
 describe('IDX', () => {
   test('`authenticated` property', () => {
-    const idx1 = new IDX({ ceramic: {} as any })
+    const idx1 = new IDX({ ceramic: {} } as any)
     expect(idx1.authenticated).toBe(false)
 
-    const idx2 = new IDX({ ceramic: { user: {} } as any })
+    const idx2 = new IDX({ ceramic: { did: {} } } as any)
     expect(idx2.authenticated).toBe(true)
   })
 
   test('`ceramic` property', () => {
-    const ceramic = {} as any
-    const idx = new IDX({ ceramic })
+    const ceramic = {}
+    const idx = new IDX({ ceramic } as any)
     expect(idx.ceramic).toBe(ceramic)
   })
 
   test('`did` property', () => {
-    const idx1 = new IDX({ ceramic: {} as any })
+    const idx1 = new IDX({ ceramic: {} } as any)
     expect(() => idx1.did).toThrow('Ceramic instance is not authenticated')
 
     const did = {}
-    const idx2 = new IDX({ ceramic: { user: did } as any })
+    const idx2 = new IDX({ ceramic: { did } } as any)
     expect(idx2.did).toBe(did)
+  })
+
+  test('`id` property', () => {
+    const idx1 = new IDX({ ceramic: {} } as any)
+    expect(() => idx1.id).toThrow('Ceramic instance is not authenticated')
+
+    const idx2 = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+    expect(idx2.id).toBe('did:test')
   })
 
   test('`resolver` property', async () => {
     const registry = {
       test: jest.fn(() => Promise.resolve({}))
     } as any
-    const idx = new IDX({ ceramic: {} as any, resolver: { registry } })
+    const idx = new IDX({ ceramic: {}, resolver: { registry } } as any)
     await idx.resolver.resolve('did:test:123')
     expect(registry.test).toHaveBeenCalledTimes(1)
   })
 
   describe('authenticate', () => {
-    test('does nothing if the ceramic instance already has a user', async () => {
+    test('does nothing if the ceramic instance already has a DID', async () => {
       const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider, user: {} } as any })
+      const idx = new IDX({ ceramic: { setDIDProvider, did: {} } } as any)
       await idx.authenticate({ provider: {} as any })
       expect(setDIDProvider).toHaveBeenCalledTimes(0)
     })
@@ -47,268 +54,187 @@ describe('IDX', () => {
     test('attaches the provider to the ceramic instance', async () => {
       const provider = {} as any
       const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider } as any })
+      const idx = new IDX({ ceramic: { setDIDProvider } } as any)
       await idx.authenticate({ provider })
       expect(setDIDProvider).toHaveBeenCalledTimes(1)
       expect(setDIDProvider).toHaveBeenCalledWith(provider)
     })
 
-    test('throws an error if there is no user and provider', async () => {
-      const idx = new IDX({ ceramic: {} as any })
+    test('throws an error if there is no DID and provider', async () => {
+      const idx = new IDX({ ceramic: {} } as any)
       await expect(idx.authenticate()).rejects.toThrow('Not provider available')
     })
   })
 
-  test('loadCeramicDocument', async () => {
-    const loadDocument = jest.fn()
-    const idx = new IDX({ ceramic: { loadDocument } as any })
-    await Promise.all([
-      idx.loadCeramicDocument('one'),
-      idx.loadCeramicDocument('one'),
-      idx.loadCeramicDocument('two')
-    ])
-    expect(loadDocument).toBeCalledTimes(2)
-  })
-
-  test('getUserDocument', async () => {
-    const loadDocument = jest.fn()
-    const idx = new IDX({ ceramic: { loadDocument } as any })
-    await Promise.all([
-      idx.loadCeramicDocument('one'),
-      idx.loadCeramicDocument('one'),
-      idx.loadCeramicDocument('two')
-    ])
-    expect(loadDocument).toBeCalledTimes(2)
-  })
-
-  describe('getRootDocument', () => {
-    test('returns `null` if there is an existing mapping set to `null`', async () => {
-      const idx = new IDX({ ceramic: {} as any })
-      idx._did2rootId['did:test:456'] = null
-      await expect(idx.getRootDocument('did:test:456')).resolves.toBeNull()
-    })
-
-    test('calls the resolver and extract the root ID', async () => {
-      const doc = {} as Doctype
-      const resolve = jest.fn(() => {
-        return Promise.resolve({
-          service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
-        })
-      })
-      const loadDoc = jest.fn(() => Promise.resolve(doc))
-
-      const idx = new IDX({ ceramic: {} as any })
-      // @ts-expect-error
-      idx._resolver.resolve = resolve
-      idx.loadCeramicDocument = loadDoc
-
-      await expect(idx.getRootDocument('did:test:123')).resolves.toBe(doc)
-      expect(resolve).toHaveBeenCalledTimes(1)
-      expect(resolve).toHaveBeenCalledWith('did:test:123')
-      expect(loadDoc).toHaveBeenCalledTimes(1)
-      expect(loadDoc).toHaveBeenCalledWith('ceramic://test')
-      expect(idx._did2rootId['did:test:123']).toBe('ceramic://test')
-    })
-
-    test('calls the resolver and sets the root ID to null if not available', async () => {
-      const resolve = jest.fn(() => {
-        return Promise.resolve({
-          service: [{ type: 'unknown', serviceEndpoint: 'ceramic://test' }]
-        })
-      })
-      const loadDoc = jest.fn(() => Promise.resolve())
-
-      const idx = new IDX({ ceramic: {} as any })
-      // @ts-expect-error
-      idx._resolver.resolve = resolve
-      // @ts-expect-error
-      idx.loadCeramicDocument = loadDoc
-
-      await expect(idx.getRootDocument('did:test:123')).resolves.toBeNull()
-      expect(resolve).toHaveBeenCalledTimes(1)
-      expect(resolve).toHaveBeenCalledWith('did:test:123')
-      expect(loadDoc).toHaveBeenCalledTimes(0)
-      expect(idx._did2rootId['did:test:123']).toBeNull()
-    })
-  })
-
-  test('getOwnDocument', async () => {
-    const doc = { content: { test: 'hello' } }
-    const getRemote = jest.fn(() => Promise.resolve(doc))
-    const idx = new IDX({ ceramic: {} as any })
-    // @ts-expect-error
-    idx._docProxy['accounts'] = new DoctypeProxy(getRemote)
-
-    await expect(idx.getOwnDocument('accounts')).resolves.toBe(doc)
-    expect(getRemote).toHaveBeenCalledTimes(1)
-  })
-
-  test('changeOwnDocument', async () => {
-    const doc = { content: { test: 'hello' }, change: jest.fn(value => Promise.resolve(value)) }
-    const getRemote = jest.fn(() => Promise.resolve(doc))
-    const idx = new IDX({ ceramic: {} as any })
-    // @ts-expect-error
-    idx._docProxy['accounts'] = new DoctypeProxy(getRemote)
-
-    const newContent = { test: 'test' }
-    const changeFunc = jest.fn(() => newContent)
-    await idx.changeOwnDocument('accounts', changeFunc)
-
-    expect(getRemote).toHaveBeenCalledTimes(1)
-    expect(changeFunc).toHaveBeenCalledTimes(1)
-    expect(changeFunc).toHaveBeenCalledWith(doc.content)
-    expect(doc.change).toHaveBeenCalledTimes(1)
-    expect(doc.change).toHaveBeenCalledWith({ content: newContent })
-  })
-
-  describe('_getProxy', () => {
-    test('returns the proxy if already created', () => {
-      const idx = new IDX({ ceramic: {} as any })
-      const proxy = jest.fn()
-      // @ts-expect-error
-      idx._docProxy.test = proxy
-      expect(idx._getProxy('test')).toBe(proxy)
-    })
-
-    test('creates the root proxy', async () => {
-      const doc = {} as Doctype
-      const getOrCreate = jest.fn(() => Promise.resolve(doc))
-      const getOrCreateRoot = jest.fn(() => Promise.resolve(doc))
-      const idx = new IDX({ ceramic: {} as any })
-      idx._getOrCreateOwnDoc = getOrCreate
-      idx._getOrCreateOwnRootDoc = getOrCreateRoot
-
-      const rootProxy = idx._getProxy('root')
-      await rootProxy.get()
-      expect(getOrCreate).toHaveBeenCalledTimes(0)
-      expect(getOrCreateRoot).toHaveBeenCalledTimes(1)
-    })
-
-    test('creates non-root proxies', async () => {
-      const doc = {} as Doctype
-      const getOrCreate = jest.fn(() => Promise.resolve(doc))
-      const getOrCreateRoot = jest.fn(() => Promise.resolve(doc))
-      const idx = new IDX({ ceramic: {} as any })
-      idx._getOrCreateOwnDoc = getOrCreate
-      idx._getOrCreateOwnRootDoc = getOrCreateRoot
-
-      const testProxy1 = idx._getProxy('test1')
-      await testProxy1.get()
-      expect(getOrCreate).toHaveBeenCalledTimes(1)
-      expect(getOrCreate).toHaveBeenCalledWith('test1')
-      const testProxy2 = idx._getProxy('test2')
-      await testProxy2.get()
-      expect(getOrCreate).toHaveBeenCalledTimes(2)
-      expect(getOrCreate).toHaveBeenLastCalledWith('test2')
-      expect(getOrCreateRoot).toHaveBeenCalledTimes(0)
-    })
-  })
-
-  test('_getOrCreateOwnRootDoc', async () => {
-    const doc = {} as Doctype
-    const createDoc = jest.fn(() => Promise.resolve(doc))
-    const getDoc = jest.fn(() => Promise.resolve(null))
-
-    const idx = new IDX({ ceramic: {} as any })
-    idx._getOwnRootDoc = getDoc
-    idx._createOwnRootDoc = createDoc
-
-    await expect(idx._getOrCreateOwnRootDoc()).resolves.toBe(doc)
-    expect(getDoc).toBeCalledTimes(1)
-    expect(createDoc).toBeCalledTimes(1)
-  })
-
-  test('_getOwnRootDoc', async () => {
-    const getRootDocument = jest.fn()
-    const idx = new IDX({ ceramic: { user: { id: 'did:test:user' } } as any })
-    idx.getRootDocument = getRootDocument
-    await idx._getOwnRootDoc()
-    expect(getRootDocument).toHaveBeenCalledTimes(1)
-    expect(getRootDocument).toHaveBeenCalledWith('did:test:user')
-  })
-
-  test('_createOwnRootDoc', async () => {
-    const doctype = { id: 'rootDocId' }
-    const createDocument = jest.fn(() => Promise.resolve(doctype))
-    const idx = new IDX({ ceramic: { createDocument, user: { id: 'did:test:user' } } as any })
-
-    const content = { root: true }
-    const config = IDX_DOCTYPE_CONFIGS.root
-    await expect(idx._createOwnRootDoc(content)).resolves.toBe(doctype)
-    expect(createDocument).toHaveBeenCalledTimes(1)
-    expect(createDocument).toHaveBeenCalledWith('tile', {
-      content,
-      metadata: {
-        owners: ['did:test:user'],
-        schema: config.schema,
-        tags: config.tags
-      }
-    })
-    expect(idx._did2rootId['did:test:user']).toBe('rootDocId')
-  })
-
-  test('_getOrCreateOwnDoc', async () => {
-    const doc = {} as Doctype
-    const createDoc = jest.fn(() => Promise.resolve(doc))
-    const getDoc = jest.fn(() => Promise.resolve(null))
-
-    const idx = new IDX({ ceramic: {} as any })
-    idx._getOwnDoc = getDoc
-    idx._createOwnDoc = createDoc
-
-    await expect(idx._getOrCreateOwnDoc('accounts')).resolves.toBe(doc)
-    expect(getDoc).toBeCalledTimes(1)
-    expect(getDoc).toBeCalledWith('accounts')
-    expect(createDoc).toBeCalledTimes(1)
-    expect(createDoc).toBeCalledWith('accounts')
-  })
-
-  test('_getOwnDoc', async () => {
-    const docId = 'ceramic://accountsId'
-    const doc = { id: docId }
-    const loadDocument = jest.fn(id => {
-      return id === docId ? Promise.resolve(doc) : Promise.reject(new Error('Invalid id'))
-    })
-    const idx = new IDX({ ceramic: { loadDocument } as any })
-    const getRemote = jest.fn(() => Promise.resolve({ content: { accounts: docId } }))
-    // @ts-expect-error
-    idx._docProxy.root = new DoctypeProxy(getRemote)
-
-    await expect(idx._getOwnDoc('profiles')).resolves.toBeNull()
-    await expect(idx._getOwnDoc('accounts')).resolves.toBe(doc)
-    expect(getRemote).toHaveBeenCalledTimes(2)
-    expect(loadDocument).toHaveBeenCalledTimes(1)
-    expect(loadDocument).toHaveBeenCalledWith(docId)
-  })
-
-  describe('_createOwnDoc', () => {
-    test('throws an error if called with an unknown doctype name', async () => {
-      const idx = new IDX({ ceramic: {} as any })
-      await expect(idx._createOwnDoc('test')).rejects.toThrow('Unsupported IDX name: test')
-    })
-
-    test('creates the document and set it to the root doc', async () => {
-      const doctype = { id: 'testDocId' }
-      const createDocument = jest.fn(() => Promise.resolve(doctype))
-      const idx = new IDX({ ceramic: { createDocument, user: { id: 'did:test:user' } } as any })
-
-      const changeRoot = jest.fn()
-      // @ts-expect-error
-      idx._docProxy.root = { change: changeRoot }
-
-      const content = { test: 'test' }
-      const config = IDX_DOCTYPE_CONFIGS['accounts']
-      await expect(idx._createOwnDoc('accounts', content)).resolves.toBe(doctype)
-      expect(createDocument).toHaveBeenCalledTimes(1)
-      expect(createDocument).toHaveBeenCalledWith('tile', {
-        content,
+  describe('Ceramic API wrappers', () => {
+    test('createDocument', async () => {
+      const createDocument = jest.fn()
+      const idx = new IDX({ ceramic: { createDocument, did: { id: 'did:test' } } } as any)
+      await idx.createDocument({ hello: 'test' }, { tags: ['test'] })
+      expect(createDocument).toBeCalledWith('tile', {
+        content: { hello: 'test' },
         metadata: {
-          owners: ['did:test:user'],
-          schema: config.schema,
-          tags: config.tags
+          owners: ['did:test'],
+          tags: ['test']
         }
       })
-      expect(changeRoot).toBeCalledTimes(1)
     })
+
+    test('loadDocument', async () => {
+      const loadDocument = jest.fn()
+      const idx = new IDX({ ceramic: { loadDocument } } as any)
+      await Promise.all([idx.loadDocument('one'), idx.loadDocument('one'), idx.loadDocument('two')])
+      expect(loadDocument).toBeCalledTimes(2)
+    })
+  })
+
+  describe('Definition APIs', () => {
+    test('createDefinition', async () => {
+      const createDocument = jest.fn(() => Promise.resolve({ id: 'ceramic://test' }))
+      const idx = new IDX({
+        ceramic: { createDocument, did: { id: 'did:test' } },
+        schemas: { Definition: 'ceramic://definition' }
+      } as any)
+      await expect(idx.createDefinition({ name: 'test', schema: 'test' })).resolves.toBe(
+        'ceramic://test'
+      )
+      expect(createDocument).toBeCalledTimes(1)
+    })
+
+    test('getDefinition', async () => {
+      const loadDocument = jest.fn(() =>
+        Promise.resolve({
+          content: { name: 'definition' },
+          metadata: { schema: 'ceramic://definition' }
+        })
+      )
+      const idx = new IDX({
+        ceramic: { loadDocument },
+        schemas: { Definition: 'ceramic://definition' }
+      } as any)
+      await expect(idx.getDefinition('ceramic://test')).resolves.toEqual({
+        name: 'definition'
+      })
+      expect(loadDocument).toBeCalledWith('ceramic://test')
+    })
+  })
+
+  describe('Entry APIs', () => {
+    test('getEntryId', async () => {
+      const idx = new IDX({} as any)
+
+      idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
+      await expect(idx.getEntryId('test', 'did')).resolves.toBeNull()
+
+      const get = jest.fn(() => Promise.resolve('docId'))
+      idx._rootIndex = { get } as any
+      await expect(idx.getEntryId('exists', 'did')).resolves.toBe('docId')
+      expect(get).toHaveBeenCalledWith('exists', 'did')
+    })
+
+    test('getEntry', async () => {
+      const idx = new IDX({} as any)
+
+      idx.getEntryId = (): Promise<null> => Promise.resolve(null)
+      await expect(idx.getEntry('test', 'did')).resolves.toBeNull()
+
+      const doc = { content: {} }
+      const loadDocument = jest.fn(() => Promise.resolve(doc))
+      idx.loadDocument = loadDocument
+      const getEntryId = jest.fn(() => Promise.resolve('ceramic://test'))
+      idx.getEntryId = getEntryId
+      await expect(idx.getEntry('test', 'did')).resolves.toBe(doc.content)
+      expect(getEntryId).toBeCalledWith('test', 'did')
+      expect(loadDocument).toBeCalledWith('ceramic://test')
+    })
+
+    test('_setEntryId', async () => {
+      const set = jest.fn()
+      const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
+      idx._rootIndex = { set } as any
+
+      await expect(idx._setEntryId('defId', 'docId')).resolves.toBeUndefined()
+      expect(set).toBeCalledWith('defId', 'docId')
+    })
+
+    describe('setEntry', () => {
+      test('existing definition ID', async () => {
+        const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
+        idx._rootIndex = { get: (): Promise<any> => Promise.resolve('docId') } as any
+
+        const change = jest.fn()
+        const loadDocument = jest.fn(() => Promise.resolve({ change }))
+        idx.loadDocument = loadDocument
+
+        const content = { test: true }
+        await idx.setEntry('defId', content)
+        expect(loadDocument).toBeCalledWith('docId')
+        expect(change).toBeCalledWith({ content })
+      })
+
+      test('adding definition ID', async () => {
+        const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
+        idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
+
+        const definition = { name: 'test', schema: 'ceramic://...' }
+        const getDefinition = jest.fn(() => Promise.resolve(definition))
+        idx.getDefinition = getDefinition
+        const createEntry = jest.fn(() => Promise.resolve('docId'))
+        idx._createEntry = createEntry
+        const setEntryId = jest.fn()
+        idx._setEntryId = setEntryId
+
+        const content = { test: true }
+        await idx.setEntry('defId', content)
+        expect(getDefinition).toBeCalledWith('defId')
+        expect(createEntry).toBeCalledWith(definition, content)
+        expect(setEntryId).toBeCalledWith('defId', 'docId')
+      })
+    })
+
+    test('addEntry', async () => {
+      const idx = new IDX({} as any)
+      const createDefinition = jest.fn(() => Promise.resolve('defId'))
+      idx.createDefinition = createDefinition
+      const createEntry = jest.fn(() => Promise.resolve('docId'))
+      idx._createEntry = createEntry
+      const setEntryId = jest.fn()
+      idx._setEntryId = setEntryId
+
+      const definition = { name: 'test', schema: 'docId' }
+      const content = { test: true }
+      await expect(idx.addEntry(definition, content)).resolves.toBe('defId')
+      expect(createDefinition).toBeCalledWith(definition)
+      expect(createEntry).toBeCalledWith(definition, content)
+      expect(setEntryId).toBeCalledWith('defId', 'docId')
+    })
+
+    test('removeEntry', async () => {
+      const remove = jest.fn()
+      const idx = new IDX({} as any)
+      idx._rootIndex = { remove } as any
+
+      await expect(idx.removeEntry('defId')).resolves.toBeUndefined()
+      expect(remove).toBeCalledWith('defId')
+    })
+
+    test('_createEntry', async () => {
+      const idx = new IDX({} as any)
+      const createDocument = jest.fn(() => Promise.resolve({ id: 'docId' }))
+      idx.createDocument = createDocument
+
+      const definition = { name: 'test', schema: 'schemaId' }
+      const content = { test: true }
+      await idx._createEntry(definition, content)
+      expect(createDocument).toBeCalledWith(content, { schema: 'schemaId' })
+    })
+  })
+
+  describe('accessor APIs', () => {
+    test.todo('has')
+    test.todo('get')
+    test.todo('set')
+    test.todo('remove')
+    test.todo('_toDefinitionId')
   })
 })
