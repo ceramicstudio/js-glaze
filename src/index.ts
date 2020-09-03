@@ -5,7 +5,15 @@ import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
 
 import { RootIndex } from './indexes'
-import { Definition, DefinitionsAliases, DocID, SchemasAliases } from './types'
+import {
+  Definition,
+  DefinitionsAliases,
+  DocID,
+  Entry,
+  RootIndexContent,
+  SchemasAliases
+} from './types'
+import { getIDXRoot } from './utils'
 
 export * from './types'
 
@@ -97,18 +105,18 @@ export class IDX {
 
   async has(name: string, did?: string): Promise<boolean> {
     const id = this._toDefinitionId(name)
-    const docId = await this.getEntryId(id, did)
-    return docId != null
+    const entry = await this.getEntry(id, did)
+    return entry != null
   }
 
   async get<T = unknown>(name: string, did?: string): Promise<T | null> {
     const id = this._toDefinitionId(name)
-    return await this.getEntry(id, did)
+    return await this.getEntryReference(id, did)
   }
 
   async set(name: string, content: unknown): Promise<DocID> {
     const id = this._toDefinitionId(name)
-    return await this.setEntry(id, content)
+    return await this.setEntryReference(id, content)
   }
 
   async remove(name: string): Promise<void> {
@@ -122,6 +130,17 @@ export class IDX {
       throw new Error(`Invalid name: ${name}`)
     }
     return id
+  }
+
+  // Root Index APIs
+
+  async getRootId(did: string): Promise<DocID | null> {
+    const userDoc = await this._resolver.resolve(did)
+    return getIDXRoot(userDoc) ?? null
+  }
+
+  async getRoot(did?: string): Promise<RootIndexContent | null> {
+    return await this._rootIndex.getIndex(did ?? this.id)
   }
 
   // Definition APIs
@@ -141,40 +160,85 @@ export class IDX {
 
   // Entry APIs
 
-  async getEntryId(definitionId: DocID, did?: string): Promise<DocID | null> {
+  async getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
     return await this._rootIndex.get(definitionId, did ?? this.id)
   }
 
-  async getEntry<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
-    const docId = await this.getEntryId(definitionId, did)
-    if (docId == null) {
+  async getEntryReference<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
+    const entry = await this.getEntry(definitionId, did)
+    if (entry == null) {
       return null
     } else {
-      const doc = await this.loadDocument(docId)
+      const doc = await this.loadDocument(entry.referenceId)
       return doc.content as T
     }
   }
 
-  async setEntry(definitionId: DocID, content: unknown): Promise<DocID> {
-    const existingId = await this.getEntryId(definitionId, this.id)
-    if (existingId == null) {
+  async getEntryTags(definitionId: DocID, did?: string): Promise<Array<string>> {
+    const entry = await this.getEntry(definitionId, did)
+    return entry?.tags ?? []
+  }
+
+  async setEntry(definitionId: DocID, entry: Entry): Promise<void> {
+    await this._rootIndex.set(definitionId, entry)
+  }
+
+  async setEntryReference(
+    definitionId: DocID,
+    content: unknown,
+    tags: Array<string> = []
+  ): Promise<DocID> {
+    const entry = await this.getEntry(definitionId, this.id)
+    if (entry == null) {
       const definition = await this.getDefinition(definitionId)
-      const docId = await this._createEntry(definition, content)
-      await this._setEntryId(definitionId, docId)
-      return docId
+      const referenceId = await this._createReference(definition, content)
+      await this.setEntry(definitionId, { referenceId, tags })
+      return referenceId
     } else {
-      const doc = await this.loadDocument(existingId)
+      const doc = await this.loadDocument(entry.referenceId)
       await doc.change({ content })
       return doc.id
     }
   }
 
-  async addEntry(definition: Definition, content: unknown): Promise<DocID> {
-    const [definitionId, docId] = await Promise.all([
+  async addEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
+    const entry = await this.getEntry(definitionId, this.id)
+    if (entry == null) {
+      return []
+    }
+    if (entry.tags.includes(tag)) {
+      return entry.tags
+    }
+
+    entry.tags.push(tag)
+    await this.setEntry(definitionId, entry)
+    return entry.tags
+  }
+
+  async removeEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
+    const entry = await this.getEntry(definitionId, this.id)
+    if (entry == null) {
+      return []
+    }
+
+    const index = entry.tags.indexOf(tag)
+    if (index !== -1) {
+      entry.tags.splice(index, 1)
+      await this.setEntry(definitionId, entry)
+    }
+    return entry.tags
+  }
+
+  async addEntry(
+    definition: Definition,
+    content: unknown,
+    tags: Array<string> = []
+  ): Promise<DocID> {
+    const [definitionId, referenceId] = await Promise.all([
       this.createDefinition(definition),
-      this._createEntry(definition, content)
+      this._createReference(definition, content)
     ])
-    await this._setEntryId(definitionId, docId)
+    await this.setEntry(definitionId, { referenceId, tags })
     return definitionId
   }
 
@@ -182,12 +246,8 @@ export class IDX {
     await this._rootIndex.remove(definitionId)
   }
 
-  async _createEntry(definition: Definition, content: unknown): Promise<DocID> {
-    const doctype = await this.createDocument(content, { schema: definition.schema })
-    return doctype.id
-  }
-
-  async _setEntryId(definitionId: DocID, collectionId: DocID): Promise<void> {
-    await this._rootIndex.set(definitionId, collectionId)
+  async _createReference(definition: Definition, content: unknown): Promise<DocID> {
+    const doc = await this.createDocument(content, { schema: definition.schema })
+    return doc.id
   }
 }

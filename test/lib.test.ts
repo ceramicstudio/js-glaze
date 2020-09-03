@@ -120,54 +120,58 @@ describe('IDX', () => {
   })
 
   describe('Entry APIs', () => {
-    test('getEntryId', async () => {
-      const idx = new IDX({} as any)
-
-      idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
-      await expect(idx.getEntryId('test', 'did')).resolves.toBeNull()
-
-      const get = jest.fn(() => Promise.resolve('docId'))
-      idx._rootIndex = { get } as any
-      await expect(idx.getEntryId('exists', 'did')).resolves.toBe('docId')
-      expect(get).toHaveBeenCalledWith('exists', 'did')
-    })
-
     test('getEntry', async () => {
       const idx = new IDX({} as any)
 
-      idx.getEntryId = (): Promise<null> => Promise.resolve(null)
+      idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
       await expect(idx.getEntry('test', 'did')).resolves.toBeNull()
 
+      const entry = { tags: [], referenceId: 'ceramic://' }
+      const get = jest.fn(() => Promise.resolve(entry))
+      idx._rootIndex = { get } as any
+      await expect(idx.getEntry('exists', 'did')).resolves.toBe(entry)
+      expect(get).toHaveBeenCalledWith('exists', 'did')
+    })
+
+    test('getEntryReference', async () => {
+      const idx = new IDX({} as any)
+
+      idx.getEntry = (): Promise<null> => Promise.resolve(null)
+      await expect(idx.getEntryReference('test', 'did')).resolves.toBeNull()
+
       const doc = { content: {} }
+      const entry = { tags: [], referenceId: 'ceramic://test' }
       const loadDocument = jest.fn(() => Promise.resolve(doc))
       idx.loadDocument = loadDocument
-      const getEntryId = jest.fn(() => Promise.resolve('ceramic://test'))
-      idx.getEntryId = getEntryId
-      await expect(idx.getEntry('test', 'did')).resolves.toBe(doc.content)
-      expect(getEntryId).toBeCalledWith('test', 'did')
+      const getEntry = jest.fn(() => Promise.resolve(entry))
+      idx.getEntry = getEntry
+      await expect(idx.getEntryReference('test', 'did')).resolves.toBe(doc.content)
+      expect(getEntry).toBeCalledWith('test', 'did')
       expect(loadDocument).toBeCalledWith('ceramic://test')
     })
 
-    test('_setEntryId', async () => {
+    test('setEntry', async () => {
       const set = jest.fn()
       const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
       idx._rootIndex = { set } as any
 
-      await expect(idx._setEntryId('defId', 'docId')).resolves.toBeUndefined()
-      expect(set).toBeCalledWith('defId', 'docId')
+      const entry = { tags: [], referenceId: 'ceramic://' }
+      await expect(idx.setEntry('defId', entry)).resolves.toBeUndefined()
+      expect(set).toBeCalledWith('defId', entry)
     })
 
-    describe('setEntry', () => {
+    describe('setEntryReference', () => {
       test('existing definition ID', async () => {
+        const entry = { tags: [], referenceId: 'docId' }
         const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
-        idx._rootIndex = { get: (): Promise<any> => Promise.resolve('docId') } as any
+        idx._rootIndex = { get: (): Promise<any> => Promise.resolve(entry) } as any
 
         const change = jest.fn()
         const loadDocument = jest.fn(() => Promise.resolve({ change }))
         idx.loadDocument = loadDocument
 
         const content = { test: true }
-        await idx.setEntry('defId', content)
+        await idx.setEntryReference('defId', content)
         expect(loadDocument).toBeCalledWith('docId')
         expect(change).toBeCalledWith({ content })
       })
@@ -179,16 +183,16 @@ describe('IDX', () => {
         const definition = { name: 'test', schema: 'ceramic://...' }
         const getDefinition = jest.fn(() => Promise.resolve(definition))
         idx.getDefinition = getDefinition
-        const createEntry = jest.fn(() => Promise.resolve('docId'))
-        idx._createEntry = createEntry
-        const setEntryId = jest.fn()
-        idx._setEntryId = setEntryId
+        const createReference = jest.fn(() => Promise.resolve('docId'))
+        idx._createReference = createReference
+        const setEntry = jest.fn()
+        idx.setEntry = setEntry
 
         const content = { test: true }
-        await idx.setEntry('defId', content)
+        await idx.setEntryReference('defId', content)
         expect(getDefinition).toBeCalledWith('defId')
-        expect(createEntry).toBeCalledWith(definition, content)
-        expect(setEntryId).toBeCalledWith('defId', 'docId')
+        expect(createReference).toBeCalledWith(definition, content)
+        expect(setEntry).toBeCalledWith('defId', { referenceId: 'docId', tags: [] })
       })
     })
 
@@ -196,17 +200,17 @@ describe('IDX', () => {
       const idx = new IDX({} as any)
       const createDefinition = jest.fn(() => Promise.resolve('defId'))
       idx.createDefinition = createDefinition
-      const createEntry = jest.fn(() => Promise.resolve('docId'))
-      idx._createEntry = createEntry
-      const setEntryId = jest.fn()
-      idx._setEntryId = setEntryId
+      const createReference = jest.fn(() => Promise.resolve('docId'))
+      idx._createReference = createReference
+      const setEntry = jest.fn()
+      idx.setEntry = setEntry
 
       const definition = { name: 'test', schema: 'docId' }
       const content = { test: true }
-      await expect(idx.addEntry(definition, content)).resolves.toBe('defId')
+      await expect(idx.addEntry(definition, content, ['test', 'tags'])).resolves.toBe('defId')
       expect(createDefinition).toBeCalledWith(definition)
-      expect(createEntry).toBeCalledWith(definition, content)
-      expect(setEntryId).toBeCalledWith('defId', 'docId')
+      expect(createReference).toBeCalledWith(definition, content)
+      expect(setEntry).toBeCalledWith('defId', { referenceId: 'docId', tags: ['test', 'tags'] })
     })
 
     test('removeEntry', async () => {
@@ -218,14 +222,14 @@ describe('IDX', () => {
       expect(remove).toBeCalledWith('defId')
     })
 
-    test('_createEntry', async () => {
+    test('_createReference', async () => {
       const idx = new IDX({} as any)
       const createDocument = jest.fn(() => Promise.resolve({ id: 'docId' }))
       idx.createDocument = createDocument
 
       const definition = { name: 'test', schema: 'schemaId' }
       const content = { test: true }
-      await idx._createEntry(definition, content)
+      await idx._createReference(definition, content)
       expect(createDocument).toBeCalledWith(content, { schema: 'schemaId' })
     })
   })

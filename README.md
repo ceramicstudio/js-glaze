@@ -66,16 +66,25 @@ interface Definition<T extends Record<string, unknown> = Record<string, unknown>
 type DefinitionsAliases = Record<string, DocID>
 ```
 
+### Entry
+
+```ts
+interface Entry {
+  tags: Array<string>
+  referenceId: DocID
+}
+```
+
+### RootIndexContent
+
+```ts
+type RootIndexContent = Record<DocID, Entry>
+```
+
 ### SchemaType
 
 ```ts
-type SchemaType =
-  | 'BasicProfile'
-  | 'Definition'
-  | 'DocIdDocIdMap'
-  | 'DocIdList'
-  | 'DocIdMap'
-  | 'StringMap'
+type SchemaType = 'BasicProfile' | 'Definition' | 'DocIdDocIdMap' | 'DocIdMap' | 'StringMap'
 ```
 
 ### SchemasAliases
@@ -146,6 +155,65 @@ interface IDXOptions {
 
 **Returns** `string`
 
+#### .has
+
+Returns whether an entry with the `name` alias exists in the Root Index of the specified `did`
+
+**Arguments**
+
+1. `name: string`
+1. `did?: string = this.id`
+
+**Returns** `Promise<boolean>`
+
+#### .get
+
+Returns the referenced content for the given `name` alias of the specified `did`
+
+**Arguments**
+
+1. `name: string`
+1. `did?: string = this.id`
+
+**Returns** `Promise<unknown>`
+
+#### .set
+
+Sets the content for the given `name` alias in the Root Index of the authenticated DID
+
+**Arguments**
+
+1. `name: string`
+1. `content: unknown`
+
+**Returns** `Promise<DocID>` the `DocID` of the created content document
+
+#### .remove
+
+Removes the definition for the `name` alias in the Root Index of the authenticated DID
+
+**Arguments**
+
+1. `name: string`
+
+**Returns** `Promise<void>`
+
+#### .getRootId
+
+**Arguments**
+
+1. `did: string`
+
+**Returns** `Promise<DocID | null>`
+
+#### .getRoot
+
+**Arguments**
+
+1. `did?: string = this.id`
+
+**Returns** `Promise<RootIndexContent | null>`
+
 #### .createDefinition
 
 **Arguments**
@@ -162,32 +230,73 @@ interface IDXOptions {
 
 **Returns** `Promise<Definition>`
 
-#### .getEntryId
-
-**Arguments**
-
-1. `definitionId: DocID`
-1. `did?: string`
-
-**Returns** `Promise<DocID | null>`
-
 #### .getEntry
 
 **Arguments**
 
 1. `definitionId: DocID`
-1. `did?: string`
+1. `did?: string = this.id`
+
+**Returns** `Promise<Entry | null>`
+
+#### .getEntryReference
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `did?: string = this.id`
 
 **Returns** `Promise<unknown | null>`
+
+#### .getEntryTags
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `did?: string = this.id`
+
+**Returns** `Promise<Array<string>>`
 
 #### .setEntry
 
 **Arguments**
 
 1. `definitionId: DocID`
+1. `entry: Entry`
+
+**Returns** `Promise<void>`
+
+#### .setEntryReference
+
+Sets the content of the entry reference.
+
+> The provided tags will only be set if the entry is getting created, if it already exists tags will not be changed
+
+**Arguments**
+
+1. `definitionId: DocID`
 1. `content: unknown`
+1. `tags?: Array<string> = []`
 
 **Returns** `Promise<DocID>` the `DocID` of the created content document
+
+#### .addEntryTag
+
+**Arguments**
+
+1. `definitionid: DocID`
+1. `tag: string`
+
+**Returns** `Promise<Array<string>>` the updated set of tags
+
+#### .removeEntryTag
+
+**Arguments**
+
+1. `definitionId: DocID`
+1. `tag: string`
+
+**Returns** `Promise<Array<string>>` the updated set of tags
 
 #### .addEntry
 
@@ -195,6 +304,7 @@ interface IDXOptions {
 
 1. `definition: Definition`
 1. `content: unknown`
+1. `tags?: Array<string> = []`
 
 **Returns** `Promise<DocID>` the `DocID` of the created definition document
 
