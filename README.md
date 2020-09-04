@@ -318,4 +318,4 @@ Sets the content of the entry reference.
 
 ## License
 
-MIT
+Apache-2.0 OR MIT
