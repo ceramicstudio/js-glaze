@@ -10,11 +10,18 @@ export interface Definition<T extends Record<string, unknown> = Record<string, u
 
 export type DefinitionsAliases = Record<string, DocID>
 
+export interface Entry {
+  tags: Array<string>
+  ref: DocID
+}
+
+export type RootIndexContent = Record<DocID, Entry>
+
 export type SchemaType =
   | 'BasicProfile'
   | 'Definition'
   | 'DocIdDocIdMap'
-  | 'DocIdList'
   | 'DocIdMap'
+  | 'Index'
   | 'StringMap'
 export type SchemasAliases = Record<SchemaType, DocID>

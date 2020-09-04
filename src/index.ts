@@ -5,7 +5,15 @@ import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
 
 import { RootIndex } from './indexes'
-import { Definition, DefinitionsAliases, DocID, SchemasAliases } from './types'
+import {
+  Definition,
+  DefinitionsAliases,
+  DocID,
+  Entry,
+  RootIndexContent,
+  SchemasAliases
+} from './types'
+import { getIDXRoot } from './utils'
 
 export * from './types'
 
@@ -97,18 +105,33 @@ export class IDX {
 
   async has(name: string, did?: string): Promise<boolean> {
     const id = this._toDefinitionId(name)
-    const docId = await this.getEntryId(id, did)
-    return docId != null
+    const entry = await this._getEntry(id, did)
+    return entry != null
   }
 
   async get<T = unknown>(name: string, did?: string): Promise<T | null> {
     const id = this._toDefinitionId(name)
-    return await this.getEntry(id, did)
+    return await this.getEntryContent(id, did)
+  }
+
+  async getTags(name: string, did?: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.getEntryTags(id, did)
   }
 
   async set(name: string, content: unknown): Promise<DocID> {
     const id = this._toDefinitionId(name)
-    return await this.setEntry(id, content)
+    return await this.setEntryContent(id, content)
+  }
+
+  async addTag(name: string, tag: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.addEntryTag(id, tag)
+  }
+
+  async removeTag(name: string, tag: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.removeEntryTag(id, tag)
   }
 
   async remove(name: string): Promise<void> {
@@ -119,9 +142,23 @@ export class IDX {
   _toDefinitionId(name: string): DocID {
     const id = this._definitions[name] ?? this._definitions[`idx:${name}`]
     if (id == null) {
+      if (name.startsWith('ceramic://')) {
+        return name
+      }
       throw new Error(`Invalid name: ${name}`)
     }
     return id
+  }
+
+  // Root Index APIs
+
+  async getIDXDocID(did?: string): Promise<DocID | null> {
+    const userDoc = await this._resolver.resolve(did ?? this.id)
+    return getIDXRoot(userDoc) ?? null
+  }
+
+  async getIDXContent(did?: string): Promise<RootIndexContent | null> {
+    return await this._rootIndex.getIndex(did ?? this.id)
   }
 
   // Definition APIs
@@ -141,53 +178,81 @@ export class IDX {
 
   // Entry APIs
 
-  async getEntryId(definitionId: DocID, did?: string): Promise<DocID | null> {
-    return await this._rootIndex.get(definitionId, did ?? this.id)
-  }
-
-  async getEntry<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
-    const docId = await this.getEntryId(definitionId, did)
-    if (docId == null) {
+  async getEntryContent<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
+    const entry = await this._getEntry(definitionId, did)
+    if (entry == null) {
       return null
     } else {
-      const doc = await this.loadDocument(docId)
+      const doc = await this.loadDocument(entry.ref)
       return doc.content as T
     }
   }
 
-  async setEntry(definitionId: DocID, content: unknown): Promise<DocID> {
-    const existingId = await this.getEntryId(definitionId, this.id)
-    if (existingId == null) {
+  async getEntryTags(definitionId: DocID, did?: string): Promise<Array<string>> {
+    const entry = await this._getEntry(definitionId, did)
+    return entry?.tags ?? []
+  }
+
+  async setEntryContent(
+    definitionId: DocID,
+    content: unknown,
+    tags: Array<string> = []
+  ): Promise<DocID> {
+    const entry = await this._getEntry(definitionId, this.id)
+    if (entry == null) {
       const definition = await this.getDefinition(definitionId)
-      const docId = await this._createEntry(definition, content)
-      await this._setEntryId(definitionId, docId)
-      return docId
+      const ref = await this._createReference(definition, content)
+      await this._setEntry(definitionId, { ref, tags })
+      return ref
     } else {
-      const doc = await this.loadDocument(existingId)
+      const doc = await this.loadDocument(entry.ref)
       await doc.change({ content })
       return doc.id
     }
   }
 
-  async addEntry(definition: Definition, content: unknown): Promise<DocID> {
-    const [definitionId, docId] = await Promise.all([
-      this.createDefinition(definition),
-      this._createEntry(definition, content)
-    ])
-    await this._setEntryId(definitionId, docId)
-    return definitionId
+  async addEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
+    const entry = await this._getEntry(definitionId, this.id)
+    if (entry == null) {
+      return []
+    }
+    if (entry.tags.includes(tag)) {
+      return entry.tags
+    }
+
+    entry.tags.push(tag)
+    await this._setEntry(definitionId, entry)
+    return entry.tags
+  }
+
+  async removeEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
+    const entry = await this._getEntry(definitionId, this.id)
+    if (entry == null) {
+      return []
+    }
+
+    const index = entry.tags.indexOf(tag)
+    if (index !== -1) {
+      entry.tags.splice(index, 1)
+      await this._setEntry(definitionId, entry)
+    }
+    return entry.tags
   }
 
   async removeEntry(definitionId: DocID): Promise<void> {
     await this._rootIndex.remove(definitionId)
   }
 
-  async _createEntry(definition: Definition, content: unknown): Promise<DocID> {
-    const doctype = await this.createDocument(content, { schema: definition.schema })
-    return doctype.id
+  async _getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
+    return await this._rootIndex.get(definitionId, did ?? this.id)
   }
 
-  async _setEntryId(definitionId: DocID, collectionId: DocID): Promise<void> {
-    await this._rootIndex.set(definitionId, collectionId)
+  async _setEntry(definitionId: DocID, entry: Entry): Promise<void> {
+    await this._rootIndex.set(definitionId, entry)
+  }
+
+  async _createReference(definition: Definition, content: unknown): Promise<DocID> {
+    const doc = await this.createDocument(content, { schema: definition.schema })
+    return doc.id
   }
 }
