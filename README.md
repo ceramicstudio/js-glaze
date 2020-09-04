@@ -157,62 +157,66 @@ interface IDXOptions {
 
 #### .has
 
-Returns whether an entry with the `name` alias exists in the Root Index of the specified `did`
+Returns whether an entry with the `name` alias or definition `DocID` exists in the Root Index of the specified `did`
 
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 1. `did?: string = this.id`
 
 **Returns** `Promise<boolean>`
 
 #### .get
 
-Returns the referenced content for the given `name` alias of the specified `did`
+Returns the referenced content for the given `name` alias or definition `DocID` of the specified `did`
 
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 1. `did?: string = this.id`
 
 **Returns** `Promise<unknown>`
 
 #### .set
 
-Sets the content for the given `name` alias in the Root Index of the authenticated DID
+Sets the content for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 1. `content: unknown`
 
 **Returns** `Promise<DocID>` the `DocID` of the created content document
 
 #### .addTag
 
+Adds a tag for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
+
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 1. `tag: string`
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
 #### .removeTag
 
+Removes a tag for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
+
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 1. `tag: string`
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
 #### .remove
 
-Removes the definition for the `name` alias in the Root Index of the authenticated DID
+Removes the definition for the `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
 **Arguments**
 
-1. `name: string`
+1. `name: string | DocID`
 
 **Returns** `Promise<void>`
 

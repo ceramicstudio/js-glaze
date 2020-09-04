@@ -66,6 +66,102 @@ describe('IDX', () => {
     })
   })
 
+  describe('Main APIs', () => {
+    test('has - returns true', async () => {
+      const getEntry = jest.fn(() => ({}))
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx._getEntry = getEntry as any
+      await expect(idx.has('test', 'did')).resolves.toBe(true)
+      expect(getEntry).toBeCalledWith('docId', 'did')
+    })
+
+    test('has - returns false', async () => {
+      const getEntry = jest.fn(() => null)
+      const idx = new IDX({
+        ceramic: { did: { id: 'did:test' } },
+        definitions: { test: 'docId' }
+      } as any)
+      idx._getEntry = getEntry as any
+      await expect(idx.has('test')).resolves.toBe(false)
+      expect(getEntry).toBeCalledWith('docId', undefined)
+    })
+
+    test('get', async () => {
+      const content = {}
+      const getEntryContent = jest.fn(() => content)
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.getEntryContent = getEntryContent as any
+      await expect(idx.get('test', 'did')).resolves.toBe(content)
+      expect(getEntryContent).toBeCalledWith('docId', 'did')
+    })
+
+    test('getTags', async () => {
+      const tags = ['test']
+      const getEntryTags = jest.fn(() => tags)
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.getEntryTags = getEntryTags as any
+      await expect(idx.getTags('test', 'did')).resolves.toBe(tags)
+      expect(getEntryTags).toBeCalledWith('docId', 'did')
+    })
+
+    test('set', async () => {
+      const content = {}
+      const setEntryContent = jest.fn(() => 'contentId')
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.setEntryContent = setEntryContent as any
+      await expect(idx.set('test', content)).resolves.toBe('contentId')
+      expect(setEntryContent).toBeCalledWith('docId', content)
+    })
+
+    test('addTag', async () => {
+      const tags = ['new']
+      const addEntryTag = jest.fn(() => Promise.resolve(tags))
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.addEntryTag = addEntryTag as any
+      await expect(idx.addTag('test', 'new')).resolves.toEqual(tags)
+      expect(addEntryTag).toBeCalledWith('docId', 'new')
+    })
+
+    test('removeTag', async () => {
+      const tags = ['other']
+      const removeEntryTag = jest.fn(() => Promise.resolve(tags))
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.removeEntryTag = removeEntryTag as any
+      await expect(idx.removeTag('test', 'new')).resolves.toEqual(tags)
+      expect(removeEntryTag).toBeCalledWith('docId', 'new')
+    })
+
+    test('remove', async () => {
+      const removeEntry = jest.fn()
+      const idx = new IDX({ definitions: { test: 'docId' } } as any)
+      idx.removeEntry = removeEntry
+      await expect(idx.remove('test')).resolves.toBeUndefined()
+      expect(removeEntry).toBeCalledWith('docId')
+    })
+
+    describe('_toDefinitionId', () => {
+      test('resolves the existing alias', () => {
+        const idx = new IDX({ definitions: { test: 'docId' } } as any)
+        expect(idx._toDefinitionId('test')).toBe('docId')
+      })
+
+      test('resolves the existing alias with `idx:` prefix', () => {
+        const idx = new IDX({ definitions: { 'idx:test': 'docId' } } as any)
+        expect(idx._toDefinitionId('test')).toBe('docId')
+      })
+
+      test('returns the doc ID if valid', () => {
+        const idx = new IDX({} as any)
+        expect(idx._toDefinitionId('ceramic://docId')).toBe('ceramic://docId')
+      })
+
+      test('throws an error if invalid name or doc ID', () => {
+        const idx = new IDX({} as any)
+        expect(() => idx._toDefinitionId('test')).toThrow('Invalid name: test')
+      })
+    })
+  })
+
   describe('Ceramic API wrappers', () => {
     test('createDocument', async () => {
       const createDocument = jest.fn()
@@ -85,6 +181,24 @@ describe('IDX', () => {
       const idx = new IDX({ ceramic: { loadDocument } } as any)
       await Promise.all([idx.loadDocument('one'), idx.loadDocument('one'), idx.loadDocument('two')])
       expect(loadDocument).toBeCalledTimes(2)
+    })
+  })
+
+  describe('Root Index APIs', () => {
+    test('getRoot with provided DID', async () => {
+      const getIndex = jest.fn()
+      const idx = new IDX({} as any)
+      idx._rootIndex = { getIndex } as any
+      await idx.getRoot('did:test')
+      expect(getIndex).toBeCalledWith('did:test')
+    })
+
+    test('getRoot with own DID', async () => {
+      const getIndex = jest.fn()
+      const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+      idx._rootIndex = { getIndex } as any
+      await idx.getRoot()
+      expect(getIndex).toBeCalledWith('did:test')
     })
   })
 
@@ -150,6 +264,24 @@ describe('IDX', () => {
       expect(loadDocument).toBeCalledWith('ceramic://test')
     })
 
+    describe('getEntryTags', () => {
+      test('with non-existing entry', async () => {
+        const getEntry = jest.fn(() => Promise.resolve(null))
+        const idx = new IDX({} as any)
+        idx._getEntry = getEntry
+        await expect(idx.getEntryTags('docId', 'did:test')).resolves.toEqual([])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+      })
+
+      test('with existing entry', async () => {
+        const getEntry = jest.fn(() => Promise.resolve({ ref: 'id', tags: ['test', 'other'] }))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        await expect(idx.getEntryTags('docId')).resolves.toEqual(['test', 'other'])
+        expect(getEntry).toBeCalledWith('docId', undefined)
+      })
+    })
+
     test('_setEntry', async () => {
       const set = jest.fn()
       const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
@@ -196,6 +328,76 @@ describe('IDX', () => {
       })
     })
 
+    describe('addEntryTag', () => {
+      test('with non-existing entry', async () => {
+        const getEntry = jest.fn(() => Promise.resolve(null))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.addEntryTag('docId', 'test')).resolves.toEqual([])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).not.toBeCalled()
+      })
+
+      test('with existing tag', async () => {
+        const getEntry = jest.fn(() => Promise.resolve({ ref: 'id', tags: ['test', 'other'] }))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.addEntryTag('docId', 'test')).resolves.toEqual(['test', 'other'])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).not.toBeCalled()
+      })
+
+      test('with non-existing tag', async () => {
+        const getEntry = jest.fn(() => Promise.resolve({ ref: 'id', tags: ['other'] }))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.addEntryTag('docId', 'test')).resolves.toEqual(['other', 'test'])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).toBeCalledWith('docId', { ref: 'id', tags: ['other', 'test'] })
+      })
+    })
+
+    describe('removeEntryTag', () => {
+      test('with non-existing entry', async () => {
+        const getEntry = jest.fn(() => Promise.resolve(null))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.removeEntryTag('docId', 'test')).resolves.toEqual([])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).not.toBeCalled()
+      })
+
+      test('with existing tag', async () => {
+        const getEntry = jest.fn(() => Promise.resolve({ ref: 'id', tags: ['test', 'other'] }))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.removeEntryTag('docId', 'test')).resolves.toEqual(['other'])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).toBeCalledWith('docId', { ref: 'id', tags: ['other'] })
+      })
+
+      test('with non-existing tag', async () => {
+        const getEntry = jest.fn(() => Promise.resolve({ ref: 'id', tags: ['other'] }))
+        const setEntry = jest.fn()
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._getEntry = getEntry
+        idx._setEntry = setEntry
+        await expect(idx.removeEntryTag('docId', 'test')).resolves.toEqual(['other'])
+        expect(getEntry).toBeCalledWith('docId', 'did:test')
+        expect(setEntry).not.toBeCalled()
+      })
+    })
+
     test('removeEntry', async () => {
       const remove = jest.fn()
       const idx = new IDX({} as any)
@@ -215,13 +417,5 @@ describe('IDX', () => {
       await idx._createReference(definition, content)
       expect(createDocument).toBeCalledWith(content, { schema: 'schemaId' })
     })
-  })
-
-  describe('accessor APIs', () => {
-    test.todo('has')
-    test.todo('get')
-    test.todo('set')
-    test.todo('remove')
-    test.todo('_toDefinitionId')
   })
 })

@@ -142,6 +142,9 @@ export class IDX {
   _toDefinitionId(name: string): DocID {
     const id = this._definitions[name] ?? this._definitions[`idx:${name}`]
     if (id == null) {
+      if (name.startsWith('ceramic://')) {
+        return name
+      }
       throw new Error(`Invalid name: ${name}`)
     }
     return id

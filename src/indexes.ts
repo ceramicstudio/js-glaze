@@ -15,7 +15,7 @@ export class RootIndex {
 
   async getIndex(did: string): Promise<RootIndexContent | null> {
     const rootDoc =
-      this._idx.authenticated && did === this._idx.did.id
+      this._idx.authenticated && did === this._idx.id
         ? await this._proxy.get()
         : await this._getDoc(did)
     return (rootDoc?.content as RootIndexContent) ?? null
@@ -27,16 +27,15 @@ export class RootIndex {
   }
 
   async set(definitionId: DocID, entry: Entry): Promise<void> {
-    await this._proxy.changeContent<RootIndexContent>(content => ({
-      ...content,
-      [definitionId]: entry
-    }))
+    await this._proxy.changeContent<RootIndexContent>(content => {
+      return { ...content, [definitionId]: entry }
+    })
   }
 
   async remove(definitionId: DocID): Promise<void> {
-    await this._proxy.changeContent<RootIndexContent>(
-      ({ [definitionId]: _remove, ...content }) => content
-    )
+    await this._proxy.changeContent<RootIndexContent>(({ [definitionId]: _remove, ...content }) => {
+      return content
+    })
   }
 
   async _getOrCreateOwnDoc(): Promise<Doctype> {

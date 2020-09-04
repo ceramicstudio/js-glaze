@@ -25,8 +25,8 @@ describe('integration', () => {
     const alice = new IDX({ ceramic, definitions, schemas })
     await alice.set('test:profile', { name: 'Alice' })
 
-    const bob = new IDX({ ceramic, definitions, schemas })
-    const doc = await bob.get<{ name: string }>('test:profile', alice.id)
+    const bob = new IDX({ ceramic, schemas })
+    const doc = await bob.get<{ name: string }>(definitions['test:profile'], alice.id)
     expect(doc).toEqual({ name: 'Alice' })
   })
 })
