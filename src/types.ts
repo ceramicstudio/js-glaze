@@ -12,7 +12,7 @@ export type DefinitionsAliases = Record<string, DocID>
 
 export interface Entry {
   tags: Array<string>
-  referenceId: DocID
+  ref: DocID
 }
 
 export type RootIndexContent = Record<DocID, Entry>

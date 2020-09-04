@@ -188,6 +188,24 @@ Sets the content for the given `name` alias in the Root Index of the authenticat
 
 **Returns** `Promise<DocID>` the `DocID` of the created content document
 
+#### .addTag
+
+**Arguments**
+
+1. `name: string`
+1. `tag: string`
+
+**Returns** `Promise<Array<string>>` the updated set of tags
+
+#### .removeTag
+
+**Arguments**
+
+1. `name: string`
+1. `tag: string`
+
+**Returns** `Promise<Array<string>>` the updated set of tags
+
 #### .remove
 
 Removes the definition for the `name` alias in the Root Index of the authenticated DID
@@ -230,16 +248,7 @@ Removes the definition for the `name` alias in the Root Index of the authenticat
 
 **Returns** `Promise<Definition>`
 
-#### .getEntry
-
-**Arguments**
-
-1. `definitionId: DocID`
-1. `did?: string = this.id`
-
-**Returns** `Promise<Entry | null>`
-
-#### .getEntryReference
+#### .getEntryContent
 
 **Arguments**
 
@@ -257,16 +266,7 @@ Removes the definition for the `name` alias in the Root Index of the authenticat
 
 **Returns** `Promise<Array<string>>`
 
-#### .setEntry
-
-**Arguments**
-
-1. `definitionId: DocID`
-1. `entry: Entry`
-
-**Returns** `Promise<void>`
-
-#### .setEntryReference
+#### .setEntryContent
 
 Sets the content of the entry reference.
 
@@ -297,16 +297,6 @@ Sets the content of the entry reference.
 1. `tag: string`
 
 **Returns** `Promise<Array<string>>` the updated set of tags
-
-#### .addEntry
-
-**Arguments**
-
-1. `definition: Definition`
-1. `content: unknown`
-1. `tags?: Array<string> = []`
-
-**Returns** `Promise<DocID>` the `DocID` of the created definition document
 
 #### .removeEntry
 

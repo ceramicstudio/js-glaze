@@ -105,18 +105,33 @@ export class IDX {
 
   async has(name: string, did?: string): Promise<boolean> {
     const id = this._toDefinitionId(name)
-    const entry = await this.getEntry(id, did)
+    const entry = await this._getEntry(id, did)
     return entry != null
   }
 
   async get<T = unknown>(name: string, did?: string): Promise<T | null> {
     const id = this._toDefinitionId(name)
-    return await this.getEntryReference(id, did)
+    return await this.getEntryContent(id, did)
+  }
+
+  async getTags(name: string, did?: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.getEntryTags(id, did)
   }
 
   async set(name: string, content: unknown): Promise<DocID> {
     const id = this._toDefinitionId(name)
-    return await this.setEntryReference(id, content)
+    return await this.setEntryContent(id, content)
+  }
+
+  async addTag(name: string, tag: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.addEntryTag(id, tag)
+  }
+
+  async removeTag(name: string, tag: string): Promise<Array<string>> {
+    const id = this._toDefinitionId(name)
+    return await this.removeEntryTag(id, tag)
   }
 
   async remove(name: string): Promise<void> {
@@ -160,49 +175,41 @@ export class IDX {
 
   // Entry APIs
 
-  async getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
-    return await this._rootIndex.get(definitionId, did ?? this.id)
-  }
-
-  async getEntryReference<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
-    const entry = await this.getEntry(definitionId, did)
+  async getEntryContent<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
+    const entry = await this._getEntry(definitionId, did)
     if (entry == null) {
       return null
     } else {
-      const doc = await this.loadDocument(entry.referenceId)
+      const doc = await this.loadDocument(entry.ref)
       return doc.content as T
     }
   }
 
   async getEntryTags(definitionId: DocID, did?: string): Promise<Array<string>> {
-    const entry = await this.getEntry(definitionId, did)
+    const entry = await this._getEntry(definitionId, did)
     return entry?.tags ?? []
   }
 
-  async setEntry(definitionId: DocID, entry: Entry): Promise<void> {
-    await this._rootIndex.set(definitionId, entry)
-  }
-
-  async setEntryReference(
+  async setEntryContent(
     definitionId: DocID,
     content: unknown,
     tags: Array<string> = []
   ): Promise<DocID> {
-    const entry = await this.getEntry(definitionId, this.id)
+    const entry = await this._getEntry(definitionId, this.id)
     if (entry == null) {
       const definition = await this.getDefinition(definitionId)
-      const referenceId = await this._createReference(definition, content)
-      await this.setEntry(definitionId, { referenceId, tags })
-      return referenceId
+      const ref = await this._createReference(definition, content)
+      await this._setEntry(definitionId, { ref, tags })
+      return ref
     } else {
-      const doc = await this.loadDocument(entry.referenceId)
+      const doc = await this.loadDocument(entry.ref)
       await doc.change({ content })
       return doc.id
     }
   }
 
   async addEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
-    const entry = await this.getEntry(definitionId, this.id)
+    const entry = await this._getEntry(definitionId, this.id)
     if (entry == null) {
       return []
     }
@@ -211,12 +218,12 @@ export class IDX {
     }
 
     entry.tags.push(tag)
-    await this.setEntry(definitionId, entry)
+    await this._setEntry(definitionId, entry)
     return entry.tags
   }
 
   async removeEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
-    const entry = await this.getEntry(definitionId, this.id)
+    const entry = await this._getEntry(definitionId, this.id)
     if (entry == null) {
       return []
     }
@@ -224,26 +231,21 @@ export class IDX {
     const index = entry.tags.indexOf(tag)
     if (index !== -1) {
       entry.tags.splice(index, 1)
-      await this.setEntry(definitionId, entry)
+      await this._setEntry(definitionId, entry)
     }
     return entry.tags
   }
 
-  async addEntry(
-    definition: Definition,
-    content: unknown,
-    tags: Array<string> = []
-  ): Promise<DocID> {
-    const [definitionId, referenceId] = await Promise.all([
-      this.createDefinition(definition),
-      this._createReference(definition, content)
-    ])
-    await this.setEntry(definitionId, { referenceId, tags })
-    return definitionId
-  }
-
   async removeEntry(definitionId: DocID): Promise<void> {
     await this._rootIndex.remove(definitionId)
+  }
+
+  async _getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
+    return await this._rootIndex.get(definitionId, did ?? this.id)
+  }
+
+  async _setEntry(definitionId: DocID, entry: Entry): Promise<void> {
+    await this._rootIndex.set(definitionId, entry)
   }
 
   async _createReference(definition: Definition, content: unknown): Promise<DocID> {

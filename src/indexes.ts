@@ -3,7 +3,6 @@ import { Doctype } from '@ceramicnetwork/ceramic-common'
 import { DoctypeProxy } from './doctypes'
 import { IDX } from './index'
 import { DocID, Entry, RootIndexContent } from './types'
-import { getIDXRoot } from './utils'
 export class RootIndex {
   _idx: IDX
   _didCache: Record<string, DocID | null> = {}
@@ -52,15 +51,10 @@ export class RootIndex {
       return null
     }
     if (rootId == null) {
-      rootId = await this._getId(did)
+      rootId = await this._idx.getRootId(did)
       this._didCache[did] = rootId
     }
     return rootId == null ? null : await this._idx.loadDocument(rootId)
-  }
-
-  async _getId(did: string): Promise<DocID | null> {
-    const userDoc = await this._idx._resolver.resolve(did)
-    return getIDXRoot(userDoc) ?? null
   }
 
   async _createOwnDoc(): Promise<Doctype> {
