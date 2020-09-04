@@ -152,12 +152,12 @@ export class IDX {
 
   // Root Index APIs
 
-  async getRootId(did: string): Promise<DocID | null> {
-    const userDoc = await this._resolver.resolve(did)
+  async getIDXDocID(did?: string): Promise<DocID | null> {
+    const userDoc = await this._resolver.resolve(did ?? this.id)
     return getIDXRoot(userDoc) ?? null
   }
 
-  async getRoot(did?: string): Promise<RootIndexContent | null> {
+  async getIDXContent(did?: string): Promise<RootIndexContent | null> {
     return await this._rootIndex.getIndex(did ?? this.id)
   }
 

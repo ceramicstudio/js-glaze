@@ -50,15 +50,17 @@ export class RootIndex {
       return null
     }
     if (rootId == null) {
-      rootId = await this._idx.getRootId(did)
+      rootId = await this._idx.getIDXDocID(did)
       this._didCache[did] = rootId
     }
     return rootId == null ? null : await this._idx.loadDocument(rootId)
   }
 
   async _createOwnDoc(): Promise<Doctype> {
-    // TODO: schema
-    const doctype = await this._idx.createDocument({}, { tags: ['RootIndex'] })
+    const doctype = await this._idx.createDocument(
+      {},
+      { schema: this._idx._schemas.Index, tags: ['RootIndex'] }
+    )
     this._didCache[this._idx.id] = doctype.id
     return doctype
   }

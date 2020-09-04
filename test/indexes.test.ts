@@ -150,7 +150,10 @@ describe('indexes', () => {
     test('_createOwnDoc', async () => {
       const doctype = { id: 'rootDocId' }
       const createDocument = jest.fn(() => Promise.resolve(doctype))
-      const idx = new IDX({ ceramic: { createDocument, did: { id: 'did:test:user' } } } as any)
+      const idx = new IDX({
+        ceramic: { createDocument, did: { id: 'did:test:user' } },
+        schemas: { Index: 'schemaId' }
+      } as any)
       const index = new RootIndex(idx)
 
       await expect(index._createOwnDoc()).resolves.toBe(doctype)
@@ -159,6 +162,7 @@ describe('indexes', () => {
         content: {},
         metadata: {
           owners: ['did:test:user'],
+          schema: 'schemaId',
           tags: ['RootIndex']
         }
       })

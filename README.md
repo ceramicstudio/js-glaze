@@ -84,7 +84,13 @@ type RootIndexContent = Record<DocID, Entry>
 ### SchemaType
 
 ```ts
-type SchemaType = 'BasicProfile' | 'Definition' | 'DocIdDocIdMap' | 'DocIdMap' | 'StringMap'
+type SchemaType =
+  | 'BasicProfile'
+  | 'Definition'
+  | 'DocIdDocIdMap'
+  | 'DocIdMap'
+  | 'Index'
+  | 'StringMap'
 ```
 
 ### SchemasAliases

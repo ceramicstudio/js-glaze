@@ -17,5 +17,11 @@ export interface Entry {
 
 export type RootIndexContent = Record<DocID, Entry>
 
-export type SchemaType = 'BasicProfile' | 'Definition' | 'DocIdDocIdMap' | 'DocIdMap' | 'StringMap'
+export type SchemaType =
+  | 'BasicProfile'
+  | 'Definition'
+  | 'DocIdDocIdMap'
+  | 'DocIdMap'
+  | 'Index'
+  | 'StringMap'
 export type SchemasAliases = Record<SchemaType, DocID>

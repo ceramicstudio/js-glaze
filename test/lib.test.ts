@@ -185,19 +185,19 @@ describe('IDX', () => {
   })
 
   describe('Root Index APIs', () => {
-    test('getRoot with provided DID', async () => {
+    test('getIDXContent with provided DID', async () => {
       const getIndex = jest.fn()
       const idx = new IDX({} as any)
       idx._rootIndex = { getIndex } as any
-      await idx.getRoot('did:test')
+      await idx.getIDXContent('did:test')
       expect(getIndex).toBeCalledWith('did:test')
     })
 
-    test('getRoot with own DID', async () => {
+    test('getIDXContent with own DID', async () => {
       const getIndex = jest.fn()
       const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
       idx._rootIndex = { getIndex } as any
-      await idx.getRoot()
+      await idx.getIDXContent()
       expect(getIndex).toBeCalledWith('did:test')
     })
   })
