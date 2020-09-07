@@ -15,6 +15,14 @@ export interface Entry {
   ref: DocID
 }
 
+export interface DefinitionEntry extends Entry {
+  definition: DocID
+}
+
+export interface ContentEntry extends DefinitionEntry {
+  content: unknown
+}
+
 export type RootIndexContent = Record<DocID, Entry>
 
 export type SchemaType =
