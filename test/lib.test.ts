@@ -440,12 +440,12 @@ describe('IDX', () => {
 
       await expect(idx.getEntries('did:test')).resolves.toEqual([
         {
-          definition: 'ceramic://definition1',
+          def: 'ceramic://definition1',
           ref: 'ceramic://doc1',
           tags: []
         },
         {
-          definition: 'ceramic://definition2',
+          def: 'ceramic://definition2',
           ref: 'ceramic://doc2',
           tags: []
         }
@@ -483,12 +483,12 @@ describe('IDX', () => {
         idx.getIDXContent = getIndex
         await expect(idx.getTagEntries('bar')).resolves.toEqual([
           {
-            definition: 'ceramic://definition2',
+            def: 'ceramic://definition2',
             ref: 'ceramic://doc2',
             tags: ['foo', 'bar']
           },
           {
-            definition: 'ceramic://definition3',
+            def: 'ceramic://definition3',
             ref: 'ceramic://doc3',
             tags: ['bar', 'baz']
           }
@@ -526,19 +526,19 @@ describe('IDX', () => {
         }
         expect(results).toEqual([
           {
-            definition: 'ceramic://definition1',
+            def: 'ceramic://definition1',
             ref: 'ceramic://doc1',
             tags: ['foo'],
             content: 'doc content'
           },
           {
-            definition: 'ceramic://definition2',
+            def: 'ceramic://definition2',
             ref: 'ceramic://doc2',
             tags: ['foo', 'bar'],
             content: 'doc content'
           },
           {
-            definition: 'ceramic://definition3',
+            def: 'ceramic://definition3',
             ref: 'ceramic://doc3',
             tags: ['bar', 'baz'],
             content: 'doc content'
@@ -578,13 +578,13 @@ describe('IDX', () => {
         }
         expect(results).toEqual([
           {
-            definition: 'ceramic://definition1',
+            def: 'ceramic://definition1',
             ref: 'ceramic://doc1',
             tags: ['foo'],
             content: 'doc content'
           },
           {
-            definition: 'ceramic://definition2',
+            def: 'ceramic://definition2',
             ref: 'ceramic://doc2',
             tags: ['foo', 'bar'],
             content: 'doc content'

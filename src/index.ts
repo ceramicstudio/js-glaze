@@ -252,16 +252,16 @@ export class IDX {
 
   async getEntries(did?: string): Promise<Array<DefinitionEntry>> {
     const index = await this.getIDXContent(did)
-    return Object.entries(index ?? {}).map(([definition, entry]) => {
-      return { ...entry, definition }
+    return Object.entries(index ?? {}).map(([def, entry]) => {
+      return { ...entry, def }
     }, [] as Array<DefinitionEntry>)
   }
 
   async getTagEntries(tag: string, did?: string): Promise<Array<DefinitionEntry>> {
     const index = await this.getIDXContent(did)
-    return Object.entries(index ?? {}).reduce((acc, [definition, entry]) => {
+    return Object.entries(index ?? {}).reduce((acc, [def, entry]) => {
       if (entry.tags.includes(tag)) {
-        acc.push({ ...entry, definition })
+        acc.push({ ...entry, def })
       }
       return acc
     }, [] as Array<DefinitionEntry>)

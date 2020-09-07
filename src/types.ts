@@ -16,7 +16,7 @@ export interface Entry {
 }
 
 export interface DefinitionEntry extends Entry {
-  definition: DocID
+  def: DocID
 }
 
 export interface ContentEntry extends DefinitionEntry {

@@ -79,7 +79,7 @@ interface Entry {
 
 ```ts
 interface DefinitionEntry extends Entry {
-  definition: DocID
+  def: DocID
 }
 ```
 
