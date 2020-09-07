@@ -71,7 +71,23 @@ type DefinitionsAliases = Record<string, DocID>
 ```ts
 interface Entry {
   tags: Array<string>
-  referenceId: DocID
+  ref: DocID
+}
+```
+
+### DefinitionEntry
+
+```ts
+interface DefinitionEntry extends Entry {
+  def: DocID
+}
+```
+
+### ContentEntry
+
+```ts
+interface ContentEntry extends DefinitionEntry {
+  content: unknown
 }
 ```
 
@@ -99,15 +115,6 @@ type SchemaType =
 type SchemasAliases = Record<SchemaType, DocID>
 ```
 
-### AuthenticateOptions
-
-```ts
-interface AuthenticateOptions {
-  paths?: Array<string>
-  provider?: DIDProvider
-}
-```
-
 ### IDXOptions
 
 ```ts
@@ -119,11 +126,27 @@ interface IDXOptions {
 }
 ```
 
-## API
+### AuthenticateOptions
 
-### IDX class
+```ts
+interface AuthenticateOptions {
+  paths?: Array<string>
+  provider?: DIDProvider
+}
+```
 
-#### constructor
+### ContentIteratorOptions
+
+```ts
+interface ContentIteratorOptions {
+  did?: string
+  tag?: string
+}
+```
+
+## IDX class
+
+### constructor
 
 **Arguments**
 
@@ -137,31 +160,31 @@ interface IDXOptions {
 
 **Returns** `Promise<void>`
 
-#### .authenticated
+### .authenticated
 
 **Returns** `boolean`
 
-#### .ceramic
+### .ceramic
 
 **Returns** `CeramicApi`
 
-#### .resolver
+### .resolver
 
 **Returns** `Resolver`
 
-#### .did
+### .did
 
 > Accessing this property will throw an error if the instance is not authenticated
 
 **Returns** `DID`
 
-#### .id
+### .id
 
 > Accessing this property will throw an error if the instance is not authenticated
 
 **Returns** `string`
 
-#### .has
+### .has
 
 Returns whether an entry with the `name` alias or definition `DocID` exists in the Root Index of the specified `did`
 
@@ -172,7 +195,7 @@ Returns whether an entry with the `name` alias or definition `DocID` exists in t
 
 **Returns** `Promise<boolean>`
 
-#### .get
+### .get
 
 Returns the referenced content for the given `name` alias or definition `DocID` of the specified `did`
 
@@ -183,7 +206,7 @@ Returns the referenced content for the given `name` alias or definition `DocID` 
 
 **Returns** `Promise<unknown>`
 
-#### .set
+### .set
 
 Sets the content for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
@@ -194,7 +217,7 @@ Sets the content for the given `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<DocID>` the `DocID` of the created content document
 
-#### .addTag
+### .addTag
 
 Adds a tag for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
@@ -205,7 +228,7 @@ Adds a tag for the given `name` alias or definition `DocID` in the Root Index of
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
-#### .removeTag
+### .removeTag
 
 Removes a tag for the given `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
@@ -216,7 +239,7 @@ Removes a tag for the given `name` alias or definition `DocID` in the Root Index
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
-#### .remove
+### .remove
 
 Removes the definition for the `name` alias or definition `DocID` in the Root Index of the authenticated DID
 
@@ -226,7 +249,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<void>`
 
-#### .getRootId
+### .getRootId
 
 **Arguments**
 
@@ -234,7 +257,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<DocID | null>`
 
-#### .getRoot
+### .getRoot
 
 **Arguments**
 
@@ -242,7 +265,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<RootIndexContent | null>`
 
-#### .createDefinition
+### .createDefinition
 
 **Arguments**
 
@@ -250,7 +273,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<DocID>`
 
-#### .getDefinition
+### .getDefinition
 
 **Arguments**
 
@@ -258,7 +281,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<Definition>`
 
-#### .getEntryContent
+### .getEntryContent
 
 **Arguments**
 
@@ -267,7 +290,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<unknown | null>`
 
-#### .getEntryTags
+### .getEntryTags
 
 **Arguments**
 
@@ -276,7 +299,7 @@ Removes the definition for the `name` alias or definition `DocID` in the Root In
 
 **Returns** `Promise<Array<string>>`
 
-#### .setEntryContent
+### .setEntryContent
 
 Sets the content of the entry reference.
 
@@ -290,7 +313,7 @@ Sets the content of the entry reference.
 
 **Returns** `Promise<DocID>` the `DocID` of the created content document
 
-#### .addEntryTag
+### .addEntryTag
 
 **Arguments**
 
@@ -299,7 +322,7 @@ Sets the content of the entry reference.
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
-#### .removeEntryTag
+### .removeEntryTag
 
 **Arguments**
 
@@ -308,13 +331,40 @@ Sets the content of the entry reference.
 
 **Returns** `Promise<Array<string>>` the updated set of tags
 
-#### .removeEntry
+### .removeEntry
 
 **Arguments**
 
 1. `definitionId: DocID`
 
 **Returns** `Promise<void>`
+
+### .getEntries
+
+**Arguments**
+
+1. `did?: string = this.id`
+
+**Returns** `Promise<Array<DefinitionEntry>>`
+
+### .getTagEntries
+
+Returns an array of `DefinitionEntry` having the provided `tag`.
+
+**Arguments**
+
+1. `tag: string`
+1. `did?: string = this.id`
+
+**Returns** `Promise<Array<DefinitionEntry>>`
+
+### .contentIterator
+
+**Arguments**
+
+1. `options?: ContentIteratorOptions`
+
+**Returns** `AsyncIterableIterator<ContentEntry>`
 
 ## License
 

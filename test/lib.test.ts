@@ -215,21 +215,37 @@ describe('IDX', () => {
       expect(createDocument).toBeCalledTimes(1)
     })
 
-    test('getDefinition', async () => {
-      const loadDocument = jest.fn(() =>
-        Promise.resolve({
-          content: { name: 'definition' },
-          metadata: { schema: 'ceramic://definition' }
+    describe('getDefinition', () => {
+      test('works with the provided schema', async () => {
+        const loadDocument = jest.fn(() =>
+          Promise.resolve({
+            content: { name: 'definition' },
+            metadata: { schema: 'ceramic://definition' }
+          })
+        )
+        const idx = new IDX({
+          ceramic: { loadDocument },
+          schemas: { Definition: 'ceramic://definition' }
+        } as any)
+        await expect(idx.getDefinition('ceramic://test')).resolves.toEqual({
+          name: 'definition'
         })
-      )
-      const idx = new IDX({
-        ceramic: { loadDocument },
-        schemas: { Definition: 'ceramic://definition' }
-      } as any)
-      await expect(idx.getDefinition('ceramic://test')).resolves.toEqual({
-        name: 'definition'
+        expect(loadDocument).toBeCalledWith('ceramic://test')
       })
-      expect(loadDocument).toBeCalledWith('ceramic://test')
+
+      test('throws an error if the definition does not use the right schema', async () => {
+        const loadDocument = jest.fn(() =>
+          Promise.resolve({
+            content: { name: 'definition' },
+            metadata: { schema: 'ceramic://other' }
+          })
+        )
+        const idx = new IDX({
+          ceramic: { loadDocument },
+          schemas: { Definition: 'ceramic://definition' }
+        } as any)
+        await expect(idx.getDefinition('ceramic://test')).rejects.toThrow('Invalid definition')
+      })
     })
   })
 
@@ -256,7 +272,7 @@ describe('IDX', () => {
       const doc = { content: {} }
       const entry = { tags: [], ref: 'ceramic://test' }
       const loadDocument = jest.fn(() => Promise.resolve(doc))
-      idx.loadDocument = loadDocument
+      idx.loadDocument = loadDocument as any
       const getEntry = jest.fn(() => Promise.resolve(entry))
       idx._getEntry = getEntry
       await expect(idx.getEntryContent('test', 'did')).resolves.toBe(doc.content)
@@ -300,7 +316,7 @@ describe('IDX', () => {
 
         const change = jest.fn()
         const loadDocument = jest.fn(() => Promise.resolve({ change }))
-        idx.loadDocument = loadDocument
+        idx.loadDocument = loadDocument as any
 
         const content = { test: true }
         await idx.setEntryContent('defId', content)
@@ -407,10 +423,183 @@ describe('IDX', () => {
       expect(remove).toBeCalledWith('defId')
     })
 
+    test('getEntries', async () => {
+      const index = {
+        'ceramic://definition1': {
+          ref: 'ceramic://doc1',
+          tags: []
+        },
+        'ceramic://definition2': {
+          ref: 'ceramic://doc2',
+          tags: []
+        }
+      }
+      const getIndex = jest.fn(() => Promise.resolve(index))
+      const idx = new IDX({} as any)
+      idx.getIDXContent = getIndex
+
+      await expect(idx.getEntries('did:test')).resolves.toEqual([
+        {
+          def: 'ceramic://definition1',
+          ref: 'ceramic://doc1',
+          tags: []
+        },
+        {
+          def: 'ceramic://definition2',
+          ref: 'ceramic://doc2',
+          tags: []
+        }
+      ])
+      expect(getIndex).toBeCalledWith('did:test')
+    })
+
+    describe('getTagEntries', () => {
+      const index = {
+        'ceramic://definition1': {
+          ref: 'ceramic://doc1',
+          tags: ['foo']
+        },
+        'ceramic://definition2': {
+          ref: 'ceramic://doc2',
+          tags: ['foo', 'bar']
+        },
+        'ceramic://definition3': {
+          ref: 'ceramic://doc3',
+          tags: ['bar', 'baz']
+        }
+      }
+
+      test('with no match', async () => {
+        const getIndex = jest.fn(() => Promise.resolve(index))
+        const idx = new IDX({ ceramic: { did: { id: 'did:own' } } } as any)
+        idx.getIDXContent = getIndex
+        await expect(idx.getTagEntries('test')).resolves.toEqual([])
+        expect(getIndex).toBeCalled()
+      })
+
+      test('with matches', async () => {
+        const getIndex = jest.fn(() => Promise.resolve(index))
+        const idx = new IDX({ ceramic: { did: { id: 'did:own' } } } as any)
+        idx.getIDXContent = getIndex
+        await expect(idx.getTagEntries('bar')).resolves.toEqual([
+          {
+            def: 'ceramic://definition2',
+            ref: 'ceramic://doc2',
+            tags: ['foo', 'bar']
+          },
+          {
+            def: 'ceramic://definition3',
+            ref: 'ceramic://doc3',
+            tags: ['bar', 'baz']
+          }
+        ])
+        expect(getIndex).toBeCalled()
+      })
+    })
+
+    describe('contentIterator', () => {
+      const index = {
+        'ceramic://definition1': {
+          ref: 'ceramic://doc1',
+          tags: ['foo']
+        },
+        'ceramic://definition2': {
+          ref: 'ceramic://doc2',
+          tags: ['foo', 'bar']
+        },
+        'ceramic://definition3': {
+          ref: 'ceramic://doc3',
+          tags: ['bar', 'baz']
+        }
+      }
+
+      test('with no tag', async () => {
+        const loadDocument = jest.fn(() => Promise.resolve({ content: 'doc content' }))
+        const getIndex = jest.fn(() => Promise.resolve(index))
+        const idx = new IDX({ ceramic: { did: { id: 'did:own' } } } as any)
+        idx.loadDocument = loadDocument as any
+        idx.getIDXContent = getIndex
+
+        const results = []
+        for await (const entry of idx.contentIterator()) {
+          results.push(entry)
+        }
+        expect(results).toEqual([
+          {
+            def: 'ceramic://definition1',
+            ref: 'ceramic://doc1',
+            tags: ['foo'],
+            content: 'doc content'
+          },
+          {
+            def: 'ceramic://definition2',
+            ref: 'ceramic://doc2',
+            tags: ['foo', 'bar'],
+            content: 'doc content'
+          },
+          {
+            def: 'ceramic://definition3',
+            ref: 'ceramic://doc3',
+            tags: ['bar', 'baz'],
+            content: 'doc content'
+          }
+        ])
+        expect(loadDocument).toBeCalledTimes(3)
+        expect(loadDocument).toHaveBeenNthCalledWith(1, 'ceramic://doc1')
+        expect(loadDocument).toHaveBeenNthCalledWith(2, 'ceramic://doc2')
+        expect(loadDocument).toHaveBeenNthCalledWith(3, 'ceramic://doc3')
+      })
+
+      test('with tag but no match', async () => {
+        const loadDocument = jest.fn(() => Promise.resolve({ content: 'doc content' }))
+        const getIndex = jest.fn(() => Promise.resolve(index))
+        const idx = new IDX({} as any)
+        idx.loadDocument = loadDocument as any
+        idx.getIDXContent = getIndex
+
+        const results = []
+        for await (const entry of idx.contentIterator({ did: 'did:test', tag: 'test' })) {
+          results.push(entry)
+        }
+        expect(results).toEqual([])
+        expect(loadDocument).not.toHaveBeenCalled()
+      })
+
+      test('with tag matches', async () => {
+        const loadDocument = jest.fn(() => Promise.resolve({ content: 'doc content' }))
+        const getIndex = jest.fn(() => Promise.resolve(index))
+        const idx = new IDX({ ceramic: { did: { id: 'did:own' } } } as any)
+        idx.loadDocument = loadDocument as any
+        idx.getIDXContent = getIndex
+
+        const results = []
+        for await (const entry of idx.contentIterator({ tag: 'foo' })) {
+          results.push(entry)
+        }
+        expect(results).toEqual([
+          {
+            def: 'ceramic://definition1',
+            ref: 'ceramic://doc1',
+            tags: ['foo'],
+            content: 'doc content'
+          },
+          {
+            def: 'ceramic://definition2',
+            ref: 'ceramic://doc2',
+            tags: ['foo', 'bar'],
+            content: 'doc content'
+          }
+        ])
+        expect(loadDocument).toBeCalledTimes(2)
+        expect(loadDocument).toHaveBeenNthCalledWith(1, 'ceramic://doc1')
+        expect(loadDocument).toHaveBeenNthCalledWith(2, 'ceramic://doc2')
+      })
+    })
+
     test('_createReference', async () => {
       const idx = new IDX({} as any)
       const createDocument = jest.fn(() => Promise.resolve({ id: 'docId' }))
-      idx.createDocument = createDocument
+      idx.createDocument = createDocument as any
 
       const definition = { name: 'test', schema: 'schemaId' }
       const content = { test: true }

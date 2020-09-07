@@ -6,8 +6,10 @@ import { DID, DIDProvider, ResolverOptions } from 'dids'
 
 import { RootIndex } from './indexes'
 import {
+  ContentEntry,
   Definition,
   DefinitionsAliases,
+  DefinitionEntry,
   DocID,
   Entry,
   RootIndexContent,
@@ -20,6 +22,11 @@ export * from './types'
 export interface AuthenticateOptions {
   paths?: Array<string>
   provider?: DIDProvider
+}
+
+export interface ContentIteratorOptions {
+  did?: string
+  tag?: string
 }
 
 export interface IDXOptions {
@@ -241,6 +248,46 @@ export class IDX {
 
   async removeEntry(definitionId: DocID): Promise<void> {
     await this._rootIndex.remove(definitionId)
+  }
+
+  async getEntries(did?: string): Promise<Array<DefinitionEntry>> {
+    const index = await this.getIDXContent(did)
+    return Object.entries(index ?? {}).map(([def, entry]) => {
+      return { ...entry, def }
+    }, [] as Array<DefinitionEntry>)
+  }
+
+  async getTagEntries(tag: string, did?: string): Promise<Array<DefinitionEntry>> {
+    const index = await this.getIDXContent(did)
+    return Object.entries(index ?? {}).reduce((acc, [def, entry]) => {
+      if (entry.tags.includes(tag)) {
+        acc.push({ ...entry, def })
+      }
+      return acc
+    }, [] as Array<DefinitionEntry>)
+  }
+
+  contentIterator({ did, tag }: ContentIteratorOptions = {}): AsyncIterableIterator<ContentEntry> {
+    let list: Array<DefinitionEntry>
+    let cursor = 0
+
+    return {
+      [Symbol.asyncIterator]() {
+        return this
+      },
+      next: async (): Promise<IteratorResult<ContentEntry>> => {
+        if (list == null) {
+          list = tag ? await this.getTagEntries(tag, did) : await this.getEntries()
+        }
+        if (cursor === list.length) {
+          return { done: true, value: null }
+        }
+
+        const entry = list[cursor++]
+        const doc = await this.loadDocument(entry.ref)
+        return { done: false, value: { ...entry, content: doc.content } }
+      }
+    }
   }
 
   async _getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
