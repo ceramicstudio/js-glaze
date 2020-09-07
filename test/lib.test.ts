@@ -247,7 +247,6 @@ describe('IDX', () => {
         await expect(idx.getDefinition('ceramic://test')).rejects.toThrow('Invalid definition')
       })
     })
-    })
   })
 
   describe('Entry APIs', () => {
