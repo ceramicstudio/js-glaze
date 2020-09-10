@@ -30,6 +30,6 @@ export type SchemaType =
   | 'Definition'
   | 'DocIdDocIdMap'
   | 'DocIdMap'
-  | 'Index'
+  | 'RootIndex'
   | 'StringMap'
 export type SchemasAliases = Record<SchemaType, DocID>

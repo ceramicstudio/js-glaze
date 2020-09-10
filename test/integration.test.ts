@@ -5,7 +5,8 @@
 import { CeramicApi } from '@ceramicnetwork/ceramic-common'
 import { schemasList, publishSchemas } from '@ceramicstudio/idx-schemas'
 
-import { IDX } from '../src/index'
+// Note: we're using the dist lib here to make sure it behaves as expected
+import { IDX } from '..'
 
 declare global {
   const ceramic: CeramicApi
