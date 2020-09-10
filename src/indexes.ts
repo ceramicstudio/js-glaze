@@ -40,7 +40,8 @@ export class RootIndex {
 
   async _getOrCreateOwnDoc(): Promise<Doctype> {
     const doc = await this._getDoc(this._idx.id)
-    return doc ?? (await this._createOwnDoc())
+    // Note: doc ?? (await this._createOwnDoc()) gets wrongly compiled to: doc ? Promise.resolve(this._createOwnDoc()) : doc
+    return doc ? doc : await this._createOwnDoc()
   }
 
   async _getDoc(did: string): Promise<Doctype | null> {

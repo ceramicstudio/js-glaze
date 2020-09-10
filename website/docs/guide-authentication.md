@@ -17,7 +17,7 @@ const idx = new IDX(...)
 await idx.get('<Definition DocID>', '<Known DID>')
 ```
 
-However, this only works if the content is **public**. If the content has been encrypted for a **specific recipient**, the [Ceramic instance](idx-apis.md#ceramicapi) used by the [`IDX` instance](idx-apis.md#idx-class) **needs to be authenticated**.
+However, this only works if the content is **public**. If the content has been encrypted for a **specific recipient**, the [Ceramic instance](lib-apis.md#ceramicapi) used by the [`IDX` instance](lib-apis.md#idx-class) **needs to be authenticated**.
 
 It is possible to check if the Ceramic instance is authenticated and request authentication directly on the `IDX` instance:
 
@@ -29,7 +29,7 @@ if (!idx.authenticated) {
 
 ## Writing and reading when authenticated
 
-Once successufully authenticated, it is possible to write to the [Root Index](idx-terminology.md#root-index) associated to the DID, for example using the [`set` method](idx-apis.md#set):
+Once successufully authenticated, it is possible to write to the [Root Index](idx-terminology.md#root-index) associated to the DID, for example using the [`set` method](lib-apis.md#set):
 
 ```ts
 await idx.set('<Definition DocID>', { hello: 'world' })

@@ -30,7 +30,7 @@ Doctype interface exported by the [`@ceramicnetwork/ceramic-common` library](htt
 
 ### DocID
 
-The [ID](idx-terminology.md#docid) of a [Ceramic Document](idx-terminology.md#document).
+The [ID](idx-terminology.md#docid) of a [Ceramic Document](idx-terminology.md#document)
 
 ```ts
 type DocID = string
@@ -38,7 +38,7 @@ type DocID = string
 
 ### Definition
 
-A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-terminology.md#document) describing a resource in the [Root Index](idx-terminology.md#root-index).
+A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-terminology.md#document) describing a resource in the [Root Index](idx-terminology.md#root-index)
 
 ```ts
 interface Definition<T = unknown> {
@@ -58,7 +58,7 @@ type DefinitionsAliases = Record<string, DocID>
 
 ### Entry
 
-An [entry](idx-terminology.md#entry) in the [Root Index](idx-terminology.md#root-index).
+An [entry](idx-terminology.md#entry) in the [Root Index](idx-terminology.md#root-index)
 
 ```ts
 interface Entry {
@@ -85,7 +85,7 @@ interface ContentEntry extends DefinitionEntry {
 
 ### RootIndexContent
 
-Represents the shape of the content stored in the [Root Index](idx-terminology.md#root-index).
+Represents the shape of the content stored in the [Root Index](idx-terminology.md#root-index)
 
 ```ts
 type RootIndexContent = Record<DocID, Entry>
@@ -124,7 +124,7 @@ interface IDXOptions {
 
 ### AuthenticateOptions
 
-Options used by the [`authenticate` method](#authenticate) of the `IDX` class.
+Options used by the [`authenticate` method](#authenticate) of the `IDX` class
 
 ```ts
 interface AuthenticateOptions {
@@ -135,7 +135,7 @@ interface AuthenticateOptions {
 
 ### ContentIteratorOptions
 
-Options used by the [`contentIterator` method](#contentiterator) of the `IDX` class.
+Options used by the [`contentIterator` method](#contentiterator) of the `IDX` class
 
 ```ts
 interface ContentIteratorOptions {
@@ -150,13 +150,13 @@ interface ContentIteratorOptions {
 
 **Arguments**
 
-1. `options: IDXOptions`
+1. [`options: IDXOptions`](#idxoptions)
 
 ### .authenticate
 
 **Arguments**
 
-1. `options?: AuthenticateOptions`
+1. [`options?: AuthenticateOptions`](#authenticateoptions)
 
 **Returns** `Promise<void>`
 
@@ -166,17 +166,17 @@ interface ContentIteratorOptions {
 
 ### .ceramic
 
-**Returns** `CeramicApi`
+**Returns** [`CeramicApi`](#ceramicapi)
 
 ### .resolver
 
-**Returns** `Resolver`
+**Returns** [`Resolver`](#resolver)
 
 ### .did
 
 > Accessing this property will throw an error if the instance is not authenticated
 
-**Returns** `DID`
+**Returns** [`DID`](#did)
 
 ### .id
 
@@ -186,7 +186,7 @@ interface ContentIteratorOptions {
 
 ### .has
 
-Returns whether an entry with the `name` alias or definition [`DocID`](#docid) exists in the [Root Index](terminology.md#root-index) of the specified `did`
+Returns whether an entry with the `name` alias or definition [`DocID`](#docid) exists in the [Root Index](idx-terminology.md#root-index) of the specified `did`
 
 **Arguments**
 
@@ -208,7 +208,7 @@ Returns the referenced content for the given `name` alias or definition [`DocID`
 
 ### .set
 
-Sets the content for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](terminology.md#root-index) of the authenticated [DID](terminology.md#did)
+Sets the content for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -219,7 +219,7 @@ Sets the content for the given `name` alias or definition [`DocID`](#docid) in t
 
 ### .addTag
 
-Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](terminology.md#root-index) of the authenticated [DID](terminology.md#did)
+Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -230,7 +230,7 @@ Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Ro
 
 ### .removeTag
 
-Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](terminology.md#root-index) of the authenticated [DID](terminology.md#did)
+Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -241,7 +241,7 @@ Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the 
 
 ### .remove
 
-Removes the definition for the `name` alias or definition [`DocID`](#docid) in the [Root Index](terminology.md#root-index) of the authenticated [DID](terminology.md#did)
+Removes the definition for the `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -251,7 +251,7 @@ Removes the definition for the `name` alias or definition [`DocID`](#docid) in t
 
 ### .getIDXDocID
 
-Returns the [`DocID`](#docid) of the [Root Index](terminology.md#root-index) associated to the given `did`
+Returns the [`DocID`](#docid) of the [Root Index](idx-terminology.md#root-index) associated to the given `did`
 
 **Arguments**
 
@@ -261,7 +261,7 @@ Returns the [`DocID`](#docid) of the [Root Index](terminology.md#root-index) ass
 
 ### .getIDXContent
 
-Returns the [contents](#rootindexcontent) of the [Root Index](terminology.md#root-index) associated to the given `did`
+Returns the [contents](#rootindexcontent) of the [Root Index](idx-terminology.md#root-index) associated to the given `did`
 
 **Arguments**
 
@@ -271,7 +271,7 @@ Returns the [contents](#rootindexcontent) of the [Root Index](terminology.md#roo
 
 ### .createDefinition
 
-Creates a new [Definition](#definition) and returns the created [`DocID`](#docid), to be used to add resources to the [Root Index](terminology.md#root-index)
+Creates a new [Definition](#definition) and returns the created [`DocID`](#docid), to be used to add resources to the [Root Index](idx-terminology.md#root-index)
 
 **Arguments**
 
@@ -291,7 +291,7 @@ Loads an existing [Definition](#definition) by its [`DocID`](#docid)
 
 ### .getEntryContent
 
-Returns the contents of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](terminology.md#root-index) of the given `did`
+Returns the contents of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](idx-terminology.md#root-index) of the given `did`
 
 **Arguments**
 
@@ -302,7 +302,7 @@ Returns the contents of the [Entry](#entry) for the given [Definition](#definiti
 
 ### .getEntryTags
 
-Returns set of tags of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](terminology.md#root-index) of the given `did`
+Returns set of tags of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](idx-terminology.md#root-index) of the given `did`
 
 **Arguments**
 
@@ -323,7 +323,7 @@ Sets the content of the entry reference.
 1. `content: unknown`
 1. `tags?: Array<string> = []`
 
-**Returns** `Promise<DocID>` the `DocID` of the created content document
+**Returns** `Promise<DocID>` the [`DocID`](#docid) of the created content document
 
 ### .addEntryTag
 
@@ -361,7 +361,7 @@ Sets the content of the entry reference.
 
 ### .getTagEntries
 
-Returns an array of `DefinitionEntry` having the provided `tag`.
+Returns an array of [`DefinitionEntry`](#definitionentry) having the provided `tag`
 
 **Arguments**
 
@@ -372,8 +372,10 @@ Returns an array of `DefinitionEntry` having the provided `tag`.
 
 ### .contentIterator
 
+Returns an async iterator of [`ContentEntry`](#contententry) for the given [`options`](#contentiteratoroptions)
+
 **Arguments**
 
-1. `options?: ContentIteratorOptions`
+1. [`options?: ContentIteratorOptions`](#contentiteratoroptions)
 
 **Returns** `AsyncIterableIterator<ContentEntry>`
