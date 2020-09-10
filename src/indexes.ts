@@ -39,7 +39,7 @@ export class RootIndex {
   }
 
   async _getOrCreateOwnDoc(): Promise<Doctype> {
-    const doc = await this._getDoc(this._idx.did.id)
+    const doc = await this._getDoc(this._idx.id)
     return doc ?? (await this._createOwnDoc())
   }
 
@@ -59,7 +59,7 @@ export class RootIndex {
   async _createOwnDoc(): Promise<Doctype> {
     const doctype = await this._idx.createDocument(
       {},
-      { schema: this._idx._schemas.Index, tags: ['RootIndex'] }
+      { schema: this._idx._schemas.RootIndex, tags: ['RootIndex'] }
     )
     this._didCache[this._idx.id] = doctype.id
     return doctype

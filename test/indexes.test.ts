@@ -152,7 +152,7 @@ describe('indexes', () => {
       const createDocument = jest.fn(() => Promise.resolve(doctype))
       const idx = new IDX({
         ceramic: { createDocument, did: { id: 'did:test:user' } },
-        schemas: { Index: 'schemaId' }
+        schemas: { RootIndex: 'schemaId' }
       } as any)
       const index = new RootIndex(idx)
 

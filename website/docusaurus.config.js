@@ -12,27 +12,33 @@ module.exports = {
       title: 'IDX',
       logo: {
         alt: 'Identity Index Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo.svg'
       },
       items: [
         {
           to: 'docs/idx-introduction',
           activeBasePath: 'docs/idx',
           label: 'Specification',
-          position: 'left',
+          position: 'left'
         },
         {
           to: 'docs/lib-getting-started',
           activeBasePath: 'docs/lib',
           label: 'Library',
-          position: 'left',
+          position: 'left'
+        },
+        {
+          to: 'docs/guide-authentication',
+          activeBasePath: 'docs/guide',
+          label: 'Guides',
+          position: 'left'
         },
         {
           href: 'https://github.com/ceramicstudio/js-idx',
           label: 'GitHub',
-          position: 'right',
-        },
-      ],
+          position: 'right'
+        }
+      ]
     },
     footer: {
       style: 'dark',
@@ -42,13 +48,17 @@ module.exports = {
           items: [
             {
               label: 'Specification',
-              to: 'docs/idx-introduction',
+              to: 'docs/idx-introduction'
             },
             {
               label: 'Library',
-              to: 'docs/lib-getting-started',
+              to: 'docs/lib-getting-started'
             },
-          ],
+            {
+              label: 'Guides',
+              to: 'docs/guide-authentication'
+            }
+          ]
         },
         {
           title: 'Community',
@@ -59,9 +69,9 @@ module.exports = {
             // },
             {
               label: 'Twitter',
-              href: 'https://twitter.com/identityindex',
-            },
-          ],
+              href: 'https://twitter.com/identityindex'
+            }
+          ]
         },
         {
           title: 'More',
@@ -72,13 +82,13 @@ module.exports = {
             // },
             {
               label: 'GitHub',
-              href: 'https://github.com/ceramicstudio/js-idx',
-            },
-          ],
-        },
+              href: 'https://github.com/ceramicstudio/js-idx'
+            }
+          ]
+        }
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Ceramic Studio.`,
-    },
+      copyright: `Copyright © ${new Date().getFullYear()} Ceramic Studio.`
+    }
   },
   presets: [
     [
@@ -86,13 +96,12 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl:
-            'https://github.com/ceramicstudio/js-idx/edit/master/website/',
+          editUrl: 'https://github.com/ceramicstudio/js-idx/edit/master/website/'
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
-        },
-      },
-    ],
-  ],
-};
+          customCss: require.resolve('./src/css/custom.css')
+        }
+      }
+    ]
+  ]
+}

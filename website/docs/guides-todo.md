@@ -1,8 +1,12 @@
+## Thinking in IDX
+
+- Think as global DB: tables, rows and user ID
+- Emphasis differences
+
 ## During dev lifecycle
 
 1. Create a schema for you collection (or use existing one)
 1. Create a collection definition (or use existing one)
-1. Create a plugin or custom config with your collections and/or use existing ones
 
 These will have immutable DocIds that can be used to get/set data on the user's root index
 
