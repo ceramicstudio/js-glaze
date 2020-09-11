@@ -168,6 +168,11 @@ export class IDX {
     return await this._rootIndex.getIndex(did ?? this.id)
   }
 
+  async isSupported(did?: string): Promise<boolean> {
+    const id = await this.getIDXDocID(did)
+    return id !== null
+  }
+
   // Definition APIs
 
   async createDefinition(content: Definition): Promise<DocID> {

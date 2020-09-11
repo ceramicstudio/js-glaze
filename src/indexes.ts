@@ -10,7 +10,7 @@ export class RootIndex {
 
   constructor(idx: IDX) {
     this._idx = idx
-    this._proxy = new DoctypeProxy(this._getOrCreateOwnDoc.bind(this))
+    this._proxy = new DoctypeProxy(this._getOwnDoc.bind(this))
   }
 
   async getIndex(did: string): Promise<RootIndexContent | null> {
@@ -38,10 +38,12 @@ export class RootIndex {
     })
   }
 
-  async _getOrCreateOwnDoc(): Promise<Doctype> {
+  async _getOwnDoc(): Promise<Doctype> {
     const doc = await this._getDoc(this._idx.id)
-    // Note: doc ?? (await this._createOwnDoc()) gets wrongly compiled to: doc ? Promise.resolve(this._createOwnDoc()) : doc
-    return doc ? doc : await this._createOwnDoc()
+    if (doc == null) {
+      throw new Error('IDX is not supported by the authenticated DID')
+    }
+    return doc
   }
 
   async _getDoc(did: string): Promise<Doctype | null> {
@@ -55,14 +57,5 @@ export class RootIndex {
       this._didCache[did] = rootId
     }
     return rootId == null ? null : await this._idx.loadDocument(rootId)
-  }
-
-  async _createOwnDoc(): Promise<Doctype> {
-    const doctype = await this._idx.createDocument(
-      {},
-      { schema: this._idx._schemas.RootIndex, tags: ['RootIndex'] }
-    )
-    this._didCache[this._idx.id] = doctype.id
-    return doctype
   }
 }

@@ -184,6 +184,18 @@ interface ContentIteratorOptions {
 
 **Returns** `string`
 
+### .isSupported
+
+Checks if the provided `did` supports IDX. Calling methods such as [get](#get) using a DID without IDX support will result in these methods returning `null` or other fallbacks.
+
+If the `did` argument is not provided, the check will be performed on the DID authenticated with the IDX instance. Calling mutation methods such as [set](#set) using a DID without IDX support will throw errors.
+
+**Arguments**
+
+1. `did?: string`
+
+**Returns** `Promise<boolean>`
+
 ### .has
 
 Returns whether an entry with the `name` alias or definition [`DocID`](#docid) exists in the [Root Index](idx-terminology.md#root-index) of the specified `did`

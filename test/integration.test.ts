@@ -4,6 +4,7 @@
 
 import { CeramicApi } from '@ceramicnetwork/ceramic-common'
 import { schemasList, publishSchemas } from '@ceramicstudio/idx-schemas'
+import Wallet from 'identity-wallet'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
 import { IDX } from '..'
@@ -13,21 +14,43 @@ declare global {
 }
 
 describe('integration', () => {
+  let schemas: Record<string, string>
+
+  beforeAll(async () => {
+    schemas = await publishSchemas({ ceramic, schemas: schemasList })
+  })
+
   test('get and set a custom definition', async () => {
-    const schemas = await publishSchemas({ ceramic, schemas: schemasList })
+    jest.setTimeout(20000)
+
+    const wallet = await Wallet.create({
+      ceramic,
+      authId: 'test',
+      authSecret: new Uint8Array(32),
+      getPermission: () => Promise.resolve([]),
+      useThreeIdProv: false
+    })
+
     const idx = new IDX({ ceramic, schemas })
-    const definitions = {
-      'test:profile': await idx.createDefinition({
-        name: 'test profile',
-        schema: schemas.BasicProfile
-      })
-    }
+    await idx.authenticate({ provider: wallet.getDidProvider() })
 
-    const alice = new IDX({ ceramic, definitions, schemas })
-    await alice.set('test:profile', { name: 'Alice' })
+    // During development flow: create definitions used by the app
+    const profileID = await idx.createDefinition({
+      name: 'test profile',
+      schema: schemas.BasicProfile
+    })
 
-    const bob = new IDX({ ceramic, schemas })
-    const doc = await bob.get<{ name: string }>(definitions['test:profile'], alice.id)
+    const writer = new IDX({
+      ceramic,
+      definitions: { profile: profileID },
+      schemas
+    })
+    // We can use the alias provided in the definitions to identify a resource
+    await writer.set('profile', { name: 'Alice' })
+
+    const reader = new IDX({ ceramic, schemas })
+    // The definition DocID can also be used to identify a known resource
+    const doc = await reader.get<{ name: string }>(profileID, writer.id)
     expect(doc).toEqual({ name: 'Alice' })
   })
 })

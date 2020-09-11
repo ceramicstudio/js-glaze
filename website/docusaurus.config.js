@@ -9,6 +9,7 @@ module.exports = {
   projectName: 'js-idx',
   themeConfig: {
     navbar: {
+      hideOnScroll: true,
       title: 'IDX',
       logo: {
         alt: 'Identity Index Logo',

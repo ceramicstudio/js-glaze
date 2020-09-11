@@ -200,6 +200,48 @@ describe('IDX', () => {
       await idx.getIDXContent()
       expect(getIndex).toBeCalledWith('did:test')
     })
+
+    describe('isSupported', () => {
+      test('authenticated DID, not supported', async () => {
+        const resolve = jest.fn(() => Promise.resolve({}))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported()).resolves.toBe(false)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('authenticated DID, supported', async () => {
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported()).resolves.toBe(true)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('provided DID, not supported', async () => {
+        const resolve = jest.fn(() => Promise.resolve({}))
+        const idx = new IDX({} as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported('did:test')).resolves.toBe(false)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('provided DID, supported', async () => {
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const idx = new IDX({} as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported('did:test')).resolves.toBe(true)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+    })
   })
 
   describe('Definition APIs', () => {

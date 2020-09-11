@@ -99,7 +99,7 @@ describe('indexes', () => {
         const loadDoc = jest.fn(() => Promise.resolve(doc))
 
         const idx = new IDX({ ceramic: {} } as any)
-        idx._resolver.resolve = resolve
+        idx._resolver.resolve = resolve as any
         idx.loadDocument = loadDoc
 
         const index = new RootIndex(idx)
@@ -120,8 +120,8 @@ describe('indexes', () => {
         const loadDoc = jest.fn(() => Promise.resolve())
 
         const idx = new IDX({ ceramic: {} } as any)
-        idx._resolver.resolve = resolve
-        idx.loadDocument = loadDoc
+        idx._resolver.resolve = resolve as any
+        idx.loadDocument = loadDoc as any
 
         const index = new RootIndex(idx)
         await expect(index._getDoc('did:test:123')).resolves.toBeNull()
@@ -132,41 +132,30 @@ describe('indexes', () => {
       })
     })
 
-    test('_getOrCreateOwnDoc', async () => {
-      const doc = {} as Doctype
-      const createDoc = jest.fn(() => Promise.resolve(doc))
-      const getDoc = jest.fn(() => Promise.resolve(null))
+    describe('_getOwnDoc', () => {
+      test('returns the existing doc', async () => {
+        const doc = {} as Doctype
+        const getDoc = jest.fn(() => Promise.resolve(doc))
 
-      const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
-      const index = new RootIndex(idx)
-      index._getDoc = getDoc
-      index._createOwnDoc = createDoc
+        const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
+        const index = new RootIndex(idx)
+        index._getDoc = getDoc
 
-      await expect(index._getOrCreateOwnDoc()).resolves.toBe(doc)
-      expect(getDoc).toBeCalledTimes(1)
-      expect(createDoc).toBeCalledTimes(1)
-    })
-
-    test('_createOwnDoc', async () => {
-      const doctype = { id: 'rootDocId' }
-      const createDocument = jest.fn(() => Promise.resolve(doctype))
-      const idx = new IDX({
-        ceramic: { createDocument, did: { id: 'did:test:user' } },
-        schemas: { RootIndex: 'schemaId' }
-      } as any)
-      const index = new RootIndex(idx)
-
-      await expect(index._createOwnDoc()).resolves.toBe(doctype)
-      expect(createDocument).toHaveBeenCalledTimes(1)
-      expect(createDocument).toHaveBeenCalledWith('tile', {
-        content: {},
-        metadata: {
-          owners: ['did:test:user'],
-          schema: 'schemaId',
-          tags: ['RootIndex']
-        }
+        await expect(index._getOwnDoc()).resolves.toBe(doc)
+        expect(getDoc).toBeCalledTimes(1)
       })
-      expect(index._didCache['did:test:user']).toBe('rootDocId')
+
+      test('throws an error if the doc does not exist', async () => {
+        const getDoc = jest.fn(() => Promise.resolve(null))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
+        const index = new RootIndex(idx)
+        index._getDoc = getDoc
+
+        await expect(index._getOwnDoc()).rejects.toThrow(
+          'IDX is not supported by the authenticated DID'
+        )
+        expect(getDoc).toBeCalledTimes(1)
+      })
     })
   })
 })
