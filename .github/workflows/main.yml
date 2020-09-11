@@ -22,7 +22,7 @@ jobs:
             nodeModules-
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile
+        run: npm ci
         env:
           CI: true
 

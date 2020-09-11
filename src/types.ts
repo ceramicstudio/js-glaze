@@ -23,13 +23,13 @@ export interface ContentEntry extends DefinitionEntry {
   content: unknown
 }
 
-export type RootIndexContent = Record<DocID, Entry>
+export type IdentityIndexContent = Record<DocID, Entry>
 
 export type SchemaType =
   | 'BasicProfile'
   | 'Definition'
   | 'DocIdDocIdMap'
   | 'DocIdMap'
-  | 'RootIndex'
+  | 'IdentityIndex'
   | 'StringMap'
 export type SchemasAliases = Record<SchemaType, DocID>

@@ -4,7 +4,7 @@ import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
 
-import { RootIndex } from './indexes'
+import { DoctypeProxy } from './doctypes'
 import {
   ContentEntry,
   Definition,
@@ -12,7 +12,7 @@ import {
   DefinitionEntry,
   DocID,
   Entry,
-  RootIndexContent,
+  IdentityIndexContent,
   SchemasAliases
 } from './types'
 import { getIDXRoot } from './utils'
@@ -39,9 +39,10 @@ export interface IDXOptions {
 export class IDX {
   _ceramic: CeramicApi
   _definitions: DefinitionsAliases
+  _didCache: Record<string, DocID | null> = {}
   _docLoader: DataLoader<string, Doctype>
+  _indexProxy: DoctypeProxy
   _resolver: Resolver
-  _rootIndex: RootIndex
   _schemas: SchemasAliases
 
   constructor({ ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
@@ -52,14 +53,13 @@ export class IDX {
     this._docLoader = new DataLoader(async (docIds: ReadonlyArray<string>) => {
       return await Promise.all(docIds.map(async docId => await this._ceramic.loadDocument(docId)))
     })
+    this._indexProxy = new DoctypeProxy(this._getOwnIDXDoc.bind(this))
 
     const ceramicResolver = ThreeIDResolver.getResolver(ceramic)
     const registry = resolver.registry
       ? { ...resolver.registry, ...ceramicResolver }
       : ceramicResolver
     this._resolver = new Resolver(registry, resolver.cache)
-
-    this._rootIndex = new RootIndex(this)
   }
 
   get authenticated(): boolean {
@@ -157,20 +157,45 @@ export class IDX {
     return id
   }
 
-  // Root Index APIs
+  // Identity Index APIs
 
   async getIDXDocID(did?: string): Promise<DocID | null> {
     const userDoc = await this._resolver.resolve(did ?? this.id)
     return getIDXRoot(userDoc) ?? null
   }
 
-  async getIDXContent(did?: string): Promise<RootIndexContent | null> {
-    return await this._rootIndex.getIndex(did ?? this.id)
+  async getIDXContent(did?: string): Promise<IdentityIndexContent | null> {
+    const rootDoc =
+      this.authenticated && (did === this.id || did == null)
+        ? await this._indexProxy.get()
+        : await this._getIDXDoc(did ?? this.id)
+    return (rootDoc?.content as IdentityIndexContent) ?? null
   }
 
   async isSupported(did?: string): Promise<boolean> {
     const id = await this.getIDXDocID(did)
     return id !== null
+  }
+
+  async _getIDXDoc(did: string): Promise<Doctype | null> {
+    let rootId
+    rootId = this._didCache[did]
+    if (rootId === null) {
+      return null
+    }
+    if (rootId == null) {
+      rootId = await this.getIDXDocID(did)
+      this._didCache[did] = rootId
+    }
+    return rootId == null ? null : await this.loadDocument(rootId)
+  }
+
+  async _getOwnIDXDoc(): Promise<Doctype> {
+    const doc = await this._getIDXDoc(this.id)
+    if (doc == null) {
+      throw new Error('IDX is not supported by the authenticated DID')
+    }
+    return doc
   }
 
   // Definition APIs
@@ -252,7 +277,11 @@ export class IDX {
   }
 
   async removeEntry(definitionId: DocID): Promise<void> {
-    await this._rootIndex.remove(definitionId)
+    await this._indexProxy.changeContent<IdentityIndexContent>(
+      ({ [definitionId]: _remove, ...content }) => {
+        return content
+      }
+    )
   }
 
   async getEntries(did?: string): Promise<Array<DefinitionEntry>> {
@@ -296,11 +325,14 @@ export class IDX {
   }
 
   async _getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
-    return await this._rootIndex.get(definitionId, did ?? this.id)
+    const index = await this.getIDXContent(did ?? this.id)
+    return index?.[definitionId] ?? null
   }
 
   async _setEntry(definitionId: DocID, entry: Entry): Promise<void> {
-    await this._rootIndex.set(definitionId, entry)
+    await this._indexProxy.changeContent<IdentityIndexContent>(content => {
+      return { ...content, [definitionId]: entry }
+    })
   }
 
   async _createReference(definition: Definition, content: unknown): Promise<DocID> {

@@ -4,7 +4,6 @@
 
 import { CeramicApi } from '@ceramicnetwork/ceramic-common'
 import { schemasList, publishSchemas } from '@ceramicstudio/idx-schemas'
-import Wallet from 'identity-wallet'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
 import { IDX } from '..'
@@ -21,18 +20,7 @@ describe('integration', () => {
   })
 
   test('get and set a custom definition', async () => {
-    jest.setTimeout(20000)
-
-    const wallet = await Wallet.create({
-      ceramic,
-      authId: 'test',
-      authSecret: new Uint8Array(32),
-      getPermission: () => Promise.resolve([]),
-      useThreeIdProv: false
-    })
-
     const idx = new IDX({ ceramic, schemas })
-    await idx.authenticate({ provider: wallet.getDidProvider() })
 
     // During development flow: create definitions used by the app
     const profileID = await idx.createDefinition({

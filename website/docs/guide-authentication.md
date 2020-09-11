@@ -29,7 +29,7 @@ if (!idx.authenticated) {
 
 ## Writing and reading when authenticated
 
-Once successufully authenticated, it is possible to write to the [Root Index](idx-terminology.md#root-index) associated to the DID, for example using the [`set` method](lib-apis.md#set):
+Once successufully authenticated, it is possible to write to the [Identity Index](idx-terminology.md#identity-index--idx) associated to the DID, for example using the [`set` method](lib-apis.md#set):
 
 ```ts
 await idx.set('<Definition DocID>', { hello: 'world' })

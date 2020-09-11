@@ -38,7 +38,7 @@ type DocID = string
 
 ### Definition
 
-A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-terminology.md#document) describing a resource in the [Root Index](idx-terminology.md#root-index)
+A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-terminology.md#document) describing a resource in the [Identity Index](idx-terminology.md#identity-index--idx)
 
 ```ts
 interface Definition<T = unknown> {
@@ -58,7 +58,7 @@ type DefinitionsAliases = Record<string, DocID>
 
 ### Entry
 
-An [entry](idx-terminology.md#entry) in the [Root Index](idx-terminology.md#root-index)
+An [entry](idx-terminology.md#entry) in the [Identity Index](idx-terminology.md#identity-index--idx)
 
 ```ts
 interface Entry {
@@ -83,12 +83,12 @@ interface ContentEntry extends DefinitionEntry {
 }
 ```
 
-### RootIndexContent
+### IdentityIndexContent
 
-Represents the shape of the content stored in the [Root Index](idx-terminology.md#root-index)
+Represents the shape of the content stored in the [Identity Index](idx-terminology.md#identity-index--idx)
 
 ```ts
-type RootIndexContent = Record<DocID, Entry>
+type IdentityIndexContent = Record<DocID, Entry>
 ```
 
 ### SchemaType
@@ -99,7 +99,7 @@ type SchemaType =
   | 'Definition'
   | 'DocIdDocIdMap'
   | 'DocIdMap'
-  | 'RootIndex'
+  | 'IdentityIndex'
   | 'StringMap'
 ```
 
@@ -198,7 +198,7 @@ If the `did` argument is not provided, the check will be performed on the DID au
 
 ### .has
 
-Returns whether an entry with the `name` alias or definition [`DocID`](#docid) exists in the [Root Index](idx-terminology.md#root-index) of the specified `did`
+Returns whether an entry with the `name` alias or definition [`DocID`](#docid) exists in the [Identity Index](idx-terminology.md#identity-index--idx) of the specified `did`
 
 **Arguments**
 
@@ -220,7 +220,7 @@ Returns the referenced content for the given `name` alias or definition [`DocID`
 
 ### .set
 
-Sets the content for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
+Sets the content for the given `name` alias or definition [`DocID`](#docid) in the [Identity Index](idx-terminology.md#identity-index--idx) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -231,7 +231,7 @@ Sets the content for the given `name` alias or definition [`DocID`](#docid) in t
 
 ### .addTag
 
-Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
+Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Identity Index](idx-terminology.md#identity-index--idx) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -242,7 +242,7 @@ Adds a tag for the given `name` alias or definition [`DocID`](#docid) in the [Ro
 
 ### .removeTag
 
-Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
+Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the [Identity Index](idx-terminology.md#identity-index--idx) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -253,7 +253,7 @@ Removes a tag for the given `name` alias or definition [`DocID`](#docid) in the 
 
 ### .remove
 
-Removes the definition for the `name` alias or definition [`DocID`](#docid) in the [Root Index](idx-terminology.md#root-index) of the authenticated [DID](idx-terminology.md#did)
+Removes the definition for the `name` alias or definition [`DocID`](#docid) in the [Identity Index](idx-terminology.md#identity-index--idx) of the authenticated [DID](idx-terminology.md#did)
 
 **Arguments**
 
@@ -263,7 +263,7 @@ Removes the definition for the `name` alias or definition [`DocID`](#docid) in t
 
 ### .getIDXDocID
 
-Returns the [`DocID`](#docid) of the [Root Index](idx-terminology.md#root-index) associated to the given `did`
+Returns the [`DocID`](#docid) of the [Identity Index](idx-terminology.md#identity-index--idx) associated to the given `did`
 
 **Arguments**
 
@@ -273,17 +273,17 @@ Returns the [`DocID`](#docid) of the [Root Index](idx-terminology.md#root-index)
 
 ### .getIDXContent
 
-Returns the [contents](#rootindexcontent) of the [Root Index](idx-terminology.md#root-index) associated to the given `did`
+Returns the [contents](#identityindexcontent) of the [Identity Index](idx-terminology.md#identity-index--idx) associated to the given `did`
 
 **Arguments**
 
 1. `did?: string = this.id`
 
-**Returns** `Promise<RootIndexContent | null>`
+**Returns** `Promise<IdentityIndexContent | null>`
 
 ### .createDefinition
 
-Creates a new [Definition](#definition) and returns the created [`DocID`](#docid), to be used to add resources to the [Root Index](idx-terminology.md#root-index)
+Creates a new [Definition](#definition) and returns the created [`DocID`](#docid), to be used to add resources to the [Identity Index](idx-terminology.md#identity-index--idx)
 
 **Arguments**
 
@@ -303,7 +303,7 @@ Loads an existing [Definition](#definition) by its [`DocID`](#docid)
 
 ### .getEntryContent
 
-Returns the contents of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](idx-terminology.md#root-index) of the given `did`
+Returns the contents of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Identity Index](idx-terminology.md#identity-index--idx) of the given `did`
 
 **Arguments**
 
@@ -314,7 +314,7 @@ Returns the contents of the [Entry](#entry) for the given [Definition](#definiti
 
 ### .getEntryTags
 
-Returns set of tags of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Root Index](idx-terminology.md#root-index) of the given `did`
+Returns set of tags of the [Entry](#entry) for the given [Definition](#definition) [`DocID`](#docid) if present in the [Identity Index](idx-terminology.md#identity-index--idx) of the given `did`
 
 **Arguments**
 
