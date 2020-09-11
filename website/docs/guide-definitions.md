@@ -6,7 +6,7 @@ title: Setting up Definitions
 
 In IDX, **Definitions** are needed to access resources. They are used in two main ways:
 
-1. Their [Document Identifier (DocID)](idx-terminology.md#docid) is used a key in the [Root Index](idx-terminology.md#root-index) map.
+1. Their [Document Identifier (DocID)](idx-terminology.md#docid) is used a key in the [Identity Index](idx-terminology.md#identity-index--idx) map.
 1. Their [Document](idx-terminology.md#document) contents contain metadata describing the resource associated to them
 
 ## Definition contents

@@ -28,11 +28,11 @@
   },
   "devDependencies": {
     "@ceramicnetwork/ceramic-common": "^0.5.11",
-    "@ceramicstudio/idx-schemas": "^0.1.4",
+    "@ceramicstudio/idx-schemas": "^0.1.5",
     "@types/jest": "^26.0.13",
     "eslint-config-3box": "^0.1.2",
     "husky": "^4.3.0",
-    "jest-environment-ceramic": "^0.2.0",
+    "jest-environment-ceramic": "^0.2.1",
     "tsdx": "^0.13.3",
     "tslib": "^2.0.1",
     "typescript": "^4.0.2"

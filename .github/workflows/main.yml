@@ -22,7 +22,7 @@ jobs:
             nodeModules-
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile
+        run: npm ci
         env:
           CI: true
 
@@ -31,12 +31,12 @@ jobs:
         env:
           CI: true
 
-      - name: Test
-        run: npm test -- --ci --coverage --maxWorkers=2
+      - name: Build
+        run: npm run build
         env:
           CI: true
 
-      - name: Build
-        run: npm run build
+      - name: Test
+        run: npm test -- --ci --coverage --maxWorkers=2
         env:
           CI: true

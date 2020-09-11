@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
 import { IDX } from '../src/index'
 
@@ -184,21 +184,135 @@ describe('IDX', () => {
     })
   })
 
-  describe('Root Index APIs', () => {
+  describe('Identity Index APIs', () => {
     test('getIDXContent with provided DID', async () => {
-      const getIndex = jest.fn()
-      const idx = new IDX({} as any)
-      idx._rootIndex = { getIndex } as any
+      const get = jest.fn()
+      const idx = new IDX({ ceramic: { did: {} } } as any)
+      idx._getIDXDoc = get
       await idx.getIDXContent('did:test')
-      expect(getIndex).toBeCalledWith('did:test')
+      expect(get).toBeCalledWith('did:test')
     })
 
     test('getIDXContent with own DID', async () => {
-      const getIndex = jest.fn()
+      const get = jest.fn()
       const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
-      idx._rootIndex = { getIndex } as any
+      idx._indexProxy = { get } as any
       await idx.getIDXContent()
-      expect(getIndex).toBeCalledWith('did:test')
+      expect(get).toBeCalled()
+    })
+
+    describe('isSupported', () => {
+      test('authenticated DID, not supported', async () => {
+        const resolve = jest.fn(() => Promise.resolve({}))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported()).resolves.toBe(false)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('authenticated DID, supported', async () => {
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const idx = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported()).resolves.toBe(true)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('provided DID, not supported', async () => {
+        const resolve = jest.fn(() => Promise.resolve({}))
+        const idx = new IDX({} as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported('did:test')).resolves.toBe(false)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+
+      test('provided DID, supported', async () => {
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const idx = new IDX({} as any)
+        idx._resolver.resolve = resolve as any
+        await expect(idx.isSupported('did:test')).resolves.toBe(true)
+        expect(resolve).toBeCalledWith('did:test')
+      })
+    })
+
+    describe('_getIDXDoc', () => {
+      test('returns `null` if there is an existing mapping set to `null`', async () => {
+        const idx = new IDX({ ceramic: {} } as any)
+        idx._didCache['did:test:456'] = null
+        await expect(idx._getIDXDoc('did:test:456')).resolves.toBeNull()
+      })
+
+      test('calls the resolver and extract the root ID', async () => {
+        const doc = {} as any
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const loadDoc = jest.fn(() => Promise.resolve(doc))
+
+        const idx = new IDX({ ceramic: {} } as any)
+        idx._resolver.resolve = resolve as any
+        idx.loadDocument = loadDoc
+
+        await expect(idx._getIDXDoc('did:test:123')).resolves.toBe(doc)
+        expect(resolve).toHaveBeenCalledTimes(1)
+        expect(resolve).toHaveBeenCalledWith('did:test:123')
+        expect(loadDoc).toHaveBeenCalledTimes(1)
+        expect(loadDoc).toHaveBeenCalledWith('ceramic://test')
+        expect(idx._didCache['did:test:123']).toBe('ceramic://test')
+      })
+
+      test('calls the resolver and sets the root ID to null if not available', async () => {
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'unknown', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const loadDoc = jest.fn(() => Promise.resolve())
+
+        const idx = new IDX({ ceramic: {} } as any)
+        idx._resolver.resolve = resolve as any
+        idx.loadDocument = loadDoc as any
+
+        await expect(idx._getIDXDoc('did:test:123')).resolves.toBeNull()
+        expect(resolve).toHaveBeenCalledTimes(1)
+        expect(resolve).toHaveBeenCalledWith('did:test:123')
+        expect(loadDoc).toHaveBeenCalledTimes(0)
+        expect(idx._didCache['did:test:123']).toBeNull()
+      })
+    })
+
+    describe('_getOwnIDXDoc', () => {
+      test('returns the existing doc', async () => {
+        const doc = {} as any
+        const getDoc = jest.fn(() => Promise.resolve(doc))
+
+        const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
+        idx._getIDXDoc = getDoc
+
+        await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
+        expect(getDoc).toBeCalledTimes(1)
+      })
+
+      test('throws an error if the doc does not exist', async () => {
+        const getDoc = jest.fn(() => Promise.resolve(null))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
+        idx._getIDXDoc = getDoc
+
+        await expect(idx._getOwnIDXDoc()).rejects.toThrow(
+          'IDX is not supported by the authenticated DID'
+        )
+        expect(getDoc).toBeCalledTimes(1)
+      })
     })
   })
 
@@ -252,15 +366,14 @@ describe('IDX', () => {
   describe('Entry APIs', () => {
     test('_getEntry', async () => {
       const idx = new IDX({} as any)
-
-      idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
+      idx.getIDXContent = () => Promise.resolve(null)
       await expect(idx._getEntry('test', 'did')).resolves.toBeNull()
 
       const entry = { tags: [], ref: 'ceramic://' }
-      const get = jest.fn(() => Promise.resolve(entry))
-      idx._rootIndex = { get } as any
+      const get = jest.fn(() => Promise.resolve({ exists: entry }))
+      idx.getIDXContent = get as any
       await expect(idx._getEntry('exists', 'did')).resolves.toBe(entry)
-      expect(get).toHaveBeenCalledWith('exists', 'did')
+      expect(get).toHaveBeenCalledWith('did')
     })
 
     test('getEntryContent', async () => {
@@ -299,20 +412,21 @@ describe('IDX', () => {
     })
 
     test('_setEntry', async () => {
-      const set = jest.fn()
+      const content = { test: true }
+      const changeContent = jest.fn(change => change(content))
       const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
-      idx._rootIndex = { set } as any
-
-      const entry = { tags: [], ref: 'ceramic://' }
-      await expect(idx._setEntry('defId', entry)).resolves.toBeUndefined()
-      expect(set).toBeCalledWith('defId', entry)
+      idx._indexProxy = { changeContent } as any
+      await expect(idx._setEntry('testId', { tags: [], ref: 'test' })).resolves.toBeUndefined()
+      expect(changeContent).toReturnWith({ test: true, testId: { ref: 'test', tags: [] } })
     })
 
     describe('setEntryContent', () => {
       test('existing definition ID', async () => {
         const entry = { tags: [], ref: 'docId' }
-        const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
-        idx._rootIndex = { get: (): Promise<any> => Promise.resolve(entry) } as any
+        const idx = new IDX({
+          ceramic: { did: { id: 'did' } }
+        } as any)
+        idx._getEntry = (): Promise<any> => Promise.resolve(entry)
 
         const change = jest.fn()
         const loadDocument = jest.fn(() => Promise.resolve({ change }))
@@ -326,7 +440,7 @@ describe('IDX', () => {
 
       test('adding definition ID', async () => {
         const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
-        idx._rootIndex = { get: (): Promise<any> => Promise.resolve(null) } as any
+        idx._indexProxy = { get: (): Promise<any> => Promise.resolve(null) } as any
 
         const definition = { name: 'test', schema: 'ceramic://...' }
         const getDefinition = jest.fn(() => Promise.resolve(definition))
@@ -415,12 +529,12 @@ describe('IDX', () => {
     })
 
     test('removeEntry', async () => {
-      const remove = jest.fn()
+      const content = { test: true, testId: { ref: 'test', tags: [] } }
+      const changeContent = jest.fn(change => change(content))
       const idx = new IDX({} as any)
-      idx._rootIndex = { remove } as any
-
-      await expect(idx.removeEntry('defId')).resolves.toBeUndefined()
-      expect(remove).toBeCalledWith('defId')
+      idx._indexProxy = { changeContent } as any
+      await expect(idx.removeEntry('testId')).resolves.toBeUndefined()
+      expect(changeContent).toReturnWith({ test: true })
     })
 
     test('getEntries', async () => {

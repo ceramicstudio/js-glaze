@@ -8,12 +8,12 @@
 1. Create a schema for you collection (or use existing one)
 1. Create a collection definition (or use existing one)
 
-These will have immutable DocIds that can be used to get/set data on the user's root index
+These will have immutable DocIDs that can be used to get/set data on the user's Identity Index
 
 ## App bootstrapping
 
 1. Create IDW, Ceramic and IDX instances
-1. Authenticate user using IDW/Ceramic - will create a 3ID with an empty root index if needed
+1. Authenticate user using IDW/Ceramic - will create a 3ID with a linked Identity Index
 
 ## App usage
 

@@ -18,7 +18,7 @@ npm install @ceramicstudio/idx
 
 ## Definitions and Schemas
 
-All [Documents](idx-terminology.md#document) attached to the [Root Index](idx-terminology.md#root-index) need to have [Definion](idx-terminology.md#definition).
+All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to have [Definion](idx-terminology.md#definition).
 
 Once a public Ceramic network is running, the IDX library will provide a set of Definions that can be used directly, but in the meantime these needs to be defined by developers using IDX.
 

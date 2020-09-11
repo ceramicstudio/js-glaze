@@ -10,7 +10,7 @@ title: Terminology
 
 A **3ID** is a [DID](#did) document using the `3` [method name](https://www.w3.org/TR/did-core/#did-syntax) and stored by the [Ceramic network](#ceramic).
 
-A **3ID** notably stores the [DocID](#docid) of the [Root Index](#root-index) used by the IDX library.
+A **3ID** notably stores the [DocID](#docid) of the [Identity Index](idx-terminology.md#identity-index--idx) used by the [IDX library](lib-getting-started.md).
 
 ## Ceramic
 
@@ -18,15 +18,18 @@ In this documentation, **Ceramic** can refer to either the [Ceramic network](htt
 
 ## Document
 
-A **Document** is a representation of structured data on the [Ceramic network](#ceramic) along with metadata. The IDX library provides high-level interfaces interacting with these documents.
+A **Document** is a representation of structured data on the [Ceramic network](#ceramic) along with metadata. The [IDX library](lib-getting-started.md) provides high-level interfaces interacting with these documents.
 
 ## DocID
 
-A **Document Identifier (DocID)** is a URL representing a [Document](#document). Multiple APIs in the IDX library use DocIDs as inputs and/or outputs.
+A **Document Identifier (DocID)** is a URL representing a [Document](#document). Multiple APIs in the [IDX library](lib-getting-started.md) use DocIDs as inputs and/or outputs.
 
 ## Identity Index / IDX
 
 The **Identity Index** and **IDX** can sometimes both be used to refer to the [Identity Index specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), but in this documentation the term **Identity Index** will always be used to refer to the [specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), while **IDX** refers to the library, or possibly the [`IDX` class](lib-apis.md#idx-class) in code snippets.
+
+The **Identity Index contents** refers to the mapping of a [Definition](#definition), represented by its [DocID](#docid), to an [Entry](#entry).
+The contents are stored in a [Document](#document) that the [IDX library](lib-getting-started.md) interacts with.
 
 ## Schema
 
@@ -34,18 +37,10 @@ A [JSON schema](https://json-schema.org/) may be used to validate the structure 
 
 ## Definition
 
-A **Definition** is a specific type of [Document](#document) used by the IDX library to represent other documents in the [Root Index](#root-index).
+A **Definition** is a specific type of [Document](#document) used by the [IDX library](lib-getting-started.md) to represent other documents in the [Identity Index](idx-terminology.md#identity-index--idx).
 
 A **Definition** is based on a specific [Schema](#schema) describing the document it represents, notably the Schema used to validate the document.
 
 ## Entry
 
 An **Entry** is a simple data structure containing of a `ref` [DocID](#docid) for the content [Document](#document), and a set of string `tags` used for content discovery.
-
-## Root Index
-
-The **Root Index** is the main [Document](#document) used by the IDX library to access and store the contents of the [Identity Index](#identity-index--idx).
-
-The **Root Index** is a mapping of a [Definition](#definition), represented by its [DocID](#docid), to an [Entry](#entry).
-
-The IDX library provides various APIs to interact with the **Root Index** and the associated [Definitions](#definition) and [Entries](#entry).
