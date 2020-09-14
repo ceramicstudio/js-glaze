@@ -57,7 +57,7 @@ export class IDX {
   _schemas: SchemasAliases
 
   constructor({ autopin, ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
-    this._autopin = !!autopin
+    this._autopin = autopin !== false
     this._ceramic = ceramic
     this._definitions = definitions
     this._schemas = schemas

@@ -115,6 +115,7 @@ Options used by the [IDX class constructor](#constructor)
 
 ```ts
 interface IDXOptions {
+  autopin?: boolean
   ceramic: CeramicApi
   definitions?: DefinitionsAliases
   resolver?: ResolverOptions

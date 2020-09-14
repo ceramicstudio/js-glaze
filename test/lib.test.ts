@@ -164,8 +164,8 @@ describe('IDX', () => {
 
   describe('Ceramic API wrappers', () => {
     describe('createDocument', () => {
-      test('implicit no pinning', async () => {
-        const createDocument = jest.fn()
+      test('pin by default', async () => {
+        const createDocument = jest.fn(() => ({ id: 'test' }))
         const add = jest.fn()
         const idx = new IDX({
           ceramic: { createDocument, did: { id: 'did:test' }, pin: { add } }
@@ -178,19 +178,19 @@ describe('IDX', () => {
             tags: ['test']
           }
         })
-        expect(add).not.toBeCalled()
+        expect(add).toBeCalledWith('test')
       })
 
-      test('pinning via instance-level option', async () => {
-        const createDocument = jest.fn(() => ({ id: 'test' }))
+      test('no pinning by setting instance option', async () => {
+        const createDocument = jest.fn()
         const add = jest.fn()
         const idx = new IDX({
-          autopin: true,
+          autopin: false,
           ceramic: { createDocument, did: { id: 'did:test' }, pin: { add } }
         } as any)
         await idx.createDocument({ hello: 'test' })
         expect(createDocument).toBeCalled()
-        expect(add).toBeCalledWith('test')
+        expect(add).not.toBeCalledWith('test')
       })
 
       test('explicit no pinning', async () => {
@@ -353,9 +353,9 @@ describe('IDX', () => {
         ceramic: { createDocument, did: { id: 'did:test' } },
         schemas: { Definition: 'ceramic://definition' }
       } as any)
-      await expect(idx.createDefinition({ name: 'test', schema: 'test' })).resolves.toBe(
-        'ceramic://test'
-      )
+      await expect(
+        idx.createDefinition({ name: 'test', schema: 'test' }, { pin: false })
+      ).resolves.toBe('ceramic://test')
       expect(createDocument).toBeCalledTimes(1)
     })
 
