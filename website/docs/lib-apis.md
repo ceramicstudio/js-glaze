@@ -133,6 +133,26 @@ interface AuthenticateOptions {
 }
 ```
 
+### CreateOptions
+
+Options used by the [`createDocument`](#createdocument) and [`createDefinition`](#createdefinition) methods of the `IDX` class
+
+```ts
+interface CreateOptions {
+  pin?: boolean
+}
+```
+
+### CreateContentOptions
+
+Options used by the [`setEntryContent` method](#setentrycontent) of the `IDX` class
+
+```ts
+interface CreateContentOptions extends CreateOptions {
+  tags?: Array<string>
+}
+```
+
 ### ContentIteratorOptions
 
 Options used by the [`contentIterator` method](#contentiterator) of the `IDX` class
@@ -281,6 +301,28 @@ Returns the [contents](#identityindexcontent) of the [Identity Index](idx-termin
 
 **Returns** `Promise<IdentityIndexContent | null>`
 
+### .createDocument
+
+Creates a new Document in the Ceramic network. This document will **not** be attached to the [Identity Index](idx-terminology.md#identity-index--idx), [`setEntryContent`](#setentrycontent) should be used for this purpose.
+
+**Arguments**
+
+1. `content: unknown`
+1. `meta?: Partial<DocMetadata>`
+1. `options?: CreateOptions`
+
+**Returns** `Promise<Doctype>`
+
+### .loadDocument
+
+Loads a Document from the Ceramic network
+
+**Arguments**
+
+1. `id: DocID`
+
+**Returns** `Promise<Doctype>`
+
 ### .createDefinition
 
 Creates a new [Definition](#definition) and returns the created [`DocID`](#docid), to be used to add resources to the [Identity Index](idx-terminology.md#identity-index--idx)
@@ -288,6 +330,7 @@ Creates a new [Definition](#definition) and returns the created [`DocID`](#docid
 **Arguments**
 
 1. `definition: Definition`
+1. `options?: CreateOptions`
 
 **Returns** `Promise<DocID>`
 
@@ -327,13 +370,13 @@ Returns set of tags of the [Entry](#entry) for the given [Definition](#definitio
 
 Sets the content of the entry reference.
 
-> The provided tags will only be set if the entry is getting created, if it already exists tags will not be changed
+> The provided options are only applied if the entry is being created, if it already exists they are ignored
 
 **Arguments**
 
 1. `definitionId: DocID`
 1. `content: unknown`
-1. `tags?: Array<string> = []`
+1. `options?: CreateContentOptions`
 
 **Returns** `Promise<DocID>` the [`DocID`](#docid) of the created content document
 
