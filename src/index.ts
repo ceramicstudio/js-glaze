@@ -24,12 +24,22 @@ export interface AuthenticateOptions {
   provider?: DIDProvider
 }
 
+export interface CreateOptions {
+  pin?: boolean
+}
+
+export interface CreateContentOptions {
+  pin?: boolean
+  tags?: Array<string>
+}
+
 export interface ContentIteratorOptions {
   did?: string
   tag?: string
 }
 
 export interface IDXOptions {
+  autopin?: boolean
   ceramic: CeramicApi
   definitions?: DefinitionsAliases
   resolver?: ResolverOptions
@@ -37,6 +47,7 @@ export interface IDXOptions {
 }
 
 export class IDX {
+  _autopin: boolean
   _ceramic: CeramicApi
   _definitions: DefinitionsAliases
   _didCache: Record<string, DocID | null> = {}
@@ -45,7 +56,8 @@ export class IDX {
   _resolver: Resolver
   _schemas: SchemasAliases
 
-  constructor({ ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
+  constructor({ autopin, ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
+    this._autopin = autopin !== false
     this._ceramic = ceramic
     this._definitions = definitions
     this._schemas = schemas
@@ -97,11 +109,19 @@ export class IDX {
 
   // Ceramic APIs wrappers
 
-  async createDocument(content: unknown, meta: Partial<DocMetadata> = {}): Promise<Doctype> {
-    return await this._ceramic.createDocument('tile', {
+  async createDocument(
+    content: unknown,
+    meta: Partial<DocMetadata> = {},
+    { pin }: CreateOptions = {}
+  ): Promise<Doctype> {
+    const doc = await this._ceramic.createDocument('tile', {
       content,
       metadata: { owners: [this.id], ...meta }
     })
+    if (pin ?? this._autopin) {
+      await this._ceramic.pin.add(doc.id)
+    }
+    return doc
   }
 
   async loadDocument(id: DocID): Promise<Doctype> {
@@ -200,8 +220,12 @@ export class IDX {
 
   // Definition APIs
 
-  async createDefinition(content: Definition): Promise<DocID> {
-    const doctype = await this.createDocument(content, { schema: this._schemas.Definition })
+  async createDefinition(content: Definition, options?: CreateOptions): Promise<DocID> {
+    const doctype = await this.createDocument(
+      content,
+      { schema: this._schemas.Definition },
+      options
+    )
     return doctype.id
   }
 
@@ -233,12 +257,12 @@ export class IDX {
   async setEntryContent(
     definitionId: DocID,
     content: unknown,
-    tags: Array<string> = []
+    { pin, tags = [] }: CreateContentOptions = {}
   ): Promise<DocID> {
     const entry = await this._getEntry(definitionId, this.id)
     if (entry == null) {
       const definition = await this.getDefinition(definitionId)
-      const ref = await this._createReference(definition, content)
+      const ref = await this._createReference(definition, content, { pin })
       await this._setEntry(definitionId, { ref, tags })
       return ref
     } else {
@@ -335,8 +359,12 @@ export class IDX {
     })
   }
 
-  async _createReference(definition: Definition, content: unknown): Promise<DocID> {
-    const doc = await this.createDocument(content, { schema: definition.schema })
+  async _createReference(
+    definition: Definition,
+    content: unknown,
+    options?: CreateOptions
+  ): Promise<DocID> {
+    const doc = await this.createDocument(content, { schema: definition.schema }, options)
     return doc.id
   }
 }

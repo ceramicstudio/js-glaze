@@ -14,7 +14,7 @@ A **3ID** notably stores the [DocID](#docid) of the [Identity Index](idx-termino
 
 ## Ceramic
 
-In this documentation, **Ceramic** can refer to either the [Ceramic network](https://www.ceramic.network/) itself, or an instance of a Ceramic API used by the the IDX library, as exposed by the [`js-ceramic` repository](https://github.com/ceramicnetwork/js-ceramic).
+In this documentation, **Ceramic** can refer to either the [Ceramic network](https://www.ceramic.network/) itself, or an instance of a Ceramic API used by the the [IDX library](lib-getting-started.md), as exposed by the [`js-ceramic` repository](https://github.com/ceramicnetwork/js-ceramic).
 
 ## Document
 
