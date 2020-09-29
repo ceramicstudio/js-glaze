@@ -1,0 +1,17 @@
+<svg width="41" height="55" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs/>
+  <defs>
+    <pattern id="c" patternUnits="objectBoundingBox" width="100%" height="100%">
+      <use xlink:href="#a" transform="scale(1.10833)"/>
+    </pattern>
+    <path id="b" d="M1 1442h1439v1463H1z"/>
+  </defs>
+  <g transform="translate(-931 -2469)" fill="none" fill-rule="evenodd">
+    <use fill="#7B3EFE" xlink:href="#b"/>
+    <use fill-opacity=".4" fill="url(#c)" xlink:href="#b"/>
+    <rect fill="#5E28D2" x="203" y="2415" width="1035" height="348" rx="10"/>
+    <g fill="#FFF" fill-rule="nonzero">
+      <path d="M938.174 2490.522v-9.467c0-6.658 5.887-12.055 13.152-12.055 7.264 0 13.152 5.402 13.152 12.055v9.467h2.668c2.489 0 4.506 2.145 4.506 4.779v23.92c0 2.64-2.016 4.779-4.506 4.779h-31.64c-2.489 0-4.506-2.145-4.506-4.779v-23.92c0-2.64 2.016-4.78 4.506-4.78h2.668zm-2.391 4.782v23.913h31.087v-23.913h-31.087zm23.913-4.782v-9.467c0-3.916-3.661-7.272-8.37-7.272-4.712 0-8.37 3.353-8.37 7.272v9.467h16.74zm-10.761 13.832c0-1.32 1.061-2.39 2.391-2.39a2.385 2.385 0 012.391 2.39v7.175c0 1.32-1.061 2.39-2.39 2.39a2.385 2.385 0 01-2.392-2.39v-7.175z"/>
+    </g>
+  </g>
+</svg>

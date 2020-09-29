@@ -16,6 +16,8 @@ The IDX library can be installed from npm:
 npm install @ceramicstudio/idx
 ```
 
+TODO: install idx-tools
+
 ## Definitions and Schemas
 
 All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to have [Definion](idx-terminology.md#definition).
@@ -23,38 +25,40 @@ All [Documents](idx-terminology.md#document) attached to the [Identity Index](id
 Once a public Ceramic network is running, the IDX library will provide a set of Definions that can be used directly, but in the meantime these needs to be defined by developers using IDX.
 
 To create a Defininion, a specific [Schema](idx-terminology.md#schema) needs to be used, and therefore must be present on the Ceramic node used by the IDX instance.
-The [`idx-schemas` library](https://github.com/ceramicstudio/js-idx-schemas) can be used to easily publish schemas to the Ceramic node:
+The [`idx-tools` library](https://github.com/ceramicstudio/js-idx-tools) can be used to easily publish schemas to the Ceramic node:
 
 ```ts
-import { schemasList, publishSchemas } from '@ceramicstudio/idx-schemas'
+import { publishIDXConfig, publishDefinition } from '@ceramicstudio/idx-tools'
 
 // `ceramic` implements the CeramicApi interface
-const schemas = await publishSchemas({ ceramic, schemas: schemasList })
+const { definitions, schemas } = await publishIDXConfig(ceramic)
+
+const appDefinitions = {
+  profile: definition.basicProfile,
+  documents: await publishDefinition({
+    name: 'My app documents',
+    schema: schemas.DocIdMap
+  })
+}
+
+// export the created appDefinitions so they can be used at runtime
 ```
 
-The returned `schemas` object should be provided to the `IDX` constructor.
+TODO: show usage of appDefinitions defined above
 
 ## Example usage
 
 ```ts
 import { IDX } from '@ceramicstudio/idx'
 
-// `ceramic` implements the CeramicApi interface and `schemas` is created using `publishSchemas` in the code above
-const idx = new IDX({ ceramic, schemas })
-
-// Definitions should only be created once during the application development, the following code is for demonstration purpose only
-const definitions = {
-  'myapp:profile': await idx.createDefinition({
-    name: 'MyApp user profile',
-    schema: schemas.BasicProfile
-  })
-}
+// import definitions created during development or build time
+import { definitions } from './app-definitions'
 
 // A first user (Alice) can set her profile on her Index using the definition alias used by the app
-const aliceIndex = new IDX({ ceramic, definitions, schemas })
-await aliceIndex.set('myapp:profile', { name: 'Alice' })
+const aliceIndex = new IDX({ ceramic, definitions })
+await aliceIndex.set('profile', { name: 'Alice' })
 
 // Other users (such as Bob) can read from known Indexes using the same definion alias and Alice's DID
-const bobClient = new IDX({ ceramic, definitions, schemas })
-const aliceProfile = await bobClient.get('myapp:profile', aliceIndex.id)
+const bobClient = new IDX({ ceramic, definitions })
+const aliceProfile = await bobClient.get('profile', aliceIndex.id)
 ```

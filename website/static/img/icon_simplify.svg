@@ -1,0 +1,19 @@
+<svg width="48" height="60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs/>
+  <defs>
+    <pattern id="c" patternUnits="objectBoundingBox" width="100%" height="100%">
+      <use xlink:href="#a" transform="scale(1.10833)"/>
+    </pattern>
+    <path id="b" d="M1 1442h1439v1463H1z"/>
+  </defs>
+  <g transform="translate(-242 -2464)" fill="none" fill-rule="evenodd">
+    <use fill="#7B3EFE" xlink:href="#b"/>
+    <use fill-opacity=".4" fill="url(#c)" xlink:href="#b"/>
+    <rect fill="#5E28D2" x="203" y="2415" width="1035" height="348" rx="10"/>
+    <g transform="translate(242 2464)" fill="#FFF" fill-rule="nonzero">
+      <circle cx="27.143" cy="7.491" r="3.571"/>
+      <circle cx="34.286" cy="3.214" r="2.857"/>
+      <path d="M46.286 49.106L31.43 25.349v-7.135h4.285v-5H11.43v5h4.285v7.135L.856 49.106a7.143 7.143 0 006.286 10.537H40a7.143 7.143 0 006.286-10.537zM20.714 26.784v-8.57h5.715v8.57l8.483 13.565H12.231l8.483-13.565z"/>
+    </g>
+  </g>
+</svg>

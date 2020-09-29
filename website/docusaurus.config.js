@@ -1,19 +1,23 @@
 module.exports = {
   title: 'Identity Index',
   tagline: 'A standard and library for constructing an identity-centric index of resources',
-  url: 'https://ceramicstudio.github.io',
-  baseUrl: '/js-idx/',
+  url: 'https://idx.xyz',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   favicon: 'img/favicon.ico',
   organizationName: 'ceramicstudio',
   projectName: 'js-idx',
   themeConfig: {
+    colorMode: {
+      defaultMode: 'light',
+      disableSwitch: true,
+      respectPrefersColorScheme: false
+    },
     navbar: {
       hideOnScroll: true,
-      title: 'IDX',
       logo: {
-        alt: 'Identity Index Logo',
-        src: 'img/logo.svg'
+        alt: 'IDX',
+        src: '/img/logo_idx.png'
       },
       items: [
         {
@@ -23,9 +27,9 @@ module.exports = {
           position: 'left'
         },
         {
-          to: 'docs/lib-getting-started',
-          activeBasePath: 'docs/lib',
-          label: 'Library',
+          to: 'docs/libs-getting-started',
+          activeBasePath: 'docs/libs',
+          label: 'Libraries',
           position: 'left'
         },
         {
@@ -33,6 +37,11 @@ module.exports = {
           activeBasePath: 'docs/guide',
           label: 'Guides',
           position: 'left'
+        },
+        {
+          href: 'https://discord.gg/ZXR5eT8',
+          label: 'Discord',
+          position: 'right'
         },
         {
           href: 'https://github.com/ceramicstudio/js-idx',
@@ -52,8 +61,8 @@ module.exports = {
               to: 'docs/idx-introduction'
             },
             {
-              label: 'Library',
-              to: 'docs/lib-getting-started'
+              label: 'Libraries',
+              to: 'docs/libs-getting-started'
             },
             {
               label: 'Guides',
@@ -64,10 +73,10 @@ module.exports = {
         {
           title: 'Community',
           items: [
-            // {
-            //   label: 'Discord',
-            //   href: 'https://discordapp.com/invite/docusaurus',
-            // },
+            {
+              label: 'Discord',
+              href: 'https://discord.gg/ZXR5eT8'
+            },
             {
               label: 'Twitter',
               href: 'https://twitter.com/identityindex'

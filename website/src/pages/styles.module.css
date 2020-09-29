@@ -1,37 +1,228 @@
-/* stylelint-disable docusaurus/copyright-header */
-
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+.navBar {
+  display: flex;
+  height: 60px;
+  box-shadow: 0 0 10px #999999;
+  align-items: center;
+  margin-bottom: 80px;
+  padding: var(--ifm-navbar-padding-vertical) var(--ifm-navbar-padding-horizontal);
+}
+.navLogo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+.navButtons {
+  display: flex;
+  justify-content: flex-end;
+}
+.navButtons a {
+  border-color: white;
+  margin-left: 15px;
 }
 
-@media screen and (max-width: 966px) {
-  .heroBanner {
-    padding: 2rem;
+@media screen and (max-width: 450px) {
+  .navBar {
+    flex-direction: column;
   }
+  .navButtons {
+    display: none;
+  }
+}
+
+.flexCol {
+  display: flex !important;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+.imageCol {
+  text-align: center;
+}
+
+@media screen and (max-width: 996px) {
+  .header {
+    margin-top: 40px;
+    text-align: center;
+  }
+}
+.header h1 {
+  font-weight: bold;
+  font-size: 70px;
+}
+.header p {
+  color: rgba(90, 82, 108, 0.75);
+  font-size: 24px;
 }
 
 .buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
+}
+@media screen and (max-width: 996px) {
+  .buttons {
+    justify-content: center;
+  }
+}
+.buttons a + a {
+  margin-left: 2rem;
+}
+@media screen and (max-width: 450px) {
+  .buttons {
+    flex-direction: column;
+  }
+  .buttons a + a {
+    margin-top: 10px;
+    margin-left: 0;
+  }
 }
 
-.features {
+.featuresSection {
+  color: white;
+  margin-top: 80px;
+  padding-top: 80px;
+  padding-bottom: 100px;
+}
+
+.mainFeaturesSection {
+  background-color: #7b3efe;
+}
+
+.featuresSection .featuresHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.featuresHeader h2 {
+  color: white;
+  font-size: 55px;
+  text-align: center;
+}
+.featuresHeader p {
+  color: white;
+  font-size: 28px;
+  text-align: center;
+  max-width: 650px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+}
+
+.featuresContainer {
+  background-color: #5e28d2;
+  border-radius: 10px;
+}
+.featuresContainer div {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  padding-top: 30px;
+  padding-bottom: 20px;
+}
+@media screen and (max-width: 996px) {
+  .featuresContainer div + div {
+    border-top: 1px solid #7b3efe;
+  }
+}
+@media screen and (min-width: 997px) {
+  .featuresContainer div + div {
+    border-left: 1px solid #7b3efe;
+  }
+}
+.featuresContainer h3 {
+  color: white;
+  font-size: 24px;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+.featuresContainer p {
+  font-size: 20px;
+}
+
+.contentsContainer div {
+  margin-top: 40px;
+}
+
+.openFeaturesSection {
+  background-color: #2a2730;
+}
+
+.openFeatureCol {
+  color: #d6d6d6;
+  background-color: #110f15;
+  border: 1px solid #232323;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex: 1;
+}
+.openFeatureCol h3 {
   display: flex;
   align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+  height: 40px;
+}
+.openFeatureCol a {
+  color: #d6d6d6;
 }
 
-.featureImage {
-  height: 200px;
-  width: 200px;
+ul.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+ul.checklist li {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 22px;
+  position: relative;
+  padding-left: 30px;
+}
+ul.checklist li:before {
+  content: '';
+  width: 18px;
+  height: 14px;
+  position: absolute;
+  background-image: url('/img/icon_check.png');
+  background-size: cover;
+  background-position: center;
+  left: 0;
+  top: 12px;
+}
+
+.getStartedHeader {
+  font-size: 55px;
+  margin-bottom: 40px;
+}
+@media screen and (max-width: 996px) {
+  .getStartedHeader {
+    margin-top: 30px;
+    text-align: center;
+  }
+}
+
+.footer {
+  margin: 20px 20px 40px 20px;
+}
+@media screen and (max-width: 520px) {
+  .footer {
+    flex-direction: column;
+  }
+}
+@media screen and (max-width: 996px) {
+  .footerImage {
+    margin: 30px auto;
+  }
+}
+.footer a {
+  margin-left: 20px;
+}
+.footerLogos {
+  flex: 1;
+}
+.footerLogo {
+  display: inline-flex;
+  justify-content: center;
+  padding-right: 20px;
+  border-right: 1px solid #dddddd;
+}
+.footerCopyright {
+  padding-top: 8px;
+  text-align: right;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 15px;
 }
