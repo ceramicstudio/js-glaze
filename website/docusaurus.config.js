@@ -1,10 +1,9 @@
 module.exports = {
-  title: 'Identity Index',
-  tagline: 'A standard and library for constructing an identity-centric index of resources',
+  title: 'IDX - Build with Open Identity',
   url: 'https://idx.xyz',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
   organizationName: 'ceramicstudio',
   projectName: 'js-idx',
   themeConfig: {
@@ -13,6 +12,7 @@ module.exports = {
       disableSwitch: true,
       respectPrefersColorScheme: false
     },
+    image: 'img/idx_opengraph.png',
     navbar: {
       hideOnScroll: true,
       logo: {
@@ -20,12 +20,6 @@ module.exports = {
         src: '/img/logo_idx.png'
       },
       items: [
-        {
-          to: 'docs/idx-introduction',
-          activeBasePath: 'docs/idx',
-          label: 'Specification',
-          position: 'left'
-        },
         {
           to: 'docs/libs-getting-started',
           activeBasePath: 'docs/libs',
@@ -57,8 +51,8 @@ module.exports = {
           title: 'Docs',
           items: [
             {
-              label: 'Specification',
-              to: 'docs/idx-introduction'
+              label: 'Introduction',
+              to: 'docs'
             },
             {
               label: 'Libraries',

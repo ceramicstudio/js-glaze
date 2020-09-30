@@ -149,14 +149,7 @@ type IDXPublishedDefinitions = Record<IDXDefinitionName, DocID>
 Names of [Schemas](idx-terminology.md#schema) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXSchemaName =
-  | 'BasicProfile'
-  | 'CryptoAccountLinks'
-  | 'Definition'
-  | 'DocIdDocIdMap'
-  | 'DocIdMap'
-  | 'IdentityIndex'
-  | 'StringMap'
+type IDXSchemaName = 'BasicProfile' | 'CryptoAccountLinks' | 'Definition' | 'IdentityIndex'
 ```
 
 ## IDXSignedSchemas

@@ -19,17 +19,14 @@ A **Definition** contains the following metadata:
 - `url` (optional): URL of the specification for the Definition or associated project
 - `config` (optional): any additional contents that may be needed by applications to support additional logic when interacting with the resource
 
-## Creating a Definition using IDX
+## Creating a Definition using IDX tools
 
-Developers can create **Definitions** specific to their application needs directly by using the [`createDefinition` method](lib-apis.md#createdefinition) of the [`IDX`library](lib-getting-started.md):
+Developers can create **Definitions** specific to their application needs directly by using the [`createDefinition` method](libs-tools.md#createdefinition) of the [`idx-tools`library](libs-tools.md):
 
 ```ts
-import { IDX } from '@ceramicstudio/idx'
+import { createDefinition } from '@ceramicstudio/idx-tools'
 
-// See constructor options
-const idx = new IDX(...)
-
-const definitionID = await idx.createDefinition({
+const definitionID = await createDefinition(ceramic, {
   name: 'my app definition',
   schema: 'ceramic://...'
 })
@@ -38,6 +35,11 @@ const definitionID = await idx.createDefinition({
 The `definitionID` created here is **immutable** and can be used by other methods of IDX, for example to get and set the contents associated to this definition:
 
 ```ts
+import { IDX } from '@ceramicstudio/idx'
+
+// See constructor options
+const idx = new IDX(...)
+
 await idx.set(definitionID, { my: 'contents' })
 await idx.get(definitionID) // { my: 'contents' }
 ```
@@ -52,11 +54,11 @@ Aliases only need to be **created once** so they are available on the [Ceramic n
 
 ```ts
 const [userDefinitionID, collectionDefinitionID] = await Promise.all([
-  idx.createDefinition({
+  createDefinition(ceramic, {
     name: 'my first definition',
     schema: 'ceramic://...'
   }),
-  idx.createDefinition({
+  createDefinition(ceramic, {
     name: 'my second definition',
     schema: 'ceramic://...'
   })

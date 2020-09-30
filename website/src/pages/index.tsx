@@ -1,41 +1,84 @@
 import Head from '@docusaurus/Head'
 import Link from '@docusaurus/Link'
+import CodeBlock from '@theme/CodeBlock'
+import useBaseUrl from '@docusaurus/useBaseUrl'
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 import ThemeProvider from '@theme/ThemeProvider'
 import UserPreferencesProvider from '@theme/UserPreferencesProvider'
-import useBaseUrl from '@docusaurus/useBaseUrl'
 import clsx from 'clsx'
 import React, { ReactNode } from 'react'
 
 import styles from './styles.module.css'
 
+const DESCRIPTION =
+  'The most popular developer framework for building applications with decentralized identity and user-centric data'
+
 const DISCORD_URL = 'https://discord.gg/ZXR5eT8'
 const GITHUB_URL = 'https://github.com/ceramicstudio/js-idx'
 
-function Layout({ children }: { children: ReactNode }) {
+const CODE_DEFINE = `import { definitions } from '@ceramicstudio/idx-constants'
+
+export const appDefinitions = {
+  profile: definitions.basicProfile
+}
+`
+
+const CODE_INTERACT = `import { IDX } from '@ceramicstudio/idx'
+
+// Import definitions created during development or build time
+import { appDefinitions } from './app-definitions'
+
+const idx = new IDX({ ceramic, definitions: appDefinitions })
+await idx.set('profile', { name: 'Alice' })
+`
+
+const CODE_DISCOVER = `import { IDX } from '@ceramicstudio/idx'
+import { definitions } from '@ceramicstudio/idx-constants'
+
+const idx = new IDX({ ceramic })
+const profile = await idx.get(definitions.basicProfile, aliceDID)
+`
+
+function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
-      <UserPreferencesProvider>
-        <Head>
-          <html lang="en" />
-          <title>IDX</title>
-          <meta property="og:title" content="IDX" />
-          <meta
-            name="description"
-            content="IDX is an open source development framework for decentralized identity and user-centric data."
-          />
-          {/* {favicon && <link rel="shortcut icon" href={faviconUrl} />}
-          {description && <meta property="og:description" content={description} />}
-          {keywords && keywords.length && <meta name="keywords" content={keywords.join(',')} />}
-          {metaImage && <meta property="og:image" content={metaImageUrl} />}
-          {metaImage && <meta property="twitter:image" content={metaImageUrl} />}
-          {metaImage && <meta name="twitter:image:alt" content={`Image for ${metaTitle}`} />}
-          {permalink && <meta property="og:url" content={siteUrl + permalink} />}
-          {permalink && <link rel="canonical" href={siteUrl + permalink} />} */}
-          <meta name="twitter:card" content="summary_large_image" />
-        </Head>
-        <div className="main-wrapper">{children}</div>
-      </UserPreferencesProvider>
+      <UserPreferencesProvider>{children}</UserPreferencesProvider>
     </ThemeProvider>
+  )
+}
+
+function Layout({ children }: { children: ReactNode }) {
+  const { siteConfig = {} } = useDocusaurusContext()
+  const {
+    favicon,
+    title,
+    themeConfig: { image }
+  } = siteConfig
+  const metaImageUrl = useBaseUrl(image, { absolute: true })
+  const faviconUrl = useBaseUrl(favicon)
+
+  return (
+    <Providers>
+      <Head>
+        <html lang="en" />
+        <title>{title}</title>
+        <meta property="og:title" content={title} />
+        <meta name="description" content={DESCRIPTION} />
+        <meta
+          name="keywords"
+          content="idx, idx.xyz, identity index, index, web3, dweb, did, dids, identity, identity system, open identity, decentralized identity, decentralized identifier, user-centric data, user-managed data, interoperability, data, data sharing, share data, 3box, 3box labs, javascript, developers, developer tools, library, build, client, client-side, encryption, control, framework, self-sovereign identity, ssi, ssid, w3c, standard, standards, user control, privacy, ceramic, ceramic network, ceramic protocol, ipfs, filecoin, ethereum, flow, polkadot, near, blockchain, protocol, system, wallets, wallet, cross-chain, chain-agnostic, decentralized, distributed, distributed web, serverless, jamstack, user data, data management, identity management, user management, users, without servers, p2p, peer-to-peer, cross-platform, log-in, authentication, auth, platform, docs, documentation, tutorial, guides, reviews, best, popular, how to, easy, simple, open source, implementation, code, demo"
+        />
+        <link rel="shortcut icon" href={faviconUrl} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:image" content={metaImageUrl} />
+        <meta property="twitter:image" content={metaImageUrl} />
+        <meta name="twitter:image:alt" content={`Image for ${title}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
+      <div className="main-wrapper">{children}</div>
+    </Providers>
   )
 }
 
@@ -130,7 +173,7 @@ export default function Home() {
           <Link className="button button--outline button--primary" to={GITHUB_URL}>
             Github
           </Link>
-          <Link className="button button--primary" to={useBaseUrl('docs/idx-introduction')}>
+          <Link className="button button--primary" to={useBaseUrl('docs')}>
             Get started
           </Link>
         </div>
@@ -150,7 +193,7 @@ export default function Home() {
               <div className={styles.buttons}>
                 <Link
                   className={clsx('button button--primary button--lg', styles.getStarted)}
-                  to={useBaseUrl('docs/idx-introduction')}>
+                  to={useBaseUrl('docs')}>
                   Read the docs
                 </Link>
                 <Link
@@ -158,7 +201,7 @@ export default function Home() {
                     'button button--outline button--primary button--lg',
                     styles.getStarted
                   )}
-                  to={useBaseUrl('docs/idx-introduction')}>
+                  to={DISCORD_URL}>
                   Join Discord
                 </Link>
               </div>
@@ -176,6 +219,27 @@ export default function Home() {
                   Easily add users and data to your app with zero infrastructure, lock-in, or
                   trusted third parties.
                 </p>
+              </div>
+            </div>
+            <div className="row">
+              <div className={clsx('col', styles.featuresCodeExample)}>
+                <Tabs
+                  defaultValue="define"
+                  values={[
+                    { label: 'Define data models', value: 'define' },
+                    { label: 'Interact with known definitions', value: 'interact' },
+                    { label: 'Discover user data', value: 'discover' }
+                  ]}>
+                  <TabItem value="define">
+                    <CodeBlock className="ts">{CODE_DEFINE}</CodeBlock>
+                  </TabItem>
+                  <TabItem value="interact">
+                    <CodeBlock className="ts">{CODE_INTERACT}</CodeBlock>
+                  </TabItem>
+                  <TabItem value="discover">
+                    <CodeBlock className="ts">{CODE_DISCOVER}</CodeBlock>
+                  </TabItem>
+                </Tabs>
               </div>
             </div>
             <div className={clsx('row', styles.featuresContainer)}>
@@ -295,7 +359,7 @@ export default function Home() {
                 <div className={styles.buttons}>
                   <Link
                     className={clsx('button button--primary button--lg', styles.getStarted)}
-                    to={useBaseUrl('docs/idx-introduction')}>
+                    to={useBaseUrl('docs')}>
                     Read the docs
                   </Link>
                   <Link

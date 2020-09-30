@@ -105,6 +105,12 @@
   padding-bottom: 30px;
 }
 
+.featuresCodeExample {
+  background-color: white;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
 .featuresContainer {
   background-color: #5e28d2;
   border-radius: 10px;
@@ -203,10 +209,8 @@ ul.checklist li:before {
     flex-direction: column;
   }
 }
-@media screen and (max-width: 996px) {
-  .footerImage {
-    margin: 30px auto;
-  }
+.footerImage {
+  margin: 30px auto;
 }
 .footer a {
   margin-left: 20px;

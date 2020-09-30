@@ -10,13 +10,23 @@ Packages implementing this interface include [`@ceramicnetwork/ceramic-core`](ht
 
 ## Installation
 
-The IDX library can be installed from npm:
+There are two main libraries to use when building apps for IDX
+
+### IDX client library
+
+This library is used by apps to interact with Ceramic and IDX documents
 
 ```sh
 npm install @ceramicstudio/idx
 ```
 
-TODO: install idx-tools
+### IDX tools library
+
+This library contains tools for developers to help create the data models used by apps
+
+```sh
+npm install --dev @ceramicstudio/idx-tools
+```
 
 ## Definitions and Schemas
 
@@ -28,33 +38,28 @@ To create a Defininion, a specific [Schema](idx-terminology.md#schema) needs to 
 The [`idx-tools` library](https://github.com/ceramicstudio/js-idx-tools) can be used to easily publish schemas to the Ceramic node:
 
 ```ts
-import { publishIDXConfig, publishDefinition } from '@ceramicstudio/idx-tools'
+import { publishIDXConfig } from '@ceramicstudio/idx-tools'
 
-// `ceramic` implements the CeramicApi interface
-const { definitions, schemas } = await publishIDXConfig(ceramic)
+// First we need to make sure the IDX config (definitions and schemas) are published on the Ceramic node
+// Here `ceramic` implements the CeramicApi interface
+const { definitions } = await publishIDXConfig(ceramic)
 
 const appDefinitions = {
-  profile: definition.basicProfile,
-  documents: await publishDefinition({
-    name: 'My app documents',
-    schema: schemas.DocIdMap
-  })
+  profile: definitions.basicProfile
 }
 
-// export the created appDefinitions so they can be used at runtime
+// Export the created `appDefinitions` so they can be used at runtime
 ```
-
-TODO: show usage of appDefinitions defined above
 
 ## Example usage
 
 ```ts
 import { IDX } from '@ceramicstudio/idx'
 
-// import definitions created during development or build time
+// Import definitions created during development or build time
 import { definitions } from './app-definitions'
 
-// A first user (Alice) can set her profile on her Index using the definition alias used by the app
+// A first user (Alice) can set her profile on her IDX Document using the definition alias used by the app
 const aliceIndex = new IDX({ ceramic, definitions })
 await aliceIndex.set('profile', { name: 'Alice' })
 
