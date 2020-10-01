@@ -1,6 +1,6 @@
 import { DIDDocument } from 'did-resolver'
 
-import { getIDXRoot } from '../src/utils'
+import { getIDXRoot, toCeramicString, toCeramicURL } from '../src/utils'
 
 describe('utils', () => {
   test('getIDXRoot', () => {
@@ -16,5 +16,15 @@ describe('utils', () => {
     expect(getIDXRoot(doc1)).toBeUndefined()
     expect(getIDXRoot(doc2)).toBeUndefined()
     expect(getIDXRoot(doc3)).toBe('ceramic://test')
+  })
+
+  test('toCeramicString', () => {
+    expect(toCeramicString('test')).toBe('test')
+    expect(toCeramicString('ceramic://test')).toBe('test')
+  })
+
+  test('toCeramicURL', () => {
+    expect(toCeramicURL('test')).toBe('ceramic://test')
+    expect(toCeramicURL('ceramic://test')).toBe('ceramic://test')
   })
 })

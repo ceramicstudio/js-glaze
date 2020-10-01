@@ -9,13 +9,14 @@ import {
   ContentEntry,
   Definition,
   DefinitionsAliases,
-  DefinitionEntry,
   DocID,
-  Entry,
   IdentityIndexContent,
-  SchemasAliases
+  IndexKey
 } from './types'
-import { getIDXRoot } from './utils'
+import { getIDXRoot, toCeramicString, toCeramicURL } from './utils'
+
+const DEFINITION_SCHEMA_DOCID =
+  'ceramic://bagcqcerayzl65zpukldtsp2bgy4rhsvdagkba27osgzepnw3xg5bhzg4dcwq'
 
 export * from './types'
 
@@ -28,22 +29,11 @@ export interface CreateOptions {
   pin?: boolean
 }
 
-export interface CreateContentOptions {
-  pin?: boolean
-  tags?: Array<string>
-}
-
-export interface ContentIteratorOptions {
-  did?: string
-  tag?: string
-}
-
 export interface IDXOptions {
   autopin?: boolean
   ceramic: CeramicApi
   definitions?: DefinitionsAliases
   resolver?: ResolverOptions
-  schemas: SchemasAliases
 }
 
 export class IDX {
@@ -54,16 +44,14 @@ export class IDX {
   _docLoader: DataLoader<string, Doctype>
   _indexProxy: DoctypeProxy
   _resolver: Resolver
-  _schemas: SchemasAliases
 
-  constructor({ autopin, ceramic, definitions = {}, resolver = {}, schemas }: IDXOptions) {
+  constructor({ autopin, ceramic, definitions = {}, resolver = {} }: IDXOptions) {
     this._autopin = autopin !== false
     this._ceramic = ceramic
     this._definitions = definitions
-    this._schemas = schemas
 
-    this._docLoader = new DataLoader(async (docIds: ReadonlyArray<string>) => {
-      return await Promise.all(docIds.map(async docId => await this._ceramic.loadDocument(docId)))
+    this._docLoader = new DataLoader(async (ids: ReadonlyArray<string>) => {
+      return await Promise.all(ids.map(async id => await this._ceramic.loadDocument(id)))
     })
     this._indexProxy = new DoctypeProxy(this._getOwnIDXDoc.bind(this))
 
@@ -107,74 +95,31 @@ export class IDX {
     }
   }
 
-  // Ceramic APIs wrappers
-
-  async createDocument(
-    content: unknown,
-    meta: Partial<DocMetadata> = {},
-    { pin }: CreateOptions = {}
-  ): Promise<Doctype> {
-    const doc = await this._ceramic.createDocument('tile', {
-      content,
-      metadata: { owners: [this.id], ...meta }
-    })
-    if (pin ?? this._autopin) {
-      await this._ceramic.pin.add(doc.id)
-    }
-    return doc
-  }
-
-  async loadDocument(id: DocID): Promise<Doctype> {
-    return await this._docLoader.load(id)
-  }
-
   // High-level APIs
 
   async has(name: string, did?: string): Promise<boolean> {
-    const id = this._toDefinitionId(name)
-    const entry = await this._getEntry(id, did)
-    return entry != null
+    const key = this._toIndexKey(name)
+    const ref = await this._getReference(key, did)
+    return ref != null
   }
 
   async get<T = unknown>(name: string, did?: string): Promise<T | null> {
-    const id = this._toDefinitionId(name)
-    return await this.getEntryContent(id, did)
+    const key = this._toIndexKey(name)
+    return await this._getContent(key, did)
   }
 
-  async getTags(name: string, did?: string): Promise<Array<string>> {
-    const id = this._toDefinitionId(name)
-    return await this.getEntryTags(id, did)
-  }
-
-  async set(name: string, content: unknown): Promise<DocID> {
-    const id = this._toDefinitionId(name)
-    return await this.setEntryContent(id, content)
-  }
-
-  async addTag(name: string, tag: string): Promise<Array<string>> {
-    const id = this._toDefinitionId(name)
-    return await this.addEntryTag(id, tag)
-  }
-
-  async removeTag(name: string, tag: string): Promise<Array<string>> {
-    const id = this._toDefinitionId(name)
-    return await this.removeEntryTag(id, tag)
+  async set(name: string, content: unknown, options?: CreateOptions): Promise<DocID> {
+    const key = this._toIndexKey(name)
+    return await this._setContent(key, content, options)
   }
 
   async remove(name: string): Promise<void> {
-    const id = this._toDefinitionId(name)
-    await this.removeEntry(id)
+    const key = this._toIndexKey(name)
+    await this._removeReference(key)
   }
 
-  _toDefinitionId(name: string): DocID {
-    const id = this._definitions[name] ?? this._definitions[`idx:${name}`]
-    if (id == null) {
-      if (name.startsWith('ceramic://')) {
-        return name
-      }
-      throw new Error(`Invalid name: ${name}`)
-    }
-    return id
+  _toIndexKey(name: string): IndexKey {
+    return toCeramicString(this._definitions[name] ?? name)
   }
 
   // Identity Index APIs
@@ -197,6 +142,30 @@ export class IDX {
     return id !== null
   }
 
+  contentIterator(did?: string): AsyncIterableIterator<ContentEntry> {
+    let list: Array<[IndexKey, DocID]>
+    let cursor = 0
+
+    return {
+      [Symbol.asyncIterator]() {
+        return this
+      },
+      next: async (): Promise<IteratorResult<ContentEntry>> => {
+        if (list == null) {
+          const index = await this.getIDXContent(did)
+          list = Object.entries(index ?? {})
+        }
+        if (cursor === list.length) {
+          return { done: true, value: null }
+        }
+
+        const [key, ref] = list[cursor++]
+        const doc = await this._loadDocument(ref)
+        return { done: false, value: { key, ref, content: doc.content } }
+      }
+    }
+  }
+
   async _getIDXDoc(did: string): Promise<Doctype | null> {
     let rootId
     rootId = this._didCache[did]
@@ -207,7 +176,7 @@ export class IDX {
       rootId = await this.getIDXDocID(did)
       this._didCache[did] = rootId
     }
-    return rootId == null ? null : await this.loadDocument(rootId)
+    return rootId == null ? null : await this._loadDocument(rootId)
   }
 
   async _getOwnIDXDoc(): Promise<Doctype> {
@@ -220,151 +189,84 @@ export class IDX {
 
   // Definition APIs
 
-  async createDefinition(content: Definition, options?: CreateOptions): Promise<DocID> {
-    const doctype = await this.createDocument(
-      content,
-      { schema: this._schemas.Definition },
-      options
-    )
-    return doctype.id
-  }
-
-  async getDefinition(id: DocID): Promise<Definition> {
-    const doc = await this.loadDocument(id)
-    if (doc.metadata.schema !== this._schemas.Definition) {
+  async getDefinition(idOrKey: DocID | IndexKey): Promise<Definition> {
+    const doc = await this._loadDocument(idOrKey)
+    if (doc.metadata.schema !== DEFINITION_SCHEMA_DOCID) {
       throw new Error('Invalid definition')
     }
     return doc.content as Definition
   }
 
-  // Entry APIs
+  // Content APIs
 
-  async getEntryContent<T = unknown>(definitionId: DocID, did?: string): Promise<T | null> {
-    const entry = await this._getEntry(definitionId, did)
-    if (entry == null) {
+  async _getContent<T = unknown>(key: IndexKey, did?: string): Promise<T | null> {
+    const ref = await this._getReference(key, did)
+    if (ref == null) {
       return null
     } else {
-      const doc = await this.loadDocument(entry.ref)
+      const doc = await this._loadDocument(ref)
       return doc.content as T
     }
   }
 
-  async getEntryTags(definitionId: DocID, did?: string): Promise<Array<string>> {
-    const entry = await this._getEntry(definitionId, did)
-    return entry?.tags ?? []
-  }
-
-  async setEntryContent(
-    definitionId: DocID,
-    content: unknown,
-    { pin, tags = [] }: CreateContentOptions = {}
-  ): Promise<DocID> {
-    const entry = await this._getEntry(definitionId, this.id)
-    if (entry == null) {
-      const definition = await this.getDefinition(definitionId)
-      const ref = await this._createReference(definition, content, { pin })
-      await this._setEntry(definitionId, { ref, tags })
+  async _setContent(key: IndexKey, content: unknown, { pin }: CreateOptions = {}): Promise<DocID> {
+    const existing = await this._getReference(key, this.id)
+    if (existing == null) {
+      const definition = await this.getDefinition(key)
+      const ref = await this._createContent(definition, content, { pin })
+      await this._setReference(key, ref)
       return ref
     } else {
-      const doc = await this.loadDocument(entry.ref)
+      const doc = await this._loadDocument(existing)
       await doc.change({ content })
       return doc.id
     }
   }
 
-  async addEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
-    const entry = await this._getEntry(definitionId, this.id)
-    if (entry == null) {
-      return []
-    }
-    if (entry.tags.includes(tag)) {
-      return entry.tags
-    }
-
-    entry.tags.push(tag)
-    await this._setEntry(definitionId, entry)
-    return entry.tags
+  async _loadDocument(idOrKey: DocID | IndexKey): Promise<Doctype> {
+    return await this._docLoader.load(toCeramicURL(idOrKey))
   }
 
-  async removeEntryTag(definitionId: DocID, tag: string): Promise<Array<string>> {
-    const entry = await this._getEntry(definitionId, this.id)
-    if (entry == null) {
-      return []
-    }
-
-    const index = entry.tags.indexOf(tag)
-    if (index !== -1) {
-      entry.tags.splice(index, 1)
-      await this._setEntry(definitionId, entry)
-    }
-    return entry.tags
-  }
-
-  async removeEntry(definitionId: DocID): Promise<void> {
-    await this._indexProxy.changeContent<IdentityIndexContent>(
-      ({ [definitionId]: _remove, ...content }) => {
-        return content
-      }
-    )
-  }
-
-  async getEntries(did?: string): Promise<Array<DefinitionEntry>> {
-    const index = await this.getIDXContent(did)
-    return Object.entries(index ?? {}).map(([def, entry]) => {
-      return { ...entry, def }
-    }, [] as Array<DefinitionEntry>)
-  }
-
-  async getTagEntries(tag: string, did?: string): Promise<Array<DefinitionEntry>> {
-    const index = await this.getIDXContent(did)
-    return Object.entries(index ?? {}).reduce((acc, [def, entry]) => {
-      if (entry.tags.includes(tag)) {
-        acc.push({ ...entry, def })
-      }
-      return acc
-    }, [] as Array<DefinitionEntry>)
-  }
-
-  contentIterator({ did, tag }: ContentIteratorOptions = {}): AsyncIterableIterator<ContentEntry> {
-    let list: Array<DefinitionEntry>
-    let cursor = 0
-
-    return {
-      [Symbol.asyncIterator]() {
-        return this
-      },
-      next: async (): Promise<IteratorResult<ContentEntry>> => {
-        if (list == null) {
-          list = tag ? await this.getTagEntries(tag, did) : await this.getEntries()
-        }
-        if (cursor === list.length) {
-          return { done: true, value: null }
-        }
-
-        const entry = list[cursor++]
-        const doc = await this.loadDocument(entry.ref)
-        return { done: false, value: { ...entry, content: doc.content } }
-      }
-    }
-  }
-
-  async _getEntry(definitionId: DocID, did?: string): Promise<Entry | null> {
-    const index = await this.getIDXContent(did ?? this.id)
-    return index?.[definitionId] ?? null
-  }
-
-  async _setEntry(definitionId: DocID, entry: Entry): Promise<void> {
-    await this._indexProxy.changeContent<IdentityIndexContent>(content => {
-      return { ...content, [definitionId]: entry }
-    })
-  }
-
-  async _createReference(
+  async _createContent(
     definition: Definition,
     content: unknown,
     options?: CreateOptions
   ): Promise<DocID> {
-    const doc = await this.createDocument(content, { schema: definition.schema }, options)
+    const doc = await this._createDocument(content, { schema: definition.schema }, options)
     return doc.id
+  }
+
+  async _createDocument(
+    content: unknown,
+    meta: Partial<DocMetadata> = {},
+    { pin }: CreateOptions = {}
+  ): Promise<Doctype> {
+    const doc = await this._ceramic.createDocument('tile', {
+      content,
+      metadata: { owners: [this.id], ...meta }
+    })
+    if (pin ?? this._autopin) {
+      await this._ceramic.pin.add(doc.id)
+    }
+    return doc
+  }
+
+  // References APIs
+
+  async _getReference(key: IndexKey, did?: string): Promise<DocID | null> {
+    const index = await this.getIDXContent(did ?? this.id)
+    return index?.[key] ?? null
+  }
+
+  async _setReference(key: IndexKey, id: DocID): Promise<void> {
+    await this._indexProxy.changeContent<IdentityIndexContent>(content => {
+      return { ...content, [key]: id }
+    })
+  }
+
+  async _removeReference(key: IndexKey): Promise<void> {
+    await this._indexProxy.changeContent<IdentityIndexContent>(({ [key]: _remove, ...content }) => {
+      return content
+    })
   }
 }

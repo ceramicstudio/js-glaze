@@ -1,5 +1,7 @@
 export type DocID = string
 
+export type IndexKey = string
+
 export interface Definition<T extends Record<string, unknown> = Record<string, unknown>> {
   name: string
   schema: DocID
@@ -10,26 +12,10 @@ export interface Definition<T extends Record<string, unknown> = Record<string, u
 
 export type DefinitionsAliases = Record<string, DocID>
 
-export interface Entry {
-  tags: Array<string>
+export interface ContentEntry {
+  key: IndexKey
   ref: DocID
-}
-
-export interface DefinitionEntry extends Entry {
-  def: DocID
-}
-
-export interface ContentEntry extends DefinitionEntry {
   content: unknown
 }
 
-export type IdentityIndexContent = Record<DocID, Entry>
-
-export type SchemaType =
-  | 'BasicProfile'
-  | 'Definition'
-  | 'DocIdDocIdMap'
-  | 'DocIdMap'
-  | 'IdentityIndex'
-  | 'StringMap'
-export type SchemasAliases = Record<SchemaType, DocID>
+export type IdentityIndexContent = Record<IndexKey, DocID>
