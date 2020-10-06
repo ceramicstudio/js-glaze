@@ -1,23 +1,10 @@
 ---
-title: Understanding authentication
+title: Using authentication
 ---
 
 Authentication in [IDX](idx-terminology.md#identity-index--idx) and [Ceramic](idx-terminology.md#ceramic) is based on [Decentralized Identifiers (DIDs)](idx-terminology.md#did).
 
-## Reading from a known Identity Index
-
-It is possible to interact with IDX in a **read-only** manner by providing a known DID to read from, such as:
-
-```ts
-import { IDX } from '@ceramicstudio/idx'
-
-// See constructor options
-const idx = new IDX(...)
-
-await idx.get('<Definition DocID>', '<Known DID>')
-```
-
-However, this only works if the content is **public**. If the content has been encrypted for a **specific recipient**, the [Ceramic instance](libs-types.md#ceramicapi) used by the [`IDX` instance](libs-idx.md#idx-class) **needs to be authenticated**.
+## Checking and authenticating the IDX instance
 
 It is possible to check if the Ceramic instance is authenticated and request authentication directly on the `IDX` instance:
 

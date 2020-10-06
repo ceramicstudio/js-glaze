@@ -96,7 +96,7 @@ module.exports = {
           ]
         }
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Ceramic Studio.`
+      copyright: 'made with ❤️ by 3Box Labs'
     }
   },
   presets: [
