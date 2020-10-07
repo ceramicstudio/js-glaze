@@ -30,11 +30,11 @@ npm install --dev @ceramicstudio/idx-tools
 
 ## Definitions and Schemas
 
-All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to have [Definion](idx-terminology.md#definition).
+All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to have [Definition](idx-terminology.md#definition).
 
-Once a public Ceramic network is running, the IDX library will provide a set of Definions that can be used directly, but in the meantime these needs to be defined by developers using IDX.
+Once a public Ceramic network is running, the IDX library will provide a set of Definitions that can be used directly, but in the meantime these needs to be defined by developers using IDX.
 
-To create a Defininion, a specific [Schema](idx-terminology.md#schema) needs to be used, and therefore must be present on the Ceramic node used by the IDX instance.
+To create a Defininition, a specific [Schema](idx-terminology.md#schema) needs to be used, and therefore must be present on the Ceramic node used by the IDX instance.
 The [`idx-tools` library](https://github.com/ceramicstudio/js-idx-tools) can be used to easily publish schemas to the Ceramic node:
 
 ```ts

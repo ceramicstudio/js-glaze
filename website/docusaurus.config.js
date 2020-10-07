@@ -7,6 +7,11 @@ module.exports = {
   organizationName: 'ceramicstudio',
   projectName: 'js-idx',
   themeConfig: {
+    algolia: {
+      apiKey: '3c3073cbb52b20e3ede88100fbace482',
+      indexName: 'idx',
+      searchParameters: { facetFilters: ['type:lvl2', 'version:current'] }
+    },
     colorMode: {
       defaultMode: 'light',
       disableSwitch: true,
@@ -91,7 +96,7 @@ module.exports = {
           ]
         }
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Ceramic Studio.`
+      copyright: 'made with ❤️ by 3Box Labs'
     }
   },
   presets: [

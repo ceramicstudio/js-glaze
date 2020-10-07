@@ -174,7 +174,7 @@ export default function Home() {
             Github
           </Link>
           <Link className="button button--primary" to={useBaseUrl('docs')}>
-            Get started
+            Docs
           </Link>
         </div>
       </nav>
@@ -389,9 +389,7 @@ export default function Home() {
                   url="https://twitter.com/identityindex"
                 />
               </div>
-              <div className={styles.footerCopyright}>
-                Copyright 3Box Labs {new Date().getFullYear()}
-              </div>
+              <div className={styles.footerCopyright}>made with ❤️ by 3Box Labs</div>
             </div>
           </div>
         </footer>
