@@ -16,7 +16,7 @@ npm install @ceramicstudio/idx
 
 ## Documentation
 
-- [Specification](https://idx.xyz/docs/idx-introduction)
+- [Specification](https://idx.xyz/docs/)
 - [Libraries](https://idx.xyz/docs/libs-getting-started)
 
 ## License
