@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
-import { publishedSchemas } from '@ceramicstudio/idx-tools'
+import { schemas } from '@ceramicstudio/idx-constants'
 
 import { IDX } from '../src/index'
 
@@ -301,7 +301,7 @@ describe('IDX', () => {
       })
 
       test('calls the resolver and extract the root ID', async () => {
-        const doc = {} as any
+        const doc = { metadata: { schema: schemas.IdentityIndex } } as any
         const resolve = jest.fn(() => {
           return Promise.resolve({
             service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
@@ -314,6 +314,29 @@ describe('IDX', () => {
         idx._loadDocument = loadDoc
 
         await expect(idx._getIDXDoc('did:test:123')).resolves.toBe(doc)
+        expect(resolve).toHaveBeenCalledTimes(1)
+        expect(resolve).toHaveBeenCalledWith('did:test:123')
+        expect(loadDoc).toHaveBeenCalledTimes(1)
+        expect(loadDoc).toHaveBeenCalledWith('ceramic://test')
+        expect(idx._didCache['did:test:123']).toBe('ceramic://test')
+      })
+
+      test('throws an error if the document is not a valid IdentityIndex', async () => {
+        const doc = { metadata: { schema: 'ceramic://other' } } as any
+        const resolve = jest.fn(() => {
+          return Promise.resolve({
+            service: [{ type: 'IdentityIndexRoot', serviceEndpoint: 'ceramic://test' }]
+          })
+        })
+        const loadDoc = jest.fn(() => Promise.resolve(doc))
+
+        const idx = new IDX({ ceramic: {} } as any)
+        idx._resolver.resolve = resolve as any
+        idx._loadDocument = loadDoc
+
+        await expect(idx._getIDXDoc('did:test:123')).rejects.toThrow(
+          'Invalid document: schema is not IdentityIndex'
+        )
         expect(resolve).toHaveBeenCalledTimes(1)
         expect(resolve).toHaveBeenCalledWith('did:test:123')
         expect(loadDoc).toHaveBeenCalledTimes(1)
@@ -371,7 +394,7 @@ describe('IDX', () => {
       const loadDocument = jest.fn(() =>
         Promise.resolve({
           content: { name: 'definition' },
-          metadata: { schema: publishedSchemas.Definition }
+          metadata: { schema: schemas.Definition }
         })
       )
       const idx = new IDX({ ceramic: { loadDocument } } as any)
@@ -389,7 +412,9 @@ describe('IDX', () => {
         })
       )
       const idx = new IDX({ ceramic: { loadDocument } } as any)
-      await expect(idx.getDefinition('ceramic://test')).rejects.toThrow('Invalid definition')
+      await expect(idx.getDefinition('ceramic://test')).rejects.toThrow(
+        'Invalid document: schema is not Definition'
+      )
     })
   })
 

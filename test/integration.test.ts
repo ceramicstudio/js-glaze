@@ -3,7 +3,7 @@
  */
 
 import { CeramicApi } from '@ceramicnetwork/ceramic-common'
-import { publishIDXConfig, publishedDefinitions } from '@ceramicstudio/idx-tools'
+import { definitions } from '@ceramicstudio/idx-constants'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
 import { IDX } from '..'
@@ -13,12 +13,8 @@ declare global {
 }
 
 describe('integration', () => {
-  beforeAll(async () => {
-    await publishIDXConfig(ceramic)
-  })
-
   test('get and set an IDX definition', async () => {
-    const profileID = publishedDefinitions.basicProfile
+    const profileID = definitions.basicProfile
 
     const writer = new IDX({
       ceramic,

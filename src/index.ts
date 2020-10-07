@@ -1,5 +1,6 @@
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
 import { CeramicApi, Doctype, DocMetadata } from '@ceramicnetwork/ceramic-common'
+import { schemas } from '@ceramicstudio/idx-constants'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
 import { DID, DIDProvider, ResolverOptions } from 'dids'
@@ -15,10 +16,8 @@ import {
 } from './types'
 import { getIDXRoot, toCeramicString, toCeramicURL } from './utils'
 
-const DEFINITION_SCHEMA_DOCID =
-  'ceramic://bagcqcerayzl65zpukldtsp2bgy4rhsvdagkba27osgzepnw3xg5bhzg4dcwq'
-
 export * from './types'
+export * from './utils'
 
 export interface AuthenticateOptions {
   paths?: Array<string>
@@ -170,13 +169,24 @@ export class IDX {
     let rootId
     rootId = this._didCache[did]
     if (rootId === null) {
+      // If explicitly `null` the DID has already been resolved and does not support IDX
       return null
     }
+
     if (rootId == null) {
+      // If undefined try to resolve the DID and check support for IDX
       rootId = await this.getIDXDocID(did)
       this._didCache[did] = rootId
+      if (rootId == null) {
+        return null
+      }
     }
-    return rootId == null ? null : await this._loadDocument(rootId)
+
+    const doc = await this._loadDocument(rootId)
+    if (doc.metadata.schema !== schemas.IdentityIndex) {
+      throw new Error('Invalid document: schema is not IdentityIndex')
+    }
+    return doc
   }
 
   async _getOwnIDXDoc(): Promise<Doctype> {
@@ -191,8 +201,8 @@ export class IDX {
 
   async getDefinition(idOrKey: DocID | IndexKey): Promise<Definition> {
     const doc = await this._loadDocument(idOrKey)
-    if (doc.metadata.schema !== DEFINITION_SCHEMA_DOCID) {
-      throw new Error('Invalid definition')
+    if (doc.metadata.schema !== schemas.Definition) {
+      throw new Error('Invalid document: schema is not Definition')
     }
     return doc.content as Definition
   }

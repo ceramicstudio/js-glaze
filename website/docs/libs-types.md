@@ -210,7 +210,7 @@ interface IDXOptions {
 }
 ```
 
-### AuthenticateOptions
+## AuthenticateOptions
 
 Options used by the [`authenticate` method](libs-idx.md#authenticate) of the `IDX` class
 
@@ -221,7 +221,7 @@ interface AuthenticateOptions {
 }
 ```
 
-### CreateOptions
+## CreateOptions
 
 Options used by the [`set` method](libs-idx.md#set) of the `IDX` class
 

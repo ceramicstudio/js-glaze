@@ -17,13 +17,13 @@
     "react-dom": "^16.8.4"
   },
   "devDependencies": {
-    "@docusaurus/core": "2.0.0-alpha.63",
+    "@docusaurus/core": "2.0.0-alpha.65",
     "@docusaurus/module-type-aliases": "^2.0.0-alpha.51",
-    "@docusaurus/preset-classic": "2.0.0-alpha.63",
+    "@docusaurus/preset-classic": "2.0.0-alpha.65",
     "@tsconfig/docusaurus": "^1.0.2",
-    "@types/react": "^16.9.49",
+    "@types/react": "^16.9.51",
     "@types/react-helmet": "^6.1.0",
-    "@types/react-router-dom": "^5.1.5",
+    "@types/react-router-dom": "^5.1.6",
     "typescript": "^4.0.3"
   },
   "browserslist": {
