@@ -38,6 +38,14 @@ The [ID](idx-terminology.md#docid) of a [Ceramic Document](idx-terminology.md#do
 type DocID = string
 ```
 
+## IndexKey
+
+An opaque key used to identify references in the [Identity Index](#identityindexcontent)
+
+```ts
+type IndexKey = string
+```
+
 ## Schema
 
 A type representing a [JSON Schema](idx-terminology.md#schema)
@@ -63,32 +71,15 @@ interface Definition<T = unknown> {
 ## DefinitionsAliases
 
 ```ts
-type DefinitionsAliases = Record<string, DocID>
-```
-
-## Entry
-
-An [entry](idx-terminology.md#entry) in the [Identity Index](idx-terminology.md#identity-index--idx)
-
-```ts
-interface Entry {
-  tags: Array<string>
-  ref: DocID
-}
-```
-
-## DefinitionEntry
-
-```ts
-interface DefinitionEntry extends Entry {
-  def: DocID
-}
+type DefinitionsAliases = Record<string, IndexKey | DocID>
 ```
 
 ## ContentEntry
 
 ```ts
-interface ContentEntry extends DefinitionEntry {
+interface ContentEntry {
+  key: IndexKey
+  ref: DocID
   content: unknown
 }
 ```
@@ -98,7 +89,7 @@ interface ContentEntry extends DefinitionEntry {
 Represents the shape of the content stored in the [Identity Index](idx-terminology.md#identity-index--idx)
 
 ```ts
-type IdentityIndexContent = Record<DocID, Entry>
+type IdentityIndexContent = Record<IndexKey, DocID>
 ```
 
 ## EncodedDagJWS
@@ -216,11 +207,10 @@ interface IDXOptions {
   ceramic: CeramicApi
   definitions?: DefinitionsAliases
   resolver?: ResolverOptions
-  schemas: SchemasAliases
 }
 ```
 
-### AuthenticateOptions
+## AuthenticateOptions
 
 Options used by the [`authenticate` method](libs-idx.md#authenticate) of the `IDX` class
 
@@ -231,33 +221,12 @@ interface AuthenticateOptions {
 }
 ```
 
-### CreateOptions
+## CreateOptions
 
-Options used by the [`createDocument` method](libs-idx.md#createdocument) of the `IDX` class
+Options used by the [`set` method](libs-idx.md#set) of the `IDX` class
 
 ```ts
 interface CreateOptions {
   pin?: boolean
-}
-```
-
-### CreateContentOptions
-
-Options used by the [`setEntryContent` method](libs-idx.md#setentrycontent) of the `IDX` class
-
-```ts
-interface CreateContentOptions extends CreateOptions {
-  tags?: Array<string>
-}
-```
-
-### ContentIteratorOptions
-
-Options used by the [`contentIterator` method](libs-idx.md#contentiterator) of the `IDX` class
-
-```ts
-interface ContentIteratorOptions {
-  did?: string
-  tag?: string
 }
 ```

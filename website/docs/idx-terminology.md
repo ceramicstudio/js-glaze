@@ -25,11 +25,15 @@ A **Document** is a representation of structured data on the [Ceramic network](#
 
 A **Document Identifier (DocID)** is a URL representing a [Document](#document). Multiple APIs in the [IDX library](libs-idx.md) use DocIDs as inputs and/or outputs.
 
+## IndexKey
+
+An **Index Key** is a key in the [Identity Index](#identity-index--idx). It should be treated as an opaque string.
+
 ## Identity Index / IDX
 
 The **Identity Index** and **IDX** can sometimes both be used to refer to the [Identity Index specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), but in this documentation the term **Identity Index** will always be used to refer to the [specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), while **IDX** refers to the library, or possibly the [`IDX` class](libs-idx.md#idx-class) in code snippets.
 
-The **Identity Index contents** refers to the mapping of a [Definition](#definition), represented by its [DocID](#docid), to an [Entry](#entry).
+The **Identity Index contents** refers to the mapping of a [Definition](#definition), represented by its [IndexKey](#indexkey), to a referenced [DocID](#docid).
 The contents are stored in a [Document](#document) that the [IDX library](libs-idx.md) interacts with.
 
 ## Schema
@@ -41,7 +45,3 @@ A [JSON schema](https://json-schema.org/) may be used to validate the structure 
 A **Definition** is a specific type of [Document](#document) used by the [IDX library](libs-idx.md) to represent other documents in the [Identity Index](idx-terminology.md#identity-index--idx).
 
 A **Definition** is based on a specific [Schema](#schema) describing the document it represents, notably the Schema used to validate the document.
-
-## Entry
-
-An **Entry** is a simple data structure containing of a `ref` [DocID](#docid) for the content [Document](#document), and a set of string `tags` used for content discovery.
