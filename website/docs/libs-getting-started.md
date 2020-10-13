@@ -20,6 +20,12 @@ This library is used by apps to interact with Ceramic and IDX documents
 npm install @ceramicstudio/idx
 ```
 
+Alternatively, if you want to use IDX in a Web browser, the [IDX Web](libs-web.md) can be used instead:
+
+```sh
+npm install @ceramicstudio/idx-web
+```
+
 ### IDX tools library
 
 This library contains tools for developers to help create the data models used by apps
@@ -30,7 +36,7 @@ npm install --dev @ceramicstudio/idx-tools
 
 ## Definitions and Schemas
 
-All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to have [Definition](idx-terminology.md#definition).
+All [Documents](idx-terminology.md#document) attached to the [Identity Index](idx-terminology.md#identity-index--idx) need to use a [Definition](idx-terminology.md#definition).
 
 Once a public Ceramic network is running, the IDX library will provide a set of Definitions that can be used directly, but in the meantime these needs to be defined by developers using IDX.
 

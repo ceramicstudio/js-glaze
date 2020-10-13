@@ -1,7 +1,8 @@
 {
   "name": "@ceramicstudio/idx",
   "author": "Ceramic Studio",
-  "version": "0.2.0",
+  "homepage": "https://idx.xyz",
+  "version": "0.2.1",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/idx.esm.js",
@@ -23,22 +24,22 @@
     "analyze": "size-limit --why"
   },
   "dependencies": {
-    "@ceramicnetwork/3id-did-resolver": "^0.4.4",
-    "@ceramicstudio/idx-constants": "^0.2.0",
+    "@ceramicnetwork/3id-did-resolver": "^0.4.5",
+    "@ceramicstudio/idx-constants": "^0.2.1",
     "dataloader": "^2.0.0",
     "did-resolver": "^2.1.1",
     "dids": "^0.6.4"
   },
   "devDependencies": {
-    "@ceramicnetwork/ceramic-common": "^0.10.0",
+    "@ceramicnetwork/ceramic-common": "^0.10.1",
     "@size-limit/preset-small-lib": "^4.6.0",
     "@types/jest": "^26.0.14",
     "eslint-config-3box": "^0.2.0",
     "husky": "^4.3.0",
     "jest-environment-ceramic": "^0.5.1",
     "size-limit": "^4.6.0",
-    "tsdx": "^0.14.0",
-    "tslib": "^2.0.2",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.0.3",
     "typescript": "^4.0.3"
   },
   "husky": {

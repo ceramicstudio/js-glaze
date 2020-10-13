@@ -116,7 +116,7 @@ interface EncodedDagJWSResult {
 Name aliases of [Definitions](idx-terminology.md#definition) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXDefinitionName = 'basicProfile' | 'cryptoAccountLinks'
+type IDXDefinitionName = 'basicProfile' | 'cryptoAccountLinks' | 'threeIdKeychain'
 ```
 
 ## IDXSignedDefinitions
@@ -140,7 +140,12 @@ type IDXPublishedDefinitions = Record<IDXDefinitionName, DocID>
 Names of [Schemas](idx-terminology.md#schema) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXSchemaName = 'BasicProfile' | 'CryptoAccountLinks' | 'Definition' | 'IdentityIndex'
+type IDXSchemaName =
+  | 'BasicProfile'
+  | 'CryptoAccountLinks'
+  | 'Definition'
+  | 'IdentityIndex'
+  | 'ThreeIdKeychain'
 ```
 
 ## IDXSignedSchemas

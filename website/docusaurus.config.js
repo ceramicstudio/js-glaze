@@ -10,7 +10,7 @@ module.exports = {
     algolia: {
       apiKey: '3c3073cbb52b20e3ede88100fbace482',
       indexName: 'idx',
-      searchParameters: { facetFilters: ['type:lvl2', 'version:current'] }
+      searchParameters: { facetFilters: ['version:current'] }
     },
     colorMode: {
       defaultMode: 'light',
@@ -77,21 +77,29 @@ module.exports = {
               href: 'https://discord.gg/ZXR5eT8'
             },
             {
+              label: 'GitHub',
+              href: 'https://github.com/ceramicstudio/js-idx'
+            },
+            {
               label: 'Twitter',
               href: 'https://twitter.com/identityindex'
             }
           ]
         },
         {
-          title: 'More',
+          title: 'Ecosystem',
           items: [
-            // {
-            //   label: 'Blog',
-            //   to: 'blog',
-            // },
             {
-              label: 'GitHub',
-              href: 'https://github.com/ceramicstudio/js-idx'
+              label: 'Ceramic',
+              href: 'https://ceramic.network'
+            },
+            {
+              label: 'Identity Wallet',
+              href: 'https://github.com/3box/identity-wallet-js'
+            },
+            {
+              label: '3ID Connect',
+              href: 'https://github.com/3box/3id-connect'
             }
           ]
         }

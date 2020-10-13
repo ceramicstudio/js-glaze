@@ -1,6 +1,12 @@
 ---
-title: IDX library APIs
+title: IDX library
 ---
+
+## Installation
+
+```sh
+npm install @ceramicstudio/idx
+```
 
 ## IDX class
 

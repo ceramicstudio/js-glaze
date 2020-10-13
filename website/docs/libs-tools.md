@@ -2,6 +2,12 @@
 title: IDX Tools library
 ---
 
+## Installation
+
+```sh
+npm install @ceramicstudio/idx-tools
+```
+
 ## Constants
 
 ### schemas
@@ -12,6 +18,7 @@ A record of the [`Schemas`](libs-types.md#schema), keyed by [IDX schema name](li
 - `CryptoAccountLinks`: see [Crypto Account Links CIP](https://github.com/ceramicnetwork/CIP/issues/44)
 - `Definition` (CIP to be defined)
 - `IdentityIndex` see [Identity Index CIP](https://github.com/ceramicnetwork/CIP/issues/3)
+- `ThreeIdKeychain`
 
 **Returns** `Record<IDXSchemaName, Schema>`
 
