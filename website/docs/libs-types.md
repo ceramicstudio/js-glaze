@@ -32,11 +32,7 @@ JWS Signature interface exported by the [`dids` library](https://github.com/cera
 
 ## DocID
 
-The [ID](idx-terminology.md#docid) of a [Ceramic Document](idx-terminology.md#document)
-
-```ts
-type DocID = string
-```
+`DocID` instance exported by the [`@ceramicnetwork/docid` library](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/docid)
 
 ## IndexKey
 
@@ -61,7 +57,7 @@ A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-termin
 ```ts
 interface Definition<T = unknown> {
   name: string
-  schema: DocID
+  schema: string
   description?: string
   url?: string
   config?: T
@@ -71,7 +67,7 @@ interface Definition<T = unknown> {
 ## DefinitionsAliases
 
 ```ts
-type DefinitionsAliases = Record<string, IndexKey | DocID>
+type DefinitionsAliases = Record<string, string>
 ```
 
 ## ContentEntry
@@ -79,7 +75,7 @@ type DefinitionsAliases = Record<string, IndexKey | DocID>
 ```ts
 interface ContentEntry {
   key: IndexKey
-  ref: DocID
+  ref: string
   content: unknown
 }
 ```
@@ -89,7 +85,7 @@ interface ContentEntry {
 Represents the shape of the content stored in the [Identity Index](idx-terminology.md#identity-index--idx)
 
 ```ts
-type IdentityIndexContent = Record<IndexKey, DocID>
+type IdentityIndexContent = Record<IndexKey, string>
 ```
 
 ## EncodedDagJWS
@@ -132,7 +128,7 @@ type IDXSignedDefinitions = Record<IDXDefinitionName, DagJWSResult>
 Record of [Definitions](idx-terminology.md#definition) published to [Ceramic](idx-terminology.md#ceramic)
 
 ```ts
-type IDXPublishedDefinitions = Record<IDXDefinitionName, DocID>
+type IDXPublishedDefinitions = Record<IDXDefinitionName, string>
 ```
 
 ## IDXSchemaName
@@ -161,7 +157,7 @@ type IDXSignedSchemas = Record<IDXSchemaName, DagJWSResult>
 Record of [Schemas](idx-terminology.md#schema) published to [Ceramic](idx-terminology.md#ceramic)
 
 ```ts
-type IDXPublishedSchemas = Record<IDXSchemaName, DocID>
+type IDXPublishedSchemas = Record<IDXSchemaName, string>
 ```
 
 ## IDXPublishedConfig
@@ -179,10 +175,10 @@ interface IDXPublishedConfig {
 
 ```ts
 interface PublishDoc<T = unknown> {
-  id?: DocID
+  id?: DocID | string
   content: T
-  owners?: Array<string>
-  schema?: DocID
+  controllers?: Array<string>
+  schema?: DocID | string
 }
 ```
 
@@ -190,7 +186,7 @@ interface PublishDoc<T = unknown> {
 
 ```ts
 interface DefinitionDoc extends PublishDoc<Definition> {
-  id: DocID
+  id: DocID | string
 }
 ```
 

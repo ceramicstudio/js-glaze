@@ -20,7 +20,7 @@ This library is used by apps to interact with Ceramic and IDX documents
 npm install @ceramicstudio/idx
 ```
 
-Alternatively, if you want to use IDX in a Web browser, the [IDX Web](libs-web.md) can be used instead:
+Alternatively, if you want to use IDX in a Web browser, the [IDX Web library](libs-web.md) can be used instead:
 
 ```sh
 npm install @ceramicstudio/idx-web

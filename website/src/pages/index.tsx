@@ -15,7 +15,7 @@ import styles from './styles.module.css'
 const DESCRIPTION =
   'The most popular developer framework for building applications with decentralized identity and user-centric data'
 
-const DISCORD_URL = 'https://discord.gg/ZXR5eT8'
+const DISCORD_URL = 'https://chat.idx.xyz'
 const GITHUB_URL = 'https://github.com/ceramicstudio/js-idx'
 
 const CODE_DEFINE = `import { definitions } from '@ceramicstudio/idx-constants'
@@ -64,18 +64,20 @@ function Layout({ children }: { children: ReactNode }) {
       <Head>
         <html lang="en" />
         <title>{title}</title>
-        <meta property="og:title" content={title} />
         <meta name="description" content={DESCRIPTION} />
         <meta
           name="keywords"
           content="idx, idx.xyz, identity index, index, web3, dweb, did, dids, identity, identity system, open identity, decentralized identity, decentralized identifier, user-centric data, user-managed data, interoperability, data, data sharing, share data, 3box, 3box labs, javascript, developers, developer tools, library, build, client, client-side, encryption, control, framework, self-sovereign identity, ssi, ssid, w3c, standard, standards, user control, privacy, ceramic, ceramic network, ceramic protocol, ipfs, filecoin, ethereum, flow, polkadot, near, blockchain, protocol, system, wallets, wallet, cross-chain, chain-agnostic, decentralized, distributed, distributed web, serverless, jamstack, user data, data management, identity management, user management, users, without servers, p2p, peer-to-peer, cross-platform, log-in, authentication, auth, platform, docs, documentation, tutorial, guides, reviews, best, popular, how to, easy, simple, open source, implementation, code, demo"
         />
         <link rel="shortcut icon" href={faviconUrl} />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:image" content={metaImageUrl} />
-        <meta property="twitter:image" content={metaImageUrl} />
-        <meta name="twitter:image:alt" content={`Image for ${title}`} />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:site" content="@identityindex" />
+        <meta name="twitter:image" content={metaImageUrl} />
+        <meta name="twitter:image:alt" content={`Image for ${title}`} />
       </Head>
       <div className="main-wrapper">{children}</div>
     </Providers>

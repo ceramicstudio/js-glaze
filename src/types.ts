@@ -1,21 +1,19 @@
-export type DocID = string
-
 export type IndexKey = string
 
 export interface Definition<T extends Record<string, unknown> = Record<string, unknown>> {
   name: string
-  schema: DocID
+  schema: string
   description?: string
   url?: string
   config?: T
 }
 
-export type DefinitionsAliases = Record<string, DocID>
+export type DefinitionsAliases = Record<string, string>
 
 export interface ContentEntry {
   key: IndexKey
-  ref: DocID
+  ref: string
   content: unknown
 }
 
-export type IdentityIndexContent = Record<IndexKey, DocID>
+export type IdentityIndexContent = Record<IndexKey, string>

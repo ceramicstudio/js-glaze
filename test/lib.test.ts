@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
+import DocID from '@ceramicnetwork/docid'
 import { schemas } from '@ceramicstudio/idx-constants'
 
 import { IDX } from '../src/index'
 
 describe('IDX', () => {
+  const testDocID = DocID.fromString(
+    'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
+  )
+
   test('`authenticated` property', () => {
     const idx1 = new IDX({ ceramic: {} } as any)
     expect(idx1.authenticated).toBe(false)
@@ -108,6 +113,79 @@ describe('IDX', () => {
       expect(setContent).toBeCalledWith('docId', content, { pin: false })
     })
 
+    describe('merge', () => {
+      test('with existing contents', async () => {
+        const content = { hello: 'test', foo: 'bar' }
+        const getContent = jest.fn(() => content)
+        const setContent = jest.fn(() => 'contentId')
+        const idx = new IDX({ definitions: { test: 'docId' } } as any)
+        idx._getContent = getContent as any
+        idx._setContent = setContent as any
+        await expect(idx.merge('test', { hello: 'world', added: 'value' })).resolves.toBe(
+          'contentId'
+        )
+        expect(setContent).toBeCalledWith(
+          'docId',
+          { hello: 'world', foo: 'bar', added: 'value' },
+          undefined
+        )
+      })
+
+      test('without existing contents', async () => {
+        const content = { hello: 'test', foo: 'bar' }
+        const getContent = jest.fn(() => null)
+        const setContent = jest.fn(() => 'contentId')
+        const idx = new IDX({ definitions: { test: 'docId' } } as any)
+        idx._getContent = getContent as any
+        idx._setContent = setContent as any
+        await expect(idx.merge('test', content)).resolves.toBe('contentId')
+        expect(setContent).toBeCalledWith('docId', content, undefined)
+      })
+    })
+
+    test('setAll', async () => {
+      const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+      const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
+      const setContentOnly = jest.fn(key => {
+        return key === 'first' ? [true, DocID.fromString(ref1)] : [false, DocID.fromString(ref2)]
+      })
+      const setReferences = jest.fn()
+
+      const idx = new IDX({} as any)
+      idx._setContentOnly = setContentOnly as any
+      idx._setReferences = setReferences as any
+
+      const refs = { first: `ceramic://${ref1}` }
+      await expect(idx.setAll({ first: 'foo', second: 'bar' })).resolves.toEqual(refs)
+      expect(setContentOnly).toBeCalledTimes(2)
+      expect(setReferences).toBeCalledWith(refs)
+    })
+
+    test('setDefaults', async () => {
+      const newID = DocID.fromString(
+        'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+      )
+      const definition = {}
+      const getDefinition = jest.fn(() => definition)
+      const getIDXContent = jest.fn(() => ({ def1: 'ref1', def2: 'ref2' }))
+      const createContent = jest.fn(() => newID)
+      const setReferences = jest.fn()
+
+      const idx = new IDX({} as any)
+      idx.getDefinition = getDefinition as any
+      idx.getIDXContent = getIDXContent as any
+      idx._createContent = createContent as any
+      idx._setReferences = setReferences as any
+
+      const refs = { def3: newID.toUrl('base36') }
+      await expect(
+        idx.setDefaults({ def1: { hello: 'world' }, def3: { added: 'value' } })
+      ).resolves.toEqual(refs)
+      expect(getDefinition).toBeCalledWith('def3')
+      expect(createContent).toBeCalledWith(definition, { added: 'value' }, undefined)
+      expect(setReferences).toBeCalledWith(refs)
+    })
+
     test('remove', async () => {
       const removeReference = jest.fn()
       const idx = new IDX({ definitions: { test: 'docId' } } as any)
@@ -119,16 +197,6 @@ describe('IDX', () => {
     describe('_toIndexKey', () => {
       test('resolves the existing alias', () => {
         const idx = new IDX({ definitions: { test: 'docId' } } as any)
-        expect(idx._toIndexKey('test')).toBe('docId')
-      })
-
-      test('converts a doc ID as needed', () => {
-        const idx = new IDX({} as any)
-        expect(idx._toIndexKey('ceramic://docId')).toBe('docId')
-      })
-
-      test('resolves the existing alias and converts from doc ID', () => {
-        const idx = new IDX({ definitions: { test: 'ceramic://docId' } } as any)
         expect(idx._toIndexKey('test')).toBe('docId')
       })
 
@@ -151,7 +219,7 @@ describe('IDX', () => {
         expect(createDocument).toBeCalledWith('tile', {
           content: { hello: 'test' },
           metadata: {
-            owners: ['did:test'],
+            controllers: ['did:test'],
             tags: ['test']
           }
         })
@@ -435,17 +503,17 @@ describe('IDX', () => {
       expect(load).toHaveBeenCalledWith('ceramic://test')
     })
 
-    describe('_setContent', () => {
+    describe('_setContentOnly', () => {
       test('existing definition ID', async () => {
         const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
         idx._getReference = (): Promise<any> => Promise.resolve('docId')
 
         const change = jest.fn()
-        const loadDocument = jest.fn(() => Promise.resolve({ change }))
+        const loadDocument = jest.fn(() => Promise.resolve({ change, id: 'docId' }))
         idx._loadDocument = loadDocument as any
 
         const content = { test: true }
-        await idx._setContent('defId', content)
+        await expect(idx._setContentOnly('defId', content)).resolves.toEqual([false, 'docId'])
         expect(loadDocument).toBeCalledWith('docId')
         expect(change).toBeCalledWith({ content })
       })
@@ -459,13 +527,41 @@ describe('IDX', () => {
         idx.getDefinition = getDefinition
         const createContent = jest.fn(() => Promise.resolve('docId'))
         idx._createContent = createContent
+
+        const content = { test: true }
+        await expect(idx._setContentOnly('defId', content, { pin: true })).resolves.toEqual([
+          true,
+          'docId'
+        ])
+        expect(getDefinition).toBeCalledWith('defId')
+        expect(createContent).toBeCalledWith(definition, content, { pin: true })
+      })
+    })
+
+    describe('_setContent', () => {
+      test('does not set the index key if it already exists', async () => {
+        const idx = new IDX({} as any)
+        const setContent = jest.fn(() => Promise.resolve([false, 'docId']))
+        idx._setContentOnly = setContent as any
         const setReference = jest.fn()
         idx._setReference = setReference
 
         const content = { test: true }
-        await idx._setContent('defId', content, { pin: true })
-        expect(getDefinition).toBeCalledWith('defId')
-        expect(createContent).toBeCalledWith(definition, content, { pin: true })
+        await idx._setContent('defId', content)
+        expect(setContent).toBeCalledWith('defId', content, undefined)
+        expect(setReference).not.toBeCalled()
+      })
+
+      test('adds the new index key', async () => {
+        const idx = new IDX({} as any)
+        const setContent = jest.fn(() => Promise.resolve([true, 'docId']))
+        idx._setContentOnly = setContent as any
+        const setReference = jest.fn()
+        idx._setReference = setReference
+
+        const content = { test: true }
+        await idx._setContent('defId', content)
+        expect(setContent).toBeCalledWith('defId', content, undefined)
         expect(setReference).toBeCalledWith('defId', 'docId')
       })
     })
@@ -506,8 +602,17 @@ describe('IDX', () => {
       const changeContent = jest.fn(change => change(content))
       const idx = new IDX({} as any)
       idx._indexProxy = { changeContent } as any
-      await expect(idx._setReference('testId', 'test')).resolves.toBeUndefined()
-      expect(changeContent).toReturnWith({ test: true, testId: 'test' })
+      await expect(idx._setReference('testId', testDocID)).resolves.toBeUndefined()
+      expect(changeContent).toReturnWith({ test: true, testId: testDocID.toUrl('base36') })
+    })
+
+    test('_setReferences', async () => {
+      const content = { test: true }
+      const changeContent = jest.fn(change => change(content))
+      const idx = new IDX({} as any)
+      idx._indexProxy = { changeContent } as any
+      await expect(idx._setReferences({ one: 'one', two: 'two' })).resolves.toBeUndefined()
+      expect(changeContent).toReturnWith({ test: true, one: 'one', two: 'two' })
     })
 
     test('_removeReference', async () => {

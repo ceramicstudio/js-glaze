@@ -66,7 +66,7 @@ To start the Ceramic daemon, having the Ceramic CLI installed as [instructed abo
 ceramic daemon
 ```
 
-## Bootsrap Ceramic for IDX
+## Bootstrap Ceramic for IDX
 
 The IDX library relies on some Ceramic documents used as schemas and definitions from the IDX specifications to be accessible on the Ceramic network.
 
