@@ -1,6 +1,7 @@
+import DocID from '@ceramicnetwork/docid'
 import { DIDDocument } from 'did-resolver'
 
-import { getIDXRoot, toCeramicString, toCeramicURL } from '../src/utils'
+import { getIDXRoot, toDocIDString } from '../src/utils'
 
 describe('utils', () => {
   test('getIDXRoot', () => {
@@ -18,13 +19,9 @@ describe('utils', () => {
     expect(getIDXRoot(doc3)).toBe('ceramic://test')
   })
 
-  test('toCeramicString', () => {
-    expect(toCeramicString('test')).toBe('test')
-    expect(toCeramicString('ceramic://test')).toBe('test')
-  })
-
-  test('toCeramicURL', () => {
-    expect(toCeramicURL('test')).toBe('ceramic://test')
-    expect(toCeramicURL('ceramic://test')).toBe('ceramic://test')
+  test('toDocIDString', () => {
+    const docID = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
+    expect(toDocIDString(docID)).toBe(docID)
+    expect(toDocIDString(DocID.fromString(docID))).toBe(docID)
   })
 })

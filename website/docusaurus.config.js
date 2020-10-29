@@ -38,7 +38,7 @@ module.exports = {
           position: 'left'
         },
         {
-          href: 'https://discord.gg/ZXR5eT8',
+          href: 'https://chat.idx.xyz',
           label: 'Discord',
           position: 'right'
         },
@@ -74,7 +74,7 @@ module.exports = {
           items: [
             {
               label: 'Discord',
-              href: 'https://discord.gg/ZXR5eT8'
+              href: 'https://chat.idx.xyz'
             },
             {
               label: 'GitHub',
