@@ -31,7 +31,7 @@ An **Index Key** is a key in the [Identity Index](#identity-index--idx). It shou
 
 ## Identity Index / IDX
 
-The **Identity Index** and **IDX** can sometimes both be used to refer to the [Identity Index specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), but in this documentation the term **Identity Index** will always be used to refer to the [specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), while **IDX** refers to the library, or possibly the [`IDX` class](libs-idx.md#idx-class) in code snippets.
+The **Identity Index** and **IDX** can sometimes both be used to refer to the [Identity Index specification CIP](https://github.com/ceramicnetwork/CIP/blob/cip/idx/CIPs/CIP-11/CIP-11.md), but in this documentation the term **Identity Index** will always be used to refer to the [specification CIP](https://github.com/ceramicnetwork/CIP/issues/3), while **IDX** refers to the library, or possibly the [`IDX` class](libs-idx.md#idx-class) in code snippets.
 
 The **Identity Index contents** refers to the mapping of a [Definition](#definition), represented by its [IndexKey](#indexkey), to a referenced [DocID](#docid).
 The contents are stored in a [Document](#document) that the [IDX library](libs-idx.md) interacts with.
