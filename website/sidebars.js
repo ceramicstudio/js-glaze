@@ -1,6 +1,7 @@
 module.exports = {
   docs: {
-    'Identity Index': ['idx-introduction', 'idx-terminology', 'idx-ecosystem'],
+    'Introduction': ['idx-welcome', 'idx-ecosystem'],
+    'Core Concepts': ['core-concepts-dids', 'core-concept-did-providers', 'core-concepts-indexes', 'core-concepts-definitions', 'core-concepts-references', 'core-concepts-schemas', 'core-concepts-ceramic'] 
     'IDX libraries': ['libs-getting-started', 'libs-types', 'libs-tools', 'libs-idx', 'libs-web'],
     Guides: ['guide-cli', 'guide-public-data', 'guide-authentication', 'guide-definitions']
   }
