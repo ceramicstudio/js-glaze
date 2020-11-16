@@ -3,7 +3,7 @@ title: Welcome
 slug: /
 ---
 
-IDX is a protocol and library for building applications with decentralized identity and portable, user-centric data. The IDX library is currently implemented in JavaScript/TypeScript.
+IDX is a protocol for building applications with decentralized identity and portable, user-centric data. IDX libraries are currently implemented in JavaScript/TypeScript.
 
 
 ## Getting Started
