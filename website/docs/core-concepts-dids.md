@@ -5,7 +5,7 @@ slug: /concepts/dids
 
 DIDs is a standard for globally-unique persistent decentralized identifiers specified by the [W3C](https://www.w3.org/TR/did-core/). The DID is a string identifier that resolves to a document which contains various pieces of metadata about the DID. The DID document usually contains public keys used for signature verification and encryption, and optionally other metadata. 
 
-IDX uses DIDs for indentifiers ([see below](#supported-implementations)) and also uses the DID document to store the [DocID](core-concepts-ceramic.md#docid) of the user's [index](core-concepts-index.md).
+IDX uses DIDs ([see below](#supported-implementations)) for authentication and signing/encrypting documents. It also uses the DID document to store the [DocID](core-concepts-ceramic.md#docid) of the user's [index](core-concepts-index.md).
 
 ## Specification
 
