@@ -3,7 +3,7 @@ title: What is Ceramic?
 slug: /concepts/ceramic
 ---
 
-In IDX, **Ceramic** is a decentralized network used for storing DIDs (such as [3ID](core-concepts-dids.md)) and IDX documents including [indexes](core-concepts-index.md), [definitions](core-concepts-definitions.md), [references](core-concepts-references.md), and [schemas](core-concepts-schemas.md).
+In IDX, **Ceramic** is a decentralized network used for storing DIDs (such as [3ID](core-concepts-dids.md)) and IDX documents including [indexes](core-concepts-index.md), [definitions](core-concepts-definitions.md), [references](core-concepts-references.md), and [schemas](core-concepts-schemas.md). IDX uses the Ceramic API, which is exposed by the [`js-ceramic` client](https://github.com/ceramicnetwork/js-ceramic).
 
 ## Core Concepts
 
