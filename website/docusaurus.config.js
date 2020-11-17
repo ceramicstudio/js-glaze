@@ -19,7 +19,7 @@ module.exports = {
     },
     image: 'img/idx_opengraph.png',
     navbar: {
-      hideOnScroll: true,
+      hideOnScroll: false,
       logo: {
         alt: 'IDX',
         src: '/img/logo_idx.png'
