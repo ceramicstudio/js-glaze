@@ -1,7 +1,7 @@
 ## v0.3.0 (2020-10-29)
 
 - Updated to support Ceramic v0.12 - this changed the schemas and definitions IDs
-- Added `merge`, `setAll` and `setDefaults` methods.
+- Added `merge`, `setAll` and `setDefaults` methods
 
 ## v0.2.0 (2020-10-07)
 

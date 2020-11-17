@@ -26,6 +26,12 @@ module.exports = {
       },
       items: [
         {
+          to: 'docs/concepts/dids',
+          activeBasePath: 'docs/concepts',
+          label: 'Core concepts',
+          position: 'left'
+        },
+        {
           to: 'docs/libs-getting-started',
           activeBasePath: 'docs/libs',
           label: 'Libraries',
