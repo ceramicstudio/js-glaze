@@ -23,7 +23,7 @@ module.exports = {
       hideOnScroll: false,
       logo: {
         alt: 'IDX',
-        src: '/img/logo_idx.png'
+        src: 'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png'
       },
       items: [
         {
