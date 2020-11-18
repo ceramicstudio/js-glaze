@@ -18,31 +18,14 @@ module.exports = {
       respectPrefersColorScheme: false
     },
     image: 'img/idx_opengraph.png',
+    sidebarCollapsible: true,
     navbar: {
-      hideOnScroll: true,
+      hideOnScroll: false,
       logo: {
         alt: 'IDX',
-        src: '/img/logo_idx.png'
+        src: 'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png'
       },
       items: [
-        {
-          to: 'docs/concepts/dids',
-          activeBasePath: 'docs/concepts',
-          label: 'Core concepts',
-          position: 'left'
-        },
-        {
-          to: 'docs/libs-getting-started',
-          activeBasePath: 'docs/libs',
-          label: 'Libraries',
-          position: 'left'
-        },
-        {
-          to: 'docs/guide-authentication',
-          activeBasePath: 'docs/guide',
-          label: 'Guides',
-          position: 'left'
-        },
         {
           href: 'https://chat.idx.xyz',
           label: 'Discord',
