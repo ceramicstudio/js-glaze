@@ -18,6 +18,7 @@ module.exports = {
       respectPrefersColorScheme: false
     },
     image: 'img/idx_opengraph.png',
+    sidebarCollapsible: false,
     navbar: {
       hideOnScroll: false,
       logo: {
