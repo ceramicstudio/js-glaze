@@ -106,10 +106,6 @@ a > code {
   display: none;
 }
 
-.DocSearch span {
-  display: none!important;
-}
-
 .DocSearch-Footer {
   display: none!important;
 }
