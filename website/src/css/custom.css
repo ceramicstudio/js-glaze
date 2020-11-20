@@ -77,10 +77,6 @@ a > code {
   padding: 0 var(--ifm-pre-padding);
 }
 
-.footer {
-  display: none;
-}
-
 .DocSearch-Button :hover {
   background: var(--docsearch-searchbox-background)!important;
 }
@@ -140,11 +136,6 @@ a > code {
   font-size: 2.5rem;
 }
 
-.row .col {
-  max-width: 750px;
-  margin-left: 3%;
-}
-
 .row .col.col--3 {
   display: none!important;
 }
@@ -164,10 +155,6 @@ code {
 
 .markdown>h3 {
   font-size: 1.4rem;
-}
-
-.table-of-contents {
-  display:none;
 }
 
 .navbar {
