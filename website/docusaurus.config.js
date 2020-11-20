@@ -38,63 +38,6 @@ module.exports = {
         }
       ]
     },
-    footer: {
-      style: 'dark',
-      links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Introduction',
-              to: 'docs'
-            },
-            {
-              label: 'Libraries',
-              to: 'docs/libs-getting-started'
-            },
-            {
-              label: 'Guides',
-              to: 'docs/guide-authentication'
-            }
-          ]
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'Discord',
-              href: 'https://chat.idx.xyz'
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/ceramicstudio/js-idx'
-            },
-            {
-              label: 'Twitter',
-              href: 'https://twitter.com/identityindex'
-            }
-          ]
-        },
-        {
-          title: 'Ecosystem',
-          items: [
-            {
-              label: 'Ceramic',
-              href: 'https://ceramic.network'
-            },
-            {
-              label: 'Identity Wallet',
-              href: 'https://github.com/3box/identity-wallet-js'
-            },
-            {
-              label: '3ID Connect',
-              href: 'https://github.com/3box/3id-connect'
-            }
-          ]
-        }
-      ],
-      copyright: 'made with ❤️ by 3Box Labs'
-    }
   },
   presets: [
     [

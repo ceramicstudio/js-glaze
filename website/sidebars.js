@@ -30,11 +30,11 @@ module.exports = {
       label: 'Guides',
       items: ['guide-cli', 'guide-public-data', 'guide-authentication', 'guide-definitions']
     },
-    {
-      type: 'category',
-      label: 'Tutorials',
-      items: ['tutorial-build-a-simple-notes-app']
-    },
+    // {
+    //   type: 'category',
+    //   label: 'Tutorials',
+    //   items: ['tutorial-build-a-simple-notes-app']
+    // },
     {
       type: 'category',
       label: 'Community',
