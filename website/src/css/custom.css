@@ -52,14 +52,14 @@
   --ifm-menu-color: black;
   --ifm-code-background: #f4efff;
   --ifm-code-font-size: 85%;
-  --docsearch-muted-color: var(--ifm-color-primary)!important;
-  --docsearch-footer-height: 0px!important;
-  --docsearch-footer-background: none!important;
-  --docsearch-footer-shadow: none!important;
-  --docsearch-key-shadow: none!important;
-  --docsearch-key-gradient: none!important;
-  --docsearch-searchbox-background: #f4efff!important;
-  --docsearch-text-color: var(--ifm-color-primary)!important;
+  --docsearch-muted-color: var(--ifm-color-primary) !important;
+  --docsearch-footer-height: 0px !important;
+  --docsearch-footer-background: none !important;
+  --docsearch-footer-shadow: none !important;
+  --docsearch-key-shadow: none !important;
+  --docsearch-key-gradient: none !important;
+  --docsearch-searchbox-background: #f4efff !important;
+  --docsearch-text-color: var(--ifm-color-primary) !important;
 }
 
 a > code {
@@ -77,11 +77,11 @@ a > code {
   padding: 0 var(--ifm-pre-padding);
 }
 
-.DocSearch-Button :hover {
-  background: var(--docsearch-searchbox-background)!important;
+.DocSearch-Button :hover  {
+  background: var(--docsearch-searchbox-background) !important;
 }
 
-.main-wrapper a img {
+.main-wrapper a img  {
   opacity: 0;
 }
 
@@ -103,7 +103,7 @@ a > code {
 }
 
 .DocSearch-Footer {
-  display: none!important;
+  display: none !important;
 }
 
 .menu {
@@ -132,7 +132,7 @@ a > code {
   border: 1px solid #d2d2d2;
 }
 
-.col h1 {
+.col h1  {
   font-size: 2.5rem;
 }
 
@@ -140,16 +140,16 @@ code {
   color: #211f27;
 }
 
-.hash-link {
-  padding-left: 0.7rem; 
+.hash-link  {
+  padding-left: 0.7rem;
   font-size: 1.5rem;
 }
 
-.markdown>h2 {
+.markdown > h2 {
   font-size: 1.75rem;
 }
 
-.markdown>h3 {
+.markdown > h3 {
   font-size: 1.4rem;
 }
 
@@ -163,82 +163,97 @@ code {
 
 .button--secondary:not(.button--outline) {
   background: var(--ifm-color-primary);
-  border: 1px solid white!important;
-  color: white!important;
-  padding: 15px!important;
-  border-radius: 50px!important;
+  border: 1px solid white !important;
+  color: white !important;
+  padding: 15px !important;
+  border-radius: 50px !important;
 }
 
 .menu--show {
-  background: var(--ifm-color-primary)!important;
+  background: var(--ifm-color-primary) !important;
 }
 
 .DocSearch-Button-Placeholder {
-  display: none!important;
+  display: none !important;
 }
 
 .DocSearch-Button-Key {
-  display: none!important;
+  display: none !important;
 }
 
 @media (min-width: 997px) {
-
-  div[class^="docSidebarContainer"] {
-    width: 25vw!important;
-    min-width: 300px!important;
-    max-width: 450px!important;
-    padding-left: 4vw!important;
+  div[class^='docSidebarContainer'] {
+    width: 25vw !important;
+    min-width: 300px !important;
+    max-width: 450px !important;
+    padding-left: 4vw !important;
   }
 
-  div[class^="sidebar"] {
-    padding-top: 8rem!important;
+  div[class^='sidebar'] {
+    padding-top: 8rem !important;
   }
 
   .padding-vert--lg {
-    padding-top: 4.7rem!important;
+    padding-top: 4.7rem !important;
   }
 }
 
 @media (max-width: 996px) {
-  
-  .navbar__toggle {
+  .navbar__toggle  {
     display: none;
   }
 
   .padding-vert--lg {
-    padding-bottom: 6rem!important;
+    padding-bottom: 6rem !important;
   }
 
   .navbar {
-    padding-left: 1.3rem!important;
-    padding-right: 1.3rem!important;
+    padding-left: 1.3rem !important;
+    padding-right: 1.3rem !important;
   }
   .navbar__item {
-    display: flex!important;
+    display: flex !important;
   }
   .menu__link--sublist.menu__link--active {
-    color: white!important;
-    background: none!important;
+    color: white !important;
+    background: none !important;
   }
   .menu__link--active {
-    background: var(--ifm-color-primary-light)!important;
+    background: var(--ifm-color-primary-light) !important;
   }
   .menu__link {
-    color: white!important;
+    color: white !important;
   }
   .menu__link:hover {
-    background: var(--ifm-color-primary-light)!important;
+    background: var(--ifm-color-primary-light) !important;
   }
   .menu {
-    background: var(--ifm-color-primary)!important;
+    background: var(--ifm-color-primary) !important;
   }
   .menu__link--active:not(.menu__link--sublist) {
-    color: white!important;
+    color: white !important;
   }
 }
 
 @media (max-width: 1320px) and (min-width: 997px) {
   .container {
-    max-width: none!important;
+    max-width: none !important;
   }
+}
+
+.navbar-icon {
+  display: inline-block;
+  width: 60px;
+  height: 32px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.navbar-discord {
+  background-image: url('/img/social_discord.svg');
+}
+
+.navbar-github {
+  background-image: url('/img/social_github.svg');
 }

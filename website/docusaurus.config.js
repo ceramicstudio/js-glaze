@@ -23,21 +23,22 @@ module.exports = {
       hideOnScroll: false,
       logo: {
         alt: 'IDX',
-        src: 'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png'
+        src:
+          'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png'
       },
       items: [
         {
+          className: 'navbar-icon navbar-discord',
           href: 'https://chat.idx.xyz',
-          label: 'Discord',
           position: 'right'
         },
         {
+          className: 'navbar-icon navbar-github',
           href: 'https://github.com/ceramicstudio/js-idx',
-          label: 'GitHub',
           position: 'right'
         }
       ]
-    },
+    }
   },
   presets: [
     [

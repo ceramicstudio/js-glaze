@@ -8,7 +8,7 @@ import TabItem from '@theme/TabItem'
 import ThemeProvider from '@theme/ThemeProvider'
 import UserPreferencesProvider from '@theme/UserPreferencesProvider'
 import clsx from 'clsx'
-import React, { ReactNode } from 'react'
+import React, { CSSProperties, ReactNode } from 'react'
 
 import styles from './styles.module.css'
 
@@ -150,13 +150,14 @@ function ContentRow({ children, image, imageFirst, title }: ContentRowProps) {
 
 interface SocialLinkProps {
   logo: string
+  style?: CSSProperties
   title: string
   url: string
 }
-function SocialLink({ logo, title, url }: SocialLinkProps) {
+function SocialLink({ logo, style, title, url }: SocialLinkProps) {
   return (
     <Link to={url}>
-      <img alt={title} src={`img/social_${logo}.png`} title={title} />
+      <img alt={title} src={`img/social_${logo}.svg`} style={style} title={title} />
     </Link>
   )
 }
@@ -383,10 +384,16 @@ export default function Home() {
                 <span className={styles.footerLogo}>
                   <img alt="IDX" src="img/logo_idx.png" />
                 </span>
-                <SocialLink logo="discord" title="Discord" url={DISCORD_URL} />
-                <SocialLink logo="github" title="GitHub" url={GITHUB_URL} />
+                <SocialLink
+                  logo="discord"
+                  style={{ height: 32 }}
+                  title="Discord"
+                  url={DISCORD_URL}
+                />
+                <SocialLink logo="github" style={{ height: 32 }} title="GitHub" url={GITHUB_URL} />
                 <SocialLink
                   logo="twitter"
+                  style={{ height: 28 }}
                   title="Twitter"
                   url="https://twitter.com/identityindex"
                 />
