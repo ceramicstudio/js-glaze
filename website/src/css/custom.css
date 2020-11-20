@@ -41,25 +41,25 @@
   --ifm-heading-color: black;
   --ifm-hero-text-color: black;
   --ifm-toc-border-color: #ffffff;
-  --ifm-navbar-background-color: transparent;
-  --ifm-navbar-height: 6rem;
-  --ifm-navbar-padding-horizontal: 5%;
+  --ifm-navbar-background-color: white;
+  --ifm-navbar-height: 4rem;
+  --ifm-navbar-padding-horizontal: 5vw;
   --ifm-navbar-shadow: none;
   --ifm-menu-link-sublist-icon: none;
   --ifm-menu-link-padding-vertical: 0.5rem;
   --ifm-menu-color-background-active: #f4efff;
   --ifm-menu-color-background-hover: #f4efff;
-  --ifm-menu-color: #5d5967;
+  --ifm-menu-color: black;
   --ifm-code-background: #f4efff;
   --ifm-code-font-size: 85%;
-  --docsearch-muted-color: var(--ifm-color-primary);
-  --docsearch-footer-height: 0px;
-  --docsearch-footer-background: none;
-  --docsearch-footer-shadow: none;
-  --docsearch-key-shadow: none;
-  --docsearch-key-gradient: none;
-  --docsearch-searchbox-background: #f4efff;
-  --docsearch-text-color: var(--ifm-color-primary);
+  --docsearch-muted-color: var(--ifm-color-primary)!important;
+  --docsearch-footer-height: 0px!important;
+  --docsearch-footer-background: none!important;
+  --docsearch-footer-shadow: none!important;
+  --docsearch-key-shadow: none!important;
+  --docsearch-key-gradient: none!important;
+  --docsearch-searchbox-background: #f4efff!important;
+  --docsearch-text-color: var(--ifm-color-primary)!important;
 }
 
 a > code {
@@ -81,8 +81,8 @@ a > code {
   display: none;
 }
 
-.DocSearch-Button:hover {
-  background: var(--docsearch-searchbox-background);
+.DocSearch-Button :hover {
+  background: var(--docsearch-searchbox-background)!important;
 }
 
 .main-wrapper a img {
@@ -99,7 +99,7 @@ a > code {
 }
 
 .navbar__items--right {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 ::-webkit-scrollbar {
@@ -124,22 +124,11 @@ a > code {
 }
 
 .menu__link--sublist.menu__link--active {
-  color: #5d5967;
+  color: black;
 }
 
 .menu__link--active:not(.menu__link--sublist) {
-  color: rgb(244 239 255);
-}
-
-.menu__link--active {
-  font-weight: 500;
-}
-
-.menu--responsive .menu__button {
-  bottom: revert;
-  top: 2rem;
-  padding-left: 10px;
-  padding-right: 10px;
+  color: var(--ifm-color-primary);
 }
 
 .button--secondary:not(.button--outline) {
@@ -152,8 +141,12 @@ a > code {
 }
 
 .row .col {
-  max-width: 650px;
+  max-width: 750px;
   margin-left: 3%;
+}
+
+.row .col.col--3 {
+  display: none!important;
 }
 
 code {
@@ -173,27 +166,96 @@ code {
   font-size: 1.4rem;
 }
 
-@media (min-width: 997px) {
-  .menu {
-    width: 25vw;
-    padding-left: 5vw;
-    padding-top: 4rem;
+.table-of-contents {
+  display:none;
+}
+
+.navbar {
+  border-bottom: 1px solid #f4efff;
+}
+
+.navbar__toggle {
+  display: none;
+}
+
+.button--secondary:not(.button--outline) {
+  background: var(--ifm-color-primary);
+  border: 1px solid white!important;
+  color: white!important;
+  padding: 15px!important;
+  border-radius: 50px!important;
+}
+
+.menu--show {
+  background: var(--ifm-color-primary)!important;
+}
+
+.DocSearch-Button-Placeholder {
+  display: none!important;
+}
+
+.DocSearch-Button-Key {
+  display: none!important;
+}
+
+@media (min-width: 997px) {
+
+  div[class^="docSidebarContainer"] {
+    width: 25vw!important;
+    min-width: 300px!important;
+    max-width: 450px!important;
+    padding-left: 4vw!important;
   }
+
+  div[class^="sidebar"] {
+    padding-top: 8rem!important;
+  }
+
   .padding-vert--lg {
-    padding-top: 4rem!important;
+    padding-top: 4.7rem!important;
   }
 }
 
-@media (max-width: 996px) {
+@media (max-width: 996px) {
+  
   .navbar__toggle {
     display: none;
   }
-  .menu--responsive .menu__button {
-    position: absolute;
-    top: -4rem;
-    left: 1rem;
+
+  .padding-vert--lg {
+    padding-bottom: 6rem!important;
+  }
+
+  .navbar {
+    padding-left: 1.3rem!important;
+    padding-right: 1.3rem!important;
   }
   .navbar__item {
-    display: none;
+    display: flex!important;
+  }
+  .menu__link--sublist.menu__link--active {
+    color: white!important;
+    background: none!important;
+  }
+  .menu__link--active {
+    background: var(--ifm-color-primary-light)!important;
+  }
+  .menu__link {
+    color: white!important;
+  }
+  .menu__link:hover {
+    background: var(--ifm-color-primary-light)!important;
+  }
+  .menu {
+    background: var(--ifm-color-primary)!important;
+  }
+  .menu__link--active:not(.menu__link--sublist) {
+    color: white!important;
+  }
+}
+
+@media (max-width: 1320px) and (min-width: 997px) {
+  .container {
+    max-width: none!important;
   }
 }
