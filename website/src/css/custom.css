@@ -136,10 +136,6 @@ a > code {
   font-size: 2.5rem;
 }
 
-.row .col.col--3 {
-  display: none!important;
-}
-
 code {
   color: #211f27;
 }
