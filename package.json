@@ -2,7 +2,7 @@
   "name": "@ceramicstudio/idx",
   "author": "Ceramic Studio",
   "homepage": "https://idx.xyz",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/idx.esm.js",
@@ -24,25 +24,23 @@
     "analyze": "size-limit --why"
   },
   "dependencies": {
-    "@ceramicnetwork/3id-did-resolver": "^0.4.7",
-    "@ceramicstudio/idx-constants": "^0.3.0",
-    "dataloader": "^2.0.0",
-    "did-resolver": "^2.1.1",
-    "dids": "^0.7.0"
+    "@ceramicstudio/idx-constants": "^0.4.0",
+    "dataloader": "^2.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/ceramic-common": "^0.12.0",
-    "@ceramicnetwork/docid": "^0.2.0",
-    "@ceramicstudio/idx-tools": "^0.3.1",
-    "@size-limit/preset-small-lib": "^4.7.0",
+    "@ceramicnetwork/common": "^0.14.0",
+    "@ceramicnetwork/docid": "^0.3.0",
+    "@size-limit/preset-small-lib": "^4.9.0",
     "@types/jest": "^26.0.15",
+    "dids": "^1.1.0",
     "eslint-config-3box": "^0.2.0",
     "husky": "^4.3.0",
-    "jest-environment-idx": "^0.1.0",
-    "size-limit": "^4.7.0",
+    "jest-environment-idx": "^0.2.0",
+    "prettier": "^2.2.1",
+    "size-limit": "^4.9.0",
     "tsdx": "^0.14.1",
     "tslib": "^2.0.3",
-    "typescript": "^4.0.5"
+    "typescript": "^4.1.2"
   },
   "husky": {
     "hooks": {
@@ -60,11 +58,11 @@
   "size-limit": [
     {
       "path": "dist/idx.cjs.production.min.js",
-      "limit": "20 KB"
+      "limit": "10 KB"
     },
     {
       "path": "dist/idx.esm.js",
-      "limit": "20 KB"
+      "limit": "10 KB"
     }
   ]
 }

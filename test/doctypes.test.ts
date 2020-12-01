@@ -28,7 +28,7 @@ describe('DoctypeProxy', () => {
     const results = await Promise.all([
       proxy.change(mutateFirst),
       proxy.change(mutateSecond),
-      proxy.get()
+      proxy.get(),
     ])
 
     expect(results).toEqual([undefined, undefined, 'second'])
@@ -73,7 +73,7 @@ describe('DoctypeProxy', () => {
     const results = await Promise.all([
       wrapSettle(proxy.change(mutateFirst)),
       wrapSettle(proxy.change(mutateSecond)),
-      wrapSettle(proxy.get())
+      wrapSettle(proxy.get()),
     ])
     for (const res of results) {
       expect(res.status).toBe('rejected')
@@ -91,7 +91,7 @@ describe('DoctypeProxy', () => {
     const [resFirst, resSecond, resGet] = await Promise.all([
       wrapSettle(proxy.change(mutateFirst)),
       wrapSettle(proxy.change(mutateSecond)),
-      wrapSettle(proxy.get())
+      wrapSettle(proxy.get()),
     ])
 
     expect(resFirst.status).toBe('rejected')
@@ -107,12 +107,12 @@ describe('DoctypeProxy', () => {
 
   test('changeContent creates the mutation function', async () => {
     const doc = { content: { test: true } }
-    const change = jest.fn(data => {
+    const change = jest.fn((data) => {
       Object.assign(doc, data)
     })
     const getRemote = jest.fn(() => Promise.resolve({ ...doc, change }))
     const proxy = new DoctypeProxy(getRemote)
-    await proxy.changeContent(content => ({ ...content, hello: 'test' }))
+    await proxy.changeContent((content) => ({ ...content, hello: 'test' }))
     expect(getRemote).toBeCalledTimes(1)
     expect(change).toBeCalledWith({ content: { test: true, hello: 'test' } })
   })
@@ -128,7 +128,7 @@ describe('DoctypeProxy', () => {
       proxy.change(mutateFirst),
       proxy.get(),
       proxy.change(mutateSecond),
-      proxy.get()
+      proxy.get(),
     ])
 
     expect(getRemote).toBeCalledTimes(2)

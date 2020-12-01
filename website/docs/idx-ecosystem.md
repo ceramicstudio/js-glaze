@@ -27,10 +27,6 @@ The main [IDX library](libs-idx.md) used to interact with IdentityIndex document
 
 The [IDX Tools library](libs-tools.md) provides development utilities to help build applications leveraging IDX.
 
-### IDX Web
-
-The [IDX Web library](libs-web.md) extends the main IDX library with browser-specific features, notably authenticating using 3ID Connect.
-
 ## Other tools
 
 ### Ceramic CLI

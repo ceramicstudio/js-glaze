@@ -5,20 +5,16 @@ slug: /introduction/components
 
 This page contains an overview of the libraries and components utilized within IDX.
 
-
 ## Application Libraries
+
 JavaScript/TypeScript libraries used within your application.
 
 ### IDX
 
 [`js-idx`](libs-idx.md) is the core library used to interact with the IDX protocol.
 
-### IDX Web
-
-[`js-web`](libs-web.md) extends `js-idx` with browser-specific features, notably authenticating using [3ID Connect](#3id-connect).
-
-
 ## Developer Utilities
+
 Libraries used during development with IDX.
 
 ### IDX Tools
@@ -28,7 +24,6 @@ Libraries used during development with IDX.
 ### IDX CLI
 
 [idx-cli](https://github.com/ceramicstudio/idx-cli#idx-cli) provides various commands to interact with DIDs and IDX documents, as introduced in this [getting started guide](guide-cli.md). Note, the `idx-cli` requires the Ceramic CLI below.
-
 
 ## Dependencies
 

@@ -4,7 +4,7 @@ title: Interfaces and types
 
 ## CeramicApi
 
-Ceramic API interface exported by the [`@ceramicnetwork/ceramic-common` library](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/ceramic-common)
+Ceramic API interface exported by the [`@ceramicnetwork/common` library](https://docs.ceramic.network/modules/_ceramicnetwork_common.html)
 
 ## DID
 
@@ -16,23 +16,15 @@ DID Provider interface exported by the [`dids` library](https://github.com/ceram
 
 ## Doctype
 
-Doctype interface exported by the [`@ceramicnetwork/ceramic-common` library](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/ceramic-common)
+Doctype interface exported by the [`@ceramicnetwork/common` library](https://docs.ceramic.network/modules/_ceramicnetwork_common.html)
 
 ## JWSSignature
 
 JWS Signature interface exported by the [`dids` library](https://github.com/ceramicnetwork/js-did)
 
-## Resolver
-
-`Resolver` instance exported by the [`did-resolver` library](https://github.com/decentralized-identity/did-resolver)
-
-## ResolverOptions
-
-`ResolverOptions` interface exported by the [`dids` library](https://github.com/ceramicnetwork/js-did)
-
 ## DocID
 
-`DocID` instance exported by the [`@ceramicnetwork/docid` library](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/docid)
+`DocID` instance exported by the [`@ceramicnetwork/docid` library](https://docs.ceramic.network/modules/_ceramicnetwork_docid.html)
 
 ## IndexKey
 
@@ -58,7 +50,7 @@ A [Definition](idx-terminology.md#definition) is a [Ceramic Document](idx-termin
 interface Definition<T = unknown> {
   name: string
   schema: string
-  description?: string
+  description: string
   url?: string
   config?: T
 }
@@ -138,7 +130,7 @@ Names of [Schemas](idx-terminology.md#schema) provided by the [IDX tools library
 ```ts
 type IDXSchemaName =
   | 'BasicProfile'
-  | 'CryptoAccountLinks'
+  | 'CryptoAccounts'
   | 'Definition'
   | 'IdentityIndex'
   | 'ThreeIdKeychain'
@@ -204,10 +196,9 @@ Options used by the [IDX class constructor](libs-idx.md#constructor)
 
 ```ts
 interface IDXOptions {
+  aliases?: DefinitionsAliases
   autopin?: boolean
   ceramic: CeramicApi
-  definitions?: DefinitionsAliases
-  resolver?: ResolverOptions
 }
 ```
 

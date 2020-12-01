@@ -1,4 +1,4 @@
-import { Doctype } from '@ceramicnetwork/ceramic-common'
+import type { Doctype } from '@ceramicnetwork/common'
 
 export type MutationFunc<T = Doctype> = (current: T) => Promise<T>
 
@@ -64,7 +64,7 @@ export class DoctypeProxy<T extends Doctype = Doctype> {
       const value = await this._getRemote()
       this._next(value)
     } catch (err) {
-      this._queue.forEach(item => {
+      this._queue.forEach((item) => {
         item.reject(err)
       })
       this._queue = []

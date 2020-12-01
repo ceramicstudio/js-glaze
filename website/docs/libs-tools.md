@@ -34,21 +34,9 @@ A record of the signed [`schemas`](#schemas)
 
 **Returns** `Record<IDXSchemaName, DagJWSResult>`
 
-### publishedDefinitions
-
-A record of published [`Definitions`](idx-terminology.md#definition), keyed by [IDX definition name](libs-types.md#idxdefinitionname):
-
-**Returns** `Record<IDXDefinitionName, DocID>`
-
-### publishedSchemas
-
-A record of the published [`schemas`](#schemas)
-
-**Returns** `Record<IDXSchemaName, DocID>`
-
 ## API
 
-### validateSchema
+### isSecureSchema
 
 Checks if a [JSON Schema](libs-types.md#schema) is valid and secure according to [Ajv's secure schema](https://github.com/ajv-validator/ajv#security-risks-of-trusted-schemas)
 
