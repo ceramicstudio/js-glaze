@@ -1,20 +1,18 @@
-import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
-import { CeramicApi, Doctype, DocMetadata } from '@ceramicnetwork/ceramic-common'
-import DocID from '@ceramicnetwork/docid'
-import { schemas } from '@ceramicstudio/idx-constants'
+import type { CeramicApi, Doctype } from '@ceramicnetwork/common'
+import type DocID from '@ceramicnetwork/docid'
+import { definitions, schemas } from '@ceramicstudio/idx-constants'
 import DataLoader from 'dataloader'
-import { Resolver } from 'did-resolver'
-import { DID, DIDProvider, ResolverOptions } from 'dids'
+import type { DID, DIDProvider } from 'dids'
 
 import { DoctypeProxy } from './doctypes'
-import {
+import type {
   ContentEntry,
-  Definition,
   DefinitionsAliases,
+  DefinitionWithID,
   IdentityIndexContent,
-  IndexKey
+  IndexKey,
 } from './types'
-import { getIDXRoot, toDocIDString } from './utils'
+import { toDocIDString } from './utils'
 
 export * from './types'
 export * from './utils'
@@ -29,36 +27,27 @@ export interface CreateOptions {
 }
 
 export interface IDXOptions {
+  aliases?: DefinitionsAliases
   autopin?: boolean
   ceramic: CeramicApi
-  definitions?: DefinitionsAliases
-  resolver?: ResolverOptions
 }
 
 export class IDX {
+  _aliases: DefinitionsAliases
   _autopin: boolean
   _ceramic: CeramicApi
-  _definitions: DefinitionsAliases
-  _didCache: Record<string, string | null> = {}
   _docLoader: DataLoader<string, Doctype>
   _indexProxy: DoctypeProxy
-  _resolver: Resolver
 
-  constructor({ autopin, ceramic, definitions = {}, resolver = {} }: IDXOptions) {
+  constructor({ aliases = {}, autopin, ceramic }: IDXOptions) {
+    this._aliases = { ...definitions, ...aliases }
     this._autopin = autopin !== false
     this._ceramic = ceramic
-    this._definitions = definitions
 
     this._docLoader = new DataLoader(async (ids: ReadonlyArray<string>) => {
-      return await Promise.all(ids.map(async id => await this._ceramic.loadDocument<Doctype>(id)))
+      return await Promise.all(ids.map(async (id) => await this._ceramic.loadDocument<Doctype>(id)))
     })
     this._indexProxy = new DoctypeProxy(this._getOwnIDXDoc.bind(this))
-
-    const ceramicResolver = ThreeIDResolver.getResolver(ceramic)
-    const registry = resolver.registry
-      ? { ...resolver.registry, ...ceramicResolver }
-      : ceramicResolver
-    this._resolver = new Resolver(registry, resolver.cache)
   }
 
   get authenticated(): boolean {
@@ -67,10 +56,6 @@ export class IDX {
 
   get ceramic(): CeramicApi {
     return this._ceramic
-  }
-
-  get resolver(): Resolver {
-    return this._resolver
   }
 
   get did(): DID {
@@ -136,7 +121,7 @@ export class IDX {
 
     const newReferences = changes.reduce((acc, [created, key, id]) => {
       if (created) {
-        acc[key] = id.toUrl('base36')
+        acc[key] = id.toUrl()
       }
       return acc
     }, {} as IdentityIndexContent)
@@ -157,7 +142,7 @@ export class IDX {
       .map(async ([key, content]) => {
         const definition = await this.getDefinition(key as IndexKey)
         const id = await this._createContent(definition, content, options)
-        return { [key as IndexKey]: id.toUrl('base36') }
+        return { [key as IndexKey]: id.toUrl() }
       }) as Array<Promise<IdentityIndexContent>>
     const changes = await Promise.all(updates)
 
@@ -175,27 +160,17 @@ export class IDX {
   }
 
   _toIndexKey(name: string): IndexKey {
-    return this._definitions[name] ?? name
+    return this._aliases[name] ?? name
   }
 
   // Identity Index APIs
 
-  async getIDXDocID(did?: string): Promise<string | null> {
-    const userDoc = await this._resolver.resolve(did ?? this.id)
-    return getIDXRoot(userDoc) ?? null
-  }
-
-  async getIDXContent(did?: string): Promise<IdentityIndexContent | null> {
+  async getIDXContent(did?: string): Promise<IdentityIndexContent> {
     const rootDoc =
       this.authenticated && (did === this.id || did == null)
         ? await this._indexProxy.get()
         : await this._getIDXDoc(did ?? this.id)
-    return (rootDoc?.content as IdentityIndexContent) ?? null
-  }
-
-  async isSupported(did?: string): Promise<boolean> {
-    const id = await this.getIDXDocID(did)
-    return id !== null
+    return rootDoc?.content as IdentityIndexContent
   }
 
   contentIterator(did?: string): AsyncIterableIterator<ContentEntry> {
@@ -218,28 +193,23 @@ export class IDX {
         const [key, ref] = list[cursor++]
         const doc = await this._loadDocument(ref)
         return { done: false, value: { key, ref, content: doc.content } }
-      }
+      },
     }
   }
 
-  async _getIDXDoc(did: string): Promise<Doctype | null> {
-    let rootId
-    rootId = this._didCache[did]
-    if (rootId === null) {
-      // If explicitly `null` the DID has already been resolved and does not support IDX
-      return null
-    }
+  async _createIDXDoc(did: string): Promise<Doctype> {
+    return await this._ceramic.createDocument(
+      'tile',
+      {
+        deterministic: true,
+        metadata: { controllers: [did], family: 'IDX' },
+      },
+      { anchor: false, publish: false }
+    )
+  }
 
-    if (rootId == null) {
-      // If undefined try to resolve the DID and check support for IDX
-      rootId = await this.getIDXDocID(did)
-      this._didCache[did] = rootId
-      if (rootId == null) {
-        return null
-      }
-    }
-
-    const doc = await this._loadDocument(rootId)
+  async _getIDXDoc(did: string): Promise<Doctype> {
+    const doc = await this._createIDXDoc(did)
     if (doc.metadata.schema !== schemas.IdentityIndex) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -247,21 +217,24 @@ export class IDX {
   }
 
   async _getOwnIDXDoc(): Promise<Doctype> {
-    const doc = await this._getIDXDoc(this.id)
-    if (doc == null) {
-      throw new Error('IDX is not supported by the authenticated DID')
+    const doc = await this._createIDXDoc(this.id)
+    if (doc.metadata.schema == null) {
+      // Doc just got created, need to update it with schema
+      await doc.change({ metadata: { ...doc.metadata, schema: schemas.IdentityIndex } })
+    } else if (doc.metadata.schema !== schemas.IdentityIndex) {
+      throw new Error('Invalid document: schema is not IdentityIndex')
     }
     return doc
   }
 
   // Definition APIs
 
-  async getDefinition(idOrKey: DocID | IndexKey): Promise<Definition> {
+  async getDefinition(idOrKey: DocID | IndexKey): Promise<DefinitionWithID> {
     const doc = await this._loadDocument(idOrKey)
     if (doc.metadata.schema !== schemas.Definition) {
       throw new Error('Invalid document: schema is not Definition')
     }
-    return doc.content as Definition
+    return { ...doc.content, id: doc.id } as DefinitionWithID
   }
 
   // Content APIs
@@ -306,27 +279,25 @@ export class IDX {
   }
 
   async _createContent(
-    definition: Definition,
+    definition: DefinitionWithID,
     content: unknown,
-    options?: CreateOptions
-  ): Promise<DocID> {
-    const doc = await this._createDocument(content, { schema: definition.schema }, options)
-    return doc.id
-  }
-
-  async _createDocument(
-    content: unknown,
-    meta: Partial<DocMetadata> = {},
     { pin }: CreateOptions = {}
-  ): Promise<Doctype> {
-    const doc = await this._ceramic.createDocument('tile', {
-      content,
-      metadata: { controllers: [this.id], ...meta }
-    })
+  ): Promise<DocID> {
+    const metadata = { controllers: [this.id], family: definition.id.toString() }
+    // Doc must first be created in a deterministic way
+    const doc = await this._ceramic.createDocument(
+      'tile',
+      { deterministic: true, metadata },
+      { anchor: false, publish: false }
+    )
+    // Then be updated with content and schema
+    const updated = doc.change({ content, metadata: { ...metadata, schema: definition.schema } })
     if (pin ?? this._autopin) {
-      await this._ceramic.pin.add(doc.id)
+      await Promise.all([updated, this._ceramic.pin.add(doc.id)])
+    } else {
+      await updated
     }
-    return doc
+    return doc.id
   }
 
   // References APIs
@@ -337,14 +308,14 @@ export class IDX {
   }
 
   async _setReference(key: IndexKey, id: DocID): Promise<void> {
-    await this._indexProxy.changeContent<IdentityIndexContent>(content => {
-      return { ...content, [key]: id.toUrl('base36') }
+    await this._indexProxy.changeContent<IdentityIndexContent>((content) => {
+      return { ...content, [key]: id.toUrl() }
     })
   }
 
   async _setReferences(references: IdentityIndexContent): Promise<void> {
     if (Object.keys(references).length !== 0) {
-      await this._indexProxy.changeContent<IdentityIndexContent>(content => {
+      await this._indexProxy.changeContent<IdentityIndexContent>((content) => {
         return { ...content, ...references }
       })
     }

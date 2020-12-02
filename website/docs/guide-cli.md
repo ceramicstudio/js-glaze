@@ -9,7 +9,7 @@ The Ceramic and IDX CLIs require the [Node.js runtime](https://nodejs.org/en/) a
 If you have not installed the Ceramic CLI, it is recommended you use it alongside the IDX CLI, otherwise you will have to use a remote Ceramic server:
 
 ```sh
-npm install --global @ceramicnetwork/ceramic-cli
+npm install --global @ceramicnetwork/cli
 ```
 
 ## Installation

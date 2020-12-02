@@ -4,9 +4,9 @@ title: Getting Started
 
 ## Environment
 
-IDX needs to access the Ceramic network using an implementation of the Ceramic API as exported by the [`@ceramicnetwork/ceramic-common` library](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/ceramic-common).
+IDX needs to access the Ceramic network using an implementation of the Ceramic API as exported by the [`@ceramicnetwork/common` library](https://docs.ceramic.network/modules/_ceramicnetwork_common.html).
 
-Packages implementing this interface include [`@ceramicnetwork/ceramic-core`](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/ceramic-core) and [`@ceramicnetwork/ceramic-http-client`](https://github.com/ceramicnetwork/js-ceramic/tree/develop/packages/ceramic-http-client).
+Packages implementing this interface include [`@ceramicnetwork/core`](https://docs.ceramic.network/modules/_ceramicnetwork_core.html) and [`@ceramicnetwork/http-client`](https://docs.ceramic.network/modules/_ceramicnetwork_http_client.html).
 
 ## Installation
 
@@ -18,12 +18,6 @@ This library is used by apps to interact with Ceramic and IDX documents
 
 ```sh
 npm install @ceramicstudio/idx
-```
-
-Alternatively, if you want to use IDX in a Web browser, the [IDX Web library](libs-web.md) can be used instead:
-
-```sh
-npm install @ceramicstudio/idx-web
 ```
 
 ### IDX tools library
@@ -51,7 +45,7 @@ import { publishIDXConfig } from '@ceramicstudio/idx-tools'
 const { definitions } = await publishIDXConfig(ceramic)
 
 const appDefinitions = {
-  profile: definitions.basicProfile
+  profile: definitions.basicProfile,
 }
 
 // Export the created `appDefinitions` so they can be used at runtime

@@ -2,11 +2,11 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'idx-welcome' // Home
+      id: 'idx-welcome', // Home
     },
     {
       type: 'doc',
-      id: 'idx-components' // IDX Components
+      id: 'idx-components', // IDX Components
     },
     {
       type: 'category',
@@ -17,18 +17,18 @@ module.exports = {
         'core-concepts-definitions',
         'core-concepts-references',
         'core-concepts-schemas',
-        'core-concepts-ceramic'
-      ]
+        'core-concepts-ceramic',
+      ],
     },
     {
       type: 'category',
       label: 'API Reference',
-      items: ['libs-getting-started', 'libs-types', 'libs-tools', 'libs-idx', 'libs-web']
+      items: ['libs-getting-started', 'libs-types', 'libs-tools', 'libs-idx'],
     },
     {
       type: 'category',
       label: 'Guides',
-      items: ['guide-cli', 'guide-public-data', 'guide-authentication', 'guide-definitions']
+      items: ['guide-cli', 'guide-public-data', 'guide-authentication', 'guide-definitions'],
     },
     // {
     //   type: 'category',
@@ -42,19 +42,19 @@ module.exports = {
         {
           type: 'link',
           label: 'Discord', // string - the label that should be displayed.
-          href: 'https://chat.idx.xyz' // string - the target URL.
+          href: 'https://chat.idx.xyz', // string - the target URL.
         },
         {
           type: 'link',
           label: 'Github', // string - the label that should be displayed.
-          href: 'https://github.com/ceramicstudio/js-idx' // string - the target URL.
+          href: 'https://github.com/ceramicstudio/js-idx', // string - the target URL.
         },
         {
           type: 'link',
           label: 'Twitter', // string - the label that should be displayed.
-          href: 'https://twitter.com/identityindex' // string - the target URL.
-        }
-      ]
-    }
-  ]
+          href: 'https://twitter.com/identityindex', // string - the target URL.
+        },
+      ],
+    },
+  ],
 }

@@ -32,10 +32,6 @@ npm install @ceramicstudio/idx
 
 **Returns** [`CeramicApi`](libs-types.md#ceramicapi)
 
-### .resolver
-
-**Returns** [`Resolver`](libs-types.md#resolver)
-
 ### .did
 
 > Accessing this property will throw an error if the instance is not authenticated
@@ -47,18 +43,6 @@ npm install @ceramicstudio/idx
 > Accessing this property will throw an error if the instance is not authenticated
 
 **Returns** `string`
-
-### .isSupported
-
-Checks if the provided `did` supports IDX. Calling methods such as [get](#get) using a DID without IDX support will result in these methods returning `null` or other fallbacks.
-
-If the `did` argument is not provided, the check will be performed on the DID authenticated with the IDX instance. Calling mutation methods such as [set](#set) using a DID without IDX support will throw errors.
-
-**Arguments**
-
-1. `did?: string`
-
-**Returns** `Promise<boolean>`
 
 ### .has
 
@@ -140,16 +124,6 @@ Removes the definition for the `name` alias, [`IndexKey`](libs-types.md#indexkey
 
 **Returns** `Promise<void>`
 
-### .getIDXDocID
-
-Returns the [`DocID`](libs-types.md#docid) of the [Identity Index](idx-terminology.md#identity-index--idx) associated to the given `did`
-
-**Arguments**
-
-1. `did: string`
-
-**Returns** `Promise<DocID | null>`
-
 ### .getIDXContent
 
 Returns the [contents](libs-types.md#identityindexcontent) of the [Identity Index](idx-terminology.md#identity-index--idx) associated to the given `did`
@@ -158,7 +132,7 @@ Returns the [contents](libs-types.md#identityindexcontent) of the [Identity Inde
 
 1. `did?: string = this.id`
 
-**Returns** `Promise<IdentityIndexContent | null>`
+**Returns** `Promise<IdentityIndexContent>`
 
 ### .contentIterator
 
