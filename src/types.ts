@@ -5,7 +5,7 @@ export type IndexKey = string
 export interface Definition<T extends Record<string, unknown> = Record<string, unknown>> {
   name: string
   schema: string
-  description?: string
+  description: string
   url?: string
   config?: T
 }
