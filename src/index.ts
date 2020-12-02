@@ -220,10 +220,7 @@ export class IDX {
     const doc = await this._createIDXDoc(this.id)
     if (doc.metadata.schema == null) {
       // Doc just got created, need to update it with schema
-      await doc.change(
-        { metadata: { ...doc.metadata, schema: schemas.IdentityIndex } },
-        { anchor: true, publish: true }
-      )
+      await doc.change({ metadata: { ...doc.metadata, schema: schemas.IdentityIndex } })
     } else if (doc.metadata.schema !== schemas.IdentityIndex) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -294,10 +291,7 @@ export class IDX {
       { anchor: false, publish: false }
     )
     // Then be updated with content and schema
-    const updated = doc.change(
-      { content, metadata: { ...metadata, schema: definition.schema } },
-      { anchor: true, publish: true }
-    )
+    const updated = doc.change({ content, metadata: { ...metadata, schema: definition.schema } })
     if (pin ?? this._autopin) {
       await Promise.all([updated, this._ceramic.pin.add(doc.id)])
     } else {

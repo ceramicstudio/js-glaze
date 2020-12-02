@@ -307,10 +307,9 @@ describe('IDX', () => {
 
         await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(change).toHaveBeenCalledWith(
-          { metadata: { ...metadata, schema: schemas.IdentityIndex } },
-          { anchor: true, publish: true }
-        )
+        expect(change).toHaveBeenCalledWith({
+          metadata: { ...metadata, schema: schemas.IdentityIndex },
+        })
       })
 
       test('throws an error if the schema is not a valid IdentityIndex', async () => {
@@ -486,13 +485,10 @@ describe('IDX', () => {
           },
           { anchor: false, publish: false }
         )
-        expect(change).toBeCalledWith(
-          {
-            content,
-            metadata: { controllers: [id], family: 'defId', schema: 'schemaId' },
-          },
-          { anchor: true, publish: true }
-        )
+        expect(change).toBeCalledWith({
+          content,
+          metadata: { controllers: [id], family: 'defId', schema: 'schemaId' },
+        })
         expect(add).toBeCalledWith('docId')
       })
 
