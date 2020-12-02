@@ -1,4 +1,4 @@
-import type { CeramicApi, Doctype, DocMetadata } from '@ceramicnetwork/common'
+import type { CeramicApi, Doctype } from '@ceramicnetwork/common'
 import type DocID from '@ceramicnetwork/docid'
 import { definitions, schemas } from '@ceramicstudio/idx-constants'
 import DataLoader from 'dataloader'
@@ -197,15 +197,19 @@ export class IDX {
     }
   }
 
-  async _getIDXDoc(did: string): Promise<Doctype> {
-    const doc = await this._ceramic.createDocument(
+  async _createIDXDoc(did: string): Promise<Doctype> {
+    return await this._ceramic.createDocument(
       'tile',
       {
         deterministic: true,
-        metadata: { controllers: [did], family: 'IDX', schema: schemas.IdentityIndex },
+        metadata: { controllers: [did], family: 'IDX' },
       },
       { anchor: false, publish: false }
     )
+  }
+
+  async _getIDXDoc(did: string): Promise<Doctype> {
+    const doc = await this._createIDXDoc(did)
     if (doc.metadata.schema !== schemas.IdentityIndex) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -213,7 +217,17 @@ export class IDX {
   }
 
   async _getOwnIDXDoc(): Promise<Doctype> {
-    return await this._getIDXDoc(this.id)
+    const doc = await this._createIDXDoc(this.id)
+    if (doc.metadata.schema == null) {
+      // Doc just got created, need to update it with schema
+      await doc.change(
+        { metadata: { ...doc.metadata, schema: schemas.IdentityIndex } },
+        { anchor: true, publish: true }
+      )
+    } else if (doc.metadata.schema !== schemas.IdentityIndex) {
+      throw new Error('Invalid document: schema is not IdentityIndex')
+    }
+    return doc
   }
 
   // Definition APIs
@@ -270,29 +284,26 @@ export class IDX {
   async _createContent(
     definition: DefinitionWithID,
     content: unknown,
-    options?: CreateOptions
-  ): Promise<DocID> {
-    const doc = await this._createDocument(
-      content,
-      { family: definition.id.toString(), schema: definition.schema },
-      options
-    )
-    return doc.id
-  }
-
-  async _createDocument(
-    content: unknown,
-    meta: Partial<DocMetadata> = {},
     { pin }: CreateOptions = {}
-  ): Promise<Doctype> {
-    const doc = await this._ceramic.createDocument('tile', {
-      content,
-      metadata: { controllers: [this.id], ...meta },
-    })
+  ): Promise<DocID> {
+    const metadata = { controllers: [this.id], family: definition.id.toString() }
+    // Doc must first be created in a deterministic way
+    const doc = await this._ceramic.createDocument(
+      'tile',
+      { deterministic: true, metadata },
+      { anchor: false, publish: false }
+    )
+    // Then be updated with content and schema
+    const updated = doc.change(
+      { content, metadata: { ...metadata, schema: definition.schema } },
+      { anchor: true, publish: true }
+    )
     if (pin ?? this._autopin) {
-      await this._ceramic.pin.add(doc.id)
+      await Promise.all([updated, this._ceramic.pin.add(doc.id)])
+    } else {
+      await updated
     }
-    return doc
+    return doc.id
   }
 
   // References APIs

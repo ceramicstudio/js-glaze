@@ -198,62 +198,6 @@ describe('IDX', () => {
     })
   })
 
-  describe('Ceramic API wrappers', () => {
-    describe('_createDocument', () => {
-      test('pin by default', async () => {
-        const createDocument = jest.fn(() => ({ id: 'test' }))
-        const add = jest.fn()
-        const idx = new IDX({
-          ceramic: { createDocument, did: { id: 'did:test' }, pin: { add } },
-        } as any)
-        await idx._createDocument({ hello: 'test' }, { tags: ['test'] })
-        expect(createDocument).toBeCalledWith('tile', {
-          content: { hello: 'test' },
-          metadata: {
-            controllers: ['did:test'],
-            tags: ['test'],
-          },
-        })
-        expect(add).toBeCalledWith('test')
-      })
-
-      test('no pinning by setting instance option', async () => {
-        const createDocument = jest.fn()
-        const add = jest.fn()
-        const idx = new IDX({
-          autopin: false,
-          ceramic: { createDocument, did: { id: 'did:test' }, pin: { add } },
-        } as any)
-        await idx._createDocument({ hello: 'test' })
-        expect(createDocument).toBeCalled()
-        expect(add).not.toBeCalled()
-      })
-
-      test('explicit no pinning', async () => {
-        const createDocument = jest.fn()
-        const add = jest.fn()
-        const idx = new IDX({
-          autopin: true,
-          ceramic: { createDocument, did: { id: 'did:test' }, pin: { add } },
-        } as any)
-        await idx._createDocument({ hello: 'test' }, {}, { pin: false })
-        expect(createDocument).toBeCalled()
-        expect(add).not.toBeCalled()
-      })
-    })
-
-    test('_loadDocument', async () => {
-      const loadDocument = jest.fn()
-      const idx = new IDX({ ceramic: { loadDocument } } as any)
-      await Promise.all([
-        idx._loadDocument('one'),
-        idx._loadDocument('one'),
-        idx._loadDocument('two'),
-      ])
-      expect(loadDocument).toBeCalledTimes(2)
-    })
-  })
-
   describe('IdentityIndex APIs', () => {
     test('getIDXContent with provided DID', async () => {
       const get = jest.fn()
@@ -310,49 +254,90 @@ describe('IDX', () => {
       expect(loadDocument).toHaveBeenNthCalledWith(3, 'ceramic://doc3')
     })
 
+    test('_createIDXDoc', async () => {
+      const doc = {}
+      const createDocument = jest.fn(() => Promise.resolve(doc)) as any
+      const idx = new IDX({ ceramic: { createDocument } } as any)
+
+      await expect(idx._createIDXDoc('did:test:123')).resolves.toBe(doc)
+      expect(createDocument).toHaveBeenCalledTimes(1)
+      expect(createDocument).toHaveBeenCalledWith(
+        'tile',
+        {
+          deterministic: true,
+          metadata: { controllers: ['did:test:123'], family: 'IDX' },
+        },
+        { anchor: false, publish: false }
+      )
+    })
+
     describe('_getIDXDoc', () => {
-      test('calls the Ceramic node with the expected payload', async () => {
+      test('calls _createIDXDoc and check the schema', async () => {
         const doc = { metadata: { schema: schemas.IdentityIndex } } as any
-        const createDocument = jest.fn(() => Promise.resolve(doc))
-        const idx = new IDX({ ceramic: { createDocument } } as any)
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({} as any)
+        idx._createIDXDoc = createDoc
 
         await expect(idx._getIDXDoc('did:test:123')).resolves.toBe(doc)
-        expect(createDocument).toHaveBeenCalledTimes(1)
-        expect(createDocument).toHaveBeenCalledWith(
-          'tile',
-          {
-            deterministic: true,
-            metadata: {
-              controllers: ['did:test:123'],
-              family: 'IDX',
-              schema: schemas.IdentityIndex,
-            },
-          },
-          { anchor: false, publish: false }
-        )
+        expect(createDoc).toHaveBeenCalledWith('did:test:123')
       })
 
       test('throws an error if the document is not a valid IdentityIndex', async () => {
         const doc = { metadata: { schema: 'ceramic://other' } } as any
-        const createDocument = jest.fn(() => Promise.resolve(doc))
-        const idx = new IDX({ ceramic: { createDocument } } as any)
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({} as any)
+        idx._createIDXDoc = createDoc
 
         await expect(idx._getIDXDoc('did:test:123')).rejects.toThrow(
           'Invalid document: schema is not IdentityIndex'
         )
-        expect(createDocument).toHaveBeenCalledTimes(1)
+        expect(createDoc).toHaveBeenCalledTimes(1)
       })
     })
 
-    test('_getOwnIDXDoc', async () => {
-      const doc = {} as any
-      const getDoc = jest.fn(() => Promise.resolve(doc))
+    describe('_getOwnIDXDoc', () => {
+      test('creates and sets schema in update', async () => {
+        const id = 'did:test:123'
+        const metadata = { controllers: [id], family: 'IDX' }
+        const change = jest.fn()
+        const doc = { change, metadata } as any
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({ ceramic: { did: { id } } } as any)
+        idx._createIDXDoc = createDoc
 
-      const idx = new IDX({ ceramic: { did: { id: 'did:test:user' } } } as any)
-      idx._getIDXDoc = getDoc
+        await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
+        expect(createDoc).toHaveBeenCalledWith(id)
+        expect(change).toHaveBeenCalledWith(
+          { metadata: { ...metadata, schema: schemas.IdentityIndex } },
+          { anchor: true, publish: true }
+        )
+      })
 
-      await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
-      expect(getDoc).toBeCalledTimes(1)
+      test('throws an error if the schema is not a valid IdentityIndex', async () => {
+        const doc = { metadata: { schema: 'ceramic://other' } } as any
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({ ceramic: { did: { id: 'did:test:123' } } } as any)
+        idx._createIDXDoc = createDoc
+
+        await expect(idx._getOwnIDXDoc()).rejects.toThrow(
+          'Invalid document: schema is not IdentityIndex'
+        )
+        expect(createDoc).toHaveBeenCalledTimes(1)
+      })
+
+      test('returns the doc if valid', async () => {
+        const id = 'did:test:123'
+        const metadata = { controllers: [id], family: 'IDX', schema: schemas.IdentityIndex }
+        const change = jest.fn()
+        const doc = { change, metadata } as any
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({ ceramic: { did: { id } } } as any)
+        idx._createIDXDoc = createDoc
+
+        await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
+        expect(createDoc).toHaveBeenCalledWith(id)
+        expect(change).not.toHaveBeenCalled()
+      })
     })
   })
 
@@ -386,6 +371,17 @@ describe('IDX', () => {
   })
 
   describe('Content APIs', () => {
+    test('_loadDocument', async () => {
+      const loadDocument = jest.fn()
+      const idx = new IDX({ ceramic: { loadDocument } } as any)
+      await Promise.all([
+        idx._loadDocument('one'),
+        idx._loadDocument('one'),
+        idx._loadDocument('two'),
+      ])
+      expect(loadDocument).toBeCalledTimes(2)
+    })
+
     test('_getContent', async () => {
       const idx = new IDX({} as any)
       idx.getIDXContent = () => Promise.resolve(null)
@@ -465,23 +461,85 @@ describe('IDX', () => {
       })
     })
 
-    test('_createContent', async () => {
-      const idx = new IDX({} as any)
-      const createDocument = jest.fn(() => Promise.resolve({ id: 'docId' }))
-      idx._createDocument = createDocument as any
+    describe('_createContent', () => {
+      test('creates the deterministic doc and updates it', async () => {
+        const id = 'did:test:123'
+        const add = jest.fn()
+        const change = jest.fn()
+        const createDocument = jest.fn((_doctype, { metadata }, _opts) => {
+          return Promise.resolve({ id: 'docId', change, metadata })
+        })
+        const idx = new IDX({ ceramic: { createDocument, did: { id }, pin: { add } } } as any)
 
-      const definition = {
-        id: { toString: () => 'defId' },
-        name: 'test',
-        schema: 'schemaId',
-      } as any
-      const content = { test: true }
-      await idx._createContent(definition, content, { pin: true })
-      expect(createDocument).toBeCalledWith(
-        content,
-        { family: 'defId', schema: 'schemaId' },
-        { pin: true }
-      )
+        const definition = {
+          id: { toString: () => 'defId' },
+          name: 'test',
+          schema: 'schemaId',
+        } as any
+        const content = { test: true }
+        await expect(idx._createContent(definition, content, { pin: true })).resolves.toBe('docId')
+        expect(createDocument).toBeCalledWith(
+          'tile',
+          {
+            deterministic: true,
+            metadata: { controllers: [id], family: 'defId' },
+          },
+          { anchor: false, publish: false }
+        )
+        expect(change).toBeCalledWith(
+          {
+            content,
+            metadata: { controllers: [id], family: 'defId', schema: 'schemaId' },
+          },
+          { anchor: true, publish: true }
+        )
+        expect(add).toBeCalledWith('docId')
+      })
+
+      test('pin by default', async () => {
+        const add = jest.fn()
+        const change = jest.fn()
+        const createDocument = jest.fn((_doctype, { metadata }) => {
+          return Promise.resolve({ id: 'docId', change, metadata })
+        })
+        const idx = new IDX({
+          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+        } as any)
+
+        await idx._createContent({ id: { toString: () => 'defId' } } as any, {})
+        expect(change).toBeCalled()
+        expect(add).toBeCalledWith('docId')
+      })
+
+      test('no pinning by setting instance option', async () => {
+        const add = jest.fn()
+        const change = jest.fn()
+        const createDocument = jest.fn((_doctype, { metadata }) => {
+          return Promise.resolve({ id: 'docId', change, metadata })
+        })
+        const idx = new IDX({
+          autopin: false,
+          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+        } as any)
+        await idx._createContent({ id: { toString: () => 'defId' } } as any, {})
+        expect(change).toBeCalled()
+        expect(add).not.toBeCalled()
+      })
+
+      test('explicit no pinning', async () => {
+        const add = jest.fn()
+        const change = jest.fn()
+        const createDocument = jest.fn((_doctype, { metadata }) => {
+          return Promise.resolve({ id: 'docId', change, metadata })
+        })
+        const idx = new IDX({
+          autopin: true,
+          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+        } as any)
+        await idx._createContent({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
+        expect(change).toBeCalled()
+        expect(add).not.toBeCalled()
+      })
     })
   })
 
