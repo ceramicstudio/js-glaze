@@ -132,7 +132,7 @@ Returns the [contents](libs-types.md#identityindexcontent) of the [Identity Inde
 
 1. `did?: string = this.id`
 
-**Returns** `Promise<IdentityIndexContent>`
+**Returns** `Promise<IdentityIndexContent | null>`
 
 ### .contentIterator
 

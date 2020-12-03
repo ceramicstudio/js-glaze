@@ -282,6 +282,16 @@ describe('IDX', () => {
         expect(createDoc).toHaveBeenCalledWith('did:test:123')
       })
 
+      test('returns null if the schema is not set', async () => {
+        const doc = { metadata: {} } as any
+        const createDoc = jest.fn((_did) => Promise.resolve(doc))
+        const idx = new IDX({} as any)
+        idx._createIDXDoc = createDoc
+
+        await expect(idx._getIDXDoc('did:test:123')).resolves.toBeNull()
+        expect(createDoc).toHaveBeenCalledWith('did:test:123')
+      })
+
       test('throws an error if the document is not a valid IdentityIndex', async () => {
         const doc = { metadata: { schema: 'ceramic://other' } } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))

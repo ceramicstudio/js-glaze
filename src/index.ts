@@ -165,12 +165,12 @@ export class IDX {
 
   // Identity Index APIs
 
-  async getIDXContent(did?: string): Promise<IdentityIndexContent> {
+  async getIDXContent(did?: string): Promise<IdentityIndexContent | null> {
     const rootDoc =
       this.authenticated && (did === this.id || did == null)
         ? await this._indexProxy.get()
         : await this._getIDXDoc(did ?? this.id)
-    return rootDoc?.content as IdentityIndexContent
+    return rootDoc ? (rootDoc.content as IdentityIndexContent) : null
   }
 
   contentIterator(did?: string): AsyncIterableIterator<ContentEntry> {
@@ -208,8 +208,11 @@ export class IDX {
     )
   }
 
-  async _getIDXDoc(did: string): Promise<Doctype> {
+  async _getIDXDoc(did: string): Promise<Doctype | null> {
     const doc = await this._createIDXDoc(did)
+    if (doc.metadata.schema == null) {
+      return null
+    }
     if (doc.metadata.schema !== schemas.IdentityIndex) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
