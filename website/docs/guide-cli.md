@@ -29,7 +29,7 @@ Most commands of the IDX CLI need to communicate with a Ceramic HTTP server, usi
 By setting the `--ceramic` flag when running a command, it is possible to specify what Ceramic HTTP URL to use, for example:
 
 ```sh
-idx index:check <did> --ceramic=https://my-ceramic-server.tld
+idx index:inspect <did> --ceramic=https://my-ceramic-server.tld
 ```
 
 ### Environment variable
@@ -37,7 +37,7 @@ idx index:check <did> --ceramic=https://my-ceramic-server.tld
 If present, the `CERAMIC_URL` environment variable will be used by the CLI, for example on a UNIX system:
 
 ```sh
-CERAMIC_URL=https://my-ceramic-server.tld idx index:check <did>
+CERAMIC_URL=https://my-ceramic-server.tld idx index:inspect <did>
 ```
 
 ### CLI configuration
@@ -97,11 +97,11 @@ It is possible to display all the locally created DIDs and their labels by runni
 idx did:list
 ```
 
-## Check IDX support
+## Inspect the IDX document
 
-By running then `index:check` it is possible to check if a given DID supports IDX.
+By running then `index:inspect` it is possible to check the IDX document associated to a DID.
 
-Assuming you have created a DID using the step above, you can run the command to confirm your DID can be used with IDX:
+Assuming you have created a DID using the step above, you can run the following command:
 
 ```sh
 idx index:check me

@@ -37,10 +37,10 @@ IDX depends on [Ceramic](core-concepts-ceramic.md) for storing documents and [DI
 
 ### DID Providers
 
-#### Identity Wallet
+#### 3ID DID Provider
 
-[Identity Wallet](https://github.com/3box/identity-wallet-js) is a DID Provider used to instantiate and authenticate [3IDs](core-concepts-dids.md#supported-implementations), allowing them to create, sign, and update documents on Ceramic.
+[3ID DID Provider](https://github.com/ceramicstudio/js-3id-did-provider) is a DID Provider used to instantiate and authenticate [3IDs](core-concepts-dids.md#supported-implementations), allowing them to create, sign, and update documents on Ceramic.
 
 #### 3ID Connect
 
-[3ID Connect](https://github.com/ceramicstudio/3id-connect) provides an iframe-based version of Identity Wallet that can be used by Web applications. 3ID Connect allows users to rely on their existing Ethereum wallet for signing. Support for more blockchains is coming soon.
+[3ID Connect](https://github.com/ceramicstudio/3id-connect) provides an iframe-based version of 3ID DID Provider that can be used by Web applications. 3ID Connect allows users to rely on their existing Ethereum wallet for signing. Support for more blockchains is coming soon.

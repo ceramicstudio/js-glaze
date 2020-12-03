@@ -15,7 +15,7 @@ npm install @ceramicstudio/idx-tools
 A record of the [`Schemas`](libs-types.md#schema), keyed by [IDX schema name](libs-types.md#idxschemaname):
 
 - `BasicProfile`: see [Basic Profile CIP](https://github.com/ceramicnetwork/CIP/issues/32)
-- `CryptoAccountLinks`: see [Crypto Account Links CIP](https://github.com/ceramicnetwork/CIP/issues/44)
+- `CryptoAccounts`: see [Crypto Accounts CIP](https://github.com/ceramicnetwork/CIP/issues/44)
 - `Definition` (CIP to be defined)
 - `IdentityIndex` see [Identity Index CIP](https://github.com/ceramicnetwork/CIP/issues/3)
 - `ThreeIdKeychain`
