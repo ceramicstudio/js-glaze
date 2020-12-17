@@ -16,12 +16,6 @@ npm install @ceramicstudio/idx
 
 1. [`options: IDXOptions`](libs-types.md#idxoptions)
 
-### .authenticate
-
-**Arguments**
-
-1. [`options?: AuthenticateOptions`](libs-types.md#authenticateoptions)
-
 **Returns** `Promise<void>`
 
 ### .authenticated
@@ -31,12 +25,6 @@ npm install @ceramicstudio/idx
 ### .ceramic
 
 **Returns** [`CeramicApi`](libs-types.md#ceramicapi)
-
-### .did
-
-> Accessing this property will throw an error if the instance is not authenticated
-
-**Returns** [`DID`](libs-types.md#did)
 
 ### .id
 

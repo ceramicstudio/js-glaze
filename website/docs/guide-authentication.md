@@ -4,14 +4,14 @@ title: Using authentication
 
 Authentication in [IDX](idx-terminology.md#identity-index--idx) and [Ceramic](idx-terminology.md#ceramic) is based on [Decentralized Identifiers (DIDs)](idx-terminology.md#did).
 
-## Checking and authenticating the IDX instance
-
-It is possible to check if the Ceramic instance is authenticated and request authentication directly on the `IDX` instance:
+## Checking and authenticating the Ceramic instance
 
 ```ts
-if (!idx.authenticated) {
-  await idx.authenticate()
+if (ceramic.did == null) {
+  // Attach a DID provider to the Ceramic instance to authenticate
+  await ceramic.setDIDProvider(provider)
 }
+const idx = new IDX({ ceramic })
 ```
 
 ## Writing and reading when authenticated
@@ -28,4 +28,4 @@ It is also possible to omit providing the DID in the reading methods:
 const content = await idx.get('<Definition DocID>')
 ```
 
-In this case, IDX will use the authenticated DID as fallback.
+In this case, IDX will use the authenticated DID of the Ceramic instance as fallback.

@@ -1,3 +1,12 @@
+## v0.5.0 (2020-12-17)
+
+- Updated to support Ceramic v0.17 - this changed the schemas and definitions IDs
+- Removed the `authenticate` method and `did` property
+
+## v0.4.0 (2020-12-02)
+
+Updated to support Ceramic v0.15
+
 ## v0.3.0 (2020-10-29)
 
 - Updated to support Ceramic v0.12 - this changed the schemas and definitions IDs
