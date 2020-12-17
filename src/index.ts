@@ -2,7 +2,6 @@ import type { CeramicApi, Doctype } from '@ceramicnetwork/common'
 import type DocID from '@ceramicnetwork/docid'
 import { definitions, schemas } from '@ceramicstudio/idx-constants'
 import DataLoader from 'dataloader'
-import type { DID, DIDProvider } from 'dids'
 
 import { DoctypeProxy } from './doctypes'
 import type {
@@ -16,11 +15,6 @@ import { toDocIDString } from './utils'
 
 export * from './types'
 export * from './utils'
-
-export interface AuthenticateOptions {
-  paths?: Array<string>
-  provider?: DIDProvider
-}
 
 export interface CreateOptions {
   pin?: boolean
@@ -58,25 +52,11 @@ export class IDX {
     return this._ceramic
   }
 
-  get did(): DID {
+  get id(): string {
     if (this._ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this._ceramic.did
-  }
-
-  get id(): string {
-    return this.did.id
-  }
-
-  async authenticate(options: AuthenticateOptions = {}): Promise<void> {
-    if (this._ceramic.did == null) {
-      if (options.provider == null) {
-        throw new Error('Not provider available')
-      } else {
-        await this._ceramic.setDIDProvider(options.provider)
-      }
-    }
+    return this._ceramic.did.id
   }
 
   // High-level APIs

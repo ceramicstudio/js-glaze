@@ -52,6 +52,7 @@ interface Definition<T = unknown> {
   schema: string
   description: string
   url?: string
+  family?: string
   config?: T
 }
 ```
@@ -99,36 +100,36 @@ interface EncodedDagJWSResult {
 }
 ```
 
-## IDXDefinitionName
+## DefinitionName
 
 Name aliases of [Definitions](idx-terminology.md#definition) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXDefinitionName = 'basicProfile' | 'cryptoAccountLinks' | 'threeIdKeychain'
+type DefinitionName = 'basicProfile' | 'cryptoAccountLinks' | 'threeIdKeychain'
 ```
 
-## IDXSignedDefinitions
+## SignedDefinitions
 
 Signed [Definitions](idx-terminology.md#definition) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXSignedDefinitions = Record<IDXDefinitionName, DagJWSResult>
+type SignedDefinitions = Record<DefinitionName, DagJWSResult>
 ```
 
-## IDXPublishedDefinitions
+## PublishedDefinitions
 
 Record of [Definitions](idx-terminology.md#definition) published to [Ceramic](idx-terminology.md#ceramic)
 
 ```ts
-type IDXPublishedDefinitions = Record<IDXDefinitionName, string>
+type PublishedDefinitions = Record<DefinitionName, string>
 ```
 
-## IDXSchemaName
+## SchemaName
 
 Names of [Schemas](idx-terminology.md#schema) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXSchemaName =
+type SchemaName =
   | 'BasicProfile'
   | 'CryptoAccounts'
   | 'Definition'
@@ -136,30 +137,30 @@ type IDXSchemaName =
   | 'ThreeIdKeychain'
 ```
 
-## IDXSignedSchemas
+## SignedSchemas
 
 Signed [Schemas](idx-terminology.md#schema) provided by the [IDX tools library](libs-tools.md)
 
 ```ts
-type IDXSignedSchemas = Record<IDXSchemaName, DagJWSResult>
+type SignedSchemas = Record<SchemaName, DagJWSResult>
 ```
 
-## IDXPublishedSchemas
+## PublishedSchemas
 
 Record of [Schemas](idx-terminology.md#schema) published to [Ceramic](idx-terminology.md#ceramic)
 
 ```ts
-type IDXPublishedSchemas = Record<IDXSchemaName, string>
+type PublishedSchemas = Record<SchemaName, string>
 ```
 
-## IDXPublishedConfig
+## PublishedConfig
 
 [Definitions](idx-terminology.md#definition) and [Schemas](idx-terminology.md#schema) published to [Ceramic](idx-terminology.md#ceramic)
 
 ```ts
-interface IDXPublishedConfig {
-  definitions: IDXPublishedDefinitions
-  schemas: IDXPublishedSchemas
+interface PublishedConfig {
+  definitions: PublishedDefinitions
+  schemas: PublishedSchemas
 }
 ```
 
@@ -199,17 +200,6 @@ interface IDXOptions {
   aliases?: DefinitionsAliases
   autopin?: boolean
   ceramic: CeramicApi
-}
-```
-
-## AuthenticateOptions
-
-Options used by the [`authenticate` method](libs-idx.md#authenticate) of the `IDX` class
-
-```ts
-interface AuthenticateOptions {
-  paths?: Array<string>
-  provider?: DIDProvider
 }
 ```
 

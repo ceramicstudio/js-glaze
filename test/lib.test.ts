@@ -24,44 +24,12 @@ describe('IDX', () => {
     expect(idx.ceramic).toBe(ceramic)
   })
 
-  test('`did` property', () => {
-    const idx1 = new IDX({ ceramic: {} } as any)
-    expect(() => idx1.did).toThrow('Ceramic instance is not authenticated')
-
-    const did = {}
-    const idx2 = new IDX({ ceramic: { did } } as any)
-    expect(idx2.did).toBe(did)
-  })
-
   test('`id` property', () => {
     const idx1 = new IDX({ ceramic: {} } as any)
     expect(() => idx1.id).toThrow('Ceramic instance is not authenticated')
 
     const idx2 = new IDX({ ceramic: { did: { id: 'did:test' } } } as any)
     expect(idx2.id).toBe('did:test')
-  })
-
-  describe('authenticate', () => {
-    test('does nothing if the ceramic instance already has a DID', async () => {
-      const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider, did: {} } } as any)
-      await idx.authenticate({ provider: {} as any })
-      expect(setDIDProvider).toHaveBeenCalledTimes(0)
-    })
-
-    test('attaches the provider to the ceramic instance', async () => {
-      const provider = {} as any
-      const setDIDProvider = jest.fn()
-      const idx = new IDX({ ceramic: { setDIDProvider } } as any)
-      await idx.authenticate({ provider })
-      expect(setDIDProvider).toHaveBeenCalledTimes(1)
-      expect(setDIDProvider).toHaveBeenCalledWith(provider)
-    })
-
-    test('throws an error if there is no DID and provider', async () => {
-      const idx = new IDX({ ceramic: {} } as any)
-      await expect(idx.authenticate()).rejects.toThrow('Not provider available')
-    })
   })
 
   describe('Main APIs', () => {
