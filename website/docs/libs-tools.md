@@ -102,4 +102,4 @@ Publishes the signed [Definitions](idx-terminology.md#definition) and [Schemas](
 
 1. [`ceramic: CeramicApi`](libs-types.md#ceramicapi)
 
-**Returns** [`Promise<IDXPublishedConfig>`](libs-types.md#idxpublishedconfig)
+**Returns** [`Promise<PublishedConfig>`](libs-types.md#publishedconfig)

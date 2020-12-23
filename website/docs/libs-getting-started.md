@@ -8,6 +8,10 @@ IDX needs to access the Ceramic network using an implementation of the Ceramic A
 
 Packages implementing this interface include [`@ceramicnetwork/core`](https://docs.ceramic.network/modules/_ceramicnetwork_core.html) and [`@ceramicnetwork/http-client`](https://docs.ceramic.network/modules/_ceramicnetwork_http_client.html).
 
+:::note Alpha release
+IDX is currently in alpha and may be unstable.
+:::
+
 ## Installation
 
 There are two main libraries to use when building apps for IDX

@@ -10,12 +10,16 @@ module.exports = {
     algolia: {
       apiKey: '3c3073cbb52b20e3ede88100fbace482',
       indexName: 'idx',
-      searchParameters: { facetFilters: ['version:current'] }
+      searchParameters: { facetFilters: ['version:current'] },
+    },
+    gtag: {
+      trackingID: 'G-6SKY4F2GXZ',
+      anonymizeIP: true,
     },
     colorMode: {
       defaultMode: 'light',
       disableSwitch: true,
-      respectPrefersColorScheme: false
+      respectPrefersColorScheme: false,
     },
     image: 'img/idx_opengraph.png',
     sidebarCollapsible: true,
@@ -24,21 +28,21 @@ module.exports = {
       logo: {
         alt: 'IDX',
         src:
-          'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png'
+          'https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5fb488ba847afb916a7d0874_idxdevs.png',
       },
       items: [
         {
           className: 'navbar-icon navbar-discord',
           href: 'https://chat.idx.xyz',
-          position: 'right'
+          position: 'right',
         },
         {
           className: 'navbar-icon navbar-github',
           href: 'https://github.com/ceramicstudio/js-idx',
-          position: 'right'
-        }
-      ]
-    }
+          position: 'right',
+        },
+      ],
+    },
   },
   presets: [
     [
@@ -46,12 +50,12 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/ceramicstudio/js-idx/edit/master/website/'
+          editUrl: 'https://github.com/ceramicstudio/js-idx/edit/master/website/',
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css')
-        }
-      }
-    ]
-  ]
+          customCss: require.resolve('./src/css/custom.css'),
+        },
+      },
+    ],
+  ],
 }
