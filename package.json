@@ -2,7 +2,7 @@
   "name": "@ceramicstudio/idx",
   "author": "Ceramic Studio",
   "homepage": "https://idx.xyz",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/idx.esm.js",

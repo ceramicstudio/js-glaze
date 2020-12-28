@@ -223,9 +223,10 @@ describe('IDX', () => {
     })
 
     test('_createIDXDoc', async () => {
-      const doc = {}
+      const doc = { id: 'docId' }
+      const add = jest.fn()
       const createDocument = jest.fn(() => Promise.resolve(doc)) as any
-      const idx = new IDX({ ceramic: { createDocument } } as any)
+      const idx = new IDX({ ceramic: { createDocument, pin: { add } } } as any)
 
       await expect(idx._createIDXDoc('did:test:123')).resolves.toBe(doc)
       expect(createDocument).toHaveBeenCalledTimes(1)
@@ -237,6 +238,7 @@ describe('IDX', () => {
         },
         { anchor: false, publish: false }
       )
+      expect(add).toBeCalledWith('docId')
     })
 
     describe('_getIDXDoc', () => {

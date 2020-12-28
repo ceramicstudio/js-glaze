@@ -178,7 +178,7 @@ export class IDX {
   }
 
   async _createIDXDoc(did: string): Promise<Doctype> {
-    return await this._ceramic.createDocument(
+    const doc = await this._ceramic.createDocument(
       'tile',
       {
         deterministic: true,
@@ -186,6 +186,10 @@ export class IDX {
       },
       { anchor: false, publish: false }
     )
+    if (this._autopin) {
+      await this._ceramic.pin.add(doc.id)
+    }
+    return doc
   }
 
   async _getIDXDoc(did: string): Promise<Doctype | null> {
