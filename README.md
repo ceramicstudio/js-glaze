@@ -6,24 +6,35 @@
 [![](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
 [![Twitter](https://img.shields.io/twitter/follow/identityindex?label=Follow&style=social)](https://twitter.com/identityindex)
 
-> This project is WIP. Read and contribute to the spec [here](https://www.notion.so/threebox/IDP2P-IDW-2-0-e713338a094a44758ce2c3f21cdce27e).
+**js-idx** is a JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
+> ⚠️ IDX is in alpha. Libraries may be unstable and APIs are subject to change.
 
-**js-idx** is a JavaScript/TypeScript library for building applications with decentralized identity and user-centric data.
+## IDX: An identity protocol for open applications
 
-IDX provides high-level APIs for interacting with various decentralized identity standards implemented on the Ceramic network such as 3ID DIDs, Identity Indexes, user profiles, open social graphs, and more. IDX is compatible with all blockchains, wallets, and a wide variety of user and application data storage options including Ceramic, Textile, OrbitDB, Filecoin, IPFS, Secure Data Stores, and more  – so you can seamlessly integrate decentralized identity with the rest of your Web3 tech stack. IDX allows you to build much more sophisticated and powerful Web3 applications that rival and even exceed what's currently possible on Web2.
+IDX is a cross-platform identity protocol that replaces centralized user tables with a decentralized alternative. IDX allows users to build up a unified digital identity consisting of all their data while enabling developers to break down silos and freely share a users' data between applications. IDX supports all application architectures, but is notably compatible with all blockchains, wallets, and user/application datastores.
 
-## Installation
+- **Eliminate users from your server**: Replace centralized user IDs and user tables with a secure decentralized alternative
+- **Connect many accounts**: Link multiple blockchain, web3, social network accounts, and domains to the same user identity
+- **Use any datastore**: Store user and application data in any DB server, blockchain, or Web3 datastore
+- **Make your data discoverable**: Add references to your data to a user’s personal index, where it can be discovered by others
+- **Import data from other apps**: Discover a user's entire catalog of data by querying the index and import it into your app
+- **Give users control**: Give users control over data discovery, sharing, and permissions
 
-```sh
-npm install @ceramicstudio/idx
-```
+## Getting started
 
-## Documentation
+- [Quick start](https://docs.idx.xyz/build/quick-start)
+- [Installation](https://docs.idx.xyz/build/installation)
 
-- [Specification](https://idx.xyz/docs/)
-- [Core Concepts](https://idx.xyz/docs/concepts/dids)
-- [Libraries](https://idx.xyz/docs/libs-getting-started)
+## More resources
+
+- [Learn the basics](https://docs.idx.xyz/learn/welcome)
+- [API Reference](https://docs.idx.xyz/reference/idx)
+- [Developer chat](https://chat.idx.xyz)
+
+## Maintainers
+
+- Paul Le Cam ([@paullecam](http://github.com/paullecam))
 
 ## License
 
-Apache-2.0 OR MIT
+Dual licensed under MIT and Apache 2
