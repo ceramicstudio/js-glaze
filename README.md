@@ -1,4 +1,4 @@
-![IDX header image](https://uploads-ssl.webflow.com/5e4b58d7f08158ece0209bbd/5f918d0b08173a9e9770ed59_idx%20opengraph.png)
+![IDX header image](https://uploads-ssl.webflow.com/5ff39a496ca3e515d3359963/5ff48347c70c7d7c48fed7ea_image-idx-rethink-identity.png)
 
 # js-idx
 
