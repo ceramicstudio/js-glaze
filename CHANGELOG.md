@@ -1,3 +1,9 @@
+## v0.6.0 (2021-01-14)
+
+- Renamed `getIDXContent` method to `getIndex`
+- Renamed `contentIterator` method to `iterator`
+- Renamed various TypeScript definitions to match APIs changes
+
 ## v0.5.0 (2020-12-17)
 
 - Updated to support Ceramic v0.17 - this changed the schemas and definitions IDs
