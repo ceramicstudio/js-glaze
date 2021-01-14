@@ -1,26 +1,17 @@
 import type DocID from '@ceramicnetwork/docid'
+import type { Definition } from '@ceramicstudio/idx-constants'
+
+export type Aliases = Record<string, string>
+
+export type DefinitionWithID<
+  C extends Record<string, unknown> = Record<string, unknown>
+> = Definition<C> & { id: DocID }
 
 export type IndexKey = string
+export type Index = Record<IndexKey, string>
 
-export interface Definition<T extends Record<string, unknown> = Record<string, unknown>> {
-  name: string
-  schema: string
-  description: string
-  url?: string
-  config?: T
-}
-
-export interface DefinitionWithID<T extends Record<string, unknown> = Record<string, unknown>>
-  extends Definition<T> {
-  id: DocID
-}
-
-export type DefinitionsAliases = Record<string, string>
-
-export interface ContentEntry {
+export type Entry = {
   key: IndexKey
-  ref: string
-  content: unknown
+  id: string
+  record: unknown
 }
-
-export type IdentityIndexContent = Record<IndexKey, string>
