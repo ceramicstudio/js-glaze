@@ -1,3 +1,7 @@
+## v0.7.0 (2021-01-19)
+
+Updated `Definition` schema and definitions IDs.
+
 ## v0.6.0 (2021-01-14)
 
 - Renamed `getIDXContent` method to `getIndex`
