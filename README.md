@@ -1,6 +1,13 @@
+![IDX header image](https://uploads-ssl.webflow.com/5ff39a496ca3e515d3359963/5ff48347c70c7d7c48fed7ea_image-idx-rethink-identity.png)
+
 # IDX monorepo
 
+[![Discord](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
+[![Twitter](https://img.shields.io/twitter/follow/identityindex?label=Follow&style=social)](https://twitter.com/identityindex)
+
 Packages providing the JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
+
+> ⚠️ IDX is in alpha. Libraries may be unstable and APIs are subject to change.
 
 ## Installation
 
