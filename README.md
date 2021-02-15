@@ -21,7 +21,7 @@ If you are using an older version of Node, make sure to install npm v7.
 
 - [`@ceramicstudio/idx`](https://developers.idx.xyz/reference/idx/) in [`packages/core`](packages/core)
 - [`@ceramicstudio/idx-constants`](https://developers.idx.xyz/reference/idx-constants/) in [`packages/constants`](packages/constants)
-- [`@ceramicstudio/idx-cli`](https://developers.idx.xyz/reference/idx-cli/) in [`packages/cli`](packages/cli)
+- [`@ceramicstudio/idx-cli`](https://developers.idx.xyz/reference/cli/) in [`packages/cli`](packages/cli)
 - [`@ceramicstudio/idx-tools`](https://developers.idx.xyz/reference/idx-tools/) in [`packages/tools`](packages/tools)
 
 ### Jest environments
