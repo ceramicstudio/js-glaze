@@ -9,15 +9,52 @@
     "test": "lerna run test --",
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "prepublish": "lerna run prepublish"
+    "prepublish": "lerna run prepublish",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
   },
   "devDependencies": {
+    "@size-limit/preset-small-lib": "^4.9.2",
+    "@types/jest": "^26.0.20",
     "eslint": "^7.19.0",
     "eslint-config-3box": "^0.2.0",
     "eslint-config-react-app": "^6.0.0",
+    "husky": "^5.0.9",
     "jest": "^26.6.3",
     "lerna": "^3.22.1",
+    "size-limit": "^4.9.2",
     "tsdx": "^0.14.1",
     "typescript": "^4.1.5"
-  }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
+  "size-limit": [
+    {
+      "path": "packages/constants/dist/idx-constants.cjs.production.min.js",
+      "limit": "1 KB"
+    },
+    {
+      "path": "packages/constants/dist/idx-constants.esm.js",
+      "limit": "1 KB"
+    },
+    {
+      "path": "packages/core/dist/idx.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "packages/core/dist/idx.esm.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "packages/tools/dist/idx-tools.cjs.production.min.js",
+      "limit": "100 KB"
+    },
+    {
+      "path": "packages/tools/dist/idx-tools.esm.js",
+      "limit": "100 KB"
+    }
+  ]
 }
