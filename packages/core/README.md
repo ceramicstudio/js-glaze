@@ -2,11 +2,11 @@
 
 # js-idx
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
+[![Discord](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
 [![Twitter](https://img.shields.io/twitter/follow/identityindex?label=Follow&style=social)](https://twitter.com/identityindex)
 
 **js-idx** is a JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
+
 > ⚠️ IDX is in alpha. Libraries may be unstable and APIs are subject to change.
 
 ## IDX: An identity protocol for open applications
