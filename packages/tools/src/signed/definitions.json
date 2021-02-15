@@ -1,0 +1,47 @@
+{
+  "basicProfile": [
+    {
+      "jws": {
+        "payload": "AXESIGww3IkW644NFDLTHch-m5INxdfYenbtUOr1llb7ZDx7",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSI3o2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5UiJ9",
+            "signature": "zXCglxEF-0tZIq8RkTEAcSj4RmYLxmJ-VHXprP-UCz8Le3ex4KtOCqRv1jvbT84embsSC8z3Man_jKqcqIhtDg"
+          }
+        ],
+        "link": "bafyreidmgdoisfxlrygrimwtdxeh5g4sbxc5pwd2o3wvb2xvszlpwzb4pm"
+      },
+      "linkedBlock": "o2RkYXRho2RuYW1lbUJhc2ljIFByb2ZpbGVmc2NoZW1heEtjZXJhbWljOi8vazN5NTJsN3FidjFmcnhqZHI5cXBuOWxkdmJ4YjBqZzRlaWc3d3Rqa2R1NmdrODR2eWF6dzlqNHR4ZjRvNmQyaW9rZGVzY3JpcHRpb254I0Jhc2ljIHByb2ZpbGUgaW5mb3JtYXRpb24gZm9yIGEgRElEZmhlYWRlcqJmc2NoZW1heEtjZXJhbWljOi8vazN5NTJsN3FidjFmcnk0aDI4cjUzZWJrZXltMm14ZjFpMjNmMzAzcWwzZ3Mxb3FvdmZtbDQ0c2NhdWtuY3B4YzBrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5Umdkb2N0eXBlZHRpbGU="
+    }
+  ],
+  "cryptoAccounts": [
+    {
+      "jws": {
+        "payload": "AXESIBVXsEtoHtj8RgcqVY-vlv-Ed7W9EKj1Up1DyUhXlbKR",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSI3o2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5UiJ9",
+            "signature": "THV0tBcQ5rGXCYtEsyv11P1E4gSLYvX-lFjGeSpaHnN1J3sk5OVclEnkNsb2AmOlQH7UR_rGN4s-m3FNvT8uBQ"
+          }
+        ],
+        "link": "bafyreiavk6yew2a63d6embzkkwh27fx7qr33lpiqvd2vfhkdzfefpfnsse"
+      },
+      "linkedBlock": "o2RkYXRho2RuYW1lb0NyeXB0byBBY2NvdW50c2ZzY2hlbWF4S2NlcmFtaWM6Ly9rM3k1Mmw3cWJ2MWZyeTZ6NDV5OXMydzVucGUwbnlva2JwMG9pdjF0ZGh2c3dodjA3bGIydjEzemR6NGkxYnA0d2tkZXNjcmlwdGlvbngiQ3J5cHRvIGFjY291bnRzIGxpbmtlZCB0byB5b3VyIERJRGZoZWFkZXKiZnNjaGVtYXhLY2VyYW1pYzovL2szeTUybDdxYnYxZnJ5NGgyOHI1M2Via2V5bTJteGYxaTIzZjMwM3FsM2dzMW9xb3ZmbWw0NHNjYXVrbmNweGMwa2NvbnRyb2xsZXJzgXg4ZGlkOmtleTp6Nk1rdGlzYmpUOG5uMVFmUFpMcXZaNjkzVUVLVUNHQ1lEMnBLSGZnMm8ycWY2OVJnZG9jdHlwZWR0aWxl"
+    }
+  ],
+  "threeIdKeychain": [
+    {
+      "jws": {
+        "payload": "AXESIOo2HFK4dq_19MGnT05qHfJ_k8xSnm0osjDFR4a99W92",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSI3o2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5UiJ9",
+            "signature": "ea9bTtbconXmnKH2WICgt01wdjMSLByzE-kl9bQwZ0g-x_IvGq4-eqG9vPshs_g1Ukp1JVHDdpFVc8GRMlPgCg"
+          }
+        ],
+        "link": "bafyreihkgyoffodwv727jqnhj5hguhpsp6j4yuu6nuulemgfi6dl35lpoy"
+      },
+      "linkedBlock": "o2RkYXRho2RuYW1lbDNJRCBLZXljaGFpbmZzY2hlbWF4S2NlcmFtaWM6Ly9rM3k1Mmw3cWJ2MWZyeTY5c29kdTBoYzRud3Z6Z2xheHh2eTNsMHhkdzd2MW8zNmd5dTJkbDl1czQ3MnFoOHZlb2tkZXNjcmlwdGlvbnBLZXkgZGF0YSBmb3IgM0lEZmhlYWRlcqJmc2NoZW1heEtjZXJhbWljOi8vazN5NTJsN3FidjFmcnk0aDI4cjUzZWJrZXltMm14ZjFpMjNmMzAzcWwzZ3Mxb3FvdmZtbDQ0c2NhdWtuY3B4YzBrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5Umdkb2N0eXBlZHRpbGU="
+    }
+  ]
+}

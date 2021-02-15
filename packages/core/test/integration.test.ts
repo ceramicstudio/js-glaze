@@ -6,7 +6,7 @@ import { CeramicApi } from '@ceramicnetwork/common'
 import { definitions } from '@ceramicstudio/idx-constants'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
-import { IDX } from '..'
+import { IDX } from '../dist'
 
 declare global {
   const ceramic: CeramicApi

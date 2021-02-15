@@ -1,0 +1,9 @@
+{
+  "version": "0.0.0",
+  "registry": "https://registry.npmjs.org/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "useWorkspaces": true,
+  "packages": ["packages/*"]
+}

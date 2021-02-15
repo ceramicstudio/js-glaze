@@ -1,24 +1,18 @@
+
 {
-  "include": ["src", "types"],
+  "extends": "./tsconfig.build.json",
+  "include": ["packages", "types"],
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "target": "es6",
-    "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
-    "rootDir": "./src",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "baseUrl": "./",
+    "allowJs": false,
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
-      "*": ["src/*", "node_modules/*"]
-    },
-    "jsx": "react",
-    "esModuleInterop": true
+      "@ceramicstudio/idx": ["packages/core/src"],
+      "@ceramicstudio/idx-cli": ["packages/cli/src"],
+      "@ceramicstudio/idx-constants": ["packages/constants/src"],
+      "@ceramicstudio/idx-tools": ["packages/tools/src"],
+      "jest-environment-ceramic": ["packages/jest-environment-ceramic"],
+      "jest-environment-idx": ["packages/jest-environment-idx"]
+    }
   }
 }
