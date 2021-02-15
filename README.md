@@ -42,4 +42,4 @@ If you are using an older version of Node, make sure to install npm v7.
 
 ## License
 
-Dual licensed under MIT and Apache 2
+Dual licensed under [MIT](LICENSE-MIT) and [Apache 2](LICENSE-APACHE)
