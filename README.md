@@ -1,35 +1,40 @@
 ![IDX header image](https://uploads-ssl.webflow.com/5ff39a496ca3e515d3359963/5ff48347c70c7d7c48fed7ea_image-idx-rethink-identity.png)
 
-# js-idx
+# IDX monorepo
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
+[![Discord](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
 [![Twitter](https://img.shields.io/twitter/follow/identityindex?label=Follow&style=social)](https://twitter.com/identityindex)
 
-**js-idx** is a JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
+Packages providing the JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
+
 > ⚠️ IDX is in alpha. Libraries may be unstable and APIs are subject to change.
 
-## IDX: An identity protocol for open applications
+## Installation
 
-IDX is a cross-platform identity protocol that replaces centralized user tables with a decentralized alternative. IDX allows users to build up a unified digital identity consisting of all their data while enabling developers to break down silos and freely share a users' data between applications. IDX supports all application architectures, but is notably compatible with all blockchains, wallets, and user/application datastores.
+This monorepo uses workspaces from npm v7, included with Node v15.
+If you are using an older version of Node, make sure to install npm v7.
 
-- **Eliminate users from your server**: Replace centralized user IDs and user tables with a secure decentralized alternative
-- **Connect many accounts**: Link multiple blockchain, web3, social network accounts, and domains to the same user identity
-- **Use any datastore**: Store user and application data in any DB server, blockchain, or Web3 datastore
-- **Make your data discoverable**: Add references to your data to a user’s personal index, where it can be discovered by others
-- **Import data from other apps**: Discover a user's entire catalog of data by querying the index and import it into your app
-- **Give users control**: Give users control over data discovery, sharing, and permissions
+1. `npm install` to install the dependencies
+1. `npm run build` to build all the packages
 
-## Getting started
+### Additional scripts
 
-- [Quick start](https://docs.idx.xyz/build/quick-start)
-- [Installation](https://docs.idx.xyz/build/installation)
+- `npm run lint` to run the linter in all packages
+- `npm test` to run tests in all packages
 
-## More resources
+## Packages
 
-- [Learn the basics](https://docs.idx.xyz/learn/welcome)
-- [API Reference](https://docs.idx.xyz/reference/idx)
-- [Developer chat](https://chat.idx.xyz)
+### IDX
+
+- [`@ceramicstudio/idx`](https://developers.idx.xyz/reference/idx/) in [`packages/core`](packages/core)
+- [`@ceramicstudio/idx-constants`](https://developers.idx.xyz/reference/idx-constants/) in [`packages/constants`](packages/constants)
+- [`@ceramicstudio/idx-cli`](https://developers.idx.xyz/reference/cli/) in [`packages/cli`](packages/cli)
+- [`@ceramicstudio/idx-tools`](https://developers.idx.xyz/reference/idx-tools/) in [`packages/tools`](packages/tools)
+
+### Jest environments
+
+- `jest-environment-ceramic` in [`packages/jest-environment-ceramic`](packages/jest-environment-ceramic)
+- `jest-environment-idx` in [`packages/jest-environment-idx`](packages/jest-environment-idx)
 
 ## Maintainers
 

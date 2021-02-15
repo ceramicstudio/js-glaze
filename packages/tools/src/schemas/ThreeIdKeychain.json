@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "JWE": {
+      "title": "JWE",
+      "type": "object",
+      "properties": {
+        "protected": { "type": "string" },
+        "iv": { "type": "string" },
+        "ciphertext": { "type": "string" },
+        "tag": { "type": "string" },
+        "aad": { "type": "string" },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "header": { "type": "object" },
+              "encrypted_key": { "type": "string" }
+            },
+            "required": ["header", "encrypted_key"]
+          }
+        }
+      },
+      "required": ["protected", "iv", "ciphertext", "tag"]
+    },
+    "WrappedJWE": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "jwe": {
+          "$ref": "#/definitions/JWE"
+        }
+      }
+    },
+    "AuthData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/WrappedJWE"
+        },
+        "pub": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/WrappedJWE"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "authMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/AuthData"
+      }
+    },
+    "pastSeeds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/JWE"
+      }
+    }
+  }
+}

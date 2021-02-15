@@ -1,0 +1,27 @@
+{
+  "name": "@ceramicstudio/idx-constants",
+  "version": "0.6.0",
+  "author": "Ceramic Studio",
+  "homepage": "https://idx.xyz",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/idx-constants.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "tsdx lint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "tslib": "^2.1.0"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "@ceramicstudio/idx",
+  "author": "Ceramic Studio",
+  "homepage": "https://idx.xyz",
+  "version": "0.7.0",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/idx.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "tsdx lint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ceramicstudio/idx-constants": "^0.6.0",
+    "dataloader": "^2.0.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^0.15.7",
+    "@ceramicnetwork/docid": "^0.4.5",
+    "jest-environment-idx": "^0.5.0",
+    "tslib": "^2.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "testEnvironment": "node"
+  },
+  "size-limit": [
+    {
+      "path": "dist/idx.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/idx.esm.js",
+      "limit": "10 KB"
+    }
+  ]
+}
