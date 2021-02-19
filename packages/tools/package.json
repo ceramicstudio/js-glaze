@@ -1,6 +1,6 @@
 {
   "name": "@ceramicstudio/idx-tools",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": "Ceramic Studio",
   "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
@@ -25,8 +25,8 @@
     "analyze": "size-limit --why"
   },
   "dependencies": {
-    "@ceramicstudio/idx-constants": "^0.6.0",
-    "ajv": "^7.0.3",
+    "@ceramicstudio/idx-constants": "^0.7.0",
+    "ajv": "^7.1.1",
     "ajv-formats": "^1.5.1",
     "change-case": "^4.1.2",
     "cids": "~1.0.2",

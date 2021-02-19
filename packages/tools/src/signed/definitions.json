@@ -1,4 +1,19 @@
 {
+  "alsoKnownAs": [
+    {
+      "jws": {
+        "payload": "AXESIC2HgPpETbhwFMx13WVhzszaotMxd0MuDDClRgJkaR2v",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSI3o2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5UiJ9",
+            "signature": "0GOkVKIqivkD6mv-OgNGq8PdSup_xkhho7Zo2hwaKfK5qfhp5H8TCoRbDnF6V7-Bi-Xp5PgXTT5_r3ouk0jBDA"
+          }
+        ],
+        "link": "bafyreibnq6apurcnxbybjtdv3vswdtwm3krngmlximxaymffiybgi2i5v4"
+      },
+      "linkedBlock": "o2RkYXRho2RuYW1lbUFsc28gS25vd24gQXNmc2NoZW1heEtjZXJhbWljOi8vazN5NTJsN3FidjFmcnhudGFqa2M1czJuMTlsZHNlYWJrNDFseWI1aHl0eDdyMW50Yjl1aGYyYmF2OXFxY3J2Z2drZGVzY3JpcHRpb254ZEFsc28gS25vd24gQXMgaXMgYSBkYXRhIHNldCB0aGF0IHN0b3JlcyBhIGxpc3Qgb2YgYWNjb3VudHMgdGhhdCBhcmUgcHVibGljbHkgbGlua2VkIHRvIHRoZSB1c2VycyBESURmaGVhZGVyomZzY2hlbWF4S2NlcmFtaWM6Ly9rM3k1Mmw3cWJ2MWZyeTRoMjhyNTNlYmtleW0ybXhmMWkyM2YzMDNxbDNnczFvcW92Zm1sNDRzY2F1a25jcHhjMGtjb250cm9sbGVyc4F4OGRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSZ2RvY3R5cGVkdGlsZQ=="
+    }
+  ],
   "basicProfile": [
     {
       "jws": {

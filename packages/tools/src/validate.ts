@@ -6,7 +6,7 @@ import { Definition as DefinitionSchema } from './schemas'
 import type { Definition, Schema } from './types'
 
 const ajv = new Ajv({ strict: false })
-addFormats(ajv)
+addFormats(ajv as any) // Seems there is a type mismatch with ajv-formats
 
 export const validateDefinition = ajv.compile<Definition>(DefinitionSchema)
 

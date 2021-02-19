@@ -8,6 +8,12 @@ export function createIDXDefinitions(
   schemas: PublishedSchemas
 ): Record<DefinitionName, Definition> {
   return {
+    alsoKnownAs: {
+      name: 'Also Known As',
+      description:
+        'Also Known As is a data set that stores a list of accounts that are publicly linked to the users DID',
+      schema: schemas.AlsoKnownAs,
+    },
     basicProfile: {
       name: 'Basic Profile',
       description: 'Basic profile information for a DID',

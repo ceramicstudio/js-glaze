@@ -1,3 +1,7 @@
+## v0.8.0 (2021-02-22)
+
+Added `AlsoKnownAs` schema and `alsoKnownAs` definition to IDX constants and core.
+
 ## v0.7.0 (2021-01-19)
 
 Updated `Definition` schema and definitions IDs.
