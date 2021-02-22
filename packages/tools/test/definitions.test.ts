@@ -18,6 +18,7 @@ describe('definitions', () => {
   const Records = expect.arrayContaining([DagJWSResult])
 
   const schemas = {
+    AlsoKnownAs: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp890',
     BasicProfile: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp012',
     CryptoAccounts: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp123',
     Definition: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp234',
@@ -27,6 +28,12 @@ describe('definitions', () => {
 
   it('createIDXDefinitions', () => {
     expect(createIDXDefinitions(schemas)).toEqual({
+      alsoKnownAs: {
+        name: 'Also Known As',
+        schema: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp890',
+        description:
+          'Also Known As is a data set that stores a list of accounts that are publicly linked to the users DID',
+      },
       basicProfile: {
         name: 'Basic Profile',
         schema: 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp012',
@@ -56,6 +63,7 @@ describe('definitions', () => {
     })
     await did.authenticate()
     await expect(createIDXSignedDefinitions(did, schemas)).resolves.toEqual({
+      alsoKnownAs: Records,
       basicProfile: Records,
       cryptoAccounts: Records,
       threeIdKeychain: Records,

@@ -55,6 +55,7 @@ describe('lib', () => {
     // First sign all the schemas using the DID
     const signedSchemas = await signIDXSchemas(did)
     expect(signedSchemas).toEqual({
+      AlsoKnownAs: Records,
       BasicProfile: Records,
       CryptoAccounts: Records,
       Definition: Records,
@@ -65,6 +66,7 @@ describe('lib', () => {
     // Publish the signed schemas to Ceramic, no need to be the authoring DID
     const schemas = await publishIDXSignedSchemas(ceramic, signedSchemas)
     expect(schemas).toEqual({
+      AlsoKnownAs: DocURL,
       BasicProfile: DocURL,
       CryptoAccounts: DocURL,
       Definition: DocURL,
@@ -75,6 +77,7 @@ describe('lib', () => {
     // Create and sign the definitions, we need the published schemas DocIDs for this
     const signedDefinitions = await createIDXSignedDefinitions(did, publishedSchemas)
     expect(signedDefinitions).toEqual({
+      alsoKnownAs: Records,
       basicProfile: Records,
       cryptoAccounts: Records,
       threeIdKeychain: Records,
@@ -83,6 +86,7 @@ describe('lib', () => {
     // Publish the definitions to Ceramic
     const definitions = await publishIDXSignedDefinitions(ceramic, signedDefinitions)
     expect(definitions).toEqual({
+      alsoKnownAs: DocID,
       basicProfile: DocID,
       cryptoAccounts: DocID,
       threeIdKeychain: DocID,

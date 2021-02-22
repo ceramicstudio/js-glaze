@@ -1,4 +1,19 @@
 {
+  "AlsoKnownAs": [
+    {
+      "jws": {
+        "payload": "AXESILtlC8GH--xqmL32vZL-SBzJZeO8jyy0D2n2qWY-vo4S",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3Rpc2JqVDhubjFRZlBaTHF2WjY5M1VFS1VDR0NZRDJwS0hmZzJvMnFmNjlSI3o2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5UiJ9",
+            "signature": "FMVOlNKb2T3l21nnC0SnnTO-eFFAIo53XNMiruqP4ee7FsS96Uxz-9RQNVOj9pd4A39-oaQRUajmCyl5pfYxDQ"
+          }
+        ],
+        "link": "bafyreif3muf4db735rvjrppwxwjp4sa4zfs6hpepfs2a62pwvftd5puoci"
+      },
+      "linkedBlock": "o2RkYXRhp2R0eXBlZm9iamVjdGV0aXRsZWtBbHNvS25vd25Bc2ckc2NoZW1heCdodHRwOi8vanNvbi1zY2hlbWEub3JnL2RyYWZ0LTA3L3NjaGVtYSNocmVxdWlyZWSBaGFjY291bnRzanByb3BlcnRpZXOhaGFjY291bnRzomR0eXBlZWFycmF5ZWl0ZW1zoWQkcmVmdSMvZGVmaW5pdGlvbnMvQWNjb3VudGtkZWZpbml0aW9uc6JnQWNjb3VudKNkdHlwZWZvYmplY3RocmVxdWlyZWSCaHByb3RvY29sYmlkanByb3BlcnRpZXOlYmlkomR0eXBlZnN0cmluZ2ltYXhMZW5ndGgZAcJkaG9zdKJkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGJZlY2xhaW2iZHR5cGVmc3RyaW5naW1heExlbmd0aBkBwmhwcm90b2NvbKJkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGDJsYXR0ZXN0YXRpb25zomR0eXBlZWFycmF5ZWl0ZW1zoWQkcmVmeBkjL2RlZmluaXRpb25zL0F0dGVzdGF0aW9ua0F0dGVzdGF0aW9uomR0eXBlZm9iamVjdGpwcm9wZXJ0aWVzomdkaWQtand0omR0eXBlZnN0cmluZ2ltYXhMZW5ndGgZA+hqZGlkLWp3dC12Y6JkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGQPodGFkZGl0aW9uYWxQcm9wZXJ0aWVz9GZoZWFkZXKiZnNjaGVtYfdrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWt0aXNialQ4bm4xUWZQWkxxdlo2OTNVRUtVQ0dDWUQycEtIZmcybzJxZjY5Umdkb2N0eXBlZHRpbGU="
+    }
+  ],
   "BasicProfile": [
     {
       "jws": {
