@@ -8,9 +8,9 @@
   "version": "0.7.0",
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
-  "repository": "ceramicstudio/idx-cli",
-  "homepage": "https://github.com/ceramicstudio/idx-cli",
-  "bugs": "https://github.com/ceramicstudio/idx-cli/issues",
+  "repository": "ceramicstudio/js-idx",
+  "homepage": "https://github.com/ceramicstudio/js-idx",
+  "bugs": "https://github.com/ceramicstudio/js-idx/issues",
   "main": "lib/index.js",
   "bin": {
     "idx": "./bin/run"
