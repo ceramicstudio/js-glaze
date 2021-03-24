@@ -324,6 +324,6 @@ export class IDX {
     if (caip10Doc?.content == null) {
       throw new Error(`No DID found for ${accountId}`)
     }
-    return caip10Doc?.content as string
+    return caip10Doc.content as string
   }
 }
