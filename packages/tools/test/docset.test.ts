@@ -222,13 +222,10 @@ describe('docset', () => {
             title: 'item',
             properties: {
               note: {
-                type: 'object',
-                $id: 'ceramic://schemaReference',
+                type: 'string',
                 title: 'reference',
-                properties: {
-                  schema: { type: 'string', const: noteSchemaURL },
-                  id: { type: 'string' },
-                },
+                $ceramic: { type: 'tile', schema: noteSchemaURL },
+                maxLength: 150,
               },
               title: {
                 type: 'string',

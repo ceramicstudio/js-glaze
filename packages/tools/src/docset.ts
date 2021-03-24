@@ -8,7 +8,9 @@ import { createDefinition, createTile, publishCommits, publishSchema } from './p
 import type { Definition, EncodedDagJWSResult, Schema } from './types'
 import { docIDToString } from './utils'
 
-export const SCHEMA_REF_ID = 'ceramic://schemaReference'
+type CeramicMeta = { type: 'tile'; schema?: string | Array<string> }
+
+type CeramicSchema = Schema & { $ceramic?: CeramicMeta }
 
 export type CreatedDoc = {
   id: DocID
@@ -63,10 +65,27 @@ type AddSchemaOptions = {
   prefix: string
 }
 
+function getCeramicTileSchema(schema: CeramicSchema): Array<string> | null {
+  if (schema.$ceramic?.type === 'tile' && schema.$ceramic.schema != null) {
+    if (Array.isArray(schema.$ceramic.schema)) {
+      const clone = schema.$ceramic.schema.slice()
+      clone.sort()
+      return clone
+    }
+    return [schema.$ceramic.schema]
+  }
+  return null
+}
+
+function getName(base: string, prefix = ''): string {
+  const withCase = pascalCase(base)
+  return withCase.startsWith(prefix) ? withCase : prefix + withCase
+}
+
 // Add a JSON schema to the provided records based on its type
 function addSchema(
   records: GraphQLDocSetRecords,
-  schema: Schema,
+  schema: CeramicSchema,
   options: AddSchemaOptions
 ): string {
   const providedTitle = options.name ?? (schema.title as string)
@@ -74,44 +93,43 @@ function addSchema(
     throw new Error('Schema must have a title')
   }
 
-  const title = pascalCase(providedTitle)
-  const name = title.startsWith(options.prefix) ? title : options.prefix + title
+  const name = getName(providedTitle, options.prefix)
 
-  if (schema.type === 'array' && schema.items != null) {
+  if (schema.type === 'string') {
+    const references = getCeramicTileSchema(schema)
+    if (references != null) {
+      records.references[name] = references
+    }
+  } else if (schema.type === 'array' && schema.items != null) {
     records.lists[name] = addSchema(records, schema.items, { prefix: name })
   } else if (schema.type === 'object' && schema.properties != null) {
-    if (schema.$id === SCHEMA_REF_ID) {
-      const ref = (schema.properties as Record<string, any>).schema as {
-        const?: string
-        enum?: Array<string>
-      }
-      if (ref != null) {
-        if (ref.enum != null) {
-          records.references[name] = ref.enum
-        } else if (typeof ref.const === 'string') {
-          records.references[name] = [ref.const]
-        }
-      }
-    } else {
-      const requiredProps = (schema.required as Array<string>) ?? []
-      records.objects[name] = Object.entries(schema.properties as Record<string, any>).reduce(
-        (acc, [key, value]: [string, Schema]) => {
-          const prop = camelCase(key)
-          const opts = { name: (value.title as string) ?? key, prefix: name }
-          const required = requiredProps.includes(key)
-          if (value.type === 'array') {
-            acc[prop] = { required, type: 'list', name: addSchema(records, value, opts) }
-          } else if (value.type === 'object') {
-            const type = value.$id === SCHEMA_REF_ID ? 'reference' : 'object'
-            acc[prop] = { required, type, name: addSchema(records, value, opts) }
+    const requiredProps = (schema.required as Array<string>) ?? []
+    records.objects[name] = Object.entries(schema.properties as Record<string, any>).reduce(
+      (acc, [key, value]: [string, Schema]) => {
+        const propName = (value.title as string) ?? key
+        const prop = camelCase(key)
+        const opts = { name: propName, prefix: name }
+        const required = requiredProps.includes(key)
+        if (value.type === 'string') {
+          const references = getCeramicTileSchema(value)
+          if (references == null) {
+            acc[prop] = { ...value, required, type: 'string' }
           } else {
-            acc[prop] = { ...value, required } as Field
+            const refName = getName(propName, name)
+            records.references[refName] = references
+            acc[prop] = { required, type: 'reference', name: refName }
           }
-          return acc
-        },
-        {} as Record<string, Field>
-      )
-    }
+        } else if (value.type === 'array') {
+          acc[prop] = { required, type: 'list', name: addSchema(records, value, opts) }
+        } else if (value.type === 'object') {
+          acc[prop] = { required, type: 'object', name: addSchema(records, value, opts) }
+        } else {
+          acc[prop] = { ...value, required } as Field
+        }
+        return acc
+      },
+      {} as Record<string, Field>
+    )
   }
 
   return name
@@ -119,28 +137,17 @@ function addSchema(
 
 // Recursively extract references to other schemas from a JSON schema arrays and objects
 function extractSchemaReferences(schema: Schema): Array<string> {
+  if (schema.type === 'string') {
+    return getCeramicTileSchema(schema) ?? []
+  }
   if (schema.type === 'array') {
     return extractSchemaReferences(schema.items)
   }
-
   if (schema.type === 'object' && schema.properties != null) {
-    const props = schema.properties as Record<string, Schema>
-
-    if (schema.$id === SCHEMA_REF_ID) {
-      if (props.schema == null) {
-        return []
-      }
-      if (Array.isArray(props.schema.enum)) {
-        return props.schema.enum as Array<string>
-      }
-      if (typeof props.schema.const === 'string') {
-        return [props.schema.const]
-      }
-    }
-
-    return Object.values(props).flatMap(extractSchemaReferences)
+    return Object.values(schema.properties as Record<string, Schema>).flatMap(
+      extractSchemaReferences
+    )
   }
-
   return []
 }
 
