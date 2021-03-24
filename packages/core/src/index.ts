@@ -5,7 +5,7 @@ import DataLoader from 'dataloader'
 
 import { DoctypeProxy } from './doctypes'
 import type { Aliases, DefinitionWithID, Entry, Index, IndexKey } from './types'
-import { toDocIDString, isCaip10, testDid } from './utils'
+import { toDocIDString, isCaip10, assertDid } from './utils'
 
 export * from './types'
 export * from './utils'
@@ -169,7 +169,7 @@ export class IDX {
     if (isCaip10(did)) {
       did = await this.caip10ToDid(did)
     }
-    testDid(did)
+    assertDid(did)
     const doc = await this._ceramic.createDocument(
       'tile',
       {
@@ -321,7 +321,7 @@ export class IDX {
       },
       { anchor: false }
     )
-    if (caip10Doc?.content === null) {
+    if (caip10Doc?.content == null) {
       throw new Error(`No DID found for ${accountId}`)
     }
     return caip10Doc?.content as string

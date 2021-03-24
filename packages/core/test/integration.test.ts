@@ -51,8 +51,8 @@ describe('integration', () => {
   test('get an invalid DID should fail', async () => {
     const invalidDid = 'did:f2_invalid'
     const reader = new IDX({ ceramic })
-    await expect(reader.get<{ name: string }>('basicProfile', invalidDid)).rejects.toEqual(
-      new Error('Invalid DID: ' + invalidDid)
+    await expect(reader.get<{ name: string }>('basicProfile', invalidDid)).rejects.toThrow(
+      'Invalid DID: ' + invalidDid
     )
   })
 
@@ -87,8 +87,8 @@ describe('integration', () => {
 
     // Read the record from idx using the caip10 account id
     const reader = new IDX({ ceramic })
-    await expect(reader.get<{ name: string }>('basicProfile', accountId)).rejects.toEqual(
-      new Error('No DID found for ' + accountId)
+    await expect(reader.get<{ name: string }>('basicProfile', accountId)).rejects.toThrow(
+      'No DID found for ' + accountId
     )
   })
 })

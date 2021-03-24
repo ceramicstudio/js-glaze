@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@ceramicstudio/idx-constants": "^0.7.0",
+    "caip": "^0.9.2",
     "dataloader": "^2.0.0"
   },
   "devDependencies": {
