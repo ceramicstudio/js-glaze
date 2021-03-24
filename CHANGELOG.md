@@ -1,3 +1,7 @@
+## v0.9.0 (2021-03-24)
+
+Added support for `CAIP-10` accounts in `get()` and `has()` methods.
+
 ## v0.8.0 (2021-02-22)
 
 Added `AlsoKnownAs` schema and `alsoKnownAs` definition to IDX constants and core.
