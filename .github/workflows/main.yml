@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Patch node-pre-gyp
+        run: npm i -g @mapbox/node-pre-gyp
+
       - name: Install deps and build (with cache)
         uses: bahmutov/npm-install@v1
 
