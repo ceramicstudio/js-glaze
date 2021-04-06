@@ -8,7 +8,7 @@ import { fromString } from 'uint8arrays'
 
 import { DocSet, publishIDXConfig, publishEncodedSignedDocSet } from '../src'
 
-describe('docset', () => {
+describe.skip('docset', () => {
   beforeAll(async () => {
     const seed = fromString(
       '08b2e655d239e24e3ca9aa17bc1d05c1dee289d6ebf0b3542fd9536912d51ee9',

@@ -63,7 +63,8 @@ export abstract class Command<
     if (this._resolverRegistry == null) {
       const ceramic = await this.getCeramic()
       const keyResolver = KeyResolver.getResolver()
-      const threeIDResolver = ThreeIDResolver.getResolver(ceramic)
+      // Not sure why eslint was complaining about the following line without 'as'
+      const threeIDResolver = ThreeIDResolver.getResolver(ceramic) as ResolverRegistry
       this._resolverRegistry = { ...keyResolver, ...threeIDResolver }
     }
     return this._resolverRegistry
