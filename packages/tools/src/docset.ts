@@ -1,5 +1,6 @@
 import type { CeramicApi, DocMetadata, Doctype } from '@ceramicnetwork/common'
 import type DocID from '@ceramicnetwork/docid'
+import type { Field, GraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-types'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -31,36 +32,7 @@ export type DocSetData<T> = {
 export type SignedDocSet = DocSetData<Array<DagJWSResult>>
 export type EncodedSignedDocSet = DocSetData<Array<EncodedDagJWSResult>>
 
-// TODO: import these types from IDX GraphQL lib once published
-type FieldCommon = { required?: boolean }
-type FieldType =
-  | { type: 'boolean' }
-  | { type: 'integer' }
-  | { type: 'float' }
-  | { type: 'string' }
-  | { type: 'list'; name: string }
-  | { type: 'object'; name: string }
-  | { type: 'reference'; name: string }
-
-type Field = FieldCommon & FieldType
-
-type ObjectFields = Record<string, Field>
-
-type DocReference = {
-  id: string
-  schema: string
-}
-
-type GraphQLDocSetRecords = {
-  index: Record<string, DocReference>
-  lists: Record<string, string>
-  nodes: Record<string, string>
-  objects: Record<string, ObjectFields>
-  references: Record<string, Array<string>>
-  roots: Record<string, DocReference>
-}
-
-type AddSchemaOptions = {
+export type AddDocSetSchemaOptions = {
   name?: string
   prefix: string
 }
@@ -83,10 +55,10 @@ function getName(base: string, prefix = ''): string {
 }
 
 // Add a JSON schema to the provided records based on its type
-function addSchema(
+export function addDocSetSchema(
   records: GraphQLDocSetRecords,
   schema: CeramicSchema,
-  options: AddSchemaOptions
+  options: AddDocSetSchemaOptions
 ): string {
   const providedTitle = options.name ?? (schema.title as string)
   if (providedTitle == null) {
@@ -101,7 +73,7 @@ function addSchema(
       records.references[name] = references
     }
   } else if (schema.type === 'array' && schema.items != null) {
-    records.lists[name] = addSchema(records, schema.items, { prefix: name })
+    records.lists[name] = addDocSetSchema(records, schema.items, { prefix: name })
   } else if (schema.type === 'object' && schema.properties != null) {
     const requiredProps = (schema.required as Array<string>) ?? []
     records.objects[name] = Object.entries(schema.properties as Record<string, any>).reduce(
@@ -120,9 +92,9 @@ function addSchema(
             acc[prop] = { required, type: 'reference', name: refName }
           }
         } else if (value.type === 'array') {
-          acc[prop] = { required, type: 'list', name: addSchema(records, value, opts) }
+          acc[prop] = { required, type: 'list', name: addDocSetSchema(records, value, opts) }
         } else if (value.type === 'object') {
-          acc[prop] = { required, type: 'object', name: addSchema(records, value, opts) }
+          acc[prop] = { required, type: 'object', name: addDocSetSchema(records, value, opts) }
         } else {
           acc[prop] = { ...value, required } as Field
         }
@@ -463,7 +435,7 @@ export class DocSet {
         if (schema == null) {
           throw new Error(`Could not load schema ${name}`)
         }
-        records.nodes[doc.commitId.toUrl()] = addSchema(records, schema, { prefix: '' })
+        records.nodes[doc.commitId.toUrl()] = addDocSetSchema(records, schema, { prefix: '' })
       }
     })
 

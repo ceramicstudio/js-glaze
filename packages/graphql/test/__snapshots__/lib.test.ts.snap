@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib create a note 1`] = `
+Object {
+  "data": Object {
+    "createNote": Object {
+      "node": Object {
+        "date": "2021-01-06T14:28:00.000Z",
+        "text": "hello test!",
+      },
+    },
+  },
+}
+`;
+
+exports[`lib read existing note 1`] = `
+Object {
+  "data": Object {
+    "node": Object {
+      "date": "2020-12-10T11:12:34.567Z",
+      "text": "An example note",
+    },
+  },
+}
+`;
+
+exports[`lib schema creation 1`] = `
+"type Query {
+  index(did: String): Index!
+
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  exampleNote: Note!
+}
+
+type Index {
+  myNotes: Notes
+}
+
+type Notes implements Node {
+  id: ID!
+  notes: [NotesListItem]
+}
+
+\\"\\"\\"An object with an ID\\"\\"\\"
+interface Node {
+  \\"\\"\\"The id of the object.\\"\\"\\"
+  id: ID!
+}
+
+type NotesListItem {
+  note: NotesListItemReference!
+  title: String
+}
+
+type NotesListItemReference {
+  id: String
+  schema: String
+}
+
+type Note implements Node {
+  id: ID!
+  date: String!
+  text: String!
+}
+
+type Mutation {
+  createNotes(input: CreateNotesInput!): CreateNotesPayload
+  updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
+  createNote(input: CreateNoteInput!): CreateNotePayload
+  updateNote(input: UpdateNoteInput!): UpdateNotePayload
+  setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
+}
+
+type CreateNotesPayload {
+  node: Notes!
+  clientMutationId: String
+}
+
+input CreateNotesInput {
+  object: NotesInput!
+  clientMutationId: String
+}
+
+input NotesInput {
+  notes: [NotesListItemInput]
+}
+
+input NotesListItemInput {
+  note: NotesListItemReferenceInput!
+  title: String
+}
+
+input NotesListItemReferenceInput {
+  id: String
+  schema: String
+}
+
+type UpdateNotesPayload {
+  node: Notes!
+  clientMutationId: String
+}
+
+input UpdateNotesInput {
+  id: ID!
+  object: NotesInput!
+  clientMutationId: String
+}
+
+type CreateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input CreateNoteInput {
+  object: NoteInput!
+  clientMutationId: String
+}
+
+input NoteInput {
+  date: String!
+  text: String!
+}
+
+type UpdateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input UpdateNoteInput {
+  id: ID!
+  object: NoteInput!
+  clientMutationId: String
+}
+
+type SetMyNotesPayload {
+  clientMutationId: String
+}
+
+input SetMyNotesInput {
+  object: NotesInput!
+  clientMutationId: String
+}
+"
+`;

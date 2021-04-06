@@ -1,0 +1,41 @@
+{
+  "name": "@ceramicstudio/idx-graphql",
+  "version": "0.1.0",
+  "author": "Ceramic Studio",
+  "homepage": "https://idx.xyz",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/idx-graphql.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "tsdx lint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ceramicstudio/idx-graphql-types": "0.1.0",
+    "change-case": "^4.1.2",
+    "graphql": "^15.5.0",
+    "graphql-relay": "^0.6.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^0.16.0",
+    "@ceramicstudio/idx": "^0.9.0",
+    "@ceramicstudio/idx-constants": "^0.7.0",
+    "@ceramicstudio/idx-graphql-tools": "^0.1.0",
+    "@ceramicstudio/idx-tools": "^0.8.0",
+    "@types/graphql": "^14.5.0",
+    "@types/graphql-relay": "^0.6.0",
+    "jest-environment-idx": "0.6.0",
+    "tslib": "^2.1.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@ceramicstudio/idx-graphql-types",
+  "version": "0.1.0",
+  "author": "Ceramic Studio",
+  "homepage": "https://idx.xyz",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/idx-graphql-types.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "lint": "tsdx lint src --fix",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "tslib": "^2.1.0"
+  }
+}
