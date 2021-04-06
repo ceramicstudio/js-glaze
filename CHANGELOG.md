@@ -1,3 +1,7 @@
+## v0.9.1 (2021-04-06)
+
+Updated schemas and definitions IDs.
+
 ## v0.9.0 (2021-03-24)
 
 Added support for `CAIP-10` accounts in `get()` and `has()` methods.

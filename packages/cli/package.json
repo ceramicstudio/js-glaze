@@ -5,7 +5,7 @@
     "ceramic",
     "idx"
   ],
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
   "repository": "ceramicstudio/js-idx",
