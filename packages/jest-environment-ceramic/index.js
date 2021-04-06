@@ -3,25 +3,25 @@ const Ceramic = require('@ceramicnetwork/core').default
 const dagJose = require('dag-jose').default
 const IPFS = require('ipfs-core')
 const NodeEnvironment = require('jest-environment-node')
-const legacy = require('multiformats/legacy')
-const multiformats = require('multiformats/basics')
 const { dir } = require('tmp-promise')
+const { sha256 } = require('multiformats/hashes/sha2')
+const { legacy } = require('multiformats/legacy')
 
-multiformats.multicodec.add(dagJose)
+const hasher = { [sha256.code]: sha256 }
+const dagJoseFormat = legacy(dagJose, {hashes: hasher})
 
 module.exports = class CeramicEnvironment extends NodeEnvironment {
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await IPFS.create({
-      ipld: { formats: [legacy(multiformats, dagJose.name)] },
+      ipld: { formats: [dagJoseFormat] },
       profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,
     })
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       anchorOnRequest: false,
-      pinsetDirectory: path.join(this.tmpFolder.path, 'pinset'),
-      stateStorePath: path.join(this.tmpFolder.path, 'ceramic'),
+      stateStoreDirectory: path.join(this.tmpFolder.path, 'ceramic'),
     })
   }
 

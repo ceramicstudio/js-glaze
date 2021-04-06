@@ -1,4 +1,4 @@
-const KeyResolver = require('@ceramicnetwork/key-did-resolver').default
+const KeyResolver = require('key-did-resolver').default
 const { DID } = require('dids')
 const { Ed25519Provider } = require('key-did-provider-ed25519')
 const { resolve } = require('path')

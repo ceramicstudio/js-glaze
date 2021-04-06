@@ -1,5 +1,6 @@
 import type { CeramicApi, DocMetadata, Doctype } from '@ceramicnetwork/common'
-import type DocID from '@ceramicnetwork/docid'
+import type { DocID, DocRef } from '@ceramicnetwork/docid'
+import { CommitID } from '@ceramicnetwork/docid'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -11,8 +12,8 @@ import { docIDToString } from './utils'
 export const SCHEMA_REF_ID = 'ceramic://schemaReference'
 
 export type CreatedDoc = {
-  id: DocID
-  dependencies: Array<DocID>
+  id: DocRef
+  dependencies: Array<DocRef>
 }
 
 export type PublishedDocSet = {
@@ -163,7 +164,7 @@ export class DocSet {
     return await this.loadDoc((await created).id)
   }
 
-  async loadDoc(docID: DocID | string): Promise<Doctype> {
+  async loadDoc(docID: DocRef | string): Promise<Doctype> {
     const id = docIDToString(docID)
     if (this._docs[id] == null) {
       this._docs[id] = this._ceramic.loadDocument(id)
@@ -202,7 +203,7 @@ export class DocSet {
   createSchema(
     name: string,
     schema: Schema,
-    deps: Array<Promise<DocID>> = []
+    deps: Array<Promise<DocRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasSchema(name)) {
       throw new Error(`Schema ${name} already exists`)
@@ -223,7 +224,7 @@ export class DocSet {
     return this._schemas[name]
   }
 
-  async addSchema(schema: Schema, alias?: string): Promise<DocID> {
+  async addSchema(schema: Schema, alias?: string): Promise<DocRef> {
     const name = alias ?? (schema.title as string | undefined)
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
@@ -238,7 +239,7 @@ export class DocSet {
     return created.id
   }
 
-  async useExistingSchema(id: DocID | string, alias?: string): Promise<DocID> {
+  async useExistingSchema(id: DocRef | string, alias?: string): Promise<DocRef> {
     const existingAlias = this._schemaAliases[docIDToString(id)]
     if (existingAlias != null) {
       const existing = this._schemas[existingAlias]
@@ -291,7 +292,7 @@ export class DocSet {
   createDefinition(
     alias: string,
     definition: Definition,
-    deps: Array<Promise<DocID>> = []
+    deps: Array<Promise<DocRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasDefinition(alias)) {
       throw new Error(`Definition ${alias} already exists`)
@@ -309,7 +310,7 @@ export class DocSet {
     return this._definitions[alias]
   }
 
-  async addDefinition(definition: Definition, alias = definition.name): Promise<DocID> {
+  async addDefinition(definition: Definition, alias = definition.name): Promise<DocRef> {
     const created = await this.createDefinition(alias, definition, [
       this.useExistingSchema(definition.schema),
     ])
@@ -336,7 +337,7 @@ export class DocSet {
     alias: string,
     contents: T,
     meta: Partial<DocMetadata>,
-    deps: Array<Promise<DocID>> = []
+    deps: Array<Promise<DocRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasTile(alias)) {
       throw new Error(`Tile ${alias} already exists`)
@@ -358,7 +359,7 @@ export class DocSet {
     alias: string,
     contents: T,
     meta: Partial<DocMetadata>
-  ): Promise<DocID> {
+  ): Promise<DocRef> {
     if (meta.schema == null) {
       throw new Error('Missing schema to add tile')
     }
@@ -403,7 +404,8 @@ export class DocSet {
       dependencies.forEach((depid) => {
         deps.add(depid.toString())
       })
-      const commits = await this._ceramic.loadDocumentCommits(id)
+      const docid = (id instanceof CommitID ? id.baseID : id) as DocID
+      const commits = await this._ceramic.loadDocumentCommits(docid)
       docs[id.toString()] = commits.map((r) => r.value as DagJWSResult)
     }
 

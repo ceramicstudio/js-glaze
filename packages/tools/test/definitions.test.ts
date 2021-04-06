@@ -3,7 +3,7 @@
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import KeyResolver from '@ceramicnetwork/key-did-resolver'
+import KeyResolver from 'key-did-resolver'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { fromString } from 'uint8arrays'
