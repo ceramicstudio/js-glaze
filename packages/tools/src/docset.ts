@@ -1,5 +1,6 @@
 import type { CeramicApi, DocMetadata, Doctype } from '@ceramicnetwork/common'
 import type { DocID, DocRef } from '@ceramicnetwork/docid'
+import { CommitID } from '@ceramicnetwork/docid'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -403,7 +404,8 @@ export class DocSet {
       dependencies.forEach((depid) => {
         deps.add(depid.toString())
       })
-      const commits = await this._ceramic.loadDocumentCommits(id as DocID)
+      const docid = (id instanceof CommitID ? id.baseID : id) as DocID
+      const commits = await this._ceramic.loadDocumentCommits(docid)
       docs[id.toString()] = commits.map((r) => r.value as DagJWSResult)
     }
 
