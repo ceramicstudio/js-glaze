@@ -2,7 +2,7 @@ import { inspect } from 'util'
 
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
 import Ceramic from '@ceramicnetwork/http-client'
-import KeyResolver from '@ceramicnetwork/key-did-resolver'
+import KeyResolver from 'key-did-resolver'
 import { IDX } from '@ceramicstudio/idx'
 import { definitions } from '@ceramicstudio/idx-constants'
 import type { DefinitionName } from '@ceramicstudio/idx-constants'

@@ -5,7 +5,7 @@
     "ceramic",
     "idx"
   ],
-  "version": "0.8.0",
+  "version": "0.8.1",
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
   "repository": "ceramicstudio/js-idx",
@@ -43,7 +43,6 @@
     "@ceramicnetwork/3id-did-resolver": "^1.1.1",
     "@ceramicnetwork/docid": "^0.5.1",
     "@ceramicnetwork/http-client": "^0.10.1",
-    "@ceramicnetwork/key-did-resolver": "^0.2.2",
     "@ceramicstudio/idx": "^0.9.1",
     "@ceramicstudio/idx-constants": "^1.0.0",
     "@ceramicstudio/idx-tools": "^0.9.0",
