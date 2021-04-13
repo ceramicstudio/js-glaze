@@ -7,6 +7,7 @@ import { DoctypeProxy } from './doctypes'
 import type { Aliases, DefinitionWithID, Entry, Index, IndexKey } from './types'
 import { toDocIDString, isCaip10, assertDid } from './utils'
 
+export { getLegacy3BoxProfileAsBasicProfile } from './3box'
 export * from './types'
 export * from './utils'
 

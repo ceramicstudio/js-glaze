@@ -14,9 +14,13 @@ export function isCaip10(account: string): boolean {
   }
 }
 
-const didRegex = /did:([A-Za-z0-9]+):([A-Za-z0-9.\-:_]+)$/
+const didRegex = /^did:([A-Za-z0-9]+):([A-Za-z0-9.\-:_]+)$/
+export function isDid(did: string): boolean {
+  return didRegex.test(did)
+}
+
 export function assertDid(did: string): void {
-  if (!didRegex.test(did)) {
+  if (!isDid(did)) {
     throw new Error(`Invalid DID: ${did}`)
   }
 }
