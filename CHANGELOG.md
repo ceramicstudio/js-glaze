@@ -1,3 +1,7 @@
+## v0.10.0 (2021-04-13)
+
+Added `getLegacy3BoxProfileAsBasicProfile` function to load a legacy 3Box profile as a `BasicProfile`.
+
 ## v0.9.1 (2021-04-06)
 
 Updated schemas and definitions IDs.
