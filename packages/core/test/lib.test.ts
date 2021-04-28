@@ -3,9 +3,9 @@
 import StreamID from '@ceramicnetwork/streamid'
 import { schemas } from '@ceramicstudio/idx-constants'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-jest.mock('@ceramicnetwork/stream-tile')
 
 import { IDX } from '../src/index'
+jest.mock('@ceramicnetwork/stream-tile')
 
 describe('IDX', () => {
   const testDocID = StreamID.fromString(
@@ -110,7 +110,9 @@ describe('IDX', () => {
       const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
       const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
       const setRecordOnly = jest.fn((key) => {
-        return key === 'first' ? [true, StreamID.fromString(ref1)] : [false, StreamID.fromString(ref2)]
+        return key === 'first'
+          ? [true, StreamID.fromString(ref1)]
+          : [false, StreamID.fromString(ref2)]
       })
       const setReferences = jest.fn()
 
@@ -234,7 +236,9 @@ describe('IDX', () => {
       const idx = new IDX({ ceramic } as any)
 
       await expect(idx._createIDXDoc('did:test:123')).resolves.toBe(doc)
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(TileDocument.create).toHaveBeenCalledTimes(1)
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(TileDocument.create).toHaveBeenCalledWith(
         ceramic,
         null,
@@ -471,9 +475,11 @@ describe('IDX', () => {
         const id = 'did:test:123'
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata, _opts) => {
-          return Promise.resolve({ id: 'streamId', update, metadata })
-        }))
+        TileDocument.create.mockImplementationOnce(
+          jest.fn((_ceramic, _content, metadata, _opts) => {
+            return Promise.resolve({ id: 'streamId', update, metadata })
+          })
+        )
         const ceramic = { did: { id }, pin: { add } }
         const idx = new IDX({ ceramic } as any)
 
@@ -483,23 +489,33 @@ describe('IDX', () => {
           schema: 'schemaId',
         } as any
         const content = { test: true }
-        await expect(idx._createRecord(definition, content, { pin: true })).resolves.toBe('streamId')
+        await expect(idx._createRecord(definition, content, { pin: true })).resolves.toBe(
+          'streamId'
+        )
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(TileDocument.create).toBeCalledWith(
           ceramic,
           null,
           { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(update).toBeCalledWith(content, { deterministic: true, controllers: [id], family: 'defId', schema: 'schemaId' })
+        expect(update).toBeCalledWith(content, {
+          deterministic: true,
+          controllers: [id],
+          family: 'defId',
+          schema: 'schemaId',
+        })
         expect(add).toBeCalledWith('streamId')
       })
 
       test('pin by default', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
-          return Promise.resolve({ id: 'streamId', update, metadata })
-        }))
+        TileDocument.create.mockImplementationOnce(
+          jest.fn((_ceramic, _content, metadata) => {
+            return Promise.resolve({ id: 'streamId', update, metadata })
+          })
+        )
         const idx = new IDX({
           ceramic: { did: { id: 'did:test:123' }, pin: { add } },
         } as any)
@@ -512,9 +528,11 @@ describe('IDX', () => {
       test('no pinning by setting instance option', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
-          return Promise.resolve({ id: 'streamId', update, metadata })
-        }))
+        TileDocument.create.mockImplementationOnce(
+          jest.fn((_ceramic, _content, metadata) => {
+            return Promise.resolve({ id: 'streamId', update, metadata })
+          })
+        )
         const idx = new IDX({
           autopin: false,
           ceramic: { did: { id: 'did:test:123' }, pin: { add } },
@@ -527,9 +545,11 @@ describe('IDX', () => {
       test('explicit no pinning', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
-          return Promise.resolve({ id: 'streamId', update, metadata })
-        }))
+        TileDocument.create.mockImplementationOnce(
+          jest.fn((_ceramic, _content, metadata) => {
+            return Promise.resolve({ id: 'streamId', update, metadata })
+          })
+        )
         const idx = new IDX({
           autopin: true,
           ceramic: { did: { id: 'did:test:123' }, pin: { add } },

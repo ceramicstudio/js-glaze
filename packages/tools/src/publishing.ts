@@ -92,7 +92,11 @@ export async function publishCommits(
   ceramic: CeramicApi,
   [genesis, ...updates]: Array<CeramicCommit>
 ): Promise<TileDocument<Record<string, any>>> {
-  const doc = await TileDocument.createFromGenesis<TileDocument<Record<string, any>>>(ceramic, genesis as GenesisCommit, PUBLISH_OPTS)
+  const doc = await TileDocument.createFromGenesis<TileDocument<Record<string, any>>>(
+    ceramic,
+    genesis as GenesisCommit,
+    PUBLISH_OPTS
+  )
   await ceramic.pin.add(doc.id)
   for (const commit of updates) {
     await ceramic.applyCommit(doc.id, commit, PUBLISH_OPTS)

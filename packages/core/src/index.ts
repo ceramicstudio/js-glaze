@@ -69,7 +69,11 @@ export class IDX {
     return await this._getRecord(key, did)
   }
 
-  async set(name: string, content: Record<string, any>, options?: CreateOptions): Promise<StreamID> {
+  async set(
+    name: string,
+    content: Record<string, any>,
+    options?: CreateOptions
+  ): Promise<StreamID> {
     const key = this._toIndexKey(name)
     return await this._setRecord(key, content, options)
   }
@@ -85,7 +89,10 @@ export class IDX {
     return await this._setRecord(key, newContent, options)
   }
 
-  async setAll(contents: Record<string, Record<string, any>>, options?: CreateOptions): Promise<Index> {
+  async setAll(
+    contents: Record<string, Record<string, any>>,
+    options?: CreateOptions
+  ): Promise<Index> {
     const updates = Object.entries(contents).map(async ([name, content]) => {
       const key = this._toIndexKey(name)
       const [created, id] = await this._setRecordOnly(key, content, options)
@@ -104,18 +111,23 @@ export class IDX {
     return newReferences
   }
 
-  async setDefaults(contents: Record<string, Record<string, any>>, options?: CreateOptions): Promise<Index> {
+  async setDefaults(
+    contents: Record<string, Record<string, any>>,
+    options?: CreateOptions
+  ): Promise<Index> {
     const index = (await this.getIndex()) ?? {}
 
     const updates = Object.entries(contents)
       .map(([name, content]) => [this._toIndexKey(name), content])
       // This filter returned the type (string | Record<string, any>)[][]
       // we need to add a type guard to get the correct type here.
-      .filter((entry): entry is [string, Record<string, any>] => index[entry[0] as IndexKey] == null)
+      .filter(
+        (entry): entry is [string, Record<string, any>] => index[entry[0] as IndexKey] == null
+      )
       .map(async ([key, content]) => {
-        const definition = await this.getDefinition(key as IndexKey)
+        const definition = await this.getDefinition(key)
         const id = await this._createRecord(definition, content, options)
-        return { [key as IndexKey]: id.toUrl() }
+        return { [key]: id.toUrl() }
       }) as Array<Promise<Index>>
     const changes = await Promise.all(updates)
 
@@ -238,7 +250,11 @@ export class IDX {
     return doc ? (doc.content as T) : null
   }
 
-  async _setRecord(key: IndexKey, content: Record<string, any>, options?: CreateOptions): Promise<StreamID> {
+  async _setRecord(
+    key: IndexKey,
+    content: Record<string, any>,
+    options?: CreateOptions
+  ): Promise<StreamID> {
     const [created, id] = await this._setRecordOnly(key, content, options)
     if (created) {
       await this._setReference(key, id)
@@ -272,14 +288,16 @@ export class IDX {
     content: Record<string, any>,
     { pin }: CreateOptions = {}
   ): Promise<StreamID> {
-    const metadata = { deterministic: true, controllers: [this.id], family: definition.id.toString() }
+    const metadata = {
+      deterministic: true,
+      controllers: [this.id],
+      family: definition.id.toString(),
+    }
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(
-      this._ceramic,
-      null,
-      metadata,
-      { anchor: false, publish: false }
-    )
+    const doc = await TileDocument.create<TileContent>(this._ceramic, null, metadata, {
+      anchor: false,
+      publish: false,
+    })
     // Then be updated with content and schema
     const updated = doc.update(content, { ...metadata, schema: definition.schema })
     if (pin ?? this._autopin) {

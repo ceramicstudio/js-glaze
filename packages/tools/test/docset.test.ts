@@ -20,17 +20,13 @@ describe('docset', () => {
     )
     const did = new DID({
       resolver: KeyResolver.getResolver(),
-      provider: new Ed25519Provider(seed)
+      provider: new Ed25519Provider(seed),
     })
-    await Promise.all([
-      ceramic.setDID(did),
-      publishIDXConfig(ceramic),
-    ])
+    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic)])
     await did.authenticate()
   })
 
   test('publish signed', async () => {
-
     const signedDocSet = {
       definitions: ['myNotes'],
       schemas: ['NotesList', 'Note'],
@@ -96,7 +92,6 @@ describe('docset', () => {
   })
 
   test('creation flow', async () => {
-
     const NoteSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Note',
@@ -170,7 +165,6 @@ describe('docset', () => {
   })
 
   test('creation flow with associated schema', async () => {
-
     const docset = new DocSet(ceramic)
 
     // TODO: also test with external schema added in docset constructor?

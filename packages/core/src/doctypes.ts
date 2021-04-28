@@ -4,7 +4,6 @@ export type TileContent = Record<string, any> | null
 export type TileDoc = TileDocument<TileContent>
 export type MutationFunc = (current: TileDoc) => Promise<TileDoc>
 
-
 type RejectFunc = (error: Error) => void
 
 type QueueItem<TileDoc> = {
