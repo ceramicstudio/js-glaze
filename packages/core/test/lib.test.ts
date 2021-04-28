@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
-import DocID from '@ceramicnetwork/docid'
+import StreamID from '@ceramicnetwork/streamid'
 import { schemas } from '@ceramicstudio/idx-constants'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
+jest.mock('@ceramicnetwork/stream-tile')
 
 import { IDX } from '../src/index'
 
 describe('IDX', () => {
-  const testDocID = DocID.fromString(
+  const testDocID = StreamID.fromString(
     'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
   )
 
@@ -37,41 +39,41 @@ describe('IDX', () => {
   describe('Main methods', () => {
     describe('has', () => {
       test('returns true', async () => {
-        const getReference = jest.fn(() => 'docId')
-        const idx = new IDX({ aliases: { test: 'docId' } } as any)
+        const getReference = jest.fn(() => 'streamId')
+        const idx = new IDX({ aliases: { test: 'streamId' } } as any)
         idx._getReference = getReference as any
         await expect(idx.has('test', 'did')).resolves.toBe(true)
-        expect(getReference).toBeCalledWith('docId', 'did')
+        expect(getReference).toBeCalledWith('streamId', 'did')
       })
 
       test('returns false', async () => {
         const getReference = jest.fn(() => null)
         const idx = new IDX({
           ceramic: { did: { id: 'did:test' } },
-          aliases: { test: 'docId' },
+          aliases: { test: 'streamId' },
         } as any)
         idx._getReference = getReference
         await expect(idx.has('test')).resolves.toBe(false)
-        expect(getReference).toBeCalledWith('docId', undefined)
+        expect(getReference).toBeCalledWith('streamId', undefined)
       })
     })
 
     test('get', async () => {
       const content = {}
       const getRecord = jest.fn(() => content)
-      const idx = new IDX({ aliases: { test: 'docId' } } as any)
+      const idx = new IDX({ aliases: { test: 'streamId' } } as any)
       idx._getRecord = getRecord as any
       await expect(idx.get('test', 'did')).resolves.toBe(content)
-      expect(getRecord).toBeCalledWith('docId', 'did')
+      expect(getRecord).toBeCalledWith('streamId', 'did')
     })
 
     test('set', async () => {
       const content = {}
       const setRecord = jest.fn(() => 'contentId')
-      const idx = new IDX({ aliases: { test: 'docId' } } as any)
+      const idx = new IDX({ aliases: { test: 'streamId' } } as any)
       idx._setRecord = setRecord as any
       await expect(idx.set('test', content, { pin: false })).resolves.toBe('contentId')
-      expect(setRecord).toBeCalledWith('docId', content, { pin: false })
+      expect(setRecord).toBeCalledWith('streamId', content, { pin: false })
     })
 
     describe('merge', () => {
@@ -79,14 +81,14 @@ describe('IDX', () => {
         const content = { hello: 'test', foo: 'bar' }
         const getRecord = jest.fn(() => content)
         const setRecord = jest.fn(() => 'contentId')
-        const idx = new IDX({ aliases: { test: 'docId' } } as any)
+        const idx = new IDX({ aliases: { test: 'streamId' } } as any)
         idx._getRecord = getRecord as any
         idx._setRecord = setRecord as any
         await expect(idx.merge('test', { hello: 'world', added: 'value' })).resolves.toBe(
           'contentId'
         )
         expect(setRecord).toBeCalledWith(
-          'docId',
+          'streamId',
           { hello: 'world', foo: 'bar', added: 'value' },
           undefined
         )
@@ -96,11 +98,11 @@ describe('IDX', () => {
         const content = { hello: 'test', foo: 'bar' }
         const getRecord = jest.fn(() => null)
         const setRecord = jest.fn(() => 'contentId')
-        const idx = new IDX({ aliases: { test: 'docId' } } as any)
+        const idx = new IDX({ aliases: { test: 'streamId' } } as any)
         idx._getRecord = getRecord as any
         idx._setRecord = setRecord as any
         await expect(idx.merge('test', content)).resolves.toBe('contentId')
-        expect(setRecord).toBeCalledWith('docId', content, undefined)
+        expect(setRecord).toBeCalledWith('streamId', content, undefined)
       })
     })
 
@@ -108,7 +110,7 @@ describe('IDX', () => {
       const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
       const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
       const setRecordOnly = jest.fn((key) => {
-        return key === 'first' ? [true, DocID.fromString(ref1)] : [false, DocID.fromString(ref2)]
+        return key === 'first' ? [true, StreamID.fromString(ref1)] : [false, StreamID.fromString(ref2)]
       })
       const setReferences = jest.fn()
 
@@ -123,7 +125,7 @@ describe('IDX', () => {
     })
 
     test('setDefaults', async () => {
-      const newID = DocID.fromString(
+      const newID = StreamID.fromString(
         'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
       )
       const definition = {}
@@ -149,21 +151,21 @@ describe('IDX', () => {
 
     test('remove', async () => {
       const removeReference = jest.fn()
-      const idx = new IDX({ aliases: { test: 'docId' } } as any)
+      const idx = new IDX({ aliases: { test: 'streamId' } } as any)
       idx._removeReference = removeReference
       await expect(idx.remove('test')).resolves.toBeUndefined()
-      expect(removeReference).toBeCalledWith('docId')
+      expect(removeReference).toBeCalledWith('streamId')
     })
 
     describe('_toIndexKey', () => {
       test('resolves the existing alias', () => {
-        const idx = new IDX({ aliases: { test: 'docId' } } as any)
-        expect(idx._toIndexKey('test')).toBe('docId')
+        const idx = new IDX({ aliases: { test: 'streamId' } } as any)
+        expect(idx._toIndexKey('test')).toBe('streamId')
       })
 
       test('returns provided key as-is if not other match', () => {
         const idx = new IDX({} as any)
-        expect(idx._toIndexKey('docId')).toBe('docId')
+        expect(idx._toIndexKey('streamId')).toBe('streamId')
       })
     })
   })
@@ -225,22 +227,21 @@ describe('IDX', () => {
     })
 
     test('_createIDXDoc', async () => {
-      const doc = { id: 'docId' }
+      const doc = { id: 'streamId' }
       const add = jest.fn()
-      const createDocument = jest.fn(() => Promise.resolve(doc)) as any
-      const idx = new IDX({ ceramic: { createDocument, pin: { add } } } as any)
+      TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
+      const ceramic = { pin: { add } }
+      const idx = new IDX({ ceramic } as any)
 
       await expect(idx._createIDXDoc('did:test:123')).resolves.toBe(doc)
-      expect(createDocument).toHaveBeenCalledTimes(1)
-      expect(createDocument).toHaveBeenCalledWith(
-        'tile',
-        {
-          deterministic: true,
-          metadata: { controllers: ['did:test:123'], family: 'IDX' },
-        },
+      expect(TileDocument.create).toHaveBeenCalledTimes(1)
+      expect(TileDocument.create).toHaveBeenCalledWith(
+        ceramic,
+        null,
+        { deterministic: true, controllers: ['did:test:123'], family: 'IDX' },
         { anchor: false, publish: false }
       )
-      expect(add).toBeCalledWith('docId')
+      expect(add).toBeCalledWith('streamId')
     })
 
     describe('_getIDXDoc', () => {
@@ -281,17 +282,15 @@ describe('IDX', () => {
       test('creates and sets schema in update', async () => {
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX' }
-        const change = jest.fn()
-        const doc = { change, metadata } as any
+        const update = jest.fn()
+        const doc = { update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
         const idx = new IDX({ ceramic: { did: { id } } } as any)
         idx._createIDXDoc = createDoc
 
         await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(change).toHaveBeenCalledWith({
-          metadata: { ...metadata, schema: schemas.IdentityIndex },
-        })
+        expect(update).toHaveBeenCalledWith(null, { ...metadata, schema: schemas.IdentityIndex })
       })
 
       test('throws an error if the schema is not a valid IdentityIndex', async () => {
@@ -309,15 +308,15 @@ describe('IDX', () => {
       test('returns the doc if valid', async () => {
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX', schema: schemas.IdentityIndex }
-        const change = jest.fn()
-        const doc = { change, metadata } as any
+        const update = jest.fn()
+        const doc = { update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
         const idx = new IDX({ ceramic: { did: { id } } } as any)
         idx._createIDXDoc = createDoc
 
         await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(change).not.toHaveBeenCalled()
+        expect(update).not.toHaveBeenCalled()
       })
     })
   })
@@ -325,27 +324,27 @@ describe('IDX', () => {
   describe('Metadata methods', () => {
     describe('getDefinition', () => {
       test('works with the provided schema', async () => {
-        const loadDocument = jest.fn(() =>
+        const loadStream = jest.fn(() =>
           Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: schemas.Definition },
           })
         )
-        const idx = new IDX({ ceramic: { loadDocument } } as any)
+        const idx = new IDX({ ceramic: { loadStream } } as any)
         await expect(idx.getDefinition('ceramic://test')).resolves.toEqual({
           name: 'definition',
         })
-        expect(loadDocument).toBeCalledWith('ceramic://test')
+        expect(loadStream).toBeCalledWith('ceramic://test')
       })
 
       test('throws an error if the definition does not use the right schema', async () => {
-        const loadDocument = jest.fn(() =>
+        const loadStream = jest.fn(() =>
           Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: 'ceramic://other' },
           })
         )
-        const idx = new IDX({ ceramic: { loadDocument } } as any)
+        const idx = new IDX({ ceramic: { loadStream } } as any)
         await expect(idx.getDefinition('ceramic://test')).rejects.toThrow(
           'Invalid document: schema is not Definition'
         )
@@ -355,14 +354,14 @@ describe('IDX', () => {
 
   describe('Records methods', () => {
     test('_loadDocument', async () => {
-      const loadDocument = jest.fn()
-      const idx = new IDX({ ceramic: { loadDocument } } as any)
+      const loadStream = jest.fn()
+      const idx = new IDX({ ceramic: { loadStream } } as any)
       await Promise.all([
         idx._loadDocument('one'),
         idx._loadDocument('one'),
         idx._loadDocument('two'),
       ])
-      expect(loadDocument).toBeCalledTimes(2)
+      expect(loadStream).toBeCalledTimes(2)
     })
 
     test('getRecordID', async () => {
@@ -407,16 +406,16 @@ describe('IDX', () => {
     describe('_setRecordOnly', () => {
       test('existing definition ID', async () => {
         const idx = new IDX({ ceramic: { did: { id: 'did' } } } as any)
-        idx._getReference = (): Promise<any> => Promise.resolve('docId')
+        idx._getReference = (): Promise<any> => Promise.resolve('streamId')
 
-        const change = jest.fn()
-        const loadDocument = jest.fn(() => Promise.resolve({ change, id: 'docId' }))
+        const update = jest.fn()
+        const loadDocument = jest.fn(() => Promise.resolve({ update, id: 'streamId' }))
         idx._loadDocument = loadDocument as any
 
         const content = { test: true }
-        await expect(idx._setRecordOnly('defId', content)).resolves.toEqual([false, 'docId'])
-        expect(loadDocument).toBeCalledWith('docId')
-        expect(change).toBeCalledWith({ content })
+        await expect(idx._setRecordOnly('defId', content)).resolves.toEqual([false, 'streamId'])
+        expect(loadDocument).toBeCalledWith('streamId')
+        expect(update).toBeCalledWith(content)
       })
 
       test('adding definition ID', async () => {
@@ -426,13 +425,13 @@ describe('IDX', () => {
         const definition = { name: 'test', schema: 'ceramic://...' }
         const getDefinition = jest.fn(() => Promise.resolve(definition))
         idx.getDefinition = getDefinition as any
-        const createRecord = jest.fn(() => Promise.resolve('docId'))
+        const createRecord = jest.fn(() => Promise.resolve('streamId'))
         idx._createRecord = createRecord as any
 
         const content = { test: true }
         await expect(idx._setRecordOnly('defId', content, { pin: true })).resolves.toEqual([
           true,
-          'docId',
+          'streamId',
         ])
         expect(getDefinition).toBeCalledWith('defId')
         expect(createRecord).toBeCalledWith(definition, content, { pin: true })
@@ -442,7 +441,7 @@ describe('IDX', () => {
     describe('_setRecord', () => {
       test('does not set the index key if it already exists', async () => {
         const idx = new IDX({} as any)
-        const setRecord = jest.fn(() => Promise.resolve([false, 'docId']))
+        const setRecord = jest.fn(() => Promise.resolve([false, 'streamId']))
         idx._setRecordOnly = setRecord as any
         const setReference = jest.fn()
         idx._setReference = setReference
@@ -455,7 +454,7 @@ describe('IDX', () => {
 
       test('adds the new index key', async () => {
         const idx = new IDX({} as any)
-        const setRecord = jest.fn(() => Promise.resolve([true, 'docId']))
+        const setRecord = jest.fn(() => Promise.resolve([true, 'streamId']))
         idx._setRecordOnly = setRecord as any
         const setReference = jest.fn()
         idx._setReference = setReference
@@ -463,7 +462,7 @@ describe('IDX', () => {
         const content = { test: true }
         await idx._setRecord('defId', content)
         expect(setRecord).toBeCalledWith('defId', content, undefined)
-        expect(setReference).toBeCalledWith('defId', 'docId')
+        expect(setReference).toBeCalledWith('defId', 'streamId')
       })
     })
 
@@ -471,11 +470,12 @@ describe('IDX', () => {
       test('creates the deterministic doc and updates it', async () => {
         const id = 'did:test:123'
         const add = jest.fn()
-        const change = jest.fn()
-        const createDocument = jest.fn((_doctype, { metadata }, _opts) => {
-          return Promise.resolve({ id: 'docId', change, metadata })
-        })
-        const idx = new IDX({ ceramic: { createDocument, did: { id }, pin: { add } } } as any)
+        const update = jest.fn()
+        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata, _opts) => {
+          return Promise.resolve({ id: 'streamId', update, metadata })
+        }))
+        const ceramic = { did: { id }, pin: { add } }
+        const idx = new IDX({ ceramic } as any)
 
         const definition = {
           id: { toString: () => 'defId' },
@@ -483,64 +483,59 @@ describe('IDX', () => {
           schema: 'schemaId',
         } as any
         const content = { test: true }
-        await expect(idx._createRecord(definition, content, { pin: true })).resolves.toBe('docId')
-        expect(createDocument).toBeCalledWith(
-          'tile',
-          {
-            deterministic: true,
-            metadata: { controllers: [id], family: 'defId' },
-          },
+        await expect(idx._createRecord(definition, content, { pin: true })).resolves.toBe('streamId')
+        expect(TileDocument.create).toBeCalledWith(
+          ceramic,
+          null,
+          { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(change).toBeCalledWith({
-          content,
-          metadata: { controllers: [id], family: 'defId', schema: 'schemaId' },
-        })
-        expect(add).toBeCalledWith('docId')
+        expect(update).toBeCalledWith(content, { deterministic: true, controllers: [id], family: 'defId', schema: 'schemaId' })
+        expect(add).toBeCalledWith('streamId')
       })
 
       test('pin by default', async () => {
         const add = jest.fn()
-        const change = jest.fn()
-        const createDocument = jest.fn((_doctype, { metadata }) => {
-          return Promise.resolve({ id: 'docId', change, metadata })
-        })
+        const update = jest.fn()
+        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
+          return Promise.resolve({ id: 'streamId', update, metadata })
+        }))
         const idx = new IDX({
-          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
         } as any)
 
         await idx._createRecord({ id: { toString: () => 'defId' } } as any, {})
-        expect(change).toBeCalled()
-        expect(add).toBeCalledWith('docId')
+        expect(update).toBeCalled()
+        expect(add).toBeCalledWith('streamId')
       })
 
       test('no pinning by setting instance option', async () => {
         const add = jest.fn()
-        const change = jest.fn()
-        const createDocument = jest.fn((_doctype, { metadata }) => {
-          return Promise.resolve({ id: 'docId', change, metadata })
-        })
+        const update = jest.fn()
+        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
+          return Promise.resolve({ id: 'streamId', update, metadata })
+        }))
         const idx = new IDX({
           autopin: false,
-          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
         } as any)
         await idx._createRecord({ id: { toString: () => 'defId' } } as any, {})
-        expect(change).toBeCalled()
+        expect(update).toBeCalled()
         expect(add).not.toBeCalled()
       })
 
       test('explicit no pinning', async () => {
         const add = jest.fn()
-        const change = jest.fn()
-        const createDocument = jest.fn((_doctype, { metadata }) => {
-          return Promise.resolve({ id: 'docId', change, metadata })
-        })
+        const update = jest.fn()
+        TileDocument.create.mockImplementationOnce(jest.fn((_ceramic, _content, metadata) => {
+          return Promise.resolve({ id: 'streamId', update, metadata })
+        }))
         const idx = new IDX({
           autopin: true,
-          ceramic: { createDocument, did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
         } as any)
         await idx._createRecord({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
-        expect(change).toBeCalled()
+        expect(update).toBeCalled()
         expect(add).not.toBeCalled()
       })
     })
@@ -557,10 +552,10 @@ describe('IDX', () => {
       })
 
       test('with authenticated DID', async () => {
-        const getIndex = jest.fn(() => Promise.resolve({ testId: 'docId' }))
+        const getIndex = jest.fn(() => Promise.resolve({ testId: 'streamId' }))
         const idx = new IDX({ ceramic: { did: { id: 'did:3:test' } } } as any)
         idx.getIndex = getIndex
-        await expect(idx._getReference('testId')).resolves.toBe('docId')
+        await expect(idx._getReference('testId')).resolves.toBe('streamId')
         expect(getIndex).toBeCalledWith('did:3:test')
       })
     })

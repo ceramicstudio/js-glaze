@@ -1,6 +1,7 @@
-import type { CeramicApi, DocMetadata, Doctype } from '@ceramicnetwork/common'
-import type { DocID, DocRef } from '@ceramicnetwork/docid'
-import { CommitID } from '@ceramicnetwork/docid'
+import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
+import type { StreamID, StreamRef } from '@ceramicnetwork/streamid'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
+import { CommitID } from '@ceramicnetwork/streamid'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -12,8 +13,8 @@ import { docIDToString } from './utils'
 export const SCHEMA_REF_ID = 'ceramic://schemaReference'
 
 export type CreatedDoc = {
-  id: DocRef
-  dependencies: Array<DocRef>
+  id: StreamRef
+  dependencies: Array<StreamRef>
 }
 
 export type PublishedDocSet = {
@@ -147,7 +148,7 @@ function extractSchemaReferences(schema: Schema): Array<string> {
 
 export class DocSet {
   _ceramic: CeramicApi
-  _docs: Record<string, Promise<Doctype>> = {}
+  _docs: Record<string, Promise<TileDocument>> = {}
   _definitions: Record<string, Promise<CreatedDoc>> = {}
   _schemas: Record<string, Promise<CreatedDoc>> = {}
   _schemaAliases: Record<string, string> = {}
@@ -160,14 +161,14 @@ export class DocSet {
     this._ceramic = ceramic
   }
 
-  async loadCreated(created: Promise<CreatedDoc>): Promise<Doctype> {
+  async loadCreated(created: Promise<CreatedDoc>): Promise<TileDocument> {
     return await this.loadDoc((await created).id)
   }
 
-  async loadDoc(docID: DocRef | string): Promise<Doctype> {
-    const id = docIDToString(docID)
+  async loadDoc(streamID: StreamRef | string): Promise<TileDocument> {
+    const id = docIDToString(streamID)
     if (this._docs[id] == null) {
-      this._docs[id] = this._ceramic.loadDocument(id)
+      this._docs[id] = this._ceramic.loadStream<TileDocument>(id)
     }
     return await this._docs[id]
   }
@@ -203,7 +204,7 @@ export class DocSet {
   createSchema(
     name: string,
     schema: Schema,
-    deps: Array<Promise<DocRef>> = []
+    deps: Array<Promise<StreamRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasSchema(name)) {
       throw new Error(`Schema ${name} already exists`)
@@ -224,7 +225,7 @@ export class DocSet {
     return this._schemas[name]
   }
 
-  async addSchema(schema: Schema, alias?: string): Promise<DocRef> {
+  async addSchema(schema: Schema, alias?: string): Promise<StreamRef> {
     const name = alias ?? (schema.title as string | undefined)
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
@@ -239,7 +240,7 @@ export class DocSet {
     return created.id
   }
 
-  async useExistingSchema(id: DocRef | string, alias?: string): Promise<DocRef> {
+  async useExistingSchema(id: StreamRef | string, alias?: string): Promise<StreamRef> {
     const existingAlias = this._schemaAliases[docIDToString(id)]
     if (existingAlias != null) {
       const existing = this._schemas[existingAlias]
@@ -292,7 +293,7 @@ export class DocSet {
   createDefinition(
     alias: string,
     definition: Definition,
-    deps: Array<Promise<DocRef>> = []
+    deps: Array<Promise<StreamRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasDefinition(alias)) {
       throw new Error(`Definition ${alias} already exists`)
@@ -310,7 +311,7 @@ export class DocSet {
     return this._definitions[alias]
   }
 
-  async addDefinition(definition: Definition, alias = definition.name): Promise<DocRef> {
+  async addDefinition(definition: Definition, alias = definition.name): Promise<StreamRef> {
     const created = await this.createDefinition(alias, definition, [
       this.useExistingSchema(definition.schema),
     ])
@@ -336,8 +337,8 @@ export class DocSet {
   createTile<T extends Record<string, unknown>>(
     alias: string,
     contents: T,
-    meta: Partial<DocMetadata>,
-    deps: Array<Promise<DocRef>> = []
+    meta: Partial<StreamMetadata>,
+    deps: Array<Promise<StreamRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasTile(alias)) {
       throw new Error(`Tile ${alias} already exists`)
@@ -358,8 +359,8 @@ export class DocSet {
   async addTile<T extends Record<string, unknown>>(
     alias: string,
     contents: T,
-    meta: Partial<DocMetadata>
-  ): Promise<DocRef> {
+    meta: Partial<StreamMetadata>
+  ): Promise<StreamRef> {
     if (meta.schema == null) {
       throw new Error('Missing schema to add tile')
     }
@@ -404,8 +405,8 @@ export class DocSet {
       dependencies.forEach((depid) => {
         deps.add(depid.toString())
       })
-      const docid = (id instanceof CommitID ? id.baseID : id) as DocID
-      const commits = await this._ceramic.loadDocumentCommits(docid)
+      const streamid = (id instanceof CommitID ? id.baseID : id) as StreamID
+      const commits = await this._ceramic.loadStreamCommits(streamid)
       docs[id.toString()] = commits.map((r) => r.value as DagJWSResult)
     }
 
@@ -497,8 +498,8 @@ export async function publishSignedDocSet(
   ceramic: CeramicApi,
   docSet: SignedDocSet
 ): Promise<void> {
-  const schemas: Array<Promise<Doctype>> = []
-  const others: Array<Promise<Doctype>> = []
+  const schemas: Array<Promise<TileDocument>> = []
+  const others: Array<Promise<TileDocument>> = []
 
   Object.entries(docSet.docs).forEach(([id, commits]) => {
     const publish = publishCommits(ceramic, commits)

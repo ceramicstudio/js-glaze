@@ -1,22 +1,25 @@
-import type { Doctype } from '@ceramicnetwork/common'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 
-export type MutationFunc<T = Doctype> = (current: T) => Promise<T>
+export type TileContent = Record<string, any> | null
+export type TileDoc = TileDocument<TileContent>
+export type MutationFunc = (current: TileDoc) => Promise<TileDoc>
+
 
 type RejectFunc = (error: Error) => void
 
-type QueueItem<T = Doctype> = {
+type QueueItem<TileDoc> = {
   reject: RejectFunc
-  run: (value: T) => Promise<void>
+  run: (value: TileDoc) => Promise<void>
 }
 
-export class DoctypeProxy<T extends Doctype = Doctype> {
-  _getRemote: () => Promise<T>
-  _getPromise: Promise<T> | null = null
-  _queue: Array<QueueItem<T>> = []
-  _promiseValue!: Promise<T>
-  _deferValue!: { resolve: (value: T) => any; reject: RejectFunc }
+export class DoctypeProxy {
+  _getRemote: () => Promise<TileDoc>
+  _getPromise: Promise<TileDoc> | null = null
+  _queue: Array<QueueItem<TileDoc>> = []
+  _promiseValue!: Promise<TileDoc>
+  _deferValue!: { resolve: (value: TileDoc) => any; reject: RejectFunc }
 
-  constructor(getRemote: () => Promise<T>) {
+  constructor(getRemote: () => Promise<TileDoc>) {
     this._getRemote = getRemote
     this._createValuePromise()
   }
@@ -27,9 +30,9 @@ export class DoctypeProxy<T extends Doctype = Doctype> {
     })
   }
 
-  change(mutation: MutationFunc<T>): Promise<void> {
+  change(mutation: MutationFunc): Promise<void> {
     return new Promise((resolve, reject) => {
-      const run = async (current: T): Promise<void> => {
+      const run = async (current: TileDoc): Promise<void> => {
         try {
           const next = await mutation(current)
           resolve()
@@ -47,15 +50,15 @@ export class DoctypeProxy<T extends Doctype = Doctype> {
     })
   }
 
-  async changeContent<U>(change: (content: U) => U): Promise<void> {
-    const mutation = async (doc: T): Promise<T> => {
-      await doc.change({ content: change(doc.content), metadata: doc.metadata })
+  async changeContent(change: (content: TileContent) => TileContent): Promise<void> {
+    const mutation = async (doc: TileDoc): Promise<TileDoc> => {
+      await doc.update(change(doc.content), doc.metadata)
       return doc
     }
     return await this.change(mutation)
   }
 
-  async get(): Promise<T> {
+  async get(): Promise<TileDoc> {
     return this._queue.length === 0 ? await this._getRemote() : await this._promiseValue
   }
 
@@ -73,7 +76,7 @@ export class DoctypeProxy<T extends Doctype = Doctype> {
     }
   }
 
-  _next(value: T): void {
+  _next(value: TileDoc): void {
     const item = this._queue.shift()
     if (item == null) {
       this._end(value)
@@ -82,7 +85,7 @@ export class DoctypeProxy<T extends Doctype = Doctype> {
     }
   }
 
-  _end(value: T): void {
+  _end(value: TileDoc): void {
     this._deferValue.resolve(value)
     this._createValuePromise()
   }

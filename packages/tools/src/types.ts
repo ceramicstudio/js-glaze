@@ -1,4 +1,4 @@
-import type DocID from '@ceramicnetwork/docid'
+import type StreamID from '@ceramicnetwork/streamid'
 import type {
   Definition,
   DefinitionName,
@@ -33,13 +33,13 @@ export interface PublishedConfig {
 }
 
 export interface PublishDoc<T = unknown> {
-  id?: DocID | string
+  id?: StreamID | string
   content: T
   controllers?: Array<string>
-  schema?: DocID | string
+  schema?: StreamID | string
 }
 export interface DefinitionDoc extends PublishDoc<Definition> {
-  id: DocID | string
+  id: StreamID | string
 }
 export interface SchemaDoc extends PublishDoc<Schema> {
   name: string

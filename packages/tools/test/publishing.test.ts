@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import DocID from '@ceramicnetwork/docid'
+import StreamID from '@ceramicnetwork/streamid'
 
 import { createTile, publishCommits, publishDoc } from '../src'
 
+import { TileDocument } from '@ceramicnetwork/stream-tile'
+jest.mock('@ceramicnetwork/stream-tile')
+
 describe('publishing', () => {
   const testID = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
-  const testDocID = DocID.fromString(testID)
+  const testDocID = StreamID.fromString(testID)
   const testDoc = {
     id: testDocID,
-    commitId: DocID.fromString('kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60t'),
+    commitId: StreamID.fromString('kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60t'),
   }
 
   describe('createTile', () => {
@@ -20,37 +23,37 @@ describe('publishing', () => {
     })
 
     test('sets the authenticated DID as controllers if not set in metadata', async () => {
-      const createDocument = jest.fn(() => Promise.resolve({ id: testDocID }))
+      TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve({ id: testDocID })))
       const pinAdd = jest.fn(() => Promise.resolve())
-      const ceramic = { did: { id: 'did:test:123' }, createDocument, pin: { add: pinAdd } } as any
+      const ceramic = { did: { id: 'did:test:123' }, pin: { add: pinAdd } } as any
 
       await createTile(ceramic, { hello: 'test' }, { schema: testID })
-      expect(createDocument).toBeCalledWith('tile', {
-        content: { hello: 'test' },
-        metadata: { controllers: ['did:test:123'], schema: testID },
-      })
+      expect(TileDocument.create).toBeCalledWith(
+        ceramic,
+        { hello: 'test' },
+        { controllers: ['did:test:123'], schema: testID },
+      )
       expect(pinAdd).toBeCalledWith(testDocID)
     })
 
     test('sets the provided controllers', async () => {
-      const createDocument = jest.fn(() => Promise.resolve({ id: testDocID }))
+      TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve({ id: testDocID })))
       const pinAdd = jest.fn()
-      const ceramic = { did: { id: 'did:test:123' }, createDocument, pin: { add: pinAdd } } as any
+      const ceramic = { did: { id: 'did:test:123' }, pin: { add: pinAdd } } as any
 
       await createTile(ceramic, { hello: 'test' }, { controllers: ['did:test:456'] })
-      expect(createDocument).toBeCalledWith('tile', {
-        content: { hello: 'test' },
-        metadata: { controllers: ['did:test:456'] },
-      })
+      expect(TileDocument.create).toBeCalledWith(ceramic,
+        { hello: 'test' },
+        { controllers: ['did:test:456'] },
+      )
     })
   })
 
   test('publishCommits', async () => {
-    const createDocument = jest.fn(() => Promise.resolve(testDoc))
+    TileDocument.createFromGenesis.mockImplementationOnce(jest.fn(() => Promise.resolve(testDoc)))
     const applyCommit = jest.fn(() => Promise.resolve(testDoc))
     const pinAdd = jest.fn(() => Promise.resolve())
     const ceramic = {
-      createDocumentFromGenesis: createDocument,
       applyCommit,
       pin: { add: pinAdd },
     } as any
@@ -58,17 +61,17 @@ describe('publishing', () => {
     const commits = [{ jws: {}, __genesis: true }, { jws: {} }, { jws: {} }]
     const opts = { anchor: false, publish: false }
     await expect(publishCommits(ceramic, commits as any)).resolves.toBe(testDoc)
-    expect(createDocument).toBeCalledWith('tile', { jws: {}, __genesis: true }, opts)
+    expect(TileDocument.createFromGenesis).toBeCalledWith(ceramic, { jws: {}, __genesis: true }, opts)
     expect(pinAdd).toBeCalledWith(testDocID)
     expect(applyCommit).toBeCalledTimes(2)
     expect(applyCommit).toBeCalledWith(testDocID, { jws: {} }, opts)
   })
 
   describe('publishDoc', () => {
-    test('creates the document if the DocID is not provided', async () => {
-      const createDocument = jest.fn(() => Promise.resolve(testDoc))
+    test('creates the document if the StreamID is not provided', async () => {
+      TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve(testDoc)))
       const pinAdd = jest.fn(() => Promise.resolve())
-      const ceramic = { did: { id: 'did:test:123' }, createDocument, pin: { add: pinAdd } } as any
+      const ceramic = { did: { id: 'did:test:123' }, pin: { add: pinAdd } } as any
 
       await expect(
         publishDoc(ceramic, {
@@ -77,37 +80,37 @@ describe('publishing', () => {
           schema: testID,
         })
       ).resolves.toBe(testDoc)
-      expect(createDocument).toBeCalledWith('tile', {
-        content: { hello: 'test' },
-        metadata: { controllers: ['did:test:456'], schema: testID },
-      })
+      expect(TileDocument.create).toBeCalledWith(ceramic,
+        { hello: 'test' },
+        { controllers: ['did:test:456'], schema: testID },
+      )
       expect(pinAdd).toBeCalledWith(testDocID)
     })
 
     test('updates the document if contents changed', async () => {
-      const change = jest.fn()
-      const doc = { content: { hello: 'world' }, change, id: testDocID }
-      const loadDocument = jest.fn(() => Promise.resolve(doc))
-      const ceramic = { loadDocument } as any
+      const update = jest.fn()
+      const doc = { content: { hello: 'world' }, update, id: testDocID }
+      const loadStream = jest.fn(() => Promise.resolve(doc))
+      const ceramic = { loadStream } as any
 
       await expect(publishDoc(ceramic, { id: testID, content: { hello: 'test' } })).resolves.toBe(
         doc
       )
-      expect(loadDocument).toBeCalledWith(testID)
-      expect(change).toBeCalledWith({ content: { hello: 'test' } })
+      expect(loadStream).toBeCalledWith(testID)
+      expect(update).toBeCalledWith({ hello: 'test' })
     })
 
     test('does not update the document if contents have not changed', async () => {
-      const change = jest.fn()
-      const doc = { content: { hello: 'test' }, change, id: testDocID }
-      const loadDocument = jest.fn(() => Promise.resolve(doc))
-      const ceramic = { loadDocument } as any
+      const update = jest.fn()
+      const doc = { content: { hello: 'test' }, update, id: testDocID }
+      const loadStream = jest.fn(() => Promise.resolve(doc))
+      const ceramic = { loadStream } as any
 
       await expect(publishDoc(ceramic, { id: testID, content: { hello: 'test' } })).resolves.toBe(
         doc
       )
-      expect(loadDocument).toBeCalledWith(testID)
-      expect(change).not.toBeCalled()
+      expect(loadStream).toBeCalledWith(testID)
+      expect(update).not.toBeCalled()
     })
   })
 })

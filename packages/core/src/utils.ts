@@ -1,7 +1,7 @@
-import type DocID from '@ceramicnetwork/docid'
+import type StreamID from '@ceramicnetwork/streamid'
 import { AccountID } from 'caip'
 
-export function toDocIDString(id: DocID | string): string {
+export function toDocIDString(id: StreamID | string): string {
   return typeof id === 'string' ? id : id.toString()
 }
 

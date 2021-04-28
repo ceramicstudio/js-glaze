@@ -1,10 +1,10 @@
 import type {
   CeramicApi,
   CeramicCommit,
-  DocMetadata,
-  DocOpts,
-  Doctype,
+  GenesisCommit,
+  StreamMetadata,
 } from '@ceramicnetwork/common'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { schemas as publishedSchemas } from '@ceramicstudio/idx-constants'
 import type {
   DefinitionName,
@@ -27,13 +27,13 @@ import type {
 import { promiseMap, docIDToString } from './utils'
 import { isValidDefinition, isSecureSchema } from './validate'
 
-const PUBLISH_OPTS: DocOpts = { anchor: false, publish: false }
+const PUBLISH_OPTS = { anchor: false, publish: false }
 
 export async function createTile<T = unknown>(
   ceramic: CeramicApi,
   content: T,
-  metadata: Partial<DocMetadata> = {}
-): Promise<Doctype> {
+  metadata: Partial<StreamMetadata> = {}
+): Promise<TileDocument> {
   if (ceramic.did == null) {
     throw new Error('Ceramic instance is not authenticated')
   }
@@ -42,7 +42,7 @@ export async function createTile<T = unknown>(
     metadata.controllers = [ceramic.did.id]
   }
 
-  const doc = await ceramic.createDocument('tile', { content, metadata: metadata as DocMetadata })
+  const doc = await TileDocument.create(ceramic, content, metadata)
   await ceramic.pin.add(doc.id)
   return doc
 }
@@ -50,7 +50,7 @@ export async function createTile<T = unknown>(
 export async function publishDoc<T = unknown>(
   ceramic: CeramicApi,
   doc: PublishDoc<T>
-): Promise<Doctype> {
+): Promise<TileDocument> {
   if (doc.id == null) {
     return await createTile(ceramic, doc.content, {
       controllers: doc.controllers,
@@ -58,9 +58,9 @@ export async function publishDoc<T = unknown>(
     })
   }
 
-  const loaded = await ceramic.loadDocument(doc.id)
+  const loaded = await ceramic.loadStream<TileDocument>(doc.id)
   if (!isEqual(loaded.content, doc.content)) {
-    await loaded.change({ content: doc.content })
+    await loaded.update(doc.content)
   }
   return loaded
 }
@@ -68,7 +68,7 @@ export async function publishDoc<T = unknown>(
 export async function createDefinition(
   ceramic: CeramicApi,
   definition: Definition
-): Promise<Doctype> {
+): Promise<TileDocument> {
   if (!isValidDefinition(definition)) {
     throw new Error('Invalid definition')
   }
@@ -76,13 +76,13 @@ export async function createDefinition(
 }
 
 export async function updateDefinition(ceramic: CeramicApi, doc: DefinitionDoc): Promise<boolean> {
-  const loaded = await ceramic.loadDocument(doc.id)
+  const loaded = await ceramic.loadStream<TileDocument>(doc.id)
   if (loaded.metadata.schema !== publishedSchemas.Definition) {
     throw new Error('Document is not a valid Definition')
   }
 
   if (!isEqual(loaded.content, doc.content)) {
-    await loaded.change({ content: doc.content })
+    await loaded.update(doc.content)
     return true
   }
   return false
@@ -91,8 +91,8 @@ export async function updateDefinition(ceramic: CeramicApi, doc: DefinitionDoc):
 export async function publishCommits(
   ceramic: CeramicApi,
   [genesis, ...updates]: Array<CeramicCommit>
-): Promise<Doctype> {
-  const doc = await ceramic.createDocumentFromGenesis('tile', genesis, PUBLISH_OPTS)
+): Promise<TileDocument<Record<string, any>>> {
+  const doc = await TileDocument.createFromGenesis<TileDocument<Record<string, any>>>(ceramic, genesis as GenesisCommit, PUBLISH_OPTS)
   await ceramic.pin.add(doc.id)
   for (const commit of updates) {
     await ceramic.applyCommit(doc.id, commit, PUBLISH_OPTS)
@@ -100,7 +100,7 @@ export async function publishCommits(
   return doc
 }
 
-export async function publishSchema(ceramic: CeramicApi, doc: SchemaDoc): Promise<Doctype> {
+export async function publishSchema(ceramic: CeramicApi, doc: SchemaDoc): Promise<TileDocument> {
   if (!isSecureSchema(doc.content)) {
     throw new Error(`Schema ${doc.name} is not secure`)
   }
@@ -110,7 +110,7 @@ export async function publishSchema(ceramic: CeramicApi, doc: SchemaDoc): Promis
 export async function publishSignedMap<T extends string = string>(
   ceramic: CeramicApi,
   signed: Record<T, Array<CeramicCommit>>
-): Promise<Record<T, Doctype>> {
+): Promise<Record<T, TileDocument>> {
   return await promiseMap(signed, async (commits) => await publishCommits(ceramic, commits))
 }
 

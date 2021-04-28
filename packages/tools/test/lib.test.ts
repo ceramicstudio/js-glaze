@@ -10,6 +10,7 @@ import {
 } from '@ceramicstudio/idx-constants'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
+import KeyResolver from 'key-did-resolver'
 import { fromString } from 'uint8arrays'
 
 import {
@@ -28,6 +29,11 @@ describe('lib', () => {
     linkedBlock: expect.any(Uint8Array),
   })
   const Records = expect.arrayContaining([DagJWSResult])
+
+  beforeAll(async () => {
+    const did = new DID({ resolver: KeyResolver.getResolver() })
+    await ceramic.setDID(did)
+  })
 
   test('publish config', async () => {
     jest.setTimeout(20000)

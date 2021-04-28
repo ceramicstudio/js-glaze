@@ -1,4 +1,4 @@
-import type DocID from '@ceramicnetwork/docid'
+import type StreamID from '@ceramicnetwork/streamid'
 import type { DagJWSResult, DID } from 'dids'
 
 import * as schemas from './schemas'
@@ -8,7 +8,7 @@ import { docIDToString, promiseMap } from './utils'
 export async function signTile<T = unknown>(
   did: DID,
   data: T,
-  schema?: DocID | string
+  schema?: StreamID | string
 ): Promise<DagJWSResult> {
   if (!did.authenticated) {
     throw new Error('DID must be authenticated')
@@ -23,7 +23,7 @@ export async function signTile<T = unknown>(
 
 export async function signIDXDefinitions(
   did: DID,
-  definitionSchema: DocID | string,
+  definitionSchema: StreamID | string,
   definitions: Record<string, Definition>
 ): Promise<Record<string, Array<DagJWSResult>>> {
   const schema = docIDToString(definitionSchema)
