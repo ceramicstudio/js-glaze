@@ -63,7 +63,7 @@
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^1.0.0-rc.4",
+    "@ceramicnetwork/common": "^1.0.0-rc.5",
     "@oclif/dev-cli": "^1.26.0",
     "@types/inquirer": "^7.3.1",
     "@types/listr": "^0.14.2",
