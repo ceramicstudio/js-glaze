@@ -29,6 +29,11 @@ describe('lib', () => {
   })
   const Records = expect.arrayContaining([DagJWSResult])
 
+  beforeAll(async () => {
+    const did = new DID({ resolver: KeyResolver.getResolver() })
+    await ceramic.setDID(did)
+  })
+
   test('publish config', async () => {
     jest.setTimeout(20000)
 

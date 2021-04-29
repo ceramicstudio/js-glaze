@@ -1,9 +1,10 @@
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
 export default class SetTile extends Command<
   CommandFlags,
-  { did: string; id: string; contents: unknown }
+  { did: string; id: string; contents: Record<string, any> }
 > {
   static description = 'set the contents of a tile document'
 
@@ -24,9 +25,9 @@ export default class SetTile extends Command<
     this.spinner.start('Loading document...')
     try {
       const ceramic = await this.getAuthenticatedCeramic(this.args.did)
-      const doc = await ceramic.loadDocument(this.args.id)
+      const doc = await ceramic.loadStream<TileDocument>(this.args.id)
       this.spinner.succeed('Document loaded').start('Updating document...')
-      await doc.change({ content: this.args.contents })
+      await doc.update(this.args.contents)
       this.spinner.succeed('Document successfully updated')
     } catch (err) {
       this.spinner.fail((err as Error).message)

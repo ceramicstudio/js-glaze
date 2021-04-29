@@ -3,6 +3,7 @@
  */
 
 import { CeramicApi } from '@ceramicnetwork/common'
+import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
 import { EthereumAuthProvider } from '@ceramicnetwork/blockchain-utils-linking'
 import { Wallet as EthereumWallet } from '@ethersproject/wallet'
 import { definitions } from '@ceramicstudio/idx-constants'
@@ -35,6 +36,7 @@ const createEthProvider = (wallet: EthereumWallet) => ({
 })
 
 describe('integration', () => {
+  jest.setTimeout(10000)
   test('get and set an IDX definition', async () => {
     const profileID = definitions.basicProfile
 
@@ -43,7 +45,7 @@ describe('integration', () => {
     await writer.set('basicProfile', { name: 'Alice' })
 
     const reader = new IDX({ ceramic })
-    // The definition DocID can also be used to identify a known resource
+    // The definition StreamID can also be used to identify a known resource
     const doc = await reader.get<{ name: string }>(profileID, writer.id)
     expect(doc).toEqual({ name: 'Alice' })
   })
@@ -67,14 +69,8 @@ describe('integration', () => {
     const authProvider = new EthereumAuthProvider(createEthProvider(wallet), wallet.address)
     const accountId = (await authProvider.accountId()).toString().toLowerCase()
     const linkProof = await authProvider.createLink(writer.id)
-    const caip10Doc = await ceramic.createDocument(
-      'caip10-link',
-      {
-        metadata: { controllers: [accountId] },
-      },
-      { anchor: false }
-    )
-    await caip10Doc.change({ content: linkProof })
+    const caip10Doc = await Caip10Link.fromAccount(ceramic, accountId)
+    await caip10Doc.setDidProof(linkProof)
 
     // Read the record from idx using the caip10 account id
     const reader = new IDX({ ceramic })

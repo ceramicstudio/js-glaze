@@ -3,26 +3,29 @@
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { fromString } from 'uint8arrays'
+import { DID } from 'dids'
+import KeyResolver from 'key-did-resolver'
 
 import { DocSet, publishIDXConfig, publishEncodedSignedDocSet } from '../src'
 
 describe('docset', () => {
+  jest.setTimeout(20000)
   beforeAll(async () => {
     const seed = fromString(
       '08b2e655d239e24e3ca9aa17bc1d05c1dee289d6ebf0b3542fd9536912d51ee9',
       'base16'
     )
-    await Promise.all([
-      ceramic.setDIDProvider(new Ed25519Provider(seed)),
-      publishIDXConfig(ceramic),
-    ])
+    const did = new DID({
+      resolver: KeyResolver.getResolver(),
+      provider: new Ed25519Provider(seed),
+    })
+    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic), did.authenticate()])
   })
 
   test('publish signed', async () => {
-    jest.setTimeout(20000)
-
     const signedDocSet = {
       definitions: ['myNotes'],
       schemas: ['NotesList', 'Note'],
@@ -88,8 +91,6 @@ describe('docset', () => {
   })
 
   test('creation flow', async () => {
-    jest.setTimeout(20000)
-
     const NoteSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Note',
@@ -163,8 +164,6 @@ describe('docset', () => {
   })
 
   test('creation flow with associated schema', async () => {
-    jest.setTimeout(20000)
-
     const docset = new DocSet(ceramic)
 
     // TODO: also test with external schema added in docset constructor?
@@ -188,7 +187,7 @@ describe('docset', () => {
       required: ['date', 'text'],
     }
 
-    const noteSchema = await ceramic.createDocument('tile', { content: NoteSchema })
+    const noteSchema = await TileDocument.create(ceramic, NoteSchema)
     const noteSchemaURL = noteSchema.commitId.toUrl()
 
     const NotesSchema = {
@@ -223,7 +222,7 @@ describe('docset', () => {
       },
     }
 
-    const notesSchema = await ceramic.createDocument('tile', { content: NotesSchema })
+    const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const notesDefinitionID = await docset.addDefinition(

@@ -1,3 +1,4 @@
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
@@ -24,10 +25,10 @@ export default class MergeTile extends Command<
     this.spinner.start('Loading document...')
     try {
       const ceramic = await this.getAuthenticatedCeramic(this.args.did)
-      const doc = await ceramic.loadDocument(this.args.id)
+      const doc = await ceramic.loadStream<TileDocument>(this.args.id)
       this.spinner.succeed('Document loaded').start('Updating document...')
       const content = { ...doc.content, ...this.args.contents } as Record<string, unknown>
-      await doc.change({ content })
+      await doc.update(content)
       this.spinner.succeed('Document successfully updated')
     } catch (err) {
       this.spinner.fail((err as Error).message)

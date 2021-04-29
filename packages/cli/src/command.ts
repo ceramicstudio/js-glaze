@@ -96,8 +96,8 @@ export abstract class Command<
   }
 
   async getAuthenticatedCeramic(id: string): Promise<Ceramic> {
-    const [ceramic, provider] = await Promise.all([this.getCeramic(), this.getProvider(id)])
-    await ceramic.setDIDProvider(provider)
+    const [ceramic, did] = await Promise.all([this.getCeramic(), this.getDID(id)])
+    await ceramic.setDID(did)
     return ceramic
   }
 
