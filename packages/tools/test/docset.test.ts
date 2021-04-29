@@ -22,8 +22,7 @@ describe('docset', () => {
       resolver: KeyResolver.getResolver(),
       provider: new Ed25519Provider(seed),
     })
-    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic)])
-    await did.authenticate()
+    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic), did.authenticate()])
   })
 
   test('publish signed', async () => {

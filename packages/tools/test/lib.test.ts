@@ -10,7 +10,6 @@ import {
 } from '@ceramicstudio/idx-constants'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
-import KeyResolver from 'key-did-resolver'
 import { fromString } from 'uint8arrays'
 
 import {

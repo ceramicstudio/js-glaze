@@ -330,7 +330,6 @@ export class IDX {
   }
 
   async _removeReference(key: IndexKey): Promise<void> {
-    //await this._indexProxy.changeContent(({ [key]: _remove, ...index }) => {
     await this._indexProxy.changeContent((index) => {
       if (index) delete index[key]
       return index
