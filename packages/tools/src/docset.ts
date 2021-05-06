@@ -1,7 +1,6 @@
 import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
-import type { StreamID, StreamRef } from '@ceramicnetwork/streamid'
+import type { StreamRef } from '@ceramicnetwork/streamid'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import { CommitID } from '@ceramicnetwork/streamid'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -405,7 +404,7 @@ export class DocSet {
       dependencies.forEach((depid) => {
         deps.add(depid.toString())
       })
-      const streamid = (id instanceof CommitID ? id.baseID : id) as StreamID
+      const streamid = id.baseID
       const commits = await this._ceramic.loadStreamCommits(streamid)
       docs[id.toString()] = commits.map((r) => r.value as DagJWSResult)
     }

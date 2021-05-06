@@ -1,3 +1,7 @@
+## v0.11.0 (2021-06-06)
+
+Bump Ceramic packages to v1
+
 ## v0.10.0 (2021-04-13)
 
 Added `getLegacy3BoxProfileAsBasicProfile` function to load a legacy 3Box profile as a `BasicProfile`.
