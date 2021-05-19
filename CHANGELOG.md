@@ -1,6 +1,10 @@
-## v0.11.0 (2021-06-06)
+## v0.12.0 (2021-05-19)
 
-Bump Ceramic packages to v1
+Removed internal usage of DataLoader library.
+
+## v0.11.0 (2021-05-06)
+
+Bump Ceramic packages to v1.
 
 ## v0.10.0 (2021-04-13)
 
