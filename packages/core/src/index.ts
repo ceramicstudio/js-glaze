@@ -3,11 +3,10 @@ import type StreamID from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
 import { definitions, schemas } from '@ceramicstudio/idx-constants'
-import DataLoader from 'dataloader'
 
 import { DoctypeProxy, TileDoc, TileContent } from './doctypes'
 import type { Aliases, DefinitionWithID, Entry, Index, IndexKey } from './types'
-import { toDocIDString, isCaip10, assertDid } from './utils'
+import { isCaip10, assertDid } from './utils'
 
 export { getLegacy3BoxProfileAsBasicProfile } from './3box'
 export * from './types'
@@ -27,17 +26,12 @@ export class IDX {
   _aliases: Aliases
   _autopin: boolean
   _ceramic: CeramicApi
-  _docLoader: DataLoader<string, TileDoc>
   _indexProxy: DoctypeProxy
 
   constructor({ aliases = {}, autopin, ceramic }: IDXOptions) {
     this._aliases = { ...definitions, ...aliases }
     this._autopin = autopin !== false
     this._ceramic = ceramic
-
-    this._docLoader = new DataLoader(async (ids: ReadonlyArray<string>) => {
-      return await Promise.all(ids.map(async (id) => await this._ceramic.loadStream<TileDoc>(id)))
-    })
     this._indexProxy = new DoctypeProxy(this._getOwnIDXDoc.bind(this))
   }
 
@@ -279,8 +273,8 @@ export class IDX {
     }
   }
 
-  async _loadDocument(id: StreamID | string): Promise<TileDoc> {
-    return await this._docLoader.load(toDocIDString(id))
+  _loadDocument(id: StreamID | string): Promise<TileDoc> {
+    return this._ceramic.loadStream<TileDoc>(id)
   }
 
   async _createRecord(
