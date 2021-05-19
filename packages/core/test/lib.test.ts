@@ -365,7 +365,7 @@ describe('IDX', () => {
         idx._loadDocument('one'),
         idx._loadDocument('two'),
       ])
-      expect(loadStream).toBeCalledTimes(2)
+      expect(loadStream).toBeCalledTimes(3)
     })
 
     test('getRecordID', async () => {
