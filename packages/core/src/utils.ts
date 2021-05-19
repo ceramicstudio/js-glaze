@@ -1,9 +1,4 @@
-import type StreamID from '@ceramicnetwork/streamid'
 import { AccountID } from 'caip'
-
-export function toDocIDString(id: StreamID | string): string {
-  return typeof id === 'string' ? id : id.toString()
-}
 
 export function isCaip10(account: string): boolean {
   try {
