@@ -35,9 +35,14 @@ export class IDX {
     this._autopin = autopin !== false
     this._ceramic = ceramic
 
-    this._docLoader = new DataLoader(async (ids: ReadonlyArray<string>) => {
-      return await Promise.all(ids.map(async (id) => await this._ceramic.loadStream<TileDoc>(id)))
-    })
+    this._docLoader = new DataLoader(
+      (ids: ReadonlyArray<string>) => {
+        return Promise.all(ids.map((id) => this._ceramic.loadStream<TileDoc>(id)))
+      },
+      {
+        cache: false,
+      }
+    )
     this._indexProxy = new DoctypeProxy(this._getOwnIDXDoc.bind(this))
   }
 
@@ -66,7 +71,7 @@ export class IDX {
 
   async get<T = unknown>(name: string, did?: string): Promise<T | null> {
     const key = this._toIndexKey(name)
-    return await this._getRecord(key, did)
+    return this._getRecord(key, did)
   }
 
   async set(
@@ -75,7 +80,7 @@ export class IDX {
     options?: CreateOptions
   ): Promise<StreamID> {
     const key = this._toIndexKey(name)
-    return await this._setRecord(key, content, options)
+    return this._setRecord(key, content, options)
   }
 
   async merge<T extends Record<string, unknown> = Record<string, unknown>>(
@@ -86,7 +91,7 @@ export class IDX {
     const key = this._toIndexKey(name)
     const existing = await this._getRecord<T>(key)
     const newContent = existing ? { ...existing, ...content } : content
-    return await this._setRecord(key, newContent, options)
+    return this._setRecord(key, newContent, options)
   }
 
   async setAll(
@@ -234,7 +239,7 @@ export class IDX {
   // Record APIs
 
   async getRecordID(key: IndexKey, did?: string): Promise<string | null> {
-    return await this._getReference(key, did)
+    return this._getReference(key, did)
   }
 
   async getRecordDocument(key: IndexKey, did?: string): Promise<TileDoc | null> {
@@ -280,7 +285,7 @@ export class IDX {
   }
 
   async _loadDocument(id: StreamID | string): Promise<TileDoc> {
-    return await this._docLoader.load(toDocIDString(id))
+    return this._docLoader.load(toDocIDString(id))
   }
 
   async _createRecord(
