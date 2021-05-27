@@ -17,13 +17,13 @@ IDX is a cross-platform identity protocol that replaces centralized user tables 
 
 ## Getting started
 
-- [Quick start](https://docs.idx.xyz/build/quick-start)
-- [Installation](https://docs.idx.xyz/build/installation)
+- [Quick start](https://developers.idx.xyz/build/quick-start)
+- [Installation](https://developers.idx.xyz/build/installation)
 
 ## More resources
 
-- [Learn the basics](https://docs.idx.xyz/learn/welcome)
-- [API Reference](https://docs.idx.xyz/reference/idx)
+- [Learn the basics](https://developers.idx.xyz/learn/welcome)
+- [API Reference](https://developers.idx.xyz/reference/idx)
 - [Developer chat](https://chat.idx.xyz)
 
 ## Maintainers
