@@ -29,7 +29,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "npm run lint",
     "build": "rm -rf lib && tsc -p tsconfig.build.json --skipLibCheck && cp src/index.js lib",
-    "prepack": "npm run build && oclif-dev manifest && oclif-dev readme",
+    "prepack": "npm run build && oclif-dev manifest",
     "version": "oclif-dev readme && git add README.md"
   },
   "oclif": {
