@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "lerna": "lerna",
-    "test": "lerna run test",
+    "test": "lerna run test --",
     "lint": "lerna run lint",
     "build": "lerna run build",
     "prepublish": "lerna run prepublish",
