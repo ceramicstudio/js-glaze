@@ -229,10 +229,9 @@ describe('IDX', () => {
     })
 
     test('_createIDXDoc', async () => {
+      const ceramic = {}
       const doc = { id: 'streamId' }
-      const add = jest.fn()
       TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
-      const ceramic = { pin: { add } }
       const idx = new IDX({ ceramic } as any)
 
       await expect(idx._createIDXDoc('did:test:123')).resolves.toBe(doc)
@@ -245,7 +244,6 @@ describe('IDX', () => {
         { deterministic: true, controllers: ['did:test:123'], family: 'IDX' },
         { anchor: false, publish: false }
       )
-      expect(add).toBeCalledWith('streamId')
     })
 
     describe('_getIDXDoc', () => {
@@ -287,14 +285,16 @@ describe('IDX', () => {
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX' }
         const update = jest.fn()
-        const doc = { update, metadata } as any
+        const add = jest.fn()
+        const doc = { id: 'streamId', update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const idx = new IDX({ ceramic: { did: { id } } } as any)
+        const idx = new IDX({ ceramic: { did: { id }, pin: { add } } } as any)
         idx._createIDXDoc = createDoc
 
         await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
         expect(update).toHaveBeenCalledWith(null, { ...metadata, schema: schemas.IdentityIndex })
+        expect(add).toBeCalledWith('streamId')
       })
 
       test('throws an error if the schema is not a valid IdentityIndex', async () => {

@@ -1,14 +1,12 @@
 const path = require('path')
 const Ceramic = require('@ceramicnetwork/core').default
+const { convert } = require('blockcodec-to-ipld-format')
 const dagJose = require('dag-jose').default
 const IPFS = require('ipfs-core')
 const NodeEnvironment = require('jest-environment-node')
 const { dir } = require('tmp-promise')
-const { sha256 } = require('multiformats/hashes/sha2')
-const { legacy } = require('multiformats/legacy')
 
-const hasher = { [sha256.code]: sha256 }
-const dagJoseFormat = legacy(dagJose, {hashes: hasher})
+const dagJoseFormat = convert(dagJose)
 
 module.exports = class CeramicEnvironment extends NodeEnvironment {
   async setup() {

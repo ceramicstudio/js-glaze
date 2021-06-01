@@ -2,7 +2,7 @@
   "name": "@ceramicstudio/idx",
   "author": "Ceramic Studio",
   "homepage": "https://idx.xyz",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/idx.esm.js",
@@ -33,7 +33,7 @@
     "@ceramicnetwork/common": "^1.0.0",
     "@ceramicnetwork/streamid": "^1.0.0",
     "@ethersproject/wallet": "^5.0.12",
-    "jest-environment-idx": "^0.7.0",
+    "jest-environment-idx": "^0.8.0",
     "tslib": "^2.1.0",
     "uint8arrays": "^2.1.3"
   },
