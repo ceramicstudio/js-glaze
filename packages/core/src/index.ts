@@ -181,16 +181,12 @@ export class IDX {
       did = await this.caip10ToDid(did)
     }
     assertDid(did)
-    const doc = await TileDocument.create<TileContent>(
+    return await TileDocument.create<TileContent>(
       this._ceramic,
       null,
       { deterministic: true, controllers: [did], family: 'IDX' },
       { anchor: false, publish: false }
     )
-    if (this._autopin) {
-      await this._ceramic.pin.add(doc.id)
-    }
-    return doc
   }
 
   async _getIDXDoc(did: string): Promise<TileDoc | null> {
@@ -209,6 +205,9 @@ export class IDX {
     if (doc.metadata.schema == null) {
       // Doc just got created, need to update it with schema
       await doc.update(null, { ...doc.metadata, schema: schemas.IdentityIndex })
+      if (this._autopin) {
+        await this._ceramic.pin.add(doc.id)
+      }
     } else if (doc.metadata.schema !== schemas.IdentityIndex) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }

@@ -19,14 +19,14 @@ const DEFINITIONS_LOOKUP = reverse(definitions)
 const SCHEMAS_LOOKUP = reverse(schemas)
 
 export default class InspectIndex extends Command<CommandFlags, { did: string }> {
-  static description = 'inspect the contents of an IDX document'
+  static description = 'inspect the contents of an IDX stream'
 
   static flags = Command.flags
 
   static args = [{ name: 'did', description: 'DID or label', required: true }]
 
   async run(): Promise<void> {
-    this.spinner.start('Loading IDX document...')
+    this.spinner.start('Loading IDX stream...')
     try {
       const did = await getPublicDID(this.args.did)
       if (did == null) {
@@ -37,11 +37,11 @@ export default class InspectIndex extends Command<CommandFlags, { did: string }>
       const idx = await this.getIDX()
       const index = await idx.getIndex(did)
       if (index == null) {
-        this.spinner.warn('IDX document is empty')
+        this.spinner.warn('IDX stream is empty')
         return
       }
 
-      this.spinner.succeed('IDX document loaded')
+      this.spinner.succeed('IDX stream loaded')
 
       const tasks = Object.keys(index).map((key) => {
         const keyAlias = DEFINITIONS_LOOKUP[key]

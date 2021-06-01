@@ -1,3 +1,7 @@
+## v0.12.1 (2021-06-01)
+
+Only pin IDX stream when created by owner.
+
 ## v0.12.0 (2021-05-19)
 
 Removed internal usage of DataLoader library.

@@ -5,7 +5,7 @@
     "ceramic",
     "idx"
   ],
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
   "repository": "ceramicstudio/js-idx",
@@ -43,16 +43,16 @@
     "@ceramicnetwork/3id-did-resolver": "^1.2.0",
     "@ceramicnetwork/http-client": "^1.0.0",
     "@ceramicnetwork/streamid": "^1.0.0",
-    "@ceramicstudio/idx": "^0.11.0",
+    "@ceramicstudio/idx": "^0.12.1",
     "@ceramicstudio/idx-constants": "^1.0.0",
     "@ceramicstudio/idx-tools": "^0.10.0",
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-help": "^3.2.2",
     "cli-table3": "^0.6.0",
-    "conf": "^9.0.2",
+    "conf": "^10.0.1",
     "dids": "^2.0.0",
-    "inquirer": "^7.3.3",
+    "inquirer": "^8.1.0",
     "key-did-provider-ed25519": "^1.0.1",
     "key-did-resolver": "^1.1.1",
     "keytar": "^7.4.0",
@@ -70,7 +70,7 @@
     "@types/node": "^14.14.21",
     "@types/update-notifier": "^5.0.0",
     "globby": "^11.0.2",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.0.0",
     "tslib": "^2.1.0"
   }
 }
