@@ -1,9 +1,9 @@
 /**
  * @jest-environment ceramic
  */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 
-import KeyResolver from '@ceramicnetwork/key-did-resolver'
+import KeyResolver from 'key-did-resolver'
 import {
   definitions as publishedDefinitions,
   schemas as publishedSchemas,
@@ -28,6 +28,8 @@ describe('lib', () => {
     linkedBlock: expect.any(Uint8Array),
   })
   const Records = expect.arrayContaining([DagJWSResult])
+
+  ceramic.did = new DID({ resolver: KeyResolver.getResolver() })
 
   test('publish config', async () => {
     jest.setTimeout(20000)

@@ -1,6 +1,6 @@
-import type DocID from '@ceramicnetwork/docid'
+import type { StreamRef } from '@ceramicnetwork/streamid'
 
-export function docIDToString(id: DocID | string): string {
+export function docIDToString(id: StreamRef | string): string {
   return typeof id === 'string' ? id : id.toString()
 }
 

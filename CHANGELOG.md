@@ -1,3 +1,27 @@
+## v0.12.1 (2021-06-01)
+
+Only pin IDX stream when created by owner.
+
+## v0.12.0 (2021-05-19)
+
+Removed internal usage of DataLoader library.
+
+## v0.11.0 (2021-05-06)
+
+Bump Ceramic packages to v1.
+
+## v0.10.0 (2021-04-13)
+
+Added `getLegacy3BoxProfileAsBasicProfile` function to load a legacy 3Box profile as a `BasicProfile`.
+
+## v0.9.1 (2021-04-06)
+
+Updated schemas and definitions IDs.
+
+## v0.9.0 (2021-03-24)
+
+Added support for `CAIP-10` accounts in `get()` and `has()` methods.
+
 ## v0.8.0 (2021-02-22)
 
 Added `AlsoKnownAs` schema and `alsoKnownAs` definition to IDX constants and core.

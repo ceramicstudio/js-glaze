@@ -9,13 +9,13 @@ interface Flags extends CommandFlags {
 }
 
 export default class CreateTile extends Command<Flags, { did: string; contents: unknown }> {
-  static description = 'create a new tile document'
+  static description = 'create a new tile stream'
 
   static flags = {
     ...Command.flags,
     schema: flags.string({
       char: 's',
-      description: 'DocID of the schema validating the contents',
+      description: 'StreamID of the schema validating the contents',
     }),
   }
 
@@ -30,13 +30,13 @@ export default class CreateTile extends Command<Flags, { did: string; contents: 
   ]
 
   async run(): Promise<void> {
-    this.spinner.start('Creating document...')
+    this.spinner.start('Creating stream...')
     try {
       const ceramic = await this.getAuthenticatedCeramic(this.args.did)
       const doc = await createTile(ceramic, this.args.contents, {
         schema: this.flags.schema || undefined,
       })
-      this.spinner.succeed(`Document created with DocID: ${doc.id.toString()}`)
+      this.spinner.succeed(`Stream created with ID: ${doc.id.toString()}`)
     } catch (err) {
       this.spinner.fail((err as Error).message)
     }

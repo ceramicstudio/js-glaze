@@ -22,13 +22,14 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "@ceramicnetwork/common": "^0.15.7",
-    "@ceramicnetwork/docid": "^0.4.5",
-    "uint8arrays": "^2.1.2"
+    "@ceramicnetwork/stream-tile": "^1.0.4",
+    "@ceramicnetwork/streamid": "^1.0.1",
+    "uint8arrays": "^2.1.5"
   },
   "devDependencies": {
-    "@ceramicstudio/idx-tools": "^0.8.0",
-    "jest-environment-idx": "^0.6.0",
-    "tslib": "^2.1.0"
+    "@ceramicnetwork/common": "^1.0.4",
+    "@ceramicstudio/idx-tools": "^0.11.0",
+    "jest-environment-idx": "^0.8.0",
+    "tslib": "^2.2.0"
   }
 }

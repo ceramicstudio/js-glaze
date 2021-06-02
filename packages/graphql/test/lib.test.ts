@@ -1,8 +1,10 @@
 /**
  * @jest-environment idx
  */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
-// import type { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi } from '@ceramicnetwork/common'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { IDX } from '@ceramicstudio/idx'
 import { toGraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-tools'
 import { DocSet, publishIDXConfig } from '@ceramicstudio/idx-tools'
@@ -12,7 +14,7 @@ import type { GraphQLSchema } from 'graphql'
 import { GraphQLDocSet } from '../src'
 
 declare global {
-  const ceramic: any // CeramicApi type mismatch
+  const ceramic: CeramicApi
   const idx: IDX
 }
 
@@ -42,7 +44,7 @@ describe('lib', () => {
       required: ['date', 'text'],
     }
 
-    const noteSchema = await ceramic.createDocument('tile', { content: NoteSchema })
+    const noteSchema = await TileDocument.create(ceramic, NoteSchema)
     const noteSchemaURL = noteSchema.commitId.toUrl()
 
     const NotesSchema = {
@@ -77,7 +79,7 @@ describe('lib', () => {
       },
     }
 
-    const notesSchema = await ceramic.createDocument('tile', { content: NotesSchema })
+    const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const docset = new DocSet(ceramic)

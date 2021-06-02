@@ -1,14 +1,30 @@
-import type { CeramicApi, Doctype } from '@ceramicnetwork/common'
-import DocID from '@ceramicnetwork/docid'
+import type { CeramicApi } from '@ceramicnetwork/common'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { StreamID } from '@ceramicnetwork/streamid'
+import type { CommitID } from '@ceramicnetwork/streamid'
 import { fromString, toString } from 'uint8arrays'
+
+const CERAMIC_COLLECTION_TYPE = 'ceramic:appendCollection'
+
+type CollectionSchema = {
+  $schema: string
+  $comment: string
+  title: string
+  type: 'object'
+  properties: {
+    sliceMaxItems: { type: 'integer'; minimum: 10; maximum: 256 }
+    slicesCount: { type: 'integer'; minimum: 1 }
+  }
+  required: ['sliceMaxItems', 'slicesCount']
+}
 
 export function createAppendCollectionSchema(
   title: string,
   sliceSchemaCommitID: string
-): Record<string, any> {
+): CollectionSchema {
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    $ceramic: { type: 'appendCollection', sliceSchema: sliceSchemaCommitID },
+    $comment: `${CERAMIC_COLLECTION_TYPE}:${sliceSchemaCommitID}`,
     title,
     type: 'object',
     properties: {
@@ -19,11 +35,28 @@ export function createAppendCollectionSchema(
   }
 }
 
+type SliceSchema = {
+  $schema: string
+  $comment: string
+  title: string
+  type: 'object'
+  properties: {
+    collection: { type: 'string'; maxLength: 150 }
+    sliceIndex: { type: 'integer'; minimum: 0 }
+    contents: {
+      type: 'array'
+      maxItems: number
+      items: { oneOf: Array<Record<string, any>> }
+    }
+  }
+  required: ['collection', 'sliceIndex', 'contents']
+}
+
 export function createCollectionSliceSchema(
   title: string,
   itemSchemas: Array<Record<string, any>>,
   maxItems = 100
-): Record<string, any> {
+): SliceSchema {
   if (maxItems < 10) {
     throw new Error('maxItems value should be at least 10')
   }
@@ -33,7 +66,7 @@ export function createCollectionSliceSchema(
 
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    $ceramic: { type: 'collectionSlice' },
+    $comment: 'ceramic:collectionSlice',
     title,
     type: 'object',
     properties: {
@@ -57,7 +90,7 @@ export class Cursor {
   static fromBytes(bytes: Uint8Array): Cursor {
     const view = new DataView(bytes.buffer)
     const index = view.getUint8(bytes.byteLength - 1)
-    const id = DocID.fromBytes(bytes.slice(0, -1))
+    const id = StreamID.fromBytes(bytes.slice(0, -1))
     return new Cursor(id, index)
   }
 
@@ -72,15 +105,15 @@ export class Cursor {
     return typeof input === 'string' ? Cursor.fromString(input) : Cursor.fromBytes(input)
   }
 
-  _sliceID: DocID
+  _sliceID: StreamID
   _itemIndex: number
 
-  constructor(sliceID: DocID, itemIndex: number) {
+  constructor(sliceID: StreamID, itemIndex: number) {
     this._sliceID = sliceID
     this._itemIndex = itemIndex
   }
 
-  get sliceID(): DocID {
+  get sliceID(): StreamID {
     return this._sliceID
   }
 
@@ -110,10 +143,14 @@ type CollectionContent = {
   sliceMaxItems: number
   slicesCount: number
 }
+type CollectionDoc = TileDocument<CollectionContent>
+
 type SliceContent<Item> = {
+  collection: string
   sliceIndex: number
   contents: Array<Item>
 }
+type SliceDoc<Item> = TileDocument<SliceContent<Item>>
 
 type ItemResult<Item> = {
   cursor: Cursor
@@ -125,8 +162,6 @@ type LoadResult<Item> = {
   hasMore: boolean
 }
 
-const CERAMIC_COLLECTION_TYPE = 'appendCollection'
-
 const DEFAULT_MAX_ITEMS = 50
 
 type CreateOptions<Item> = {
@@ -136,38 +171,36 @@ type CreateOptions<Item> = {
 
 export class AppendCollection<Item = unknown> {
   _ceramic: CeramicApi
-  _collectionID: DocID
+  _collectionID: StreamID
   _sliceSchemaCommitID: string
 
   static async create<Item>(
     ceramic: CeramicApi,
-    schemaID: DocID,
+    schemaID: CommitID,
     options: CreateOptions<Item> = {}
   ): Promise<AppendCollection<Item>> {
-    const collectionSchema = await ceramic.loadDocument(schemaID)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (collectionSchema?.content?.$ceramic?.type !== CERAMIC_COLLECTION_TYPE) {
+    const collectionSchema = await TileDocument.load<CollectionSchema>(ceramic, schemaID)
+    if (!collectionSchema?.content?.$comment?.startsWith(CERAMIC_COLLECTION_TYPE)) {
       throw new Error('Invalid schema, expecting to be AppendCollection')
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const sliceSchemaCommitID = collectionSchema.content.$ceramic.sliceSchema as string | undefined
-    if (sliceSchemaCommitID == null) {
+    const sliceSchemaCommitID = collectionSchema?.content?.$comment.substr(
+      CERAMIC_COLLECTION_TYPE.length + 1
+    )
+    if (sliceSchemaCommitID === '') {
       throw new Error('Invalid schema, missing sliceSchema')
     }
-    const sliceSchemaDoc = await ceramic.loadDocument(sliceSchemaCommitID)
+    const sliceSchemaDoc = await TileDocument.load<SliceSchema>(ceramic, sliceSchemaCommitID)
 
-    const collectionDoc = await ceramic.createDocument('tile', {
-      content: {
+    const collectionDoc = await TileDocument.create(
+      ceramic,
+      {
         sliceMaxItems: options.sliceMaxItems
           ? Math.max(10, Math.min(options.sliceMaxItems), 256)
-          : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            (sliceSchemaDoc.content?.properties?.contents.maxItems as number) ?? DEFAULT_MAX_ITEMS,
+          : sliceSchemaDoc.content?.properties?.contents.maxItems ?? DEFAULT_MAX_ITEMS,
         slicesCount: 1,
       },
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore missing controllers required in type
-      metadata: { schema: schemaID.toUrl() },
-    })
+      { schema: schemaID.toUrl() }
+    )
 
     const collection = new AppendCollection<Item>(ceramic, collectionDoc.id, sliceSchemaCommitID)
 
@@ -178,69 +211,86 @@ export class AppendCollection<Item = unknown> {
     return collection
   }
 
-  constructor(ceramic: CeramicApi, collectionID: DocID, sliceSchemaCommitID: string) {
+  constructor(ceramic: CeramicApi, collectionID: StreamID, sliceSchemaCommitID: string) {
     this._ceramic = ceramic
     this._collectionID = collectionID
     this._sliceSchemaCommitID = sliceSchemaCommitID
   }
 
-  get id(): DocID {
+  get id(): StreamID {
     return this._collectionID
   }
 
-  async _getCollection(): Promise<Doctype> {
-    return await this._ceramic.loadDocument(this._collectionID)
+  _getSliceTag(index: number): string {
+    return `${this._collectionID.toString()}:${index}`
   }
 
-  async _getSliceByCursor(cursor: Cursor): Promise<Doctype> {
-    return await this._ceramic.loadDocument(cursor.sliceID)
+  async _getCollection(): Promise<CollectionDoc> {
+    return await TileDocument.load(this._ceramic, this._collectionID)
   }
 
-  async _getSliceByIndex(index: number): Promise<Doctype> {
-    return await this._ceramic.createDocument(
-      'tile',
-      {
-        content: {
-          collection: this._collectionID.toString(),
-          sliceIndex: index,
-          contents: [],
-        },
-        deterministic: true,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore missing controllers required in type
-        metadata: { schema: this._sliceSchemaCommitID },
-      },
+  async _getSliceByCursor(cursor: Cursor): Promise<SliceDoc<Item>> {
+    return await TileDocument.load(this._ceramic, cursor.sliceID)
+  }
+
+  async _getSliceByTag(tag: string): Promise<SliceDoc<Item>> {
+    return await TileDocument.create(
+      this._ceramic,
+      null as any,
+      { deterministic: true, tags: [tag] },
       { anchor: false, publish: false }
     )
   }
 
+  async _getSliceByIndex(index: number): Promise<SliceDoc<Item>> {
+    return await this._getSliceByTag(this._getSliceTag(index))
+  }
+
   async getMetadata(): Promise<CollectionContent> {
     const collectionDoc = await this._getCollection()
-    return collectionDoc.content as CollectionContent
+    return collectionDoc.content
   }
 
   async add(item: Item): Promise<Cursor> {
     const collectionDoc = await this._getCollection()
-    const collection = collectionDoc.content as CollectionContent
+    const collection = collectionDoc.content
 
     const sliceDoc = await this._getSliceByIndex(collection.slicesCount - 1)
-    const slice = sliceDoc.content as SliceContent<Item>
+    const slice = sliceDoc.content
 
-    if (slice.contents.length >= collection.sliceMaxItems) {
-      const nextSlice = await this._getSliceByIndex(collection.slicesCount)
-      await Promise.all([
-        collectionDoc.change({
-          content: { ...collection, slicesCount: collection.slicesCount + 1 },
-        }),
-        nextSlice.change({
-          content: { ...(nextSlice.content as SliceContent<Item>), contents: [item] },
-        }),
-      ])
-      return new Cursor(nextSlice.id, 0)
+    // Empty slice, set first item
+    if (slice.contents == null) {
+      await sliceDoc.update(
+        {
+          collection: this._collectionID.toString(),
+          sliceIndex: collection.slicesCount - 1,
+          contents: [item],
+        },
+        { schema: this._sliceSchemaCommitID }
+      )
+      return new Cursor(sliceDoc.id, 0)
     }
 
-    await sliceDoc.change({ content: { ...slice, contents: [...slice.contents, item] } })
-    return new Cursor(sliceDoc.id, slice.contents.length)
+    // Non-empty and non-full slice, add item
+    if (slice.contents.length < collection.sliceMaxItems) {
+      await sliceDoc.update({ ...slice, contents: [...slice.contents, item] })
+      return new Cursor(sliceDoc.id, slice.contents.length)
+    }
+
+    // Existing slice is full, create next one
+    const nextSlice = await this._getSliceByIndex(collection.slicesCount)
+    await Promise.all([
+      collectionDoc.update({ ...collection, slicesCount: collection.slicesCount + 1 }),
+      nextSlice.update(
+        {
+          collection: this._collectionID.toString(),
+          sliceIndex: collection.slicesCount,
+          contents: [item],
+        },
+        { schema: this._sliceSchemaCommitID }
+      ),
+    ])
+    return new Cursor(nextSlice.id, 0)
   }
 
   async first(count: number, after?: CursorInput): Promise<LoadResult<Item>> {
@@ -250,7 +300,7 @@ export class AppendCollection<Item = unknown> {
     if (after != null) {
       const cursor = Cursor.from(after)
       const sliceDoc = await this._getSliceByCursor(cursor)
-      const slice = sliceDoc.content as SliceContent<Item>
+      const slice = sliceDoc.content
       for (let i = cursor.itemIndex + 1; i < slice.contents.length; i++) {
         const item = slice.contents[i]
         if (item != null) {
@@ -262,8 +312,8 @@ export class AppendCollection<Item = unknown> {
 
     while (items.length < count + 1) {
       const sliceDoc = await this._getSliceByIndex(sliceIndex++)
-      const slice = sliceDoc.content as SliceContent<Item>
-      if (slice.contents.length === 0) {
+      const slice = sliceDoc.content
+      if (slice.contents == null || slice.contents.length === 0) {
         break
       }
       for (let i = 0; i < slice.contents.length; i++) {
@@ -289,7 +339,7 @@ export class AppendCollection<Item = unknown> {
     } else {
       const cursor = Cursor.from(before)
       const sliceDoc = await this._getSliceByCursor(cursor)
-      const slice = sliceDoc.content as SliceContent<Item>
+      const slice = sliceDoc.content
       for (let i = cursor.itemIndex - 1; i >= 0; i--) {
         const item = slice.contents[i]
         if (item != null) {
@@ -301,8 +351,8 @@ export class AppendCollection<Item = unknown> {
 
     while (items.length < count + 1 && sliceIndex >= 0) {
       const sliceDoc = await this._getSliceByIndex(sliceIndex--)
-      const slice = sliceDoc.content as SliceContent<Item>
-      if (slice.contents.length === 0) {
+      const slice = sliceDoc.content
+      if (slice.contents == null || slice.contents.length === 0) {
         break
       }
       for (let i = slice.contents.length; i >= 0; i--) {

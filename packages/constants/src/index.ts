@@ -97,12 +97,12 @@ export type SchemaType<K extends SchemaName> = SchemaTypes[K]
 export type PublishedSchemas = PublishedRecord<SchemaName>
 
 export const schemas: PublishedSchemas = {
-  AlsoKnownAs: 'ceramic://k3y52l7qbv1frxntajkc5s2n19ldseabk41lyb5hytx7r1ntb9uhf2bav9qqcrvgg',
-  BasicProfile: 'ceramic://k3y52l7qbv1frxjdr9qpn9ldvbxb0jg4eig7wtjkdu6gk84vyazw9j4txf4o6d2io',
-  CryptoAccounts: 'ceramic://k3y52l7qbv1fry6z45y9s2w5npe0nyokbp0oiv1tdhvswhv07lb2v13zdz4i1bp4w',
-  Definition: 'ceramic://k3y52l7qbv1fry4h28r53ebkeym2mxf1i23f303ql3gs1oqovfml44scaukncpxc0',
-  IdentityIndex: 'ceramic://k3y52l7qbv1frxrcmx299lbnc5txfo4b7tls1rm5vf7luc34yuztc60tibruptp8g',
-  ThreeIdKeychain: 'ceramic://k3y52l7qbv1fry69sodu0hc4nwvzglaxxvy3l0xdw7v1o36gyu2dl9us472qh8veo',
+  AlsoKnownAs: 'ceramic://k3y52l7qbv1fryojt8n8cw2k04p9wp67ly59iwqs65dejso566fij5wsdrb871yio',
+  BasicProfile: 'ceramic://k3y52l7qbv1frxt706gqfzmq6cbqdkptzk8uudaryhlkf6ly9vx21hqu4r6k1jqio',
+  CryptoAccounts: 'ceramic://k3y52l7qbv1frypussjburqg4fykyyycfu0p9znc75lv2t5cg4xaslhagkd7h7mkg',
+  Definition: 'ceramic://k3y52l7qbv1fry1fp4s0nwdarh0vahusarpposgevy0pemiykymd2ord6swtharcw',
+  IdentityIndex: 'ceramic://k3y52l7qbv1fryjn62sggjh1lpn11c56qfofzmty190d62hwk1cal1c7qc5he54ow',
+  ThreeIdKeychain: 'ceramic://k3y52l7qbv1frxiodfo6f25wocb8zz60ywqw4sqcprs26qx1qx467l4ybxplybvgg',
 }
 
 export type DefinitionTypes = {
@@ -116,8 +116,8 @@ export type DefinitionType<K extends DefinitionName> = DefinitionTypes[K]
 export type PublishedDefinitions = PublishedRecord<DefinitionName>
 
 export const definitions: PublishedDefinitions = {
-  alsoKnownAs: 'kjzl6cwe1jw148ah60m6n4gwudo8mje9w9p06w3b8bf2g2va3i8me36nazzurc8',
-  basicProfile: 'kjzl6cwe1jw14aewu2t91dwgc4ezkf74kmqe9beuxz8u1tlpjfss6nibbwbkohw',
-  cryptoAccounts: 'kjzl6cwe1jw14bek5i7rcr1q9byw61w4rswrhmvja0kfos89ty0notx0vh7kx3b',
-  threeIdKeychain: 'kjzl6cwe1jw14742krx8kpze2a2t25hwic331sljucncxt8g3ld8duj6cs0w7to',
+  alsoKnownAs: 'kjzl6cwe1jw146zfmqa10a5x1vry6au3t362p44uttz4l0k4hi88o41zplhmxnf',
+  basicProfile: 'kjzl6cwe1jw145cjbeko9kil8g9bxszjhyde21ob8epxuxkaon1izyqsu8wgcic',
+  cryptoAccounts: 'kjzl6cwe1jw149z4rvwzi56mjjukafta30kojzktd9dsrgqdgz4wlnceu59f95f',
+  threeIdKeychain: 'kjzl6cwe1jw14a50gupo0d433e9ojgmj9rd9ejxkc8vq6lw0fznsoohwzmejqs8',
 }

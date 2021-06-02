@@ -9,7 +9,7 @@ npm install @ceramicstudio/idx-tools
 ## Documentation
 
 - [IDX documentation](https://idx.xyz)
-- [IDX tools APIs](https://idx.xyz/docs/libs-tools)
+- [IDX tools APIs](https://developers.idx.xyz/reference/idx-tools/)
 
 ## License
 

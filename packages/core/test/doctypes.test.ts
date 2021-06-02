@@ -107,14 +107,15 @@ describe('DoctypeProxy', () => {
 
   test('changeContent creates the mutation function', async () => {
     const doc = { content: { test: true } }
-    const change = jest.fn((data) => {
-      Object.assign(doc, data)
+    const update = jest.fn((data) => {
+      doc.content = Object.assign(doc.content, data)
+      return doc
     })
-    const getRemote = jest.fn(() => Promise.resolve({ ...doc, change }))
+    const getRemote = jest.fn(() => Promise.resolve({ ...doc, update }))
     const proxy = new DoctypeProxy(getRemote)
     await proxy.changeContent((content) => ({ ...content, hello: 'test' }))
     expect(getRemote).toBeCalledTimes(1)
-    expect(change).toBeCalledWith({ content: { test: true, hello: 'test' } })
+    expect(update).toBeCalledWith({ test: true, hello: 'test' }, undefined)
   })
 
   test('delays get calls until mutations are done', async () => {

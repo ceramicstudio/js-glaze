@@ -3,7 +3,7 @@
  */
 
 import { CeramicApi } from '@ceramicnetwork/common'
-import type DocID from '@ceramicnetwork/docid'
+import type { CommitID } from '@ceramicnetwork/streamid'
 import { publishSchema } from '@ceramicstudio/idx-tools'
 
 import {
@@ -32,7 +32,7 @@ async function publishCollectionSchemas(
   title: string,
   itemSchemas: Array<Record<string, any>>,
   maxItems?: number
-): Promise<DocID> {
+): Promise<CommitID> {
   const sliceSchema = await publishSchema(ceramic, {
     name: `${title}CollectionSlice`,
     content: createCollectionSliceSchema(`${title}CollectionSlice`, itemSchemas, maxItems),
@@ -45,7 +45,9 @@ async function publishCollectionSchemas(
 }
 
 describe('append-collection', () => {
-  let collectionSchemaID: DocID
+  jest.setTimeout(20000)
+
+  let collectionSchemaID: CommitID
 
   beforeAll(async () => {
     collectionSchemaID = await publishCollectionSchemas(

@@ -13,32 +13,31 @@ idx COMMAND
 ```
 
 <!-- commands -->
-
-- [`idx bootstrap`](#idx-bootstrap)
-- [`idx config:get KEY`](#idx-configget-key)
-- [`idx config:reset KEY`](#idx-configreset-key)
-- [`idx config:set KEY VALUE`](#idx-configset-key-value)
-- [`idx config:show`](#idx-configshow)
-- [`idx definition:check ID`](#idx-definitioncheck-id)
-- [`idx definition:create DID`](#idx-definitioncreate-did)
-- [`idx definition:info ID`](#idx-definitioninfo-id)
-- [`idx definition:schema ID`](#idx-definitionschema-id)
-- [`idx did:create`](#idx-didcreate)
-- [`idx did:delete DID`](#idx-diddelete-did)
-- [`idx did:label DID [LABEL]`](#idx-didlabel-did-label)
-- [`idx did:list`](#idx-didlist)
-- [`idx did:sign DID CONTENTS`](#idx-didsign-did-contents)
-- [`idx did:verify JWS`](#idx-didverify-jws)
-- [`idx help [COMMAND]`](#idx-help-command)
-- [`idx index:get DID KEY`](#idx-indexget-did-key)
-- [`idx index:inspect DID`](#idx-indexinspect-did)
-- [`idx index:merge DID KEY CONTENTS`](#idx-indexmerge-did-key-contents)
-- [`idx index:set DID KEY CONTENTS`](#idx-indexset-did-key-contents)
-- [`idx schema:publish DID SCHEMA`](#idx-schemapublish-did-schema)
-- [`idx tile:create DID CONTENTS`](#idx-tilecreate-did-contents)
-- [`idx tile:get ID`](#idx-tileget-id)
-- [`idx tile:merge DID ID CONTENTS`](#idx-tilemerge-did-id-contents)
-- [`idx tile:set DID ID CONTENTS`](#idx-tileset-did-id-contents)
+* [`idx bootstrap`](#idx-bootstrap)
+* [`idx config:get KEY`](#idx-configget-key)
+* [`idx config:reset KEY`](#idx-configreset-key)
+* [`idx config:set KEY VALUE`](#idx-configset-key-value)
+* [`idx config:show`](#idx-configshow)
+* [`idx definition:check ID`](#idx-definitioncheck-id)
+* [`idx definition:create DID`](#idx-definitioncreate-did)
+* [`idx definition:info ID`](#idx-definitioninfo-id)
+* [`idx definition:schema ID`](#idx-definitionschema-id)
+* [`idx did:create`](#idx-didcreate)
+* [`idx did:delete DID`](#idx-diddelete-did)
+* [`idx did:label DID [LABEL]`](#idx-didlabel-did-label)
+* [`idx did:list`](#idx-didlist)
+* [`idx did:sign DID CONTENTS`](#idx-didsign-did-contents)
+* [`idx did:verify JWS`](#idx-didverify-jws)
+* [`idx help [COMMAND]`](#idx-help-command)
+* [`idx index:get DID KEY`](#idx-indexget-did-key)
+* [`idx index:inspect DID`](#idx-indexinspect-did)
+* [`idx index:merge DID KEY CONTENTS`](#idx-indexmerge-did-key-contents)
+* [`idx index:set DID KEY CONTENTS`](#idx-indexset-did-key-contents)
+* [`idx schema:publish DID SCHEMA`](#idx-schemapublish-did-schema)
+* [`idx tile:create DID CONTENTS`](#idx-tilecreate-did-contents)
+* [`idx tile:get ID`](#idx-tileget-id)
+* [`idx tile:merge DID ID CONTENTS`](#idx-tilemerge-did-id-contents)
+* [`idx tile:set DID ID CONTENTS`](#idx-tileset-did-id-contents)
 
 ## `idx bootstrap`
 
@@ -52,7 +51,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/bootstrap.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/bootstrap.ts)_
+_See code: [lib/commands/bootstrap.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/bootstrap.js)_
 
 ## `idx config:get KEY`
 
@@ -66,7 +65,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/config/get.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/config/get.ts)_
+_See code: [lib/commands/config/get.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/config/get.js)_
 
 ## `idx config:reset KEY`
 
@@ -80,7 +79,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/config/reset.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/config/reset.ts)_
+_See code: [lib/commands/config/reset.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/config/reset.js)_
 
 ## `idx config:set KEY VALUE`
 
@@ -94,7 +93,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/config/set.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/config/set.ts)_
+_See code: [lib/commands/config/set.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/config/set.js)_
 
 ## `idx config:show`
 
@@ -108,24 +107,24 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/config/show.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/config/show.ts)_
+_See code: [lib/commands/config/show.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/config/show.js)_
 
 ## `idx definition:check ID`
 
-check if a document is a valid definition
+check if a stream is a valid definition
 
 ```
 USAGE
   $ idx definition:check ID
 
 ARGUMENTS
-  ID  document ID to check
+  ID  stream ID to check
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/definition/check.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/definition/check.ts)_
+_See code: [lib/commands/definition/check.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/definition/check.js)_
 
 ## `idx definition:create DID`
 
@@ -146,7 +145,7 @@ OPTIONS
   -u, --url=url                  documentation URL for the definition
 ```
 
-_See code: [src/commands/definition/create.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/definition/create.ts)_
+_See code: [lib/commands/definition/create.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/definition/create.js)_
 
 ## `idx definition:info ID`
 
@@ -157,13 +156,13 @@ USAGE
   $ idx definition:info ID
 
 ARGUMENTS
-  ID  document ID or alias of the definition
+  ID  stream ID or alias of the definition
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/definition/info.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/definition/info.ts)_
+_See code: [lib/commands/definition/info.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/definition/info.js)_
 
 ## `idx definition:schema ID`
 
@@ -174,13 +173,13 @@ USAGE
   $ idx definition:schema ID
 
 ARGUMENTS
-  ID  document ID or alias of the definition
+  ID  stream ID or alias of the definition
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/definition/schema.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/definition/schema.ts)_
+_See code: [lib/commands/definition/schema.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/definition/schema.js)_
 
 ## `idx did:create`
 
@@ -196,7 +195,7 @@ OPTIONS
   -s, --seed=seed        base16-encoded seed to use for the DID
 ```
 
-_See code: [src/commands/did/create.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/create.ts)_
+_See code: [lib/commands/did/create.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/create.js)_
 
 ## `idx did:delete DID`
 
@@ -211,7 +210,7 @@ OPTIONS
   -f, --force            bypass confirmation prompt
 ```
 
-_See code: [src/commands/did/delete.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/delete.ts)_
+_See code: [lib/commands/did/delete.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/delete.js)_
 
 ## `idx did:label DID [LABEL]`
 
@@ -226,7 +225,7 @@ OPTIONS
   -d, --delete           delete the label
 ```
 
-_See code: [src/commands/did/label.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/label.ts)_
+_See code: [lib/commands/did/label.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/label.js)_
 
 ## `idx did:list`
 
@@ -240,7 +239,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/did/list.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/list.ts)_
+_See code: [lib/commands/did/list.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/list.js)_
 
 ## `idx did:sign DID CONTENTS`
 
@@ -258,7 +257,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/did/sign.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/sign.ts)_
+_See code: [lib/commands/did/sign.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/sign.js)_
 
 ## `idx did:verify JWS`
 
@@ -275,7 +274,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/did/verify.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/did/verify.ts)_
+_See code: [lib/commands/did/verify.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/did/verify.js)_
 
 ## `idx help [COMMAND]`
 
@@ -292,7 +291,7 @@ OPTIONS
   --all  see all commands in CLI
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/tree/v3.2.2/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
 ## `idx index:get DID KEY`
 
@@ -310,11 +309,11 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/index/get.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/index/get.ts)_
+_See code: [lib/commands/index/get.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/index/get.js)_
 
 ## `idx index:inspect DID`
 
-inspect the contents of an IDX document
+inspect the contents of an IDX stream
 
 ```
 USAGE
@@ -327,7 +326,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/index/inspect.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/index/inspect.ts)_
+_See code: [lib/commands/index/inspect.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/index/inspect.js)_
 
 ## `idx index:merge DID KEY CONTENTS`
 
@@ -346,7 +345,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/index/merge.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/index/merge.ts)_
+_See code: [lib/commands/index/merge.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/index/merge.js)_
 
 ## `idx index:set DID KEY CONTENTS`
 
@@ -365,7 +364,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/index/set.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/index/set.ts)_
+_See code: [lib/commands/index/set.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/index/set.js)_
 
 ## `idx schema:publish DID SCHEMA`
 
@@ -383,11 +382,11 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/schema/publish.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/schema/publish.ts)_
+_See code: [lib/commands/schema/publish.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/schema/publish.js)_
 
 ## `idx tile:create DID CONTENTS`
 
-create a new tile document
+create a new tile stream
 
 ```
 USAGE
@@ -399,32 +398,32 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -s, --schema=schema    DocID of the schema validating the contents
+  -s, --schema=schema    StreamID of the schema validating the contents
 ```
 
-_See code: [src/commands/tile/create.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/tile/create.ts)_
+_See code: [lib/commands/tile/create.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/tile/create.js)_
 
 ## `idx tile:get ID`
 
-get the contents of a tile document
+get the contents of a tile stream
 
 ```
 USAGE
   $ idx tile:get ID
 
 ARGUMENTS
-  ID  Document ID
+  ID  Stream ID
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   --did=did              DID or label
 ```
 
-_See code: [src/commands/tile/get.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/tile/get.ts)_
+_See code: [lib/commands/tile/get.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/tile/get.js)_
 
 ## `idx tile:merge DID ID CONTENTS`
 
-merge the contents of a tile document
+merge the contents of a tile stream
 
 ```
 USAGE
@@ -432,14 +431,14 @@ USAGE
 
 ARGUMENTS
   DID       DID or label
-  ID        Document ID
+  ID        Stream ID
   CONTENTS  String-encoded JSON data
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/tile/merge.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/tile/merge.ts)_
+_See code: [lib/commands/tile/merge.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/tile/merge.js)_
 
 ## `idx tile:set DID ID CONTENTS`
 
@@ -458,8 +457,7 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-_See code: [src/commands/tile/set.ts](https://github.com/ceramicstudio/js-idx/tree/v0.8.0/packages/cli/src/commands/tile/set.ts)_
-
+_See code: [lib/commands/tile/set.js](https://github.com/ceramicstudio/js-idx/blob/v0.10.0/lib/commands/tile/set.js)_
 <!-- commandsstop -->
 
 ## License

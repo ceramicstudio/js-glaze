@@ -3,7 +3,7 @@ import type { CommandFlags } from '../../command'
 
 export default class SetIndex extends Command<
   CommandFlags,
-  { did: string; key: string; contents: unknown }
+  { did: string; key: string; contents: Record<string, any> }
 > {
   static description = 'set the contents of a key in IDX'
 

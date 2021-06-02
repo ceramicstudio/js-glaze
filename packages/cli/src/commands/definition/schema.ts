@@ -7,7 +7,7 @@ export default class SchemaDefinition extends Command<CommandFlags, { id: string
   static flags = Command.flags
 
   static args = [
-    { name: 'id', description: 'document ID or alias of the definition', required: true },
+    { name: 'id', description: 'stream ID or alias of the definition', required: true },
   ]
 
   async run(): Promise<void> {

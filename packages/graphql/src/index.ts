@@ -1,4 +1,5 @@
-import type { CeramicApi, Doctype } from '@ceramicnetwork/common'
+import type { CeramicApi } from '@ceramicnetwork/common'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { IDX } from '@ceramicstudio/idx'
 import type {
   DocReference,
@@ -41,7 +42,7 @@ const SCALAR_FIELDS = Object.keys(SCALARS)
 
 export type Context = { ceramic: CeramicApi; idx: IDX }
 
-export function createGlobalId(typeName: string): GraphQLFieldConfigMap<Doctype, Context> {
+export function createGlobalId(typeName: string): GraphQLFieldConfigMap<TileDocument, Context> {
   return {
     id: {
       type: new GraphQLNonNull(GraphQLID),
@@ -92,7 +93,7 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
     const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
     const types: Record<string, GraphQLObjectType> = {}
 
-    const resolveType = (doc: Doctype): GraphQLObjectType<any, Context> | null => {
+    const resolveType = (doc: TileDocument): GraphQLObjectType<any, Context> | null => {
       const { schema } = doc.metadata
       if (schema == null) {
         return null
@@ -106,7 +107,7 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
 
     const { nodeInterface, nodeField } = nodeDefinitions(async (globalId: string, ctx: Context) => {
       const { id } = fromGlobalId(globalId)
-      return await ctx.ceramic.loadDocument(id)
+      return await TileDocument.load(ctx.ceramic, id)
     }, resolveType)
 
     const nodes = Object.entries(this._records.nodes).reduce((acc, [schema, name]) => {
@@ -142,10 +143,10 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
         },
       })
 
-      types[name] = new GraphQLObjectType<Doctype>({
+      types[name] = new GraphQLObjectType<TileDocument>({
         name,
         interfaces: node?.interfaces,
-        fields: (): GraphQLFieldConfigMap<Doctype, Context> => {
+        fields: (): GraphQLFieldConfigMap<TileDocument, Context> => {
           return Object.entries(fields).reduce(
             (acc, [key, field]) => {
               if (field.type === 'reference') {
@@ -153,9 +154,10 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
                 const type = types[this._records.nodes[refID]]
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
-                  resolve: async (doc, _args, ctx): Promise<Doctype | null> => {
-                    const id = doc.content?.[key]?.id
-                    return id ? await ctx.ceramic.loadDocument(id) : null
+                  resolve: async (doc, _args, ctx): Promise<TileDocument | null> => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    const id = doc.content?.[key]?.id as string | undefined
+                    return id ? await TileDocument.load(ctx.ceramic, id) : null
                   },
                 }
               } else {
@@ -174,7 +176,8 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
                 if (type != null) {
                   acc[key] = {
                     type: field.required ? new GraphQLNonNull(type) : type,
-                    resolve: (doc: Doctype): any => doc.content?.[key],
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                    resolve: (doc: TileDocument): any => doc.content?.[key],
                   }
                 }
               }
@@ -195,13 +198,13 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
             node: { type: new GraphQLNonNull(types[name]) },
           }),
           mutateAndGetPayload: async (input: { object: Record<string, any> }, ctx: Context) => {
-            if (ctx.ceramic.did == null) {
+            if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
               throw new Error('Ceramic instance is not authenticated')
             }
             return {
-              node: await ctx.ceramic.createDocument('tile', {
-                content: input.object,
-                metadata: { controllers: [ctx.ceramic.did.id], schema: node.schema },
+              node: await TileDocument.create(ctx.ceramic, input.object, {
+                controllers: [ctx.ceramic.did.id],
+                schema: node.schema,
               }),
             }
           },
@@ -221,8 +224,8 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
             ctx: Context
           ) => {
             const { id } = fromGlobalId(input.id)
-            const doc = await ctx.ceramic.loadDocument(id)
-            await doc.change({ content: input.object })
+            const doc = await TileDocument.load(ctx.ceramic, id)
+            await doc.update(input.object)
             return { node: doc }
           },
         })
@@ -234,7 +237,11 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
       const name = this._records.nodes[definition.schema]
       indexFields[key] = {
         type: types[name],
-        resolve: async (_, { did }: { did?: string }, ctx): Promise<Record<string, any>> => {
+        resolve: async (
+          _,
+          { did }: { did?: string },
+          ctx: Context
+        ): Promise<Record<string, any> | null> => {
           return await ctx.idx.getRecordDocument(definition.id, did)
         },
       }
@@ -260,8 +267,8 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
           const name = this._records.nodes[schema]
           acc[key] = {
             type: new GraphQLNonNull(types[name]),
-            resolve: async (_self, _args, ctx): Promise<any> => {
-              return await ctx.ceramic.loadDocument(id)
+            resolve: async (_self, _args, ctx: Context): Promise<any> => {
+              return await TileDocument.load(ctx.ceramic, id)
             },
           }
           return acc

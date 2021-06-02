@@ -1,6 +1,6 @@
 {
   "name": "jest-environment-idx",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "description": "IDX environment for Jest",
   "main": "index.js",
   "files": [],
@@ -11,9 +11,11 @@
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "@ceramicstudio/idx-tools": "^0.8.0",
-    "jest-environment-ceramic": "^0.11.0",
-    "key-did-provider-ed25519": "^1.0.0",
+    "@ceramicstudio/idx-tools": "^0.11.0",
+    "dids": "^2.0.0",
+    "jest-environment-ceramic": "^0.13.0",
+    "key-did-provider-ed25519": "^1.0.1",
+    "key-did-resolver": "^1.1.1",
     "uint8arrays": "^2.1.2"
   }
 }

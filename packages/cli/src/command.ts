@@ -2,14 +2,14 @@ import { inspect } from 'util'
 
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
 import Ceramic from '@ceramicnetwork/http-client'
-import KeyResolver from '@ceramicnetwork/key-did-resolver'
+import KeyResolver from 'key-did-resolver'
 import { IDX } from '@ceramicstudio/idx'
 import { definitions } from '@ceramicstudio/idx-constants'
 import type { DefinitionName } from '@ceramicstudio/idx-constants'
 import type { Definition } from '@ceramicstudio/idx-tools'
 import { Command as Cmd, flags } from '@oclif/command'
 import { DID } from 'dids'
-import type { ResolverRegistry } from 'dids'
+import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import ora from 'ora'
 import type { Ora } from 'ora'
@@ -96,8 +96,8 @@ export abstract class Command<
   }
 
   async getAuthenticatedCeramic(id: string): Promise<Ceramic> {
-    const [ceramic, provider] = await Promise.all([this.getCeramic(), this.getProvider(id)])
-    await ceramic.setDIDProvider(provider)
+    const [ceramic, did] = await Promise.all([this.getCeramic(), this.getDID(id)])
+    await ceramic.setDID(did)
     return ceramic
   }
 

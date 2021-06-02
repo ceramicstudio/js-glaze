@@ -23,9 +23,9 @@
   "dependencies": {
     "@ceramicstudio/append-collection": "^0.1.0",
     "@ceramicstudio/idx-graphql-types": "^0.1.0",
-    "@ceramicstudio/idx-tools": "^0.7.0"
+    "@ceramicstudio/idx-tools": "^0.11.0"
   },
   "devDependencies": {
-    "tslib": "^2.1.0"
+    "tslib": "^2.2.0"
   }
 }
