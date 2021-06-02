@@ -60,13 +60,10 @@ describe('lib', () => {
             title: 'item',
             properties: {
               note: {
-                type: 'object',
-                $id: 'ceramic://schemaReference',
+                type: 'string',
                 title: 'reference',
-                properties: {
-                  schema: { type: 'string', const: noteSchemaURL },
-                  id: { type: 'string' },
-                },
+                $comment: `ceramic:tile:${noteSchemaURL}`,
+                maxLength: 100,
               },
               title: {
                 type: 'string',

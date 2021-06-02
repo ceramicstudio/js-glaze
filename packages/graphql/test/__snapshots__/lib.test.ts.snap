@@ -52,13 +52,9 @@ interface Node {
 }
 
 type NotesListItem {
-  note: NotesListItemReference!
+  note: Note!
+  noteID: ID!
   title: String
-}
-
-type NotesListItemReference {
-  id: String
-  schema: String
 }
 
 type Note implements Node {
@@ -90,13 +86,8 @@ input NotesInput {
 }
 
 input NotesListItemInput {
-  note: NotesListItemReferenceInput!
+  note: ID!
   title: String
-}
-
-input NotesListItemReferenceInput {
-  id: String
-  schema: String
 }
 
 type UpdateNotesPayload {

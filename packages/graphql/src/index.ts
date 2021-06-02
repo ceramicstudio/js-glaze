@@ -151,13 +151,22 @@ export class GraphQLDocSet implements GraphQLDocSetRecords {
             (acc, [key, field]) => {
               if (field.type === 'reference') {
                 const refID = this._records.references[field.name][0]
-                const type = types[this._records.nodes[refID]]
+                const typeName = this._records.nodes[refID]
+                const type = types[typeName]
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
                   resolve: async (doc, _args, ctx): Promise<TileDocument | null> => {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     const id = doc.content?.[key]?.id as string | undefined
                     return id ? await TileDocument.load(ctx.ceramic, id) : null
+                  },
+                }
+                acc[`${key}ID`] = {
+                  type: field.required ? new GraphQLNonNull(GraphQLID) : GraphQLID,
+                  resolve: (doc, _args): string | null => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    const id = doc.content?.[key]?.id as string | undefined
+                    return id ? toGlobalId(typeName, id) : null
                   },
                 }
               } else {

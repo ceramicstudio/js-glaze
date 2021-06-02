@@ -10,9 +10,7 @@ import { createDefinition, createTile, publishCommits, publishSchema } from './p
 import type { Definition, EncodedDagJWSResult, Schema } from './types'
 import { docIDToString } from './utils'
 
-type CeramicMeta = { type: 'tile'; schema?: string | Array<string> }
-
-type CeramicSchema = Schema & { $ceramic?: CeramicMeta }
+export const CERAMIC_TILE = 'ceramic:tile'
 
 export type CreatedDoc = {
   id: StreamRef
@@ -38,14 +36,14 @@ export type AddDocSetSchemaOptions = {
   prefix: string
 }
 
-function getCeramicTileSchema(schema: CeramicSchema): Array<string> | null {
-  if (schema.$ceramic?.type === 'tile' && schema.$ceramic.schema != null) {
-    if (Array.isArray(schema.$ceramic.schema)) {
-      const clone = schema.$ceramic.schema.slice()
-      clone.sort()
-      return clone
+function getCeramicTileSchema<T = Record<string, any>>(schema: Schema<T>): Array<string> | null {
+  if (schema.$comment?.startsWith(CERAMIC_TILE)) {
+    const schemasString = schema.$comment.substr(CERAMIC_TILE.length + 1)
+    if (schemasString.length) {
+      const schemas = schemasString.split('|')
+      schemas.sort()
+      return schemas
     }
-    return [schema.$ceramic.schema]
   }
   return null
 }
@@ -56,12 +54,12 @@ function getName(base: string, prefix = ''): string {
 }
 
 // Add a JSON schema to the provided records based on its type
-export function addDocSetSchema(
+export function addDocSetSchema<T = Record<string, any>>(
   records: GraphQLDocSetRecords,
-  schema: CeramicSchema,
+  schema: Schema<T>,
   options: AddDocSetSchemaOptions
 ): string {
-  const providedTitle = options.name ?? (schema.title as string)
+  const providedTitle = options.name ?? schema.title
   if (providedTitle == null) {
     throw new Error('Schema must have a title')
   }
@@ -109,7 +107,7 @@ export function addDocSetSchema(
 }
 
 // Recursively extract references to other schemas from a JSON schema arrays and objects
-function extractSchemaReferences(schema: Schema): Array<string> {
+function extractSchemaReferences<T = Record<string, any>>(schema: Schema<T>): Array<string> {
   if (schema.type === 'string') {
     return getCeramicTileSchema(schema) ?? []
   }
@@ -133,7 +131,7 @@ export class DocSet {
   _tiles: Record<string, Promise<CreatedDoc>> = {}
 
   constructor(ceramic: CeramicApi) {
-    if (ceramic.did == null) {
+    if (ceramic.did == null || !ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
     this._ceramic = ceramic
@@ -179,9 +177,9 @@ export class DocSet {
     return false
   }
 
-  createSchema(
+  createSchema<T = Record<string, any>>(
     name: string,
-    schema: Schema,
+    schema: Schema<T>,
     deps: Array<Promise<StreamRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasSchema(name)) {
@@ -203,8 +201,8 @@ export class DocSet {
     return this._schemas[name]
   }
 
-  async addSchema(schema: Schema, alias?: string): Promise<StreamRef> {
-    const name = alias ?? (schema.title as string | undefined)
+  async addSchema<T = Record<string, any>>(schema: Schema<T>, alias?: string): Promise<StreamRef> {
+    const name = alias ?? schema.title
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
     }
@@ -218,7 +216,10 @@ export class DocSet {
     return created.id
   }
 
-  async useExistingSchema(id: StreamRef | string, alias?: string): Promise<StreamRef> {
+  async useExistingSchema<T = Record<string, any>>(
+    id: StreamRef | string,
+    alias?: string
+  ): Promise<StreamRef> {
     const existingAlias = this._schemaAliases[docIDToString(id)]
     if (existingAlias != null) {
       const existing = this._schemas[existingAlias]
@@ -229,8 +230,8 @@ export class DocSet {
     }
 
     const doc = await this.loadDoc(id)
-    const content = (doc.content ?? {}) as Schema
-    const name = alias ?? (content.title as string | undefined)
+    const content = (doc.content ?? {}) as Schema<T>
+    const name = alias ?? content.title
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
     }

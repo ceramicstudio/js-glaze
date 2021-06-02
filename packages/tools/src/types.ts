@@ -6,11 +6,15 @@ import type {
   PublishedDefinitions,
   PublishedSchemas,
 } from '@ceramicstudio/idx-constants'
+import type { JSONSchemaType } from 'ajv'
 import type { DagJWSResult, JWSSignature } from 'dids'
 
 export type { Definition } from '@ceramicstudio/idx-constants'
 
-export type Schema = Record<string, any>
+export type Schema<T = Record<string, any>> = JSONSchemaType<T> & {
+  $comment?: string
+  title?: string
+}
 
 export interface EncodedDagJWS {
   payload: string
@@ -41,6 +45,6 @@ export interface PublishDoc<T = unknown> {
 export interface DefinitionDoc extends PublishDoc<Definition> {
   id: StreamID | string
 }
-export interface SchemaDoc extends PublishDoc<Schema> {
+export interface SchemaDoc<T = Record<string, any>> extends PublishDoc<JSONSchemaType<T>> {
   name: string
 }

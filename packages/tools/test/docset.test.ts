@@ -22,7 +22,8 @@ describe('docset', () => {
       resolver: KeyResolver.getResolver(),
       provider: new Ed25519Provider(seed),
     })
-    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic), did.authenticate()])
+    ceramic.did = did
+    await Promise.all([publishIDXConfig(ceramic), did.authenticate()])
   })
 
   test('publish signed', async () => {
@@ -205,7 +206,7 @@ describe('docset', () => {
               note: {
                 type: 'string',
                 title: 'reference',
-                $ceramic: { type: 'tile', schema: noteSchemaURL },
+                $comment: `ceramic:tile:${noteSchemaURL}`,
                 maxLength: 150,
               },
               title: {
