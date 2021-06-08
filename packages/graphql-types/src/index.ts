@@ -1,53 +1,71 @@
-export interface FieldCommon {
-  required?: boolean
-}
-export interface FieldBoolean extends FieldCommon {
+export type FieldBoolean = {
   type: 'boolean'
 }
-export interface FieldInteger extends FieldCommon {
+export type FieldInteger = {
   type: 'integer'
 }
-export interface FieldFloat extends FieldCommon {
+export type FieldFloat = {
   type: 'float'
 }
-export interface FieldString extends FieldCommon {
+export type FieldString = {
   type: 'string'
   format?: 'date-time' | 'date' | 'duration' | 'time'
   maxLength?: number
 }
-export interface FieldList extends FieldCommon {
+
+export type FieldList = {
   type: 'list'
   name: string
 }
-export interface FieldObject extends FieldCommon {
+export type FieldObject = {
   type: 'object'
   name: string
 }
-export interface FieldReference extends FieldCommon {
+export type FieldReference = {
   type: 'reference'
   name: string
 }
-export type Field =
+
+export type ItemField =
   | FieldBoolean
   | FieldInteger
   | FieldFloat
   | FieldString
-  | FieldList
   | FieldObject
   | FieldReference
 
-export type ObjectFields = Record<string, Field>
+export type ObjectField = (FieldList | ItemField) & { required?: boolean }
+export type ObjectFields = Record<string, ObjectField>
 
-export type DocReference = {
+export type CollectionEntry = {
+  sliceSchema: string
+  item: FieldObject | FieldReference
+}
+export type NodeEntry = {
+  type: 'collection' | 'object'
+  name: string
+}
+export type TileEntry = {
   id: string
   schema: string
 }
 
+export type CollectionReference = {
+  type: 'collection'
+  schema: string
+}
+export type NodeReference = {
+  type: 'node'
+  schemas: Array<string>
+}
+export type ReferenceEntry = CollectionReference | NodeReference
+
 export type GraphQLDocSetRecords = {
-  index: Record<string, DocReference>
-  lists: Record<string, string>
-  nodes: Record<string, string>
-  objects: Record<string, ObjectFields>
-  references: Record<string, Array<string>>
-  roots: Record<string, DocReference>
+  collections: Record<string, CollectionEntry> // alias to collection entry
+  index: Record<string, TileEntry> // alias to tile reference
+  lists: Record<string, ItemField> // list alias to item type
+  nodes: Record<string, NodeEntry> // stream URL to entry
+  objects: Record<string, ObjectFields> // alias to fields
+  references: Record<string, Array<string>> // alias to array of stream URLs
+  roots: Record<string, TileEntry> // alias to tile reference
 }

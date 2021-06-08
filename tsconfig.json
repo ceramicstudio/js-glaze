@@ -7,9 +7,12 @@
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
+      "@ceramicstudio/append-collection": ["packages/append-collection/src"],
       "@ceramicstudio/idx": ["packages/core/src"],
       "@ceramicstudio/idx-cli": ["packages/cli/src"],
       "@ceramicstudio/idx-constants": ["packages/constants/src"],
+      "@ceramicstudio/idx-graphql": ["packages/graphql/src"],
+      "@ceramicstudio/idx-graphql-types": ["packages/graphql-types/src"],
       "@ceramicstudio/idx-tools": ["packages/tools/src"],
       "jest-environment-ceramic": ["packages/jest-environment-ceramic"],
       "jest-environment-idx": ["packages/jest-environment-idx"]

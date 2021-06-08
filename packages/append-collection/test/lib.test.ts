@@ -4,14 +4,8 @@
 
 import { CeramicApi } from '@ceramicnetwork/common'
 import type { CommitID } from '@ceramicnetwork/streamid'
-import { publishSchema } from '@ceramicstudio/idx-tools'
 
-import {
-  AppendCollection,
-  Cursor,
-  createAppendCollectionSchema,
-  createCollectionSliceSchema,
-} from '../src'
+import { AppendCollection, Cursor, publishCollectionSchemas } from '../src'
 
 declare global {
   const ceramic: CeramicApi
@@ -21,27 +15,11 @@ function cursorsToString<T = any>(res: Record<string, any>): Record<string, any>
   return {
     ...res,
     // eslint-disable-next-line
-    items: res.items.map(({ cursor, item }: { cursor: Cursor; item: T }) => ({
-      item,
+    items: res.items.map(({ cursor, data }: { cursor: Cursor; data: T }) => ({
+      data,
       cursor: cursor.toString(),
     })),
   }
-}
-
-async function publishCollectionSchemas(
-  title: string,
-  itemSchemas: Array<Record<string, any>>,
-  maxItems?: number
-): Promise<CommitID> {
-  const sliceSchema = await publishSchema(ceramic, {
-    name: `${title}CollectionSlice`,
-    content: createCollectionSliceSchema(`${title}CollectionSlice`, itemSchemas, maxItems),
-  })
-  const collectionSchema = await publishSchema(ceramic, {
-    name: `${title}Collection`,
-    content: createAppendCollectionSchema(`${title}Collection`, sliceSchema.commitId.toString()),
-  })
-  return collectionSchema.commitId
 }
 
 describe('append-collection', () => {
@@ -51,10 +29,24 @@ describe('append-collection', () => {
 
   beforeAll(async () => {
     collectionSchemaID = await publishCollectionSchemas(
+      ceramic,
       'Test',
       [{ type: 'string', maxLength: 100 }],
       10
     )
+  })
+
+  test('create and load static methods', async () => {
+    const created = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    expect(created).toBeInstanceOf(AppendCollection)
+    const cursor = await created.add('first')
+
+    const loaded = await AppendCollection.load<string>(ceramic, created.id)
+    expect(loaded).toBeInstanceOf(AppendCollection)
+    await expect(loaded.first(1)).resolves.toEqual({
+      hasMore: false,
+      items: [{ cursor, data: 'first' }],
+    })
   })
 
   test('create and load single item', async () => {
@@ -66,12 +58,12 @@ describe('append-collection', () => {
 
     await expect(collection.first(3)).resolves.toEqual({
       hasMore: false,
-      items: [{ cursor, item: 'first' }],
+      items: [{ cursor, data: 'first' }],
     })
 
     await expect(collection.last(2)).resolves.toEqual({
       hasMore: false,
-      items: [{ cursor, item: 'first' }],
+      items: [{ cursor, data: 'first' }],
     })
   })
 
@@ -106,15 +98,15 @@ describe('append-collection', () => {
     expect(cursorsToString(before)).toEqual(
       cursorsToString({
         hasMore: true,
-        items: [{ item: 'two', cursor: cursors[1] }],
+        items: [{ data: 'two', cursor: cursors[1] }],
       })
     )
     expect(cursorsToString(after)).toEqual(
       cursorsToString({
         hasMore: true,
         items: [
-          { item: 'four', cursor: cursors[3] },
-          { item: 'five', cursor: cursors[4] },
+          { data: 'four', cursor: cursors[3] },
+          { data: 'five', cursor: cursors[4] },
         ],
       })
     )

@@ -23,18 +23,19 @@
   },
   "dependencies": {
     "@ceramicnetwork/stream-tile": "^1.0.4",
-    "@ceramicstudio/idx-graphql-types": "0.1.0",
+    "@ceramicstudio/append-collection": "^0.1.0",
+    "@ceramicstudio/idx-graphql-types": "^0.1.0",
     "change-case": "^4.1.2",
     "graphql": "^15.5.0",
     "graphql-relay": "^0.7.0"
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^1.0.4",
+    "@ceramicnetwork/streamid": "^1.0.2",
     "@ceramicstudio/idx": "^0.12.1",
     "@ceramicstudio/idx-constants": "^1.0.0",
-    "@ceramicstudio/idx-graphql-tools": "^0.1.0",
     "@ceramicstudio/idx-tools": "^0.11.0",
-    "jest-environment-idx": "0.8.0",
+    "jest-environment-idx": "^0.8.0",
     "tslib": "^2.2.0"
   }
 }

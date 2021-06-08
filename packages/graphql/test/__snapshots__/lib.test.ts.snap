@@ -7,6 +7,7 @@ Object {
       "node": Object {
         "date": "2021-01-06T14:28:00.000Z",
         "text": "hello test!",
+        "title": "test",
       },
     },
   },
@@ -19,6 +20,7 @@ Object {
     "node": Object {
       "date": "2020-12-10T11:12:34.567Z",
       "text": "An example note",
+      "title": "Example",
     },
   },
 }
@@ -42,7 +44,20 @@ type Index {
 
 type Notes implements Node {
   id: ID!
-  notes: [NotesListItem]
+  all(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): NoteConnection
+  favorites: [ID]
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -51,54 +66,52 @@ interface Node {
   id: ID!
 }
 
-type NotesListItem {
-  note: Note!
-  noteID: ID!
-  title: String
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type NoteConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [NoteEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type NoteEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Note
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Note implements Node {
   id: ID!
   date: String!
   text: String!
+  title: String!
 }
 
 type Mutation {
-  createNotes(input: CreateNotesInput!): CreateNotesPayload
-  updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
   createNote(input: CreateNoteInput!): CreateNotePayload
   updateNote(input: UpdateNoteInput!): UpdateNotePayload
+  createNotes(input: CreateNotesInput!): CreateNotesPayload
+  updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
   setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
-}
-
-type CreateNotesPayload {
-  node: Notes!
-  clientMutationId: String
-}
-
-input CreateNotesInput {
-  object: NotesInput!
-  clientMutationId: String
-}
-
-input NotesInput {
-  notes: [NotesListItemInput]
-}
-
-input NotesListItemInput {
-  note: ID!
-  title: String
-}
-
-type UpdateNotesPayload {
-  node: Notes!
-  clientMutationId: String
-}
-
-input UpdateNotesInput {
-  id: ID!
-  object: NotesInput!
-  clientMutationId: String
 }
 
 type CreateNotePayload {
@@ -114,6 +127,7 @@ input CreateNoteInput {
 input NoteInput {
   date: String!
   text: String!
+  title: String!
 }
 
 type UpdateNotePayload {
@@ -124,6 +138,32 @@ type UpdateNotePayload {
 input UpdateNoteInput {
   id: ID!
   object: NoteInput!
+  clientMutationId: String
+}
+
+type CreateNotesPayload {
+  node: Notes!
+  clientMutationId: String
+}
+
+input CreateNotesInput {
+  object: NotesInput!
+  clientMutationId: String
+}
+
+input NotesInput {
+  all: ID
+  favorites: [ID]
+}
+
+type UpdateNotesPayload {
+  node: Notes!
+  clientMutationId: String
+}
+
+input UpdateNotesInput {
+  id: ID!
+  object: NotesInput!
   clientMutationId: String
 }
 

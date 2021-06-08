@@ -1,7 +1,7 @@
 import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { Field, GraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-types'
+import type { GraphQLDocSetRecords, ItemField, ObjectField } from '@ceramicstudio/idx-graphql-types'
 import { camelCase, pascalCase } from 'change-case'
 import type { DagJWSResult } from 'dids'
 
@@ -10,7 +10,8 @@ import { createDefinition, createTile, publishCommits, publishSchema } from './p
 import type { Definition, EncodedDagJWSResult, Schema } from './types'
 import { docIDToString } from './utils'
 
-export const CERAMIC_TILE = 'ceramic:tile'
+export const CERAMIC_APPEND_COLLECTION = 'ceramic:appendCollection:'
+export const CERAMIC_TILE = 'ceramic:tile:'
 
 export type CreatedDoc = {
   id: StreamRef
@@ -36,9 +37,20 @@ export type AddDocSetSchemaOptions = {
   prefix: string
 }
 
-function getCeramicTileSchema<T = Record<string, any>>(schema: Schema<T>): Array<string> | null {
+function getName(base: string, prefix = ''): string {
+  const withCase = pascalCase(base)
+  return withCase.startsWith(prefix) ? withCase : prefix + withCase
+}
+
+function getReference(schema: Schema): Array<string> | null {
+  // if (schema.$comment?.startsWith(CERAMIC_APPEND_COLLECTION)) {
+  //   const sliceSchema = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
+  //   if (sliceSchema.length) {
+  //     return { type: 'collection', sliceSchema }
+  //   }
+  // }
   if (schema.$comment?.startsWith(CERAMIC_TILE)) {
-    const schemasString = schema.$comment.substr(CERAMIC_TILE.length + 1)
+    const schemasString = schema.$comment.substr(CERAMIC_TILE.length)
     if (schemasString.length) {
       const schemas = schemasString.split('|')
       schemas.sort()
@@ -48,15 +60,35 @@ function getCeramicTileSchema<T = Record<string, any>>(schema: Schema<T>): Array
   return null
 }
 
-function getName(base: string, prefix = ''): string {
-  const withCase = pascalCase(base)
-  return withCase.startsWith(prefix) ? withCase : prefix + withCase
+export function getItemField(
+  records: GraphQLDocSetRecords,
+  schema: Schema,
+  prefix: string
+): ItemField {
+  const name = schema.title ?? ''
+  if (schema.type === 'array') {
+    throw new Error('Unsupported item field of type array')
+  }
+  if (schema.type === 'string') {
+    const reference = getReference(schema)
+    if (reference == null) {
+      return { ...schema, type: 'string' }
+    }
+
+    const refName = getName(name, prefix)
+    records.references[refName] = reference
+    return { type: 'reference', name: refName }
+  }
+  if (schema.type === 'object') {
+    return { type: 'object', name: addDocSetSchema(records, schema, { name, prefix }) }
+  }
+  return schema as ItemField
 }
 
 // Add a JSON schema to the provided records based on its type
-export function addDocSetSchema<T = Record<string, any>>(
+export function addDocSetSchema(
   records: GraphQLDocSetRecords,
-  schema: Schema<T>,
+  schema: Schema,
   options: AddDocSetSchemaOptions
 ): string {
   const providedTitle = options.name ?? schema.title
@@ -67,12 +99,12 @@ export function addDocSetSchema<T = Record<string, any>>(
   const name = getName(providedTitle, options.prefix)
 
   if (schema.type === 'string') {
-    const references = getCeramicTileSchema(schema)
-    if (references != null) {
-      records.references[name] = references
+    const reference = getReference(schema)
+    if (reference != null) {
+      records.references[name] = reference
     }
   } else if (schema.type === 'array' && schema.items != null) {
-    records.lists[name] = addDocSetSchema(records, schema.items, { prefix: name })
+    records.lists[name] = getItemField(records, schema.items, name)
   } else if (schema.type === 'object' && schema.properties != null) {
     const requiredProps = (schema.required as Array<string>) ?? []
     records.objects[name] = Object.entries(schema.properties as Record<string, any>).reduce(
@@ -82,24 +114,27 @@ export function addDocSetSchema<T = Record<string, any>>(
         const opts = { name: propName, prefix: name }
         const required = requiredProps.includes(key)
         if (value.type === 'string') {
-          const references = getCeramicTileSchema(value)
-          if (references == null) {
+          const reference = getReference(value)
+          if (reference == null) {
             acc[prop] = { ...value, required, type: 'string' }
           } else {
             const refName = getName(propName, name)
-            records.references[refName] = references
+            records.references[refName] = reference
             acc[prop] = { required, type: 'reference', name: refName }
           }
         } else if (value.type === 'array') {
+          if (value.items == null) {
+            throw new Error(`Missing items in field ${key}`)
+          }
           acc[prop] = { required, type: 'list', name: addDocSetSchema(records, value, opts) }
         } else if (value.type === 'object') {
           acc[prop] = { required, type: 'object', name: addDocSetSchema(records, value, opts) }
         } else {
-          acc[prop] = { ...value, required } as Field
+          acc[prop] = { ...value, required } as ObjectField
         }
         return acc
       },
-      {} as Record<string, Field>
+      {} as Record<string, ObjectField>
     )
   }
 
@@ -107,9 +142,9 @@ export function addDocSetSchema<T = Record<string, any>>(
 }
 
 // Recursively extract references to other schemas from a JSON schema arrays and objects
-function extractSchemaReferences<T = Record<string, any>>(schema: Schema<T>): Array<string> {
+function extractSchemaReferences(schema: Schema): Array<string> {
   if (schema.type === 'string') {
-    return getCeramicTileSchema(schema) ?? []
+    return getReference(schema) ?? []
   }
   if (schema.type === 'array') {
     return extractSchemaReferences(schema.items)
@@ -177,9 +212,9 @@ export class DocSet {
     return false
   }
 
-  createSchema<T = Record<string, any>>(
+  createSchema(
     name: string,
-    schema: Schema<T>,
+    schema: Schema,
     deps: Array<Promise<StreamRef>> = []
   ): Promise<CreatedDoc> {
     if (this.hasSchema(name)) {
@@ -201,7 +236,7 @@ export class DocSet {
     return this._schemas[name]
   }
 
-  async addSchema<T = Record<string, any>>(schema: Schema<T>, alias?: string): Promise<StreamRef> {
+  async addSchema(schema: Schema, alias?: string): Promise<StreamRef> {
     const name = alias ?? schema.title
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
@@ -216,10 +251,7 @@ export class DocSet {
     return created.id
   }
 
-  async useExistingSchema<T = Record<string, any>>(
-    id: StreamRef | string,
-    alias?: string
-  ): Promise<StreamRef> {
+  async useExistingSchema(id: StreamRef | string, alias?: string): Promise<StreamRef> {
     const existingAlias = this._schemaAliases[docIDToString(id)]
     if (existingAlias != null) {
       const existing = this._schemas[existingAlias]
@@ -230,7 +262,7 @@ export class DocSet {
     }
 
     const doc = await this.loadDoc(id)
-    const content = (doc.content ?? {}) as Schema<T>
+    const content = (doc.content ?? {}) as Schema
     const name = alias ?? content.title
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
@@ -349,6 +381,80 @@ export class DocSet {
     return created.id
   }
 
+  async toGraphQLDocSetRecords(): Promise<GraphQLDocSetRecords> {
+    // TODO: throw error on using reserved names:
+    // - "node" and "index" roots
+    // - "id" field in object if node
+
+    const records: GraphQLDocSetRecords = {
+      collections: {},
+      index: {},
+      lists: {},
+      nodes: {},
+      objects: {},
+      references: {},
+      roots: {},
+    }
+
+    const handleSchemas = this.schemas.map(async (name) => {
+      const created = this.getSchema(name)
+      if (created != null) {
+        const doc = await this.loadCreated(created)
+        const schema = doc.content as Schema
+        if (schema == null) {
+          throw new Error(`Could not load schema ${name}`)
+        }
+        if (schema.$comment?.startsWith(CERAMIC_APPEND_COLLECTION)) {
+          const sliceSchemaID = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
+          await this.useExistingSchema(sliceSchemaID)
+          const sliceSchemaDoc = await this.loadDoc(sliceSchemaID)
+          const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
+          if (itemSchema == null) {
+            throw new Error(`Could not extract item schema ${name}`)
+          }
+          records.collections[name] = {
+            sliceSchema: sliceSchemaID,
+            item: getItemField(records, itemSchema, name),
+          }
+          records.nodes[doc.commitId.toUrl()] = { type: 'collection', name }
+        } else {
+          records.nodes[doc.commitId.toUrl()] = {
+            type: 'object',
+            name: addDocSetSchema(records, schema, { prefix: '' }),
+          }
+        }
+      }
+    })
+
+    const handleDefinitions = this.definitions.map(async (name) => {
+      const created = this.getDefinition(name)
+      if (created != null) {
+        const doc = await this.loadCreated(created)
+        const definition = doc.content as Definition
+        if (definition == null) {
+          throw new Error(`Could not load definition ${name}`)
+        }
+        records.index[name] = { id: doc.id.toString(), schema: definition.schema }
+      }
+    })
+
+    const handleTiles = this.tiles.map(async (name) => {
+      const created = this.getTile(name)
+      if (created != null) {
+        const doc = await this.loadCreated(created)
+        const { schema } = doc.metadata
+        if (schema == null) {
+          throw new Error(`Missing schema for tile ${name}`)
+        }
+        records.roots[name] = { id: doc.id.toString(), schema }
+      }
+    })
+
+    await Promise.all([...handleSchemas, ...handleDefinitions, ...handleTiles])
+
+    return records
+  }
+
   // Export to maps of aliases to published doc IDs/URLs
   async toPublished(): Promise<PublishedDocSet> {
     const definitions: Record<string, string> = {}
@@ -413,62 +519,6 @@ export class DocSet {
   async toSignedJSON(): Promise<EncodedSignedDocSet> {
     const { docs, ...signed } = await this.toSigned()
     return { ...signed, docs: encodeSignedMap(docs) }
-  }
-
-  // Export to GraphQL docset records for conversion to GraphQL schema
-  async toGraphQLDocSetRecords(): Promise<GraphQLDocSetRecords> {
-    // TODO: throw error on using reserved names:
-    // - "node" and "index" roots
-    // - "id" field in object if node
-
-    const records: GraphQLDocSetRecords = {
-      index: {},
-      lists: {},
-      nodes: {},
-      objects: {},
-      references: {},
-      roots: {},
-    }
-
-    const handleSchemas = this.schemas.map(async (name) => {
-      const created = this.getSchema(name)
-      if (created != null) {
-        const doc = await this.loadCreated(created)
-        const schema = doc.content as Schema
-        if (schema == null) {
-          throw new Error(`Could not load schema ${name}`)
-        }
-        records.nodes[doc.commitId.toUrl()] = addDocSetSchema(records, schema, { prefix: '' })
-      }
-    })
-
-    const handleDefinitions = this.definitions.map(async (name) => {
-      const created = this.getDefinition(name)
-      if (created != null) {
-        const doc = await this.loadCreated(created)
-        const definition = doc.content as Definition
-        if (definition == null) {
-          throw new Error(`Could not load definition ${name}`)
-        }
-        records.index[name] = { id: doc.id.toString(), schema: definition.schema }
-      }
-    })
-
-    const handleTiles = this.tiles.map(async (name) => {
-      const created = this.getTile(name)
-      if (created != null) {
-        const doc = await this.loadCreated(created)
-        const { schema } = doc.metadata
-        if (schema == null) {
-          throw new Error(`Missing schema for tile ${name}`)
-        }
-        records.roots[name] = { id: doc.id.toString(), schema }
-      }
-    })
-
-    await Promise.all([...handleSchemas, ...handleDefinitions, ...handleTiles])
-
-    return records
   }
 }
 

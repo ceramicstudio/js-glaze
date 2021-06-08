@@ -5,22 +5,19 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { IDX } from '@ceramicstudio/idx'
-import { toGraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-tools'
+import { publishCollectionSchemas } from '@ceramicstudio/append-collection'
 import { DocSet, publishIDXConfig } from '@ceramicstudio/idx-tools'
 import { execute, parse, printSchema } from 'graphql'
 import type { GraphQLSchema } from 'graphql'
 
-import { GraphQLDocSet } from '../src'
+import { Context, createGraphQLSchema } from '../src'
 
 declare global {
   const ceramic: CeramicApi
-  const idx: IDX
 }
 
 describe('lib', () => {
-  const context = { ceramic, idx: new IDX({ ceramic }) }
-  let graphqlDocSet
+  const context = new Context(ceramic)
   let schema: GraphQLSchema
 
   beforeAll(async () => {
@@ -40,42 +37,43 @@ describe('lib', () => {
           type: 'string',
           maxLength: 4000,
         },
+        title: {
+          type: 'string',
+          maxLength: 100,
+        },
       },
-      required: ['date', 'text'],
+      required: ['date', 'text', 'title'],
     }
-
     const noteSchema = await TileDocument.create(ceramic, NoteSchema)
     const noteSchemaURL = noteSchema.commitId.toUrl()
+    const noteRef = {
+      type: 'string',
+      title: 'reference',
+      $comment: `ceramic:tile:${noteSchemaURL}`,
+      maxLength: 100,
+    }
+
+    const notesCollectionSchemaCommitID = await publishCollectionSchemas(ceramic, 'Notes', [
+      noteRef,
+    ])
 
     const NotesSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Notes',
       type: 'object',
       properties: {
-        notes: {
+        all: {
+          type: 'string',
+          $comment: `ceramic:tile:${notesCollectionSchemaCommitID.toUrl()}`,
+          maxLength: 100,
+        },
+        favorites: {
           type: 'array',
           title: 'list',
-          items: {
-            type: 'object',
-            title: 'item',
-            properties: {
-              note: {
-                type: 'string',
-                title: 'reference',
-                $comment: `ceramic:tile:${noteSchemaURL}`,
-                maxLength: 100,
-              },
-              title: {
-                type: 'string',
-                maxLength: 100,
-              },
-            },
-            required: ['note'],
-          },
+          items: noteRef,
         },
       },
     }
-
     const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
@@ -91,14 +89,12 @@ describe('lib', () => {
       ),
       docset.addTile(
         'exampleNote',
-        { date: '2020-12-10T11:12:34.567Z', text: 'An example note' },
+        { date: '2020-12-10T11:12:34.567Z', text: 'An example note', title: 'Example' },
         { schema: noteSchemaURL }
       ),
     ])
-    const graphqlDocSetRecords = await toGraphQLDocSetRecords(docset)
-
-    graphqlDocSet = new GraphQLDocSet(graphqlDocSetRecords)
-    schema = graphqlDocSet.toGraphQLSchema()
+    const graphqlDocSetRecords = await docset.toGraphQLDocSetRecords()
+    schema = createGraphQLSchema(graphqlDocSetRecords)
   })
 
   test('schema creation', () => {
@@ -119,6 +115,7 @@ describe('lib', () => {
            ...on Note {
              date
              text
+             title
            }
          }
        }
@@ -138,12 +135,13 @@ describe('lib', () => {
            node {
              date
              text
+             title
            }
          }
        }
      `)
     const res = await execute(schema, mutation, {}, context, {
-      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!' } },
+      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' } },
     })
     expect(res).toMatchSnapshot()
   })
@@ -161,7 +159,7 @@ describe('lib', () => {
        }
      `)
     const created = await execute(schema, create, {}, context, {
-      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello first' } },
+      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' } },
     })
     const { id } = created.data!.createNote.node
 
@@ -172,6 +170,7 @@ describe('lib', () => {
              id
              date
              text
+             title
            }
          }
        }
@@ -179,7 +178,7 @@ describe('lib', () => {
     await execute(schema, update, {}, context, {
       input: {
         id,
-        object: { date: '2021-01-06T14:32:00.000Z', text: 'hello second' },
+        object: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
       },
     })
 
@@ -189,6 +188,7 @@ describe('lib', () => {
            ...on Note {
              date
              text
+             title
            }
          }
        }
@@ -196,7 +196,7 @@ describe('lib', () => {
     const res = await execute(schema, read, {}, context, { id })
     expect(res).toEqual({
       data: {
-        node: { date: '2021-01-06T14:32:00.000Z', text: 'hello second' },
+        node: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
       },
     })
   })

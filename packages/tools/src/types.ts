@@ -36,7 +36,7 @@ export interface PublishedConfig {
   schemas: PublishedSchemas
 }
 
-export interface PublishDoc<T = unknown> {
+export interface PublishDoc<T = Record<string, any>> {
   id?: StreamID | string
   content: T
   controllers?: Array<string>
@@ -45,6 +45,6 @@ export interface PublishDoc<T = unknown> {
 export interface DefinitionDoc extends PublishDoc<Definition> {
   id: StreamID | string
 }
-export interface SchemaDoc<T = Record<string, any>> extends PublishDoc<JSONSchemaType<T>> {
+export interface SchemaDoc<T = Record<string, any>> extends PublishDoc<Schema<T>> {
   name: string
 }

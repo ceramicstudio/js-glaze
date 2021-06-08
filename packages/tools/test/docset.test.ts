@@ -239,16 +239,22 @@ describe('docset', () => {
     )
 
     await expect(docset.toGraphQLDocSetRecords()).resolves.toEqual({
+      collections: {},
       index: {
         myNotes: {
           id: notesDefinitionID.toString(),
           schema: notesSchemaURL,
         },
       },
-      lists: { NotesList: 'NotesListItem' },
+      lists: {
+        NotesList: {
+          name: 'NotesListItem',
+          type: 'object',
+        },
+      },
       nodes: {
-        [notesSchemaURL]: 'Notes',
-        [noteSchemaURL]: 'Note',
+        [notesSchemaURL]: { type: 'object', name: 'Notes' },
+        [noteSchemaURL]: { type: 'object', name: 'Note' },
       },
       objects: {
         NotesListItem: {

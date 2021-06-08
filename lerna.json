@@ -6,5 +6,5 @@
   },
   "useWorkspaces": true,
   "packages": ["packages/*"],
-  "npmClientArgs": ["--legacy-peer-deps"]
+  "npmClient": "yarn"
 }

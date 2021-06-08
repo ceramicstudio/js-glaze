@@ -29,11 +29,11 @@ import { isValidDefinition, isSecureSchema } from './validate'
 
 const PUBLISH_OPTS = { anchor: false, publish: false }
 
-export async function createTile<T = unknown>(
+export async function createTile<T = Record<string, any>>(
   ceramic: CeramicApi,
   content: T,
   metadata: Partial<StreamMetadata> = {}
-): Promise<TileDocument> {
+): Promise<TileDocument<T>> {
   if (ceramic.did == null) {
     throw new Error('Ceramic instance is not authenticated')
   }
@@ -42,23 +42,23 @@ export async function createTile<T = unknown>(
     metadata.controllers = [ceramic.did.id]
   }
 
-  const doc = await TileDocument.create(ceramic, content, metadata)
+  const doc = await TileDocument.create<T>(ceramic, content, metadata)
   await ceramic.pin.add(doc.id)
   return doc
 }
 
-export async function publishDoc<T = unknown>(
+export async function publishDoc<T = Record<string, any>>(
   ceramic: CeramicApi,
   doc: PublishDoc<T>
-): Promise<TileDocument> {
+): Promise<TileDocument<T>> {
   if (doc.id == null) {
-    return await createTile(ceramic, doc.content, {
+    return await createTile<T>(ceramic, doc.content, {
       controllers: doc.controllers,
       schema: doc.schema ? docIDToString(doc.schema) : undefined,
     })
   }
 
-  const loaded = await ceramic.loadStream<TileDocument>(doc.id)
+  const loaded = await TileDocument.load<T>(ceramic, doc.id)
   if (!isEqual(loaded.content, doc.content)) {
     await loaded.update(doc.content)
   }
@@ -68,7 +68,7 @@ export async function publishDoc<T = unknown>(
 export async function createDefinition(
   ceramic: CeramicApi,
   definition: Definition
-): Promise<TileDocument> {
+): Promise<TileDocument<Definition>> {
   if (!isValidDefinition(definition)) {
     throw new Error('Invalid definition')
   }
@@ -76,7 +76,7 @@ export async function createDefinition(
 }
 
 export async function updateDefinition(ceramic: CeramicApi, doc: DefinitionDoc): Promise<boolean> {
-  const loaded = await ceramic.loadStream<TileDocument>(doc.id)
+  const loaded = await TileDocument.load<Definition>(ceramic, doc.id)
   if (loaded.metadata.schema !== publishedSchemas.Definition) {
     throw new Error('Document is not a valid Definition')
   }
