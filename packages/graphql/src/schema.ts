@@ -1,4 +1,3 @@
-import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { GraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-types'
 import { pascalCase } from 'change-case'
 import {
@@ -30,6 +29,7 @@ import {
 import type { Connection } from 'graphql-relay'
 
 import type { Context } from './context'
+import type { Doc } from './types'
 import { createGlobalId } from './utils'
 
 const SCALARS = {
@@ -55,12 +55,11 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
   const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
   const types: Record<string, GraphQLObjectType> = {}
 
-  const resolveType = (doc: TileDocument): GraphQLObjectType<any, Context> | null => {
-    const { schema } = doc.metadata
-    if (schema == null) {
+  const resolveType = (doc: Doc): GraphQLObjectType<any, Context> | null => {
+    if (doc.schema == null) {
       return null
     }
-    const { name } = records.nodes[schema]
+    const { name } = records.nodes[doc.schema]
     if (name == null) {
       return null
     }
@@ -111,10 +110,10 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
       },
     })
 
-    types[name] = new GraphQLObjectType<TileDocument>({
+    types[name] = new GraphQLObjectType<Doc>({
       name,
       interfaces: node?.interfaces,
-      fields: (): GraphQLFieldConfigMap<TileDocument, Context> => {
+      fields: (): GraphQLFieldConfigMap<Doc, Context> => {
         return Object.entries(fields).reduce(
           (acc, [key, field]) => {
             if (field.type === 'reference') {
@@ -141,7 +140,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                   args: connectionArgs,
                   resolve: async (doc, args, ctx): Promise<Connection<any> | null> => {
                     const id = doc.content?.[key]?.id as string | undefined
-                    return id ? await ctx.loadConnection(id, args) : null
+                    return id ? await ctx.loadConnection(id, args, item.type === 'reference') : null
                   },
                 }
               } else if (ref.type === 'object') {
@@ -150,7 +149,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                 const type = types[typeName]
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
-                  resolve: async (doc, _args, ctx): Promise<TileDocument | null> => {
+                  resolve: async (doc, _args, ctx): Promise<Doc | null> => {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     const id = doc.content?.[key]?.id as string | undefined
                     return id ? await ctx.loadDoc(id) : null
@@ -192,7 +191,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                  resolve: (doc: TileDocument): any => doc.content?.[key],
+                  resolve: (doc: Doc): any => doc.content?.[key],
                 }
               }
             }
@@ -207,16 +206,16 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
       mutations[`create${name}`] = mutationWithClientMutationId({
         name: `Create${name}`,
         inputFields: () => ({
-          object: { type: new GraphQLNonNull(inputObjects[name]) },
+          content: { type: new GraphQLNonNull(inputObjects[name]) },
         }),
         outputFields: () => ({
           node: { type: new GraphQLNonNull(types[name]) },
         }),
-        mutateAndGetPayload: async (input: { object: Record<string, any> }, ctx: Context) => {
+        mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
           if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
             throw new Error('Ceramic instance is not authenticated')
           }
-          return { node: await ctx.createDoc(node.schema, input.object) }
+          return { node: await ctx.createDoc(node.schema, input.content) }
         },
       })
 
@@ -224,19 +223,17 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
         name: `Update${name}`,
         inputFields: () => ({
           id: { type: new GraphQLNonNull(GraphQLID) },
-          object: { type: new GraphQLNonNull(inputObjects[name]) },
+          content: { type: new GraphQLNonNull(inputObjects[name]) },
         }),
         outputFields: () => ({
           node: { type: new GraphQLNonNull(types[name]) },
         }),
         mutateAndGetPayload: async (
-          input: { id: string; object: Record<string, any> },
+          input: { id: string; content: Record<string, any> },
           ctx: Context
         ) => {
           const { id } = fromGlobalId(input.id)
-          const doc = await ctx.loadDoc(id)
-          await doc.update(input.object)
-          return { node: doc }
+          return { node: await ctx.updateDoc(id, input.content) }
         },
       })
     }
@@ -260,17 +257,17 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     mutations[`set${definitionKey}`] = mutationWithClientMutationId({
       name: `Set${definitionKey}`,
       inputFields: () => ({
-        object: { type: new GraphQLNonNull(inputObjects[name]) },
+        content: { type: new GraphQLNonNull(inputObjects[name]) },
       }),
       outputFields: () => ({}),
-      mutateAndGetPayload: async (input: { object: Record<string, any> }, ctx: Context) => {
-        await ctx.idx.set(key, input.object)
+      mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
+        await ctx.idx.set(key, input.content)
         return {}
       },
     })
   }
 
-  for (const [name, { item }] of Object.entries(sortedObject(records.collections))) {
+  for (const [collectionName, { item }] of Object.entries(sortedObject(records.collections))) {
     let nodeType
     if (item.type === 'object') {
       nodeType = types[item.name]
@@ -279,11 +276,32 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
       nodeType = types[records.nodes[refID].name]
     }
     if (nodeType == null) {
-      throw new Error(`Missing node type for collection: ${name}`)
+      throw new Error(`Missing node type for collection: ${collectionName}`)
     }
+
+    const name = nodeType.name
     const { connectionType, edgeType } = connectionDefinitions({ nodeType })
-    types[`${nodeType.name}Connection`] = connectionType
-    types[`${nodeType.name}Edge`] = edgeType
+    types[`${name}Connection`] = connectionType
+    types[`${name}Edge`] = edgeType
+
+    mutations[`add${name}`] = mutationWithClientMutationId({
+      name: `Add${name}`,
+      inputFields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        content: { type: new GraphQLNonNull(inputObjects[name]) },
+      }),
+      outputFields: () => ({
+        edge: { type: new GraphQLNonNull(edgeType) },
+      }),
+      mutateAndGetPayload: async (
+        input: { id: string; content: Record<string, any> },
+        ctx: Context
+      ) => {
+        const { id } = fromGlobalId(input.id)
+        const cursor = await ctx.addToCollection(id, input.content)
+        return { cursor: cursor.toString(), node: input.content }
+      },
+    })
   }
 
   const query = new GraphQLObjectType({

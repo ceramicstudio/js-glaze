@@ -39,7 +39,7 @@ export type ObjectFields = Record<string, ObjectField>
 
 export type CollectionEntry = {
   sliceSchema: string
-  item: FieldObject | FieldReference
+  item: ItemField
 }
 export type NodeEntry = {
   type: 'collection' | 'object'

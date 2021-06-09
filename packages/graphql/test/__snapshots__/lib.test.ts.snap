@@ -112,6 +112,7 @@ type Mutation {
   createNotes(input: CreateNotesInput!): CreateNotesPayload
   updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
   setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
+  addNote(input: AddNoteInput!): AddNotePayload
 }
 
 type CreateNotePayload {
@@ -120,7 +121,7 @@ type CreateNotePayload {
 }
 
 input CreateNoteInput {
-  object: NoteInput!
+  content: NoteInput!
   clientMutationId: String
 }
 
@@ -137,7 +138,7 @@ type UpdateNotePayload {
 
 input UpdateNoteInput {
   id: ID!
-  object: NoteInput!
+  content: NoteInput!
   clientMutationId: String
 }
 
@@ -147,7 +148,7 @@ type CreateNotesPayload {
 }
 
 input CreateNotesInput {
-  object: NotesInput!
+  content: NotesInput!
   clientMutationId: String
 }
 
@@ -163,7 +164,7 @@ type UpdateNotesPayload {
 
 input UpdateNotesInput {
   id: ID!
-  object: NotesInput!
+  content: NotesInput!
   clientMutationId: String
 }
 
@@ -172,7 +173,18 @@ type SetMyNotesPayload {
 }
 
 input SetMyNotesInput {
-  object: NotesInput!
+  content: NotesInput!
+  clientMutationId: String
+}
+
+type AddNotePayload {
+  edge: NoteEdge!
+  clientMutationId: String
+}
+
+input AddNoteInput {
+  id: ID!
+  content: NoteInput!
   clientMutationId: String
 }
 "

@@ -141,7 +141,7 @@ describe('lib', () => {
        }
      `)
     const res = await execute(schema, mutation, {}, context, {
-      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' } },
+      input: { content: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' } },
     })
     expect(res).toMatchSnapshot()
   })
@@ -159,7 +159,7 @@ describe('lib', () => {
        }
      `)
     const created = await execute(schema, create, {}, context, {
-      input: { object: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' } },
+      input: { content: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' } },
     })
     const { id } = created.data!.createNote.node
 
@@ -178,7 +178,7 @@ describe('lib', () => {
     await execute(schema, update, {}, context, {
       input: {
         id,
-        object: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
+        content: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
       },
     })
 
