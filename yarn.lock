@@ -3782,9 +3782,9 @@
   integrity sha512-5qOlnZscTn4xxM5MeGXAMOsIOIKIbh9e85zJWfBRVPlRMEVawzoPhINYbRGkBZCI8LxvBe7tJCdWiarA99OZfQ==
 
 "@types/prettier@^2.0.0":
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.2.3.tgz#ef65165aea2924c9359205bf748865b8881753c0"
-  integrity sha512-PijRCG/K3s3w1We6ynUKdxEc5AcuuH3NBmMDP8uvKVp6X43UY7NQlTzczakXP3DJR0F4dfNQIGjU2cUeRYs2AA==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.3.0.tgz#2e8332cc7363f887d32ec5496b207d26ba8052bb"
+  integrity sha512-hkc1DATxFLQo4VxPDpMH1gCkPpBbpOoJ/4nhuXw4n63/0R6bCpQECj4+K226UJ4JO/eJQz+1mC2I7JsWanAdQw==
 
 "@types/resolve@1.17.1":
   version "1.17.1"
@@ -6966,9 +6966,9 @@ dezalgo@^1.0.0:
     wrappy "1"
 
 did-jwt@^5.0.0, did-jwt@^5.0.1:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/did-jwt/-/did-jwt-5.6.0.tgz#aff04b19550c3b5175044f3f893a33da36777a9a"
-  integrity sha512-w4pvegvyOicfW2gvjUWyf0ggJV8v6NQw2OJgKNW3U3QG5ruEi3Xmv4gERRpzgGBqcCwnDuraV3NsQfTUW+kAfw==
+  version "5.6.1"
+  resolved "https://registry.yarnpkg.com/did-jwt/-/did-jwt-5.6.1.tgz#229b63cfa82c80bf96704b96e32b2ad79b63b157"
+  integrity sha512-p2IpvJmfc+2o23BD1e5LHGnNb9ZMd3rUTAjetmoPfZgMWpo+CgZzsz6Y9r5MCb3PQjUs/OOO+MiP2xGr0DyggQ==
   dependencies:
     "@stablelib/ed25519" "^1.0.1"
     "@stablelib/random" "^1.0.0"
@@ -7548,7 +7548,7 @@ eslint-plugin-flowtype@^3.13.0:
   dependencies:
     lodash "^4.17.15"
 
-eslint-plugin-import@^2.18.2:
+eslint-plugin-import@^2.18.2, eslint-plugin-import@^2.23.4:
   version "2.23.4"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.23.4.tgz#8dceb1ed6b73e46e50ec9a5bb2411b645e7d3d97"
   integrity sha512-6/wP8zZRsnQFiR3iaPFgh5ImVRM1WN5NUWfTIRqwOdeiGJlBcSk82o1FEVq8yXmy4lkIzTo7YhHCIxlU/2HyEQ==
@@ -9703,27 +9703,6 @@ ipfs-utils@^6.0.0, ipfs-utils@^6.0.1:
   version "6.0.8"
   resolved "https://registry.yarnpkg.com/ipfs-utils/-/ipfs-utils-6.0.8.tgz#a0e4cad19af35569226fac93a84664b4c222d946"
   integrity sha512-mDDQaDisI/uWk+X08wyw+jBcq76IXwMjgyaoyEgJDb/Izb+QbBCSJjo9q+EvbMxh6/l6q0NiAfbbsxEyQYPW9w==
-  dependencies:
-    abort-controller "^3.0.0"
-    any-signal "^2.1.0"
-    buffer "^6.0.1"
-    electron-fetch "^1.7.2"
-    err-code "^3.0.1"
-    is-electron "^2.2.0"
-    iso-url "^1.0.0"
-    it-glob "~0.0.11"
-    it-to-stream "^1.0.0"
-    merge-options "^3.0.4"
-    nanoid "^3.1.20"
-    native-abort-controller "^1.0.3"
-    native-fetch "^3.0.0"
-    node-fetch "^2.6.1"
-    stream-to-it "^0.2.2"
-
-ipfs-utils@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/ipfs-utils/-/ipfs-utils-7.0.0.tgz#8c1e2dc04af749e781230efc6ead7bfebe577dce"
-  integrity sha512-25Nj95cPcLVYROCk3vtfqQ30HBzsmgLjy6YlHkYbub4uO1JBKzP2gJMBFLfRPOfLGzT+0rYOCpWjnbYqDDxqIA==
   dependencies:
     abort-controller "^3.0.0"
     any-signal "^2.1.0"
@@ -12268,15 +12247,15 @@ libp2p-webrtc-star@^0.21.0:
     streaming-iterables "^5.0.3"
 
 libp2p-websockets@^0.15.1:
-  version "0.15.8"
-  resolved "https://registry.yarnpkg.com/libp2p-websockets/-/libp2p-websockets-0.15.8.tgz#809a801b42939ed386194f17163a4f9f0ca99d51"
-  integrity sha512-n8WMk/EEVgf7/k1sVm2FtMn+Atji9KPFwy194azxJ0j5G3WOcQVvCqe/OiMX6jDmxdbQEi/bczDxGxI2l6vzAw==
+  version "0.15.9"
+  resolved "https://registry.yarnpkg.com/libp2p-websockets/-/libp2p-websockets-0.15.9.tgz#d674779199abfcb222f4fa84eb484f8196405256"
+  integrity sha512-tuQ4KezPEiJ/JXGKJUttPgBWTv36NnaqY05lWja8wQwQU3R1NgpH4GRJnTBshGXoBFdvGGJbTxvsJlh15NzMkg==
   dependencies:
     abortable-iterator "^3.0.0"
     class-is "^1.1.0"
     debug "^4.3.1"
     err-code "^3.0.1"
-    ipfs-utils "^7.0.0"
+    ipfs-utils "^8.1.2"
     it-ws "^4.0.0"
     libp2p-utils "^0.3.0"
     mafmt "^9.0.0"
