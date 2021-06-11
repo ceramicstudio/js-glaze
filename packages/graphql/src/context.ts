@@ -1,18 +1,17 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
-import { AppendCollection } from '@ceramicstudio/append-collection'
-import type { Cursor, ItemResult, LoadResult } from '@ceramicstudio/append-collection'
 import { IDX } from '@ceramicstudio/idx'
-import type { Connection, ConnectionArguments } from 'graphql-relay'
 
+import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
 import type { Doc } from './types'
-import { toConnection, toDoc } from './utils'
+import { toDoc } from './utils'
 
 export class Context {
   _ceramic: CeramicApi
   _idx: IDX
-  _collections: Record<string, Promise<AppendCollection<unknown>>> = {}
+  _itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
+  _referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(ceramic: CeramicApi) {
     this._ceramic = ceramic
@@ -27,46 +26,46 @@ export class Context {
     return this._idx
   }
 
-  async loadCollection<Item = unknown>(id: string): Promise<AppendCollection<Item>> {
-    if (this._collections[id] == null) {
-      this._collections[id] = AppendCollection.load<Item>(this._ceramic, id)
+  async getItemConnection<Node = unknown>(id: string): Promise<ItemConnectionHandler<Node>> {
+    if (this._itemConnections[id] == null) {
+      this._itemConnections[id] = ItemConnectionHandler.load<Node>(this._ceramic, id)
     }
-    return (await this._collections[id]) as AppendCollection<Item>
+    return (await this._itemConnections[id]) as ItemConnectionHandler<Node>
   }
 
-  async addToCollection<Item = unknown>(id: string, item: Item): Promise<Cursor> {
-    const collection = await this.loadCollection<Item>(id)
-    return await collection.add(item)
+  async createItemConnection<Node = unknown>(
+    schemaURL: string
+  ): Promise<ItemConnectionHandler<Node>> {
+    const handler = await ItemConnectionHandler.create<Node>(this._ceramic, schemaURL)
+    this._itemConnections[handler.id] = Promise.resolve(handler)
+    return handler
   }
 
-  async loadConnection<Item = unknown>(
+  async getReferenceConnection<Node = unknown>(
     id: string,
-    args: ConnectionArguments,
-    loadReferences: boolean = false
-  ): Promise<Connection<Item>> {
-    const collection = await this.loadCollection<any>(id)
-    let res
-    if (args.first) {
-      res = await collection.first(args.first, args.after)
-    } else if (args.last) {
-      res = await collection.last(args.last, args.before)
-    } else {
-      throw new Error('Invalid connection arguments')
+    nodeSchemaURL: string
+  ): Promise<ReferenceConnectionHandler<Node>> {
+    if (this._referenceConnections[id] == null) {
+      this._referenceConnections[id] = ReferenceConnectionHandler.load<Node>(
+        this._ceramic,
+        id,
+        nodeSchemaURL
+      )
     }
-    if (loadReferences) {
-      res = await this.loadConnectionReferences<Item>(res)
-    }
-    return toConnection(args, res)
+    return (await this._referenceConnections[id]) as ReferenceConnectionHandler<Node>
   }
 
-  async loadConnectionReferences<Item>(res: LoadResult<string>): Promise<LoadResult<Item>> {
-    const items = await Promise.all(
-      res.items.map(async ({ cursor, data }) => {
-        const doc = await this.loadDoc(data)
-        return { cursor, data: doc.content } as ItemResult<Item>
-      })
+  async createReferenceConnection<Node = unknown>(
+    schemaURL: string,
+    nodeSchemaURL: string
+  ): Promise<ReferenceConnectionHandler<Node>> {
+    const handler = await ReferenceConnectionHandler.create<Node>(
+      this._ceramic,
+      schemaURL,
+      nodeSchemaURL
     )
-    return { items, hasMore: res.hasMore }
+    this._referenceConnections[handler.id] = Promise.resolve(handler)
+    return handler
   }
 
   async loadTile<Content = Record<string, any>>(

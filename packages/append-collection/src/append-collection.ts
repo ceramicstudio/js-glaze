@@ -55,7 +55,7 @@ export class AppendCollection<Item> {
 
   static async create<Item>(
     ceramic: CeramicApi,
-    schemaID: CommitID,
+    schemaID: CommitID | string,
     options: CreateOptions<Item> = {}
   ): Promise<AppendCollection<Item>> {
     const sliceSchemaCommitID = await getSliceSchemaID(ceramic, schemaID)
@@ -69,7 +69,7 @@ export class AppendCollection<Item> {
           : sliceSchemaDoc.content?.properties?.contents.maxItems ?? DEFAULT_MAX_ITEMS,
         slicesCount: 1,
       },
-      { schema: schemaID.toUrl() }
+      { schema: typeof schemaID === 'string' ? schemaID : schemaID.toUrl() }
     )
 
     const collection = new AppendCollection<Item>(ceramic, collectionDoc.id, sliceSchemaCommitID)

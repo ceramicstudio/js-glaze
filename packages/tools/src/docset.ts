@@ -34,7 +34,8 @@ export type EncodedSignedDocSet = DocSetData<Array<EncodedDagJWSResult>>
 
 export type AddDocSetSchemaOptions = {
   name?: string
-  prefix: string
+  parent?: string
+  owner?: string
 }
 
 function getName(base: string, prefix = ''): string {
@@ -43,12 +44,6 @@ function getName(base: string, prefix = ''): string {
 }
 
 function getReference(schema: Schema): Array<string> | null {
-  // if (schema.$comment?.startsWith(CERAMIC_APPEND_COLLECTION)) {
-  //   const sliceSchema = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
-  //   if (sliceSchema.length) {
-  //     return { type: 'collection', sliceSchema }
-  //   }
-  // }
   if (schema.$comment?.startsWith(CERAMIC_TILE)) {
     const schemasString = schema.$comment.substr(CERAMIC_TILE.length)
     if (schemasString.length) {
@@ -63,24 +58,26 @@ function getReference(schema: Schema): Array<string> | null {
 export function getItemField(
   records: GraphQLDocSetRecords,
   schema: Schema,
-  prefix: string
+  parent: string,
+  owner: string
 ): ItemField {
   const name = schema.title ?? ''
   if (schema.type === 'array') {
     throw new Error('Unsupported item field of type array')
   }
   if (schema.type === 'string') {
-    const reference = getReference(schema)
-    if (reference == null) {
+    const schemas = getReference(schema)
+    if (schemas == null) {
       return { ...schema, type: 'string' }
     }
 
-    const refName = getName(name, prefix)
-    records.references[refName] = reference
-    return { type: 'reference', name: refName }
+    const refName = getName(name, parent)
+    const ref = { schemas, owner }
+    records.references[refName] = ref
+    return { type: 'reference', ...ref }
   }
   if (schema.type === 'object') {
-    return { type: 'object', name: addDocSetSchema(records, schema, { name, prefix }) }
+    return { type: 'object', name: addDocSetSchema(records, schema, { name, parent, owner }) }
   }
   return schema as ItemField
 }
@@ -89,29 +86,32 @@ export function getItemField(
 export function addDocSetSchema(
   records: GraphQLDocSetRecords,
   schema: Schema,
-  options: AddDocSetSchemaOptions
+  options: AddDocSetSchemaOptions = {}
 ): string {
   const providedTitle = options.name ?? schema.title
   if (providedTitle == null) {
     throw new Error('Schema must have a title')
   }
 
-  const name = getName(providedTitle, options.prefix)
+  // TODO: add parents?: Array<string> to options
+  // If no parent and type object, treat as node and use canonical name
+  // Make sure object doesn't already exist in records, if so just add extra parents
+  const name = getName(providedTitle, options.parent)
 
   if (schema.type === 'string') {
     const reference = getReference(schema)
     if (reference != null) {
-      records.references[name] = reference
+      records.references[name] = { schemas: reference, owner: options.owner as string }
     }
   } else if (schema.type === 'array' && schema.items != null) {
-    records.lists[name] = getItemField(records, schema.items, name)
+    records.lists[name] = getItemField(records, schema.items, name, options.owner as string)
   } else if (schema.type === 'object' && schema.properties != null) {
     const requiredProps = (schema.required as Array<string>) ?? []
-    records.objects[name] = Object.entries(schema.properties as Record<string, any>).reduce(
+    const fields = Object.entries(schema.properties as Record<string, any>).reduce(
       (acc, [key, value]: [string, Schema]) => {
         const propName = (value.title as string) ?? key
         const prop = camelCase(key)
-        const opts = { name: propName, prefix: name }
+        const opts = { name: propName, parent: name, owner: options.owner ?? name }
         const required = requiredProps.includes(key)
         if (value.type === 'string') {
           const reference = getReference(value)
@@ -119,8 +119,9 @@ export function addDocSetSchema(
             acc[prop] = { ...value, required, type: 'string' }
           } else {
             const refName = getName(propName, name)
-            records.references[refName] = reference
-            acc[prop] = { required, type: 'reference', name: refName }
+            const ref = { schemas: reference, owner: options.owner ?? name }
+            records.references[refName] = ref
+            acc[prop] = { required, type: 'reference', ...ref }
           }
         } else if (value.type === 'array') {
           if (value.items == null) {
@@ -136,6 +137,7 @@ export function addDocSetSchema(
       },
       {} as Record<string, ObjectField>
     )
+    records.objects[name] = { fields, parents: options.parent ? [options.parent] : null }
   }
 
   return name
@@ -390,8 +392,8 @@ export class DocSet {
       collections: {},
       index: {},
       lists: {},
-      nodes: {},
       objects: {},
+      referenced: {},
       references: {},
       roots: {},
     }
@@ -404,6 +406,8 @@ export class DocSet {
         if (schema == null) {
           throw new Error(`Could not load schema ${name}`)
         }
+
+        const schemaURL = doc.commitId.toUrl()
         if (schema.$comment?.startsWith(CERAMIC_APPEND_COLLECTION)) {
           const sliceSchemaID = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
           await this.useExistingSchema(sliceSchemaID)
@@ -413,14 +417,14 @@ export class DocSet {
             throw new Error(`Could not extract item schema ${name}`)
           }
           records.collections[name] = {
-            sliceSchema: sliceSchemaID,
-            item: getItemField(records, itemSchema, name),
+            schema: schemaURL,
+            item: getItemField(records, itemSchema, name, name),
           }
-          records.nodes[doc.commitId.toUrl()] = { type: 'collection', name }
+          records.referenced[schemaURL] = { type: 'collection', name }
         } else {
-          records.nodes[doc.commitId.toUrl()] = {
+          records.referenced[schemaURL] = {
             type: 'object',
-            name: addDocSetSchema(records, schema, { prefix: '' }),
+            name: addDocSetSchema(records, schema),
           }
         }
       }

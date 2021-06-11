@@ -200,4 +200,59 @@ describe('lib', () => {
       },
     })
   })
+
+  test('add and read notes from a connection', async () => {
+    jest.setTimeout(30000)
+
+    const create = parse(`
+       mutation TestCreateNotes($input: CreateNotesInput!) {
+         createNotes(input: $input) {
+           node {
+             id
+           }
+         }
+       }
+     `)
+    const created = await execute(schema, create, {}, context, {
+      input: { content: {} },
+    })
+    const { id } = created.data!.createNotes.node
+
+    const add = parse(`
+      mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
+        addNotesAllEdge(input: $input) {
+          edge {
+            cursor
+          }
+        }
+      }`)
+
+    const toAdd = [
+      { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
+      { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
+      { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
+    ]
+    for (const content of toAdd) {
+      await execute(schema, add, {}, context, { input: { id, content } })
+    }
+
+    const read = parse(`
+       query TestReadNotes($id: ID!) {
+         node(id: $id) {
+           ...on Notes {
+             all(first: 3) {
+               edges {
+                node {
+                  date
+                  text
+                  title
+                }
+               }
+             }
+           }
+         }
+       }
+     `)
+    await expect(execute(schema, read, {}, context, { id })).resolves.toMatchSnapshot()
+  })
 })

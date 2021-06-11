@@ -13,6 +13,11 @@ export type FieldString = {
   maxLength?: number
 }
 
+export type ReferenceEntry = {
+  owner: string
+  schemas: Array<string>
+}
+
 export type FieldList = {
   type: 'list'
   name: string
@@ -21,9 +26,8 @@ export type FieldObject = {
   type: 'object'
   name: string
 }
-export type FieldReference = {
+export type FieldReference = ReferenceEntry & {
   type: 'reference'
-  name: string
 }
 
 export type ItemField =
@@ -36,12 +40,16 @@ export type ItemField =
 
 export type ObjectField = (FieldList | ItemField) & { required?: boolean }
 export type ObjectFields = Record<string, ObjectField>
+export type ObjectEntry = {
+  fields: ObjectFields
+  parents?: Array<string> | null
+}
 
 export type CollectionEntry = {
-  sliceSchema: string
+  schema: string
   item: ItemField
 }
-export type NodeEntry = {
+export type ReferencedEntry = {
   type: 'collection' | 'object'
   name: string
 }
@@ -50,22 +58,12 @@ export type TileEntry = {
   schema: string
 }
 
-export type CollectionReference = {
-  type: 'collection'
-  schema: string
-}
-export type NodeReference = {
-  type: 'node'
-  schemas: Array<string>
-}
-export type ReferenceEntry = CollectionReference | NodeReference
-
 export type GraphQLDocSetRecords = {
   collections: Record<string, CollectionEntry> // alias to collection entry
-  index: Record<string, TileEntry> // alias to tile reference
+  index: Record<string, TileEntry> // alias to tile entry
   lists: Record<string, ItemField> // list alias to item type
-  nodes: Record<string, NodeEntry> // stream URL to entry
-  objects: Record<string, ObjectFields> // alias to fields
-  references: Record<string, Array<string>> // alias to array of stream URLs
-  roots: Record<string, TileEntry> // alias to tile reference
+  objects: Record<string, ObjectEntry> // alias to entry
+  roots: Record<string, TileEntry> // alias to tile entry
+  referenced: Record<string, ReferencedEntry> // schema URL to referenced type
+  references: Record<string, ReferenceEntry> // alias to reference entry
 }

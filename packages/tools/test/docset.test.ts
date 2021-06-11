@@ -252,46 +252,65 @@ describe('docset', () => {
           type: 'object',
         },
       },
-      nodes: {
-        [notesSchemaURL]: { type: 'object', name: 'Notes' },
-        [noteSchemaURL]: { type: 'object', name: 'Note' },
-      },
       objects: {
         NotesListItem: {
-          note: {
-            type: 'reference',
-            name: 'NotesListItemReference',
-            required: true,
+          fields: {
+            note: {
+              type: 'reference',
+              owner: 'Notes',
+              schemas: [noteSchemaURL],
+              required: true,
+            },
+            title: {
+              type: 'string',
+              required: false,
+              maxLength: 100,
+            },
           },
-          title: {
-            type: 'string',
-            required: false,
-            maxLength: 100,
-          },
+          parents: ['NotesList'],
         },
         Notes: {
-          notes: {
-            name: 'NotesList',
-            required: false,
-            type: 'list',
+          fields: {
+            notes: {
+              name: 'NotesList',
+              required: false,
+              type: 'list',
+            },
           },
+          parents: null,
         },
         Note: {
-          date: {
-            type: 'string',
-            required: true,
-            format: 'date-time',
-            maxLength: 30,
+          fields: {
+            date: {
+              type: 'string',
+              required: true,
+              format: 'date-time',
+              maxLength: 30,
+            },
+            text: {
+              type: 'string',
+              required: true,
+              maxLength: 4000,
+            },
           },
-          text: {
-            type: 'string',
-            required: true,
-            maxLength: 4000,
-          },
+          parents: null,
+        },
+      },
+      referenced: {
+        [noteSchemaURL]: {
+          name: 'Note',
+          type: 'object',
+        },
+        [notesSchemaURL]: {
+          name: 'Notes',
+          type: 'object',
         },
       },
       references: {
-        NotesListItemReference: [noteSchemaURL],
+        NotesListItemReference: {
+          owner: 'Notes',
+          schemas: [noteSchemaURL],
+        },
       },
       roots: {
         exampleNote: {

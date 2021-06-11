@@ -30,7 +30,7 @@ import type { Connection } from 'graphql-relay'
 
 import type { Context } from './context'
 import type { Doc } from './types'
-import { createGlobalId } from './utils'
+import { createGlobalId, toDoc } from './utils'
 
 const SCALARS = {
   boolean: GraphQLBoolean,
@@ -59,7 +59,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     if (doc.schema == null) {
       return null
     }
-    const { name } = records.nodes[doc.schema]
+    const { name } = records.referenced[doc.schema]
     if (name == null) {
       return null
     }
@@ -71,12 +71,14 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     return await ctx.loadDoc(id)
   }, resolveType)
 
-  const nodes = Object.entries(records.nodes).reduce((acc, [schema, { name }]) => {
-    acc[name] = { interfaces: [nodeInterface], schema }
+  const nodes = Object.entries(records.referenced).reduce((acc, [schema, { name, type }]) => {
+    if (type === 'object') {
+      acc[name] = { interfaces: [nodeInterface], schema }
+    }
     return acc
   }, {} as Record<string, { interfaces: Array<GraphQLInterfaceType>; schema: string }>)
 
-  for (const [name, fields] of Object.entries(sortedObject(records.objects))) {
+  for (const [name, { fields }] of Object.entries(sortedObject(records.objects))) {
     const node = nodes[name]
 
     inputObjects[name] = new GraphQLInputObjectType({
@@ -85,7 +87,10 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
         return Object.entries(fields).reduce((acc, [key, field]) => {
           let type
           if (field.type === 'reference') {
-            type = GraphQLID
+            const ref = records.referenced[field.schemas[0]]
+            if (ref.type === 'object') {
+              type = GraphQLID
+            }
           } else if (field.type === 'object') {
             type = inputObjects[field.name]
           } else if (field.type === 'list') {
@@ -117,16 +122,17 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
         return Object.entries(fields).reduce(
           (acc, [key, field]) => {
             if (field.type === 'reference') {
-              const refID = records.references[field.name][0]
-              const ref = records.nodes[refID]
+              const ref = records.referenced[field.schemas[0]]
               if (ref.type === 'collection') {
                 const { item } = records.collections[ref.name]
                 let nodeType
                 if (item.type === 'object') {
                   nodeType = types[item.name]
                 } else if (item.type === 'reference') {
-                  const refID = records.references[item.name][0]
-                  nodeType = types[records.nodes[refID].name]
+                  const nodeRef = records.referenced[item.schemas[0]]
+                  nodeType = types[nodeRef.name]
+                } else if (SCALAR_FIELDS.includes(item.type)) {
+                  nodeType = SCALARS[item.type]
                 }
                 if (nodeType == null) {
                   throw new Error(`Missing node type for collection: ${name}`)
@@ -139,8 +145,15 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                   type: field.required ? new GraphQLNonNull(connectionType) : connectionType,
                   args: connectionArgs,
                   resolve: async (doc, args, ctx): Promise<Connection<any> | null> => {
-                    const id = doc.content?.[key]?.id as string | undefined
-                    return id ? await ctx.loadConnection(id, args, item.type === 'reference') : null
+                    const id = doc.content[key] as string | undefined
+                    if (id == null) {
+                      return null
+                    }
+                    const handler =
+                      item.type === 'reference'
+                        ? await ctx.getReferenceConnection(id, item.schemas[0])
+                        : await ctx.getItemConnection(id)
+                    return await handler.load(args)
                   },
                 }
               } else if (ref.type === 'object') {
@@ -150,16 +163,14 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
                   resolve: async (doc, _args, ctx): Promise<Doc | null> => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    const id = doc.content?.[key]?.id as string | undefined
+                    const id = doc.content[key]?.id as string | undefined
                     return id ? await ctx.loadDoc(id) : null
                   },
                 }
                 acc[`${key}ID`] = {
                   type: field.required ? new GraphQLNonNull(GraphQLID) : GraphQLID,
                   resolve: (doc): string | null => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    const id = doc.content?.[key]?.id as string | undefined
+                    const id = doc.content[key]?.id as string | undefined
                     return id ? toGlobalId(typeName, id) : null
                   },
                 }
@@ -190,8 +201,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
               if (type != null) {
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                  resolve: (doc: Doc): any => doc.content?.[key],
+                  resolve: (doc: Doc): any => doc.content[key],
                 }
               }
             }
@@ -241,15 +251,12 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
 
   const indexFields: GraphQLFieldConfigMap<any, any> = {}
   for (const [key, definition] of Object.entries(sortedObject(records.index))) {
-    const { name } = records.nodes[definition.schema]
+    const { name } = records.referenced[definition.schema]
     indexFields[key] = {
       type: types[name],
-      resolve: async (
-        _,
-        { did }: { did?: string },
-        ctx: Context
-      ): Promise<Record<string, any> | null> => {
-        return await ctx.idx.getRecordDocument(definition.id, did)
+      resolve: async (_, { did }: { did?: string }, ctx: Context): Promise<Doc | null> => {
+        const tile = await ctx.idx.getRecordDocument(definition.id, did)
+        return tile ? toDoc<any>(tile) : null
       },
     }
 
@@ -267,13 +274,16 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     })
   }
 
-  for (const [collectionName, { item }] of Object.entries(sortedObject(records.collections))) {
+  for (const [collectionName, { item, schema }] of Object.entries(
+    sortedObject(records.collections)
+  )) {
     let nodeType
     if (item.type === 'object') {
       nodeType = types[item.name]
     } else if (item.type === 'reference') {
-      const refID = records.references[item.name][0]
-      nodeType = types[records.nodes[refID].name]
+      const refID = item.schemas[0]
+      const ref = records.referenced[refID]
+      nodeType = types[ref.name]
     }
     if (nodeType == null) {
       throw new Error(`Missing node type for collection: ${collectionName}`)
@@ -284,31 +294,65 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     types[`${name}Connection`] = connectionType
     types[`${name}Edge`] = edgeType
 
-    mutations[`add${name}`] = mutationWithClientMutationId({
-      name: `Add${name}`,
-      inputFields: () => ({
-        id: { type: new GraphQLNonNull(GraphQLID) },
-        content: { type: new GraphQLNonNull(inputObjects[name]) },
-      }),
-      outputFields: () => ({
-        edge: { type: new GraphQLNonNull(edgeType) },
-      }),
-      mutateAndGetPayload: async (
-        input: { id: string; content: Record<string, any> },
-        ctx: Context
-      ) => {
-        const { id } = fromGlobalId(input.id)
-        const cursor = await ctx.addToCollection(id, input.content)
-        return { cursor: cursor.toString(), node: input.content }
-      },
-    })
+    for (const [label, { owner, schemas }] of Object.entries(records.references)) {
+      if (schemas[0] === schema) {
+        const field = Object.keys(records.objects[owner].fields).find((key) => {
+          const data = records.objects[owner].fields[key]
+          return data.type === 'reference' && data.schemas[0] === schema
+        })
+        if (field == null) {
+          throw new Error(`Reference field not found for ${label}`)
+        }
+
+        mutations[`add${label}Edge`] = mutationWithClientMutationId({
+          name: `Add${label}Edge`,
+          inputFields: () => ({
+            id: { type: new GraphQLNonNull(GraphQLID) },
+            content: { type: new GraphQLNonNull(inputObjects[name]) },
+          }),
+          outputFields: () => ({
+            node: { type: new GraphQLNonNull(types[owner]) },
+            edge: { type: new GraphQLNonNull(edgeType) },
+          }),
+          mutateAndGetPayload: async (
+            input: { id: string; content: Record<string, any> },
+            ctx: Context
+          ) => {
+            const { id } = fromGlobalId(input.id)
+            const tile = await ctx.loadTile(id)
+            const content = tile.content ?? {}
+
+            let handler
+            const existingID = content[field]
+            if (existingID == null) {
+              handler =
+                item.type === 'reference'
+                  ? await ctx.createReferenceConnection(schema, item.schemas[0])
+                  : await ctx.createItemConnection(schema)
+            } else {
+              handler =
+                item.type === 'reference'
+                  ? await ctx.getReferenceConnection(existingID, item.schemas[0])
+                  : await ctx.getItemConnection(existingID)
+            }
+
+            const edge = await handler.add(input.content)
+            if (existingID == null) {
+              await tile.update({ ...content, [field]: handler.id })
+            }
+
+            return { edge, node: toDoc(tile) }
+          },
+        })
+      }
+    }
   }
 
   const query = new GraphQLObjectType({
     name: 'Query',
     fields: Object.entries(sortedObject(records.roots)).reduce(
       (acc, [key, { id, schema }]) => {
-        const { name } = records.nodes[schema]
+        const { name } = records.referenced[schema]
         acc[key] = {
           type: new GraphQLNonNull(types[name]),
           resolve: async (_self, _args, ctx: Context): Promise<any> => {

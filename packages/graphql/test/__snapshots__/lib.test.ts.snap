@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib add and read notes from a connection 1`] = `
+Object {
+  "data": Object {
+    "node": Object {
+      "all": Object {
+        "edges": Array [
+          Object {
+            "node": Object {
+              "date": "2021-01-06T14:32:00.000Z",
+              "text": "hello first",
+              "title": "first",
+            },
+          },
+          Object {
+            "node": Object {
+              "date": "2021-01-06T14:33:00.000Z",
+              "text": "hello second",
+              "title": "second",
+            },
+          },
+          Object {
+            "node": Object {
+              "date": "2021-01-06T14:34:00.000Z",
+              "text": "hello third",
+              "title": "third",
+            },
+          },
+        ],
+      },
+    },
+  },
+}
+`;
+
 exports[`lib create a note 1`] = `
 Object {
   "data": Object {
@@ -112,7 +146,7 @@ type Mutation {
   createNotes(input: CreateNotesInput!): CreateNotesPayload
   updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
   setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
-  addNote(input: AddNoteInput!): AddNotePayload
+  addNotesAllEdge(input: AddNotesAllEdgeInput!): AddNotesAllEdgePayload
 }
 
 type CreateNotePayload {
@@ -153,7 +187,6 @@ input CreateNotesInput {
 }
 
 input NotesInput {
-  all: ID
   favorites: [ID]
 }
 
@@ -177,12 +210,13 @@ input SetMyNotesInput {
   clientMutationId: String
 }
 
-type AddNotePayload {
+type AddNotesAllEdgePayload {
+  node: Notes!
   edge: NoteEdge!
   clientMutationId: String
 }
 
-input AddNoteInput {
+input AddNotesAllEdgeInput {
   id: ID!
   content: NoteInput!
   clientMutationId: String
