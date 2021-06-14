@@ -412,7 +412,10 @@ export class DocSet {
           const sliceSchemaID = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
           await this.useExistingSchema(sliceSchemaID)
           const sliceSchemaDoc = await this.loadDoc(sliceSchemaID)
-          const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0] as
+            | Schema
+            | undefined
           if (itemSchema == null) {
             throw new Error(`Could not extract item schema ${name}`)
           }

@@ -17,7 +17,7 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build --tsconfig tsconfig.build.json",
-    "lint": "tsdx lint src --fix",
+    "lint": "eslint src --fix",
     "prepublish": "npm run build"
   },
   "devDependencies": {

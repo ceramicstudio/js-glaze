@@ -18,7 +18,7 @@
     "start": "tsdx watch",
     "build": "tsdx build --tsconfig tsconfig.build.json",
     "test": "tsdx test",
-    "lint": "tsdx lint src test --fix",
+    "lint": "eslint src test --fix",
     "prepublish": "npm run build"
   },
   "devDependencies": {

@@ -45,6 +45,7 @@ export function createCollectionSliceSchema<Item>(
       contents: {
         type: 'array',
         maxItems,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         items: { oneOf: [...itemSchemas, { type: 'null' }] },
       },
     },

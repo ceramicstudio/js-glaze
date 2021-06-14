@@ -61,14 +61,14 @@ export class AppendCollection<Item> {
     const sliceSchemaCommitID = await getSliceSchemaID(ceramic, schemaID)
     const sliceSchemaDoc = await TileDocument.load<SliceSchema<Item>>(ceramic, sliceSchemaCommitID)
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const sliceMaxItems: number = options.sliceMaxItems
+      ? Math.max(10, Math.min(options.sliceMaxItems), 256)
+      : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        sliceSchemaDoc.content?.properties?.contents?.maxItems ?? DEFAULT_MAX_ITEMS
     const collectionDoc = await TileDocument.create<CollectionContent>(
       ceramic,
-      {
-        sliceMaxItems: options.sliceMaxItems
-          ? Math.max(10, Math.min(options.sliceMaxItems), 256)
-          : sliceSchemaDoc.content?.properties?.contents.maxItems ?? DEFAULT_MAX_ITEMS,
-        slicesCount: 1,
-      },
+      { slicesCount: 1, sliceMaxItems },
       { schema: typeof schemaID === 'string' ? schemaID : schemaID.toUrl() }
     )
 

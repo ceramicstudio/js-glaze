@@ -1,6 +1,7 @@
 import { definitions, schemas } from '@ceramicstudio/idx-constants'
 import Listr from 'listr'
 import type { ListrTask } from 'listr'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import UpdaterRenderer from 'listr-update-renderer'
 
@@ -83,6 +84,7 @@ export default class InspectIndex extends Command<CommandFlags, { did: string }>
         exitOnError: false,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         renderer: UpdaterRenderer,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         collapse: false,
       })

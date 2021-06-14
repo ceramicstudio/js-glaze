@@ -44,7 +44,9 @@ function sortedObject<T = Record<string, any>>(input: T): T {
   const keys = Object.keys(input)
   keys.sort()
   return keys.reduce((acc, key) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     acc[key] = input[key]
     return acc
   }, {}) as T
@@ -163,19 +165,21 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
                   resolve: async (doc, _args, ctx): Promise<Doc | null> => {
-                    const id = doc.content[key]?.id as string | undefined
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    const id = doc.content[key].id as string | undefined
                     return id ? await ctx.loadDoc(id) : null
                   },
                 }
                 acc[`${key}ID`] = {
                   type: field.required ? new GraphQLNonNull(GraphQLID) : GraphQLID,
                   resolve: (doc): string | null => {
-                    const id = doc.content[key]?.id as string | undefined
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    const id = doc.content[key].id as string | undefined
                     return id ? toGlobalId(typeName, id) : null
                   },
                 }
               } else {
-                throw new Error(`Unsupported reference type: ${ref.type}`)
+                throw new Error(`Unsupported reference type: ${ref.type as string}`)
               }
             } else {
               let type
@@ -201,6 +205,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
               if (type != null) {
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(type) : type,
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                   resolve: (doc: Doc): any => doc.content[key],
                 }
               }
@@ -323,7 +328,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
             const content = tile.content ?? {}
 
             let handler
-            const existingID = content[field]
+            const existingID = content[field] as string | undefined
             if (existingID == null) {
               handler =
                 item.type === 'reference'
