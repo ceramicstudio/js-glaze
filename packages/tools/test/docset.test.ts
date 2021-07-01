@@ -206,7 +206,7 @@ describe('docset', () => {
               note: {
                 type: 'string',
                 title: 'reference',
-                $comment: `ceramic:tile:${noteSchemaURL}`,
+                $comment: `ceramic:doc:${noteSchemaURL}`,
                 maxLength: 150,
               },
               title: {

@@ -49,7 +49,7 @@ describe('lib', () => {
     const noteRef = {
       type: 'string',
       title: 'reference',
-      $comment: `ceramic:tile:${noteSchemaURL}`,
+      $comment: `ceramic:doc:${noteSchemaURL}`,
       maxLength: 100,
     }
 
@@ -64,7 +64,7 @@ describe('lib', () => {
       properties: {
         all: {
           type: 'string',
-          $comment: `ceramic:tile:${notesCollectionSchemaCommitID.toUrl()}`,
+          $comment: `ceramic:doc:${notesCollectionSchemaCommitID.toUrl()}`,
           maxLength: 100,
         },
         favorites: {

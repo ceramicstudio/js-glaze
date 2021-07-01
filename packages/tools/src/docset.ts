@@ -11,7 +11,7 @@ import type { Definition, EncodedDagJWSResult, Schema } from './types'
 import { docIDToString } from './utils'
 
 export const CERAMIC_APPEND_COLLECTION = 'ceramic:appendCollection:'
-export const CERAMIC_TILE = 'ceramic:tile:'
+export const CERAMIC_DOC = 'ceramic:doc:'
 
 export type CreatedDoc = {
   id: StreamRef
@@ -44,8 +44,8 @@ function getName(base: string, prefix = ''): string {
 }
 
 function getReference(schema: Schema): Array<string> | null {
-  if (schema.$comment?.startsWith(CERAMIC_TILE)) {
-    const schemasString = schema.$comment.substr(CERAMIC_TILE.length)
+  if (schema.$comment?.startsWith(CERAMIC_DOC)) {
+    const schemasString = schema.$comment.substr(CERAMIC_DOC.length)
     if (schemasString.length) {
       const schemas = schemasString.split('|')
       schemas.sort()
