@@ -10,8 +10,8 @@ import { createDefinition, createTile, publishCommits, publishSchema } from './p
 import type { Definition, EncodedDagJWSResult, Schema } from './types'
 import { docIDToString } from './utils'
 
-export const CERAMIC_APPEND_COLLECTION = 'ceramic:appendCollection:'
-export const CERAMIC_DOC = 'ceramic:doc:'
+export const CIP88_APPEND_COLLECTION = 'cip88:appendCollection:'
+export const CIP88_REF = 'cip88:ref:'
 
 export type CreatedDoc = {
   id: StreamRef
@@ -44,8 +44,8 @@ function getName(base: string, prefix = ''): string {
 }
 
 function getReference(schema: Schema): Array<string> | null {
-  if (schema.$comment?.startsWith(CERAMIC_DOC)) {
-    const schemasString = schema.$comment.substr(CERAMIC_DOC.length)
+  if (schema.$comment?.startsWith(CIP88_REF)) {
+    const schemasString = schema.$comment.substr(CIP88_REF.length)
     if (schemasString.length) {
       const schemas = schemasString.split('|')
       schemas.sort()
@@ -408,8 +408,8 @@ export class DocSet {
         }
 
         const schemaURL = doc.commitId.toUrl()
-        if (schema.$comment?.startsWith(CERAMIC_APPEND_COLLECTION)) {
-          const sliceSchemaID = schema.$comment.substr(CERAMIC_APPEND_COLLECTION.length)
+        if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION)) {
+          const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION.length)
           await this.useExistingSchema(sliceSchemaID)
           const sliceSchemaDoc = await this.loadDoc(sliceSchemaID)
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

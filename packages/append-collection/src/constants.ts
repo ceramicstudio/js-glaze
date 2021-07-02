@@ -1,1 +1,1 @@
-export const CERAMIC_APPEND_COLLECTION = 'ceramic:appendCollection:'
+export const CIP88_APPEND_COLLECTION = 'cip88:appendCollection:'

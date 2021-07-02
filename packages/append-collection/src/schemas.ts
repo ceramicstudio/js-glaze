@@ -2,7 +2,7 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID } from '@ceramicnetwork/streamid'
 
-import { CERAMIC_APPEND_COLLECTION } from './constants'
+import { CIP88_APPEND_COLLECTION } from './constants'
 import type { CollectionSchema, SliceSchema } from './types'
 
 export function createAppendCollectionSchema(
@@ -11,7 +11,7 @@ export function createAppendCollectionSchema(
 ): CollectionSchema {
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    $comment: `${CERAMIC_APPEND_COLLECTION}${sliceSchemaCommitID}`,
+    $comment: `${CIP88_APPEND_COLLECTION}${sliceSchemaCommitID}`,
     title,
     type: 'object',
     properties: {
@@ -36,7 +36,7 @@ export function createCollectionSliceSchema<Item>(
 
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    $comment: 'ceramic:collectionSlice',
+    $comment: 'cip88:collectionSlice',
     title,
     type: 'object',
     properties: {
