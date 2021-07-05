@@ -1,7 +1,7 @@
 /**
  * @jest-environment ceramic
  */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 
 import KeyResolver from 'key-did-resolver'
 import {
@@ -29,10 +29,7 @@ describe('lib', () => {
   })
   const Records = expect.arrayContaining([DagJWSResult])
 
-  beforeAll(async () => {
-    const did = new DID({ resolver: KeyResolver.getResolver() })
-    await ceramic.setDID(did)
-  })
+  ceramic.did = new DID({ resolver: KeyResolver.getResolver() })
 
   test('publish config', async () => {
     jest.setTimeout(20000)

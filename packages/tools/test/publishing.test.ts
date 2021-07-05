@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/unbound-method */
 
 import StreamID from '@ceramicnetwork/streamid'
 
@@ -106,26 +106,26 @@ describe('publishing', () => {
     test('updates the document if contents changed', async () => {
       const update = jest.fn()
       const doc = { content: { hello: 'world' }, update, id: testDocID }
-      const loadStream = jest.fn(() => Promise.resolve(doc))
-      const ceramic = { loadStream } as any
+      const ceramic = {} as any
+      TileDocument.load.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)))
 
       await expect(publishDoc(ceramic, { id: testID, content: { hello: 'test' } })).resolves.toBe(
         doc
       )
-      expect(loadStream).toBeCalledWith(testID)
+      expect(TileDocument.load).toBeCalledWith(ceramic, testID)
       expect(update).toBeCalledWith({ hello: 'test' })
     })
 
     test('does not update the document if contents have not changed', async () => {
       const update = jest.fn()
       const doc = { content: { hello: 'test' }, update, id: testDocID }
-      const loadStream = jest.fn(() => Promise.resolve(doc))
-      const ceramic = { loadStream } as any
+      const ceramic = {} as any
+      TileDocument.load.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)))
 
       await expect(publishDoc(ceramic, { id: testID, content: { hello: 'test' } })).resolves.toBe(
         doc
       )
-      expect(loadStream).toBeCalledWith(testID)
+      expect(TileDocument.load).toBeCalledWith(ceramic, testID)
       expect(update).not.toBeCalled()
     })
   })

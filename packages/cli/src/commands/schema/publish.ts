@@ -1,12 +1,10 @@
 import { publishSchema } from '@ceramicstudio/idx-tools'
+import type { Schema } from '@ceramicstudio/idx-tools'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
-export default class PublishSchema extends Command<
-  CommandFlags,
-  { did: string; schema: Record<string, any> }
-> {
+export default class PublishSchema extends Command<CommandFlags, { did: string; schema: Schema }> {
   static description = 'publish a schema'
 
   static args = [

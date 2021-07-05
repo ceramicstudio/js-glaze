@@ -1,0 +1,35 @@
+{
+  "name": "@ceramicstudio/append-collection",
+  "version": "0.1.0",
+  "author": "Ceramic Studio",
+  "homepage": "https://idx.xyz",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/append-collection.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "eslint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ceramicnetwork/stream-tile": "^1.0.4",
+    "@ceramicnetwork/streamid": "^1.0.1",
+    "uint8arrays": "^2.1.5"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^1.0.4",
+    "@ceramicstudio/idx-tools": "^0.11.0",
+    "jest-environment-idx": "^0.8.0",
+    "tslib": "^2.2.0"
+  }
+}

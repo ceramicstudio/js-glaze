@@ -5,7 +5,7 @@ module.exports = {
     project: ['tsconfig.json'],
   },
   rules: {
-    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
   },
 }

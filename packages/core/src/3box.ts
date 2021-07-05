@@ -13,7 +13,7 @@ export async function loadLegacy3BoxProfile<T = Record<string, any>>(
 }
 
 // Validation for BasicProfile
-const lengthIndex = <Record<string, number>>{
+const lengthIndex: Record<string, number> = {
   name: 150,
   description: 420,
   location: 140, //homeLocation

@@ -15,7 +15,7 @@
     "blockcodec-to-ipld-format": "^1.0.0",
     "dag-jose": "^0.3.0",
     "ipfs-core": "^0.5.4",
-    "jest-environment-node": "^26.6.2",
+    "jest-environment-node": "^27.0.6",
     "tmp-promise": "^3.0.2"
   }
 }

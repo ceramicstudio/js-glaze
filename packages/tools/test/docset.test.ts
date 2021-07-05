@@ -22,7 +22,8 @@ describe('docset', () => {
       resolver: KeyResolver.getResolver(),
       provider: new Ed25519Provider(seed),
     })
-    await Promise.all([ceramic.setDID(did), publishIDXConfig(ceramic), did.authenticate()])
+    ceramic.did = did
+    await Promise.all([publishIDXConfig(ceramic), did.authenticate()])
   })
 
   test('publish signed', async () => {
@@ -203,13 +204,10 @@ describe('docset', () => {
             title: 'item',
             properties: {
               note: {
-                type: 'object',
-                $id: 'ceramic://schemaReference',
+                type: 'string',
                 title: 'reference',
-                properties: {
-                  schema: { type: 'string', const: noteSchemaURL },
-                  id: { type: 'string' },
-                },
+                $comment: `cip88:ref:${noteSchemaURL}`,
+                maxLength: 150,
               },
               title: {
                 type: 'string',
@@ -241,53 +239,78 @@ describe('docset', () => {
     )
 
     await expect(docset.toGraphQLDocSetRecords()).resolves.toEqual({
+      collections: {},
       index: {
         myNotes: {
           id: notesDefinitionID.toString(),
           schema: notesSchemaURL,
         },
       },
-      lists: { NotesList: 'NotesListItem' },
-      nodes: {
-        [notesSchemaURL]: 'Notes',
-        [noteSchemaURL]: 'Note',
+      lists: {
+        NotesList: {
+          name: 'NotesListItem',
+          type: 'object',
+        },
       },
       objects: {
         NotesListItem: {
-          note: {
-            type: 'reference',
-            name: 'NotesListItemReference',
-            required: true,
+          fields: {
+            note: {
+              type: 'reference',
+              owner: 'Notes',
+              schemas: [noteSchemaURL],
+              required: true,
+            },
+            title: {
+              type: 'string',
+              required: false,
+              maxLength: 100,
+            },
           },
-          title: {
-            type: 'string',
-            required: false,
-            maxLength: 100,
-          },
+          parents: ['NotesList'],
         },
         Notes: {
-          notes: {
-            name: 'NotesList',
-            required: false,
-            type: 'list',
+          fields: {
+            notes: {
+              name: 'NotesList',
+              required: false,
+              type: 'list',
+            },
           },
+          parents: null,
         },
         Note: {
-          date: {
-            type: 'string',
-            required: true,
-            format: 'date-time',
-            maxLength: 30,
+          fields: {
+            date: {
+              type: 'string',
+              required: true,
+              format: 'date-time',
+              maxLength: 30,
+            },
+            text: {
+              type: 'string',
+              required: true,
+              maxLength: 4000,
+            },
           },
-          text: {
-            type: 'string',
-            required: true,
-            maxLength: 4000,
-          },
+          parents: null,
+        },
+      },
+      referenced: {
+        [noteSchemaURL]: {
+          name: 'Note',
+          type: 'object',
+        },
+        [notesSchemaURL]: {
+          name: 'Notes',
+          type: 'object',
         },
       },
       references: {
-        NotesListItemReference: [noteSchemaURL],
+        NotesListItemReference: {
+          owner: 'Notes',
+          schemas: [noteSchemaURL],
+        },
       },
       roots: {
         exampleNote: {
