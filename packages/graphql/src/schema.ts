@@ -1,4 +1,4 @@
-import type { GraphQLDocSetRecords } from '@ceramicstudio/idx-graphql-types'
+import type { GraphQLModel } from '@glazed/graphql-types'
 import { pascalCase } from 'change-case'
 import {
   GraphQLBoolean,
@@ -52,7 +52,7 @@ function sortedObject<T = Record<string, any>>(input: T): T {
   }, {}) as T
 }
 
-export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchema {
+export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
   const inputObjects: Record<string, GraphQLInputObjectType> = {}
   const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
   const types: Record<string, GraphQLObjectType> = {}
@@ -61,7 +61,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     if (doc.schema == null) {
       return null
     }
-    const { name } = records.referenced[doc.schema]
+    const { name } = model.referenced[doc.schema]
     if (name == null) {
       return null
     }
@@ -73,14 +73,14 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     return await ctx.loadDoc(id)
   }, resolveType)
 
-  const nodes = Object.entries(records.referenced).reduce((acc, [schema, { name, type }]) => {
+  const nodes = Object.entries(model.referenced).reduce((acc, [schema, { name, type }]) => {
     if (type === 'object') {
       acc[name] = { interfaces: [nodeInterface], schema }
     }
     return acc
   }, {} as Record<string, { interfaces: Array<GraphQLInterfaceType>; schema: string }>)
 
-  for (const [name, { fields }] of Object.entries(sortedObject(records.objects))) {
+  for (const [name, { fields }] of Object.entries(sortedObject(model.objects))) {
     const node = nodes[name]
 
     inputObjects[name] = new GraphQLInputObjectType({
@@ -89,14 +89,14 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
         return Object.entries(fields).reduce((acc, [key, field]) => {
           let type
           if (field.type === 'reference') {
-            const ref = records.referenced[field.schemas[0]]
+            const ref = model.referenced[field.schemas[0]]
             if (ref.type === 'object') {
               type = GraphQLID
             }
           } else if (field.type === 'object') {
             type = inputObjects[field.name]
           } else if (field.type === 'list') {
-            const listItem = records.lists[field.name]
+            const listItem = model.lists[field.name]
             if (listItem.type === 'object') {
               type = new GraphQLList(inputObjects[listItem.name])
             } else if (listItem.type === 'reference') {
@@ -124,14 +124,14 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
         return Object.entries(fields).reduce(
           (acc, [key, field]) => {
             if (field.type === 'reference') {
-              const ref = records.referenced[field.schemas[0]]
+              const ref = model.referenced[field.schemas[0]]
               if (ref.type === 'collection') {
-                const { item } = records.collections[ref.name]
+                const { item } = model.collections[ref.name]
                 let nodeType
                 if (item.type === 'object') {
                   nodeType = types[item.name]
                 } else if (item.type === 'reference') {
-                  const nodeRef = records.referenced[item.schemas[0]]
+                  const nodeRef = model.referenced[item.schemas[0]]
                   nodeType = types[nodeRef.name]
                 } else if (SCALAR_FIELDS.includes(item.type)) {
                   nodeType = SCALARS[item.type]
@@ -186,7 +186,7 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
               if (field.type === 'object') {
                 type = types[field.name]
               } else if (field.type === 'list') {
-                const listItem = records.lists[field.name]
+                const listItem = model.lists[field.name]
                 if (listItem.type === 'object') {
                   type = new GraphQLList(types[listItem.name])
                 } else if (listItem.type === 'reference') {
@@ -255,12 +255,12 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
   }
 
   const indexFields: GraphQLFieldConfigMap<any, any> = {}
-  for (const [key, definition] of Object.entries(sortedObject(records.index))) {
-    const { name } = records.referenced[definition.schema]
+  for (const [key, definition] of Object.entries(sortedObject(model.index))) {
+    const { name } = model.referenced[definition.schema]
     indexFields[key] = {
       type: types[name],
       resolve: async (_, { did }: { did?: string }, ctx: Context): Promise<Doc | null> => {
-        const tile = await ctx.idx.getRecordDocument(definition.id, did)
+        const tile = await ctx.dataStore.getRecordDocument(definition.id, did)
         return tile ? toDoc<any>(tile) : null
       },
     }
@@ -273,21 +273,21 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
       }),
       outputFields: () => ({}),
       mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
-        await ctx.idx.set(key, input.content)
+        await ctx.dataStore.set(definition.id, input.content)
         return {}
       },
     })
   }
 
   for (const [collectionName, { item, schema }] of Object.entries(
-    sortedObject(records.collections)
+    sortedObject(model.collections)
   )) {
     let nodeType
     if (item.type === 'object') {
       nodeType = types[item.name]
     } else if (item.type === 'reference') {
       const refID = item.schemas[0]
-      const ref = records.referenced[refID]
+      const ref = model.referenced[refID]
       nodeType = types[ref.name]
     }
     if (nodeType == null) {
@@ -299,10 +299,10 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
     types[`${name}Connection`] = connectionType
     types[`${name}Edge`] = edgeType
 
-    for (const [label, { owner, schemas }] of Object.entries(records.references)) {
+    for (const [label, { owner, schemas }] of Object.entries(model.references)) {
       if (schemas[0] === schema) {
-        const field = Object.keys(records.objects[owner].fields).find((key) => {
-          const data = records.objects[owner].fields[key]
+        const field = Object.keys(model.objects[owner].fields).find((key) => {
+          const data = model.objects[owner].fields[key]
           return data.type === 'reference' && data.schemas[0] === schema
         })
         if (field == null) {
@@ -355,9 +355,9 @@ export function createGraphQLSchema(records: GraphQLDocSetRecords): GraphQLSchem
 
   const query = new GraphQLObjectType({
     name: 'Query',
-    fields: Object.entries(sortedObject(records.roots)).reduce(
+    fields: Object.entries(sortedObject(model.roots)).reduce(
       (acc, [key, { id, schema }]) => {
-        const { name } = records.referenced[schema]
+        const { name } = model.referenced[schema]
         acc[key] = {
           type: new GraphQLNonNull(types[name]),
           resolve: async (_self, _args, ctx: Context): Promise<any> => {

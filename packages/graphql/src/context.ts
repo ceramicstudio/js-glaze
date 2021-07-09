@@ -1,7 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
-import { IDX } from '@ceramicstudio/idx'
+import { DIDDataStore } from '@glazed/did-datastore'
 
 import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
 import type { Doc } from './types'
@@ -9,21 +9,21 @@ import { toDoc } from './utils'
 
 export class Context {
   _ceramic: CeramicApi
-  _idx: IDX
+  _dataStore: DIDDataStore
   _itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
   _referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(ceramic: CeramicApi) {
     this._ceramic = ceramic
-    this._idx = new IDX({ ceramic })
+    this._dataStore = new DIDDataStore({ ceramic })
   }
 
   get ceramic(): CeramicApi {
     return this._ceramic
   }
 
-  get idx(): IDX {
-    return this._idx
+  get dataStore(): DIDDataStore {
+    return this._dataStore
   }
 
   async getItemConnection<Node = unknown>(id: string): Promise<ItemConnectionHandler<Node>> {

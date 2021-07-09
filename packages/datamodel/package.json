@@ -1,0 +1,53 @@
+{
+  "name": "@glazed/datamodel",
+  "author": "3Box Labs",
+  "homepage": "https://idx.xyz",
+  "version": "0.1.0",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/datamodel.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "eslint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ceramicnetwork/stream-tile": "^1.0.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^1.0.0",
+    "@glazed/common": "^0.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "testEnvironment": "node"
+  },
+  "size-limit": [
+    {
+      "path": "dist/datamodel.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/datamodel.esm.js",
+      "limit": "10 KB"
+    }
+  ]
+}

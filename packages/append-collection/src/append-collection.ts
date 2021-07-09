@@ -2,8 +2,8 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
 import type { CommitID } from '@ceramicnetwork/streamid'
+import { CIP88_APPEND_COLLECTION_PREFIX as PREFIX } from '@glazed/common'
 
-import { CIP88_APPEND_COLLECTION } from './constants'
 import { Cursor } from './cursor'
 import type { CursorInput } from './cursor'
 import type {
@@ -36,12 +36,10 @@ export async function getSliceSchemaID(
   collectionSchemaID: CommitID | string
 ): Promise<string> {
   const collectionSchema = await TileDocument.load<CollectionSchema>(ceramic, collectionSchemaID)
-  if (!collectionSchema?.content?.$comment?.startsWith(CIP88_APPEND_COLLECTION)) {
+  if (!collectionSchema?.content?.$comment?.startsWith(PREFIX)) {
     throw new Error('Invalid schema, expecting to be AppendCollection')
   }
-  const sliceSchemaCommitID = collectionSchema?.content?.$comment.substr(
-    CIP88_APPEND_COLLECTION.length
-  )
+  const sliceSchemaCommitID = collectionSchema?.content?.$comment.substr(PREFIX.length)
   if (sliceSchemaCommitID === '') {
     throw new Error('Invalid schema, missing sliceSchema')
   }

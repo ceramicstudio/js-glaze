@@ -7,12 +7,12 @@
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint index.js",
     "prepare": "npm run lint"
   },
   "dependencies": {
     "@ceramicstudio/idx-tools": "^0.11.0",
-    "dids": "^2.0.0",
+    "dids": "^2.3.0",
     "jest-environment-ceramic": "^0.13.0",
     "key-did-provider-ed25519": "^1.0.1",
     "key-did-resolver": "^1.1.1",

@@ -1,5 +1,5 @@
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { Schema } from '@ceramicstudio/idx-tools'
+import type { Schema } from '@glazed/common'
 
 export type CollectionContent = {
   sliceMaxItems: number

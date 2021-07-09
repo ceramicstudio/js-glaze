@@ -1,0 +1,59 @@
+{
+  "name": "@glazed/did-datastore",
+  "author": "3Box Labs",
+  "homepage": "https://idx.xyz",
+  "version": "0.1.0",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/did-datastore.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "test": "tsdx test",
+    "lint": "eslint src test --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ceramicnetwork/stream-tile": "^1.0.0",
+    "@glazed/common": "^0.1.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/blockchain-utils-linking": "^1.0.0",
+    "@ceramicnetwork/common": "^1.0.0",
+    "@ceramicnetwork/streamid": "^1.0.0",
+    "@ethersproject/wallet": "^5.0.12",
+    "jest-environment-idx": "^0.8.0",
+    "tslib": "^2.1.0",
+    "uint8arrays": "^2.1.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "testEnvironment": "node"
+  },
+  "size-limit": [
+    {
+      "path": "dist/did-datastore.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/did-datastore.esm.js",
+      "limit": "10 KB"
+    }
+  ]
+}

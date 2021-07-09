@@ -1,15 +1,14 @@
 {
-  "name": "@ceramicstudio/append-collection",
+  "name": "@glazed/append-collection",
   "version": "0.1.0",
-  "author": "Ceramic Studio",
+  "author": "3Box Labs",
   "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/append-collection.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
     "node": ">=12"
@@ -24,6 +23,7 @@
   "dependencies": {
     "@ceramicnetwork/stream-tile": "^1.0.4",
     "@ceramicnetwork/streamid": "^1.0.1",
+    "@glazed/common": "^0.1.0",
     "uint8arrays": "^2.1.5"
   },
   "devDependencies": {

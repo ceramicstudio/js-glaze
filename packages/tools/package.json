@@ -25,11 +25,11 @@
     "analyze": "size-limit --why"
   },
   "dependencies": {
+    "@ceramicnetwork/common": "^1.0.0",
     "@ceramicnetwork/stream-tile": "^1.0.0",
     "@ceramicnetwork/streamid": "^1.0.0",
-    "@ceramicnetwork/common": "^1.0.0",
     "@ceramicstudio/idx-constants": "^1.0.0",
-    "ajv": "^8.5.0",
+    "ajv": "^8.6.1",
     "ajv-formats": "^2.1.0",
     "change-case": "^4.1.2",
     "cids": "^1.1.0",
@@ -38,9 +38,8 @@
   },
   "devDependencies": {
     "@ceramicnetwork/http-client": "^1.0.0",
-    "@ceramicstudio/idx-graphql-types": "^0.1.0",
-    "@types/jest": "^26.0.20",
-    "dids": "^2.0.0",
+    "@types/jest": "^26.0.24",
+    "dids": "^2.3.0",
     "fs-extra": "^10.0.0",
     "jest-environment-ceramic": "^0.13.0",
     "key-did-provider-ed25519": "^1.0.1",
