@@ -2,7 +2,7 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
 import type { CommitID } from '@ceramicnetwork/streamid'
-import { CIP88_APPEND_COLLECTION_PREFIX as PREFIX } from '@glazed/common'
+import { CIP88_APPEND_COLLECTION_PREFIX as PREFIX } from '@glazed/constants'
 
 import { Cursor } from './cursor'
 import type { CursorInput } from './cursor'

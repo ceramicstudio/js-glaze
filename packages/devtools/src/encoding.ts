@@ -1,19 +1,9 @@
+import type { EncodedDagJWS, EncodedDagJWSResult } from '@glazed/types'
 import CID from 'cids'
-import type { DagJWS, DagJWSResult, JWSSignature } from 'dids'
+import type { DagJWS, DagJWSResult } from 'dids'
 import { fromString, toString } from 'uint8arrays'
 
 import { applyMap } from './utils'
-
-export type EncodedDagJWS = {
-  payload: string
-  signatures: Array<JWSSignature>
-  link?: string
-}
-
-export type EncodedDagJWSResult = {
-  jws: EncodedDagJWS
-  linkedBlock: string // base64
-}
 
 export function decodeDagJWS({ payload, signatures, link }: EncodedDagJWS): DagJWS {
   return { payload, signatures, link: link ? new CID(link) : undefined }

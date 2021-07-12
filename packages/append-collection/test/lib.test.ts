@@ -1,5 +1,5 @@
 /**
- * @jest-environment idx
+ * @jest-environment glaze
  */
 
 import { CeramicApi } from '@ceramicnetwork/common'

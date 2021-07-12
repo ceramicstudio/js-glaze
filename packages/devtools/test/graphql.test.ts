@@ -1,34 +1,18 @@
 /**
- * @jest-environment ceramic
+ * @jest-environment glaze
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { Ed25519Provider } from 'key-did-provider-ed25519'
-import { fromString } from 'uint8arrays'
-import { DID } from 'dids'
-import KeyResolver from 'key-did-resolver'
 
 import { ModelManager, createGraphQLModel } from '../src'
 
 describe('graphql', () => {
   jest.setTimeout(20000)
 
-  beforeAll(async () => {
-    const seed = fromString(
-      '08b2e655d239e24e3ca9aa17bc1d05c1dee289d6ebf0b3542fd9536912d51ee9',
-      'base16'
-    )
-    const did = new DID({
-      resolver: KeyResolver.getResolver(),
-      provider: new Ed25519Provider(seed),
-    })
-    ceramic.did = did
-    await did.authenticate()
-  })
-
   test('creation flow with associated schema', async () => {
     const manager = new ModelManager(ceramic)
+    await manager.useCoreModel()
 
     // TODO: also test with external schema added in manager constructor?
     // or added dynamically

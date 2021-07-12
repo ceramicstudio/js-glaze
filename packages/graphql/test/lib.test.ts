@@ -1,5 +1,5 @@
 /**
- * @jest-environment idx
+ * @jest-environment glaze
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
@@ -17,7 +17,9 @@ declare global {
 }
 
 describe('lib', () => {
-  const context = new Context(ceramic)
+  jest.setTimeout(20000)
+
+  let context: Context
   let schema: GraphQLSchema
 
   beforeAll(async () => {
@@ -76,6 +78,8 @@ describe('lib', () => {
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const manager = new ModelManager(ceramic)
+    await manager.useCoreModel()
+
     await Promise.all([
       manager.addDefinition('myNotes', {
         name: 'notes',
@@ -88,8 +92,13 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-    const model = await createGraphQLModel(manager)
-    schema = createGraphQLSchema(model)
+
+    const [graphModel, model] = await Promise.all([
+      createGraphQLModel(manager),
+      manager.toPublished(),
+    ])
+    context = new Context({ ceramic, model })
+    schema = createGraphQLSchema(graphModel)
   })
 
   test('schema creation', () => {

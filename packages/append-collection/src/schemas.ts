@@ -1,7 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID } from '@ceramicnetwork/streamid'
-import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/common'
+import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/constants'
 
 import type { CollectionSchema, SliceSchema } from './types'
 

@@ -4,14 +4,24 @@ import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
 import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { CIP88_REF_PREFIX } from '@glazed/common'
-import type { Definition, ModelData, PublishedModel, Schema } from '@glazed/common'
+import { CIP88_REF_PREFIX } from '@glazed/constants'
+import type { Definition } from '@glazed/core-datamodel'
+import { model as coreModel } from '@glazed/core-datamodel'
+import type { EncodedSignedModel, PublishedModel, Schema, SignedModel } from '@glazed/types'
 import type { DagJWSResult } from 'dids'
 
 import { decodeSignedMap, encodeSignedMap } from './encoding'
-import type { EncodedDagJWSResult } from './encoding'
 import { createTile, publishCommits } from './publishing'
 import { applyMap, promiseMap, streamIDToString } from './utils'
+
+type CoreModel = {
+  definitions: Record<string, never>
+  schemas: {
+    Definition: string
+    IdentityIndex: string
+  }
+  tiles: Record<string, never>
+}
 
 export type CreatedDoc = {
   id: StreamRef
@@ -25,9 +35,6 @@ export type ManagedModel = {
   schemaAliases: Record<string, string> // Stream ID to alias
   tiles: Record<string, Promise<CreatedDoc>>
 }
-
-export type SignedModel = ModelData<Array<DagJWSResult>>
-export type EncodedSignedModel = ModelData<Array<EncodedDagJWSResult>>
 
 export function getReference(schema: Schema): Array<string> | null {
   if (schema.$comment?.startsWith(CIP88_REF_PREFIX)) {
@@ -88,6 +95,9 @@ export async function publishEncodedSignedModel(
   return await publishSignedModel(ceramic, applyMap(model, decodeSignedMap))
 }
 
+export async function publishCoreModel(ceramic: CeramicApi): Promise<CoreModel> {
+  return (await publishEncodedSignedModel(ceramic, coreModel)) as CoreModel
+}
 export class ModelManager {
   public static fromPublished(ceramic: CeramicApi, published: PublishedModel): ModelManager {
     const model: ManagedModel = {
@@ -115,6 +125,14 @@ export class ModelManager {
     return ModelManager.fromPublished(ceramic, published)
   }
 
+  public static async fromSignedJSON(
+    ceramic: CeramicApi,
+    encoded: EncodedSignedModel
+  ): Promise<ModelManager> {
+    const signed = applyMap(encoded, decodeSignedMap)
+    return await ModelManager.fromSigned(ceramic, signed)
+  }
+
   _ceramic: CeramicApi
   _model: ManagedModel
 
@@ -134,6 +152,20 @@ export class ModelManager {
     this._ceramic = ceramic
     this._model = model
   }
+
+  get definitions(): Array<string> {
+    return Object.keys(this._model.definitions)
+  }
+
+  get schemas(): Array<string> {
+    return Object.keys(this._model.schemas)
+  }
+
+  get tiles(): Array<string> {
+    return Object.keys(this._model.tiles)
+  }
+
+  // Loaders
 
   async loadCreated(created: Promise<CreatedDoc>): Promise<TileDocument> {
     return await this.loadDoc((await created).id)
@@ -181,17 +213,15 @@ export class ModelManager {
     return doc.commitId
   }
 
-  get definitions(): Array<string> {
-    return Object.keys(this._model.definitions)
+  async useCoreModel(): Promise<void> {
+    const { schemas } = await publishCoreModel(this._ceramic)
+    await Promise.all([
+      this.usePublishedSchema('Definition', schemas.Definition),
+      this.usePublishedSchema('IdentityIndex', schemas.IdentityIndex),
+    ])
   }
 
-  get schemas(): Array<string> {
-    return Object.keys(this._model.schemas)
-  }
-
-  get tiles(): Array<string> {
-    return Object.keys(this._model.tiles)
-  }
+  // Schemas
 
   hasSchema(alias: string): boolean {
     return this._model.schemas[alias] != null
@@ -277,8 +307,19 @@ export class ModelManager {
       throw new Error(`Definition ${alias} already exists`)
     }
 
-    this._model.definitions[alias] = Promise.all(deps).then((dependencies) => {
-      return createTile(this._ceramic, definition).then(
+    if (!this.hasSchema('IdentityIndex')) {
+      throw new Error('Missing IdentityIndex schema in model, call useCoreModel() first')
+    }
+    const definitionSchemaCreated = this.getSchema('Definition')
+    if (definitionSchemaCreated == null) {
+      throw new Error('Missing Definition schema in model, call useCoreModel() first')
+    }
+
+    this._model.definitions[alias] = Promise.all([
+      definitionSchemaCreated.then((doc) => doc.id),
+      ...deps,
+    ]).then((dependencies) => {
+      return createTile(this._ceramic, definition, { schema: dependencies[0].toUrl() }).then(
         (doc) => ({ id: doc.id, dependencies }),
         (reason: any) => {
           delete this._model.definitions[alias]
@@ -384,6 +425,11 @@ export class ModelManager {
 
     this._model.tiles[alias] = added
     return (await added).id
+  }
+
+  async toPublished(): Promise<PublishedModel> {
+    const signed = await this.toSigned()
+    return await publishSignedModel(this._ceramic, signed)
   }
 
   // Export to maps of aliases to signed commits, would allow to publish a docset on a Ceramic node

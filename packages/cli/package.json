@@ -42,6 +42,7 @@
   "dependencies": {
     "@ceramicnetwork/3id-did-resolver": "^1.2.0",
     "@ceramicnetwork/http-client": "^1.0.0",
+    "@ceramicnetwork/stream-tile": "^1.0.7",
     "@ceramicnetwork/streamid": "^1.0.0",
     "@ceramicstudio/idx": "^0.12.1",
     "@ceramicstudio/idx-constants": "^1.0.0",

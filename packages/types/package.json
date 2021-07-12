@@ -1,0 +1,27 @@
+{
+  "name": "@glazed/types",
+  "version": "0.1.0",
+  "author": "3Box Labs",
+  "homepage": "https://idx.xyz",
+  "license": "(Apache-2.0 OR MIT)",
+  "main": "dist/index.js",
+  "module": "dist/types.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build --tsconfig tsconfig.build.json",
+    "lint": "eslint src --fix",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "ajv": "^8.6.1",
+    "dids": "^2.3.0",
+    "tslib": "^2.1.0"
+  }
+}

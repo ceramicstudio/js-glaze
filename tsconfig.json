@@ -1,20 +1,22 @@
 
 {
   "extends": "./tsconfig.build.json",
-  "include": ["packages", "types"],
+  "include": ["packages"],
   "compilerOptions": {
     "allowJs": false,
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "typeRoots": ["./node_modules/@types"],
     "paths": {
+      "@datamodels/3box-essentials": ["packages/3box-essentials/src"],
       "@glazed/append-collection": ["packages/append-collection/src"],
-      "@glazed/common": ["packages/common/src"],
       "@glazed/cli": ["packages/cli/src"],
+      "@glazed/constants": ["packages/constants/src"],
+      "@glazed/core-datamodel": ["packages/core-datamodel/src"],
       "@glazed/devtools": ["packages/devtools/src"],
       "@glazed/did-datastore": ["packages/did-datastore/src"],
       "@glazed/graphql": ["packages/graphql/src"],
       "@glazed/graphql-types": ["packages/graphql-types/src"],
-      "jest-environment-ceramic": ["packages/jest-environment-ceramic"]
+      "@glazed/types": ["packages/types/src"]
     }
   }
 }

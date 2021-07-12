@@ -1,30 +1,12 @@
 /**
- * @jest-environment ceramic
+ * @jest-environment glaze
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import { Ed25519Provider } from 'key-did-provider-ed25519'
-import { fromString } from 'uint8arrays'
-import { DID } from 'dids'
-import KeyResolver from 'key-did-resolver'
 
 import { ModelManager, publishEncodedSignedModel } from '../src'
 
 describe('datamodel', () => {
   jest.setTimeout(20000)
-
-  beforeAll(async () => {
-    const seed = fromString(
-      '08b2e655d239e24e3ca9aa17bc1d05c1dee289d6ebf0b3542fd9536912d51ee9',
-      'base16'
-    )
-    const did = new DID({
-      resolver: KeyResolver.getResolver(),
-      provider: new Ed25519Provider(seed),
-    })
-    ceramic.did = did
-    await did.authenticate()
-  })
 
   test('publish signed', async () => {
     const signedModel = {
@@ -148,11 +130,13 @@ describe('datamodel', () => {
     }
 
     const manager = new ModelManager(ceramic)
+    await manager.useCoreModel()
+
     const [notesListSchemaCommitID] = await Promise.all([
       manager.addSchema('NotesList', NotesListSchema as any),
       manager.addSchema('Note', NoteSchema as any),
     ])
-    expect(manager.schemas).toEqual(['NotesList', 'Note'])
+    expect(manager.schemas).toEqual(['Definition', 'IdentityIndex', 'NotesList', 'Note'])
 
     await manager.addDefinition('myNotes', {
       name: 'notes',
@@ -160,9 +144,6 @@ describe('datamodel', () => {
       schema: notesListSchemaCommitID.toUrl(),
     })
     expect(manager.definitions).toEqual(['myNotes'])
-
-    // const signed = await manager.toSignedJSON()
-    // console.log(JSON.stringify(signed))
 
     await expect(manager.toSignedJSON()).resolves.toBeDefined()
   })

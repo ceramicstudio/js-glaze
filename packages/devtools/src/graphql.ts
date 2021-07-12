@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/common'
-import type { Definition, Schema } from '@glazed/common'
+import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/constants'
+import type { Definition } from '@glazed/core-datamodel'
 import type { GraphQLModel, ItemField, ObjectField } from '@glazed/graphql-types'
+import type { Schema } from '@glazed/types'
 import { camelCase, pascalCase } from 'change-case'
 
 import type { ModelManager } from './datamodel'
 import { getReference } from './datamodel'
+
+const EXCLUDED_SCHEMAS = ['Definition', 'IdentityIndex']
 
 function getName(base: string, prefix = ''): string {
   const withCase = pascalCase(base)
@@ -122,38 +125,40 @@ export async function createGraphQLModel(manager: ModelManager): Promise<GraphQL
     roots: {},
   }
 
-  const handleSchemas = manager.schemas.map(async (name) => {
-    const created = manager.getSchema(name)
-    if (created != null) {
-      const doc = await manager.loadCreated(created)
-      const schema = doc.content as Schema
-      if (schema == null) {
-        throw new Error(`Could not load schema ${name}`)
-      }
+  const handleSchemas = manager.schemas
+    .filter((name) => !EXCLUDED_SCHEMAS.includes(name))
+    .map(async (name) => {
+      const created = manager.getSchema(name)
+      if (created != null) {
+        const doc = await manager.loadCreated(created)
+        const schema = doc.content as Schema
+        if (schema == null) {
+          throw new Error(`Could not load schema ${name}`)
+        }
 
-      const schemaURL = doc.commitId.toUrl()
-      if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
-        const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
-        await manager.loadSchema(sliceSchemaID)
-        const sliceSchemaDoc = await manager.loadDoc(sliceSchemaID)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
-        if (itemSchema == null) {
-          throw new Error(`Could not extract item schema ${name}`)
-        }
-        model.collections[name] = {
-          schema: schemaURL,
-          item: getItemField(model, itemSchema, name, name),
-        }
-        model.referenced[schemaURL] = { type: 'collection', name }
-      } else {
-        model.referenced[schemaURL] = {
-          type: 'object',
-          name: addModelSchema(model, schema),
+        const schemaURL = doc.commitId.toUrl()
+        if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
+          const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
+          await manager.loadSchema(sliceSchemaID)
+          const sliceSchemaDoc = await manager.loadDoc(sliceSchemaID)
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
+          if (itemSchema == null) {
+            throw new Error(`Could not extract item schema ${name}`)
+          }
+          model.collections[name] = {
+            schema: schemaURL,
+            item: getItemField(model, itemSchema, name, name),
+          }
+          model.referenced[schemaURL] = { type: 'collection', name }
+        } else {
+          model.referenced[schemaURL] = {
+            type: 'object',
+            name: addModelSchema(model, schema),
+          }
         }
       }
-    }
-  })
+    })
 
   const handleDefinitions = manager.definitions.map(async (name) => {
     const created = manager.getDefinition(name)

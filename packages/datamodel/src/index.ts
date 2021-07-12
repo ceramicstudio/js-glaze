@@ -1,19 +1,6 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { PublishedModel } from '@glazed/common'
-
-export type ModelTypeAliases<
-  // Schema alias to content type
-  Schemas extends Record<string, any> = Record<string, any>,
-  // Definition alias to schema alias
-  Definitions extends Record<string, keyof Schemas> = Record<string, string>,
-  // Tile alias to schema alias
-  Tiles extends Record<string, keyof Schemas> = Record<string, string>
-> = {
-  schemas: Schemas
-  definitions: Definitions
-  tiles: Tiles
-}
+import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
 
 // Internal utilty type to ensure Record keys are strings
 type KeyOf<Rec extends Record<string, any>, Key extends string> = keyof Rec[Key] & string
