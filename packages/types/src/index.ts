@@ -23,9 +23,27 @@ export type ModelData<T> = {
   tiles: Record<string, T>
 }
 
-export type PublishedModel = ModelData<string>
-export type SignedModel = ModelData<Array<DagJWSResult>>
-export type EncodedSignedModel = ModelData<Array<EncodedDagJWSResult>>
+export type MapModelTypes<Model extends ModelData<any>, ToType> = {
+  schemas: Record<keyof Model['schemas'], ToType>
+  definitions: Record<keyof Model['definitions'], ToType>
+  tiles: Record<keyof Model['tiles'], ToType>
+}
+
+export type CastModelTo<Model extends ModelData<any> | void, ToType> = Model extends ModelData<any>
+  ? MapModelTypes<Model, ToType>
+  : ModelData<ToType>
+
+export type PublishedModel<Model extends ModelData<any> | void = void> = CastModelTo<Model, string>
+
+export type SignedModel<Model extends ModelData<any> | void = void> = CastModelTo<
+  Model,
+  Array<DagJWSResult>
+>
+
+export type EncodedSignedModel<Model extends ModelData<any> | void = void> = CastModelTo<
+  Model,
+  Array<EncodedDagJWSResult>
+>
 
 export type ModelTypeAliases<
   // Schema alias to content type

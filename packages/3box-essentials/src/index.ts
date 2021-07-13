@@ -93,7 +93,7 @@ export type ModelTypes = ModelTypeAliases<
   }
 >
 
-export const model: EncodedSignedModel = {
+export const model: EncodedSignedModel<ModelTypes> = {
   definitions: {
     alsoKnownAs: [
       {

@@ -15,7 +15,7 @@ export type ModelTypes = ModelTypeAliases<{
   IdentityIndex: IdentityIndex
 }>
 
-export const model: EncodedSignedModel = {
+export const model: EncodedSignedModel<ModelTypes> = {
   definitions: {},
   schemas: {
     Definition: [

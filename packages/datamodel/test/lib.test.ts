@@ -18,19 +18,10 @@ describe('DataModel', () => {
     },
   }
 
-  describe('properties', () => {
-    test('`ceramic` property', () => {
-      const ceramic = {}
-      const model = new DataModel({ ceramic } as any)
-      expect(model.ceramic).toBe(ceramic)
-    })
-
-    test('aliases properties', () => {
-      const model = new DataModel({ ceramic: {}, model: aliases } as any)
-      expect(model.definitions).toBe(aliases.definitions)
-      expect(model.schemas).toBe(aliases.schemas)
-      expect(model.tiles).toBe(aliases.tiles)
-    })
+  test('`ceramic` property', () => {
+    const ceramic = {}
+    const model = new DataModel({ ceramic } as any)
+    expect(model.ceramic).toBe(ceramic)
   })
 
   describe('Aliases methods', () => {

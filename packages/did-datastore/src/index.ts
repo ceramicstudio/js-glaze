@@ -11,15 +11,16 @@ import { assertDid } from './utils'
 
 type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,
-  Alias extends string,
-  Fallback = Record<string, unknown>
-> = Alias extends keyof ModelTypes['definitions'] ? ModelTypes['schemas'][Alias] : Fallback
+  Alias extends keyof ModelTypes['definitions']
+> = ModelTypes['schemas'][ModelTypes['definitions'][Alias]]
 
 type DefinitionsContentTypes<
   ModelTypes extends ModelTypeAliases,
   Fallback = Record<string, unknown>
 > = {
-  [Key: string]: DefinitionContentType<ModelTypes, typeof Key, Fallback>
+  [Key: string]: typeof Key extends keyof ModelTypes['definitions']
+    ? DefinitionContentType<ModelTypes, typeof Key>
+    : Fallback
 }
 
 export type DefinitionWithID<Config extends Record<string, unknown> = Record<string, unknown>> =
@@ -41,7 +42,10 @@ export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAl
   model: DataModel<ModelTypes> | PublishedModel
 }
 
-export class DIDDataStore<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
+export class DIDDataStore<
+  ModelTypes extends ModelTypeAliases = ModelTypeAliases,
+  Alias extends keyof ModelTypes['definitions'] = keyof ModelTypes['definitions']
+> {
   _autopin: boolean
   _ceramic: CeramicApi
   _definitionsSchemaURL: string
@@ -96,20 +100,20 @@ export class DIDDataStore<ModelTypes extends ModelTypeAliases = ModelTypeAliases
     return ref != null
   }
 
-  async get<Alias extends string, ContentType = DefinitionContentType<ModelTypes, Alias>>(
-    alias: Alias,
+  async get<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
+    key: Key,
     did?: string
   ): Promise<ContentType | null> {
-    const definitionID = this.getDefinitionID(alias)
+    const definitionID = this.getDefinitionID(key as string)
     return await this.getRecord<ContentType>(definitionID, did)
   }
 
-  async set<Alias extends string, ContentType = DefinitionContentType<ModelTypes, Alias>>(
-    alias: Alias,
+  async set<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
+    key: Key,
     content: ContentType,
     options?: CreateOptions
   ): Promise<StreamID> {
-    const definitionID = this.getDefinitionID(alias)
+    const definitionID = this.getDefinitionID(key as string)
     const [created, id] = await this._setRecordOnly(definitionID, content, options)
     if (created) {
       await this._setReference(definitionID, id)
@@ -117,12 +121,12 @@ export class DIDDataStore<ModelTypes extends ModelTypeAliases = ModelTypeAliases
     return id
   }
 
-  async merge<Alias extends string, ContentType = DefinitionContentType<ModelTypes, Alias>>(
-    alias: Alias,
+  async merge<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
+    key: Key,
     content: ContentType,
     options?: CreateOptions
   ): Promise<StreamID> {
-    const definitionID = this.getDefinitionID(alias)
+    const definitionID = this.getDefinitionID(key as string)
     const existing = await this.getRecord<ContentType>(definitionID)
     const newContent = existing ? { ...existing, ...content } : content
     return await this.setRecord(definitionID, newContent, options)
@@ -177,9 +181,9 @@ export class DIDDataStore<ModelTypes extends ModelTypeAliases = ModelTypeAliases
     return newReferences
   }
 
-  async remove(alias: string): Promise<void> {
+  async remove(key: Alias): Promise<void> {
     await this._indexProxy.changeContent((index) => {
-      if (index) delete index[this.getDefinitionID(alias)]
+      if (index) delete index[this.getDefinitionID(key as string)]
       return index
     })
   }
