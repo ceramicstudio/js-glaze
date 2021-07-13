@@ -3,7 +3,7 @@ import type { StreamID } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { Definition, IdentityIndex } from '@glazed/core-datamodel'
 import { DataModel } from '@glazed/datamodel'
-import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
+import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
 import type { TileContent, TileDoc } from './proxy'
@@ -39,7 +39,7 @@ export type CreateOptions = {
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   autopin?: boolean
   ceramic: CeramicApi
-  model: DataModel<ModelTypes> | PublishedModel
+  model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
 export class DIDDataStore<

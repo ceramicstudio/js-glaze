@@ -3,7 +3,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { DataModel } from '@glazed/datamodel'
 import { DIDDataStore } from '@glazed/did-datastore'
-import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
+import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
 import type { Doc } from './types'
@@ -12,25 +12,25 @@ import { toDoc } from './utils'
 export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   autopin?: boolean
   ceramic: CeramicApi
-  model: DataModel<ModelTypes> | PublishedModel
+  model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
 export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   _ceramic: CeramicApi
-  _dataStore: DIDDataStore
+  _dataStore: DIDDataStore<ModelTypes>
   _itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
   _referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(config: ContextConfig<ModelTypes>) {
     this._ceramic = config.ceramic
-    this._dataStore = new DIDDataStore(config)
+    this._dataStore = new DIDDataStore<ModelTypes>(config)
   }
 
   get ceramic(): CeramicApi {
     return this._ceramic
   }
 
-  get dataStore(): DIDDataStore {
+  get dataStore(): DIDDataStore<ModelTypes> {
     return this._dataStore
   }
 

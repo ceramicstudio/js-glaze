@@ -57,3 +57,8 @@ export type ModelTypeAliases<
   definitions: Definitions
   tiles: Tiles
 }
+
+export type ModelTypesToAliases<TypeAliases extends ModelTypeAliases> = MapModelTypes<
+  TypeAliases,
+  string
+>

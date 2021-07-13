@@ -1,11 +1,6 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { MapModelTypes, ModelTypeAliases } from '@glazed/types'
-
-export type ModelTypesToAliases<TypeAliases extends ModelTypeAliases> = MapModelTypes<
-  TypeAliases,
-  string
->
+import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 export type CreateOptions = {
   pin?: boolean
