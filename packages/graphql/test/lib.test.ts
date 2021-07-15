@@ -1,12 +1,12 @@
 /**
- * @jest-environment idx
+ * @jest-environment glaze
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { publishCollectionSchemas } from '@ceramicstudio/append-collection'
-import { DocSet, publishIDXConfig } from '@ceramicstudio/idx-tools'
+import { publishCollectionSchemas } from '@glazed/append-collection'
+import { ModelManager, createGraphQLModel } from '@glazed/devtools'
 import { execute, parse, printSchema } from 'graphql'
 import type { GraphQLSchema } from 'graphql'
 
@@ -17,12 +17,12 @@ declare global {
 }
 
 describe('lib', () => {
-  const context = new Context(ceramic)
+  jest.setTimeout(20000)
+
+  let context: Context
   let schema: GraphQLSchema
 
   beforeAll(async () => {
-    await publishIDXConfig(ceramic)
-
     const NoteSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Note',
@@ -77,24 +77,28 @@ describe('lib', () => {
     const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
-    const docset = new DocSet(ceramic)
+    const manager = new ModelManager(ceramic)
+    await manager.useDataStoreModel()
+
     await Promise.all([
-      docset.addDefinition(
-        {
-          name: 'notes',
-          description: 'My notes',
-          schema: notesSchemaURL,
-        },
-        'myNotes'
-      ),
-      docset.addTile(
+      manager.addDefinition('myNotes', {
+        name: 'notes',
+        description: 'My notes',
+        schema: notesSchemaURL,
+      }),
+      manager.addTile(
         'exampleNote',
         { date: '2020-12-10T11:12:34.567Z', text: 'An example note', title: 'Example' },
         { schema: noteSchemaURL }
       ),
     ])
-    const graphqlDocSetRecords = await docset.toGraphQLDocSetRecords()
-    schema = createGraphQLSchema(graphqlDocSetRecords)
+
+    const [graphModel, model] = await Promise.all([
+      createGraphQLModel(manager),
+      manager.toPublished(),
+    ])
+    context = new Context({ ceramic, model })
+    schema = createGraphQLSchema(graphModel)
   })
 
   test('schema creation', () => {

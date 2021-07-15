@@ -11,25 +11,23 @@ Packages providing the JavaScript/TypeScript implementation of the [IDX protocol
 
 ## Installation
 
-This monorepo uses workspaces from npm v7, included with Node v15.
-If you are using an older version of Node, make sure to install npm v7.
+This monorepo uses Yarn's workspaces, make sure to install it first if you don't already have it.
 
-1. `npm install` to install the dependencies
-1. `npm run build` to build all the packages
+1. `yarn install` to install the dependencies
+1. `yarn build` to build all the packages
 
 ### Additional scripts
 
-- `npm run lint` to run the linter in all packages
-- `npm test` to run tests in all packages
+- `yarn lint` to run the linter in all packages
+- `yarn test` to run tests in all packages
 
 ## Packages
 
 ### IDX
 
-- [`@ceramicstudio/idx`](https://developers.idx.xyz/reference/idx/) in [`packages/core`](packages/core)
-- [`@ceramicstudio/idx-constants`](https://developers.idx.xyz/reference/idx-constants/) in [`packages/constants`](packages/constants)
-- [`@ceramicstudio/idx-cli`](https://developers.idx.xyz/reference/cli/) in [`packages/cli`](packages/cli)
-- [`@ceramicstudio/idx-tools`](https://developers.idx.xyz/reference/idx-tools/) in [`packages/tools`](packages/tools)
+- [`@ceramicstudio/idx`](https://developers.idx.xyz/reference/idx/) in [`packages/idx`](packages/idx)
+- [`@ceramicstudio/idx-constants`](https://developers.idx.xyz/reference/idx-constants/) in [`packages/idx-constants`](packages/constants)
+- [`@ceramicstudio/idx-tools`](https://developers.idx.xyz/reference/idx-tools/) in [`packages/idx-tools`](packages/idx-tools)
 
 ### Jest environments
 

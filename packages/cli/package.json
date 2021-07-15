@@ -1,11 +1,11 @@
 {
-  "name": "@ceramicstudio/idx-cli",
-  "description": "IDX CLI",
+  "name": "@glazed/cli",
+  "description": "Glaze CLI",
   "keywords": [
     "ceramic",
-    "idx"
+    "glaze"
   ],
-  "version": "0.10.0",
+  "version": "0.1.0",
   "author": "Paul Le Cam <paul@3box.io>",
   "license": "(Apache-2.0 OR MIT)",
   "repository": "ceramicstudio/js-idx",
@@ -34,7 +34,7 @@
   },
   "oclif": {
     "commands": "./lib/commands",
-    "bin": "idx",
+    "bin": "glaze",
     "plugins": [
       "@oclif/plugin-help"
     ]
@@ -42,6 +42,7 @@
   "dependencies": {
     "@ceramicnetwork/3id-did-resolver": "^1.2.0",
     "@ceramicnetwork/http-client": "^1.0.0",
+    "@ceramicnetwork/stream-tile": "^1.0.7",
     "@ceramicnetwork/streamid": "^1.0.0",
     "@ceramicstudio/idx": "^0.12.1",
     "@ceramicstudio/idx-constants": "^1.0.0",
@@ -51,7 +52,8 @@
     "@oclif/plugin-help": "^3.2.2",
     "cli-table3": "^0.6.0",
     "conf": "^10.0.1",
-    "dids": "^2.0.0",
+    "did-resolver": "^3.1.0",
+    "dids": "^2.3.0",
     "inquirer": "^8.1.0",
     "key-did-provider-ed25519": "^1.0.1",
     "key-did-resolver": "^1.1.1",
@@ -65,10 +67,10 @@
   "devDependencies": {
     "@ceramicnetwork/common": "^1.0.0",
     "@oclif/dev-cli": "^1.26.0",
-    "@types/inquirer": "^7.3.1",
-    "@types/listr": "^0.14.2",
+    "@types/inquirer": "^7.3.3",
+    "@types/listr": "^0.14.4",
     "@types/node": "^14.14.21",
-    "@types/update-notifier": "^5.0.0",
+    "@types/update-notifier": "^5.0.1",
     "globby": "^11.0.2",
     "ts-node": "^10.0.0",
     "tslib": "^2.1.0"

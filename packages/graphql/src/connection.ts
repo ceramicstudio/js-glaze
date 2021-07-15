@@ -1,7 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { AppendCollection } from '@ceramicstudio/append-collection'
-import type { ItemResult, LoadResult } from '@ceramicstudio/append-collection'
+import { AppendCollection } from '@glazed/append-collection'
+import type { ItemResult, LoadResult } from '@glazed/append-collection'
 import type { Connection, ConnectionArguments, Edge } from 'graphql-relay'
 
 import type { Doc } from './types'

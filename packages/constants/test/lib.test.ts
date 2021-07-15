@@ -1,9 +1,9 @@
-import { definitions, schemas } from '..'
+import { CIP88_APPEND_COLLECTION_PREFIX, CIP88_REF_PREFIX } from '..'
 
-test('definitions', () => {
-  expect(definitions).toBeDefined()
+test('AppendCollection prefix', () => {
+  expect(CIP88_APPEND_COLLECTION_PREFIX).toBeDefined()
 })
 
-test('schemas', () => {
-  expect(schemas).toBeDefined()
+test('Ref prefix', () => {
+  expect(CIP88_REF_PREFIX).toBeDefined()
 })

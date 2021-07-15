@@ -58,7 +58,7 @@ export type TileEntry = {
   schema: string
 }
 
-export type GraphQLDocSetRecords = {
+export type GraphQLModel = {
   collections: Record<string, CollectionEntry> // alias to collection entry
   index: Record<string, TileEntry> // alias to tile entry
   lists: Record<string, ItemField> // list alias to item type

@@ -1,0 +1,20 @@
+{
+  "name": "jest-environment-glaze",
+  "version": "0.1.0",
+  "description": "Glaze environment for Jest",
+  "main": "index.js",
+  "files": [],
+  "author": "Paul Le Cam <paul@3box.io>",
+  "license": "(Apache-2.0 OR MIT)",
+  "scripts": {
+    "lint": "eslint index.js --fix",
+    "prepare": "npm run lint"
+  },
+  "dependencies": {
+    "dids": "^2.3.0",
+    "jest-environment-ceramic": "^0.13.0",
+    "key-did-provider-ed25519": "^1.0.1",
+    "key-did-resolver": "^1.1.1",
+    "uint8arrays": "^2.1.2"
+  }
+}

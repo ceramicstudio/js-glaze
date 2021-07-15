@@ -15,12 +15,12 @@ module.exports = class IDXEnvironment extends CeramicEnvironment {
     await super.setup()
     const did = new DID({
       resolver: KeyResolver.getResolver(),
-      provider: new Ed25519Provider(this.seed)
+      provider: new Ed25519Provider(this.seed),
     })
     await Promise.all([
       publishIDXConfig(this.global.ceramic),
       this.global.ceramic.setDID(did),
-      did.authenticate()
+      did.authenticate(),
     ])
   }
 }

@@ -1,15 +1,14 @@
 {
-  "name": "@ceramicstudio/idx-graphql-types",
+  "name": "@glazed/graphql-types",
   "version": "0.1.0",
-  "author": "Ceramic Studio",
+  "author": "3Box Labs",
   "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
-  "module": "dist/idx-graphql-types.esm.js",
+  "module": "dist/graphql-types.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
     "node": ">=12"

@@ -1,21 +1,22 @@
 
 {
   "extends": "./tsconfig.build.json",
-  "include": ["packages", "types"],
+  "include": ["packages"],
   "compilerOptions": {
     "allowJs": false,
     "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "typeRoots": ["./node_modules/@types"],
     "paths": {
-      "@ceramicstudio/append-collection": ["packages/append-collection/src"],
-      "@ceramicstudio/idx": ["packages/core/src"],
-      "@ceramicstudio/idx-cli": ["packages/cli/src"],
-      "@ceramicstudio/idx-constants": ["packages/constants/src"],
-      "@ceramicstudio/idx-graphql": ["packages/graphql/src"],
-      "@ceramicstudio/idx-graphql-types": ["packages/graphql-types/src"],
-      "@ceramicstudio/idx-tools": ["packages/tools/src"],
-      "jest-environment-ceramic": ["packages/jest-environment-ceramic"],
-      "jest-environment-idx": ["packages/jest-environment-idx"]
+      "@datamodels/3box-essentials": ["packages/3box-essentials/src"],
+      "@glazed/append-collection": ["packages/append-collection/src"],
+      "@glazed/cli": ["packages/cli/src"],
+      "@glazed/constants": ["packages/constants/src"],
+      "@glazed/devtools": ["packages/devtools/src"],
+      "@glazed/did-datastore": ["packages/did-datastore/src"],
+      "@glazed/did-datastore-model": ["packages/did-datastore-model/src"],
+      "@glazed/graphql": ["packages/graphql/src"],
+      "@glazed/graphql-types": ["packages/graphql-types/src"],
+      "@glazed/types": ["packages/types/src"]
     }
   }
 }

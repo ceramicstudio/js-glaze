@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datamodel publish signed 1`] = `
+Object {
+  "definitions": Object {
+    "myNotes": "kjzl6cwe1jw14bhxm5momzc0s5f22he2ezy5gng99cruakyp9og5cohp3ccbqrn",
+  },
+  "schemas": Object {
+    "Note": "ceramic://k3y52l7qbv1fryjox0zhbtmer654wj7us7h1gmz5dl3r9y0wvag42g31uuzxujh1c",
+    "NotesList": "ceramic://k3y52l7qbv1fryeoydjq5tcwl56zdb7coxyj5lu12sopjv69p3oz1f5dozdhasg74",
+  },
+  "tiles": Object {},
+}
+`;
