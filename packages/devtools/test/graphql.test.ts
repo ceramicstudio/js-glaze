@@ -12,7 +12,7 @@ describe('graphql', () => {
 
   test('creation flow with associated schema', async () => {
     const manager = new ModelManager(ceramic)
-    await manager.useCoreModel()
+    await manager.useDataStoreModel()
 
     // TODO: also test with external schema added in manager constructor?
     // or added dynamically

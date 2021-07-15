@@ -8,8 +8,6 @@ test('3box-essentials model', () => {
       AlsoKnownAs: expect.any(Object),
       BasicProfile: expect.any(Object),
       CryptoAccounts: expect.any(Object),
-      Definition: expect.any(Object),
-      IdentityIndex: expect.any(Object),
       ThreeIdKeychain: expect.any(Object),
     },
     definitions: {

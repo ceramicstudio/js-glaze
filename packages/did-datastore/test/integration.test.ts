@@ -20,7 +20,7 @@ describe('integration', () => {
 
   test('get and set a definition', async () => {
     const manager = new ModelManager(ceramic)
-    await manager.useCoreModel()
+    await manager.useDataStoreModel()
 
     const schemaRef = await manager.addSchema('Profile', {
       $schema: 'http://json-schema.org/draft-07/schema#',

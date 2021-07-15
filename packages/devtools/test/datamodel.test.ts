@@ -130,7 +130,7 @@ describe('datamodel', () => {
     }
 
     const manager = new ModelManager(ceramic)
-    await manager.useCoreModel()
+    await manager.useDataStoreModel()
 
     const [notesListSchemaCommitID] = await Promise.all([
       manager.addSchema('NotesList', NotesListSchema as any),

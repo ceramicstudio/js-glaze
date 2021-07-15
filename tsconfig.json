@@ -11,9 +11,9 @@
       "@glazed/append-collection": ["packages/append-collection/src"],
       "@glazed/cli": ["packages/cli/src"],
       "@glazed/constants": ["packages/constants/src"],
-      "@glazed/core-datamodel": ["packages/core-datamodel/src"],
       "@glazed/devtools": ["packages/devtools/src"],
       "@glazed/did-datastore": ["packages/did-datastore/src"],
+      "@glazed/did-datastore-model": ["packages/did-datastore-model/src"],
       "@glazed/graphql": ["packages/graphql/src"],
       "@glazed/graphql-types": ["packages/graphql-types/src"],
       "@glazed/types": ["packages/types/src"]

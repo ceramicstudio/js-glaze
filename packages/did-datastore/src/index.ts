@@ -1,8 +1,8 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { StreamID } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { Definition, IdentityIndex } from '@glazed/core-datamodel'
 import { DataModel } from '@glazed/datamodel'
+import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'

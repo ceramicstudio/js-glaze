@@ -1,5 +1,3 @@
-import { model as coreModel } from '@glazed/core-datamodel'
-import type { Definition, IdentityIndex } from '@glazed/core-datamodel'
 import type { ModelTypeAliases, EncodedSignedModel } from '@glazed/types'
 
 export type Attestation = {
@@ -81,8 +79,6 @@ export type ModelTypes = ModelTypeAliases<
     AlsoKnownAs: AlsoKnownAs
     BasicProfile: BasicProfile
     CryptoAccounts: CryptoAccounts
-    Definition: Definition
-    IdentityIndex: IdentityIndex
     ThreeIdKeychain: ThreeIdKeychain
   },
   {
@@ -169,7 +165,6 @@ export const model: EncodedSignedModel<ModelTypes> = {
     ],
   },
   schemas: {
-    ...coreModel.schemas,
     AlsoKnownAs: [
       {
         jws: {

@@ -78,7 +78,7 @@ describe('lib', () => {
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const manager = new ModelManager(ceramic)
-    await manager.useCoreModel()
+    await manager.useDataStoreModel()
 
     await Promise.all([
       manager.addDefinition('myNotes', {

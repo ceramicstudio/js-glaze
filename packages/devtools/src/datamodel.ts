@@ -5,8 +5,8 @@ import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP88_REF_PREFIX } from '@glazed/constants'
-import type { Definition } from '@glazed/core-datamodel'
-import { model as coreModel } from '@glazed/core-datamodel'
+import type { Definition } from '@glazed/did-datastore-model'
+import { model as dataStoreModel } from '@glazed/did-datastore-model'
 import type { EncodedSignedModel, PublishedModel, Schema, SignedModel } from '@glazed/types'
 import type { DagJWSResult } from 'dids'
 
@@ -14,7 +14,7 @@ import { decodeSignedMap, encodeSignedMap } from './encoding'
 import { createTile, publishCommits } from './publishing'
 import { applyMap, promiseMap, streamIDToString } from './utils'
 
-type CoreModel = {
+type DataStoreModel = {
   definitions: Record<string, never>
   schemas: {
     Definition: string
@@ -95,8 +95,8 @@ export async function publishEncodedSignedModel(
   return await publishSignedModel(ceramic, applyMap(model, decodeSignedMap))
 }
 
-export async function publishCoreModel(ceramic: CeramicApi): Promise<CoreModel> {
-  return (await publishEncodedSignedModel(ceramic, coreModel)) as CoreModel
+export async function publishDataStoreModel(ceramic: CeramicApi): Promise<DataStoreModel> {
+  return (await publishEncodedSignedModel(ceramic, dataStoreModel)) as DataStoreModel
 }
 export class ModelManager {
   public static fromPublished(ceramic: CeramicApi, published: PublishedModel): ModelManager {
@@ -213,8 +213,8 @@ export class ModelManager {
     return doc.commitId
   }
 
-  async useCoreModel(): Promise<void> {
-    const { schemas } = await publishCoreModel(this._ceramic)
+  async useDataStoreModel(): Promise<void> {
+    const { schemas } = await publishDataStoreModel(this._ceramic)
     await Promise.all([
       this.usePublishedSchema('Definition', schemas.Definition),
       this.usePublishedSchema('IdentityIndex', schemas.IdentityIndex),
@@ -308,11 +308,11 @@ export class ModelManager {
     }
 
     if (!this.hasSchema('IdentityIndex')) {
-      throw new Error('Missing IdentityIndex schema in model, call useCoreModel() first')
+      throw new Error('Missing IdentityIndex schema in model, call useDataStoreModel() first')
     }
     const definitionSchemaCreated = this.getSchema('Definition')
     if (definitionSchemaCreated == null) {
-      throw new Error('Missing Definition schema in model, call useCoreModel() first')
+      throw new Error('Missing Definition schema in model, call useDataStoreModel() first')
     }
 
     this._model.definitions[alias] = Promise.all([

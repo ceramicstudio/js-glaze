@@ -2,7 +2,7 @@
 
 import { model } from '../src'
 
-test('glaze-core model', () => {
+test('DID DataStore model', () => {
   expect(model).toEqual({
     schemas: {
       Definition: expect.any(Object),

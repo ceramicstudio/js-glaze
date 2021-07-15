@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/constants'
-import type { Definition } from '@glazed/core-datamodel'
+import type { Definition } from '@glazed/did-datastore-model'
 import type { GraphQLModel, ItemField, ObjectField } from '@glazed/graphql-types'
 import type { Schema } from '@glazed/types'
 import { camelCase, pascalCase } from 'change-case'

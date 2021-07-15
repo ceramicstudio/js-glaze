@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@ceramicnetwork/http-client": "^1.0.0",
-    "@glazed/core-datamodel": "^0.1.0",
+    "@glazed/did-datastore-model": "^0.1.0",
     "@glazed/graphql-types": "^0.1.0",
     "@glazed/types": "^0.1.0",
     "@types/jest": "^26.0.24",

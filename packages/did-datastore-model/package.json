@@ -1,11 +1,11 @@
 {
-  "name": "@glazed/core-datamodel",
+  "name": "@glazed/did-datastore-model",
   "version": "0.1.0",
   "author": "3Box Labs",
   "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
-  "module": "dist/core-datamodel.esm.js",
+  "module": "dist/did-datastore-model.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"

@@ -20,9 +20,6 @@
     "lint": "eslint src test --fix",
     "prepublish": "npm run build"
   },
-  "dependencies": {
-    "@glazed/core-datamodel": "^0.1.0"
-  },
   "devDependencies": {
     "@glazed/types": "^0.1.0"
   }
