@@ -81,12 +81,12 @@ describe('lib', () => {
     await manager.useDataStoreModel()
 
     await Promise.all([
-      manager.addDefinition('myNotes', {
+      manager.createDefinition('myNotes', {
         name: 'notes',
         description: 'My notes',
         schema: notesSchemaURL,
       }),
-      manager.addTile(
+      manager.createTile(
         'exampleNote',
         { date: '2020-12-10T11:12:34.567Z', text: 'An example note', title: 'Example' },
         { schema: noteSchemaURL }

@@ -70,13 +70,13 @@ describe('graphql', () => {
     const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
-    const notesDefinitionID = await manager.addDefinition('myNotes', {
+    const notesDefinitionID = await manager.createDefinition('myNotes', {
       name: 'notes',
       description: 'My notes',
       schema: notesSchemaURL,
     })
 
-    const exampleNoteID = await manager.addTile(
+    const exampleNoteID = await manager.createTile(
       'exampleNote',
       { date: '2020-12-10T11:12:34.567Z', text: 'An example note' },
       { schema: noteSchemaURL }

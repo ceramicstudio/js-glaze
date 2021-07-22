@@ -3,78 +3,144 @@
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { ModelManager, publishEncodedSignedModel } from '../src'
+import { ModelManager, publishEncodedModel } from '../src'
 
 describe('datamodel', () => {
   jest.setTimeout(20000)
 
-  test('publish signed', async () => {
-    const signedModel = {
-      definitions: {
-        myNotes: [
-          {
-            jws: {
-              payload: 'AXESIJF7-JQyVITfBTFVxXibUpyJoHP3vWbkGpZdrOmMWdOV',
-              signatures: [
-                {
-                  signature:
-                    '74WEiXkD6StwAWqIeXlaZg8hj0asoljSPJuZarR7hloelLYSP5__F9YqDsZ2x3tumvtQtiG28J7TIxV7Sk22CQ',
-                  protected:
-                    'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa296QUVudXN0Z3BLV0hXM2poRmlSQkd3Nm9yWlRSa0sxdFZyNm1heFpycGo5I3o2TWtvekFFbnVzdGdwS1dIVzNqaEZpUkJHdzZvclpUUmtLMXRWcjZtYXhacnBqOSJ9',
-                },
-              ],
-              link: 'bafyreierpp4jimsuqtpqkmkvyv4jwuu4rgqhh555m3sbvfs5vtuyywotsu',
-            },
-            linkedBlock:
-              'omRkYXRho2RuYW1lZW5vdGVzZnNjaGVtYXhLY2VyYW1pYzovL2szeTUybDdxYnYxZnJ5ZW95ZGpxNXRjd2w1NnpkYjdjb3h5ajVsdTEyc29wanY2OXAzb3oxZjVkb3pkaGFzZzc0a2Rlc2NyaXB0aW9uaE15IG5vdGVzZmhlYWRlcqJmdW5pcXVlcHQ1bnNDUHYzc1RQR2EzSnJrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWtvekFFbnVzdGdwS1dIVzNqaEZpUkJHdzZvclpUUmtLMXRWcjZtYXhacnBqOQ==',
-          },
-        ],
-      },
+  test('publish encoded model', async () => {
+    const encodedModel = {
       schemas: {
-        NotesList: [
-          {
-            jws: {
-              payload: 'AXESIFC8Va0fKPMmnBDNo0D6Nx7G9jkdv3W-vclA11X5G3oD',
-              signatures: [
-                {
-                  signature:
-                    'iSTpVkh8XviWs5_PYfUI4kT-Z7FB7josiy9XkljOalFXxJm9bw1CbafcYJSYPUTjPYpR2kOIZBMITIBZtxEtAw',
-                  protected:
-                    'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa296QUVudXN0Z3BLV0hXM2poRmlSQkd3Nm9yWlRSa0sxdFZyNm1heFpycGo5I3o2TWtvekFFbnVzdGdwS1dIVzNqaEZpUkJHdzZvclpUUmtLMXRWcjZtYXhacnBqOSJ9',
-                },
-              ],
-              link: 'bafyreicqxrk22hzi6mtjyegnunapuny6y33dshn7ow7l3ska25k7sg32am',
+        kjzl6cwe1jw14amy1imkbql1d61u00q9cbvhy5c3jtv3nz552fshl013530rauh: {
+          alias: 'DataStoreIdentityIndex',
+          commits: [
+            {
+              jws: {
+                payload: 'AXESIKO29HNjXsFTO9Bbs5VTTGqJUPZ9Aoic83L6G0ziXp48',
+                signatures: [
+                  {
+                    signature:
+                      'R-VH5EwcOsvd3Txsl4Pjw-QSobjiNJuQVPWrbubyX6uIbe2SRupKx5od0z2agdeVnglt9L9mHiOqlRGgI7WNDQ',
+                    protected:
+                      'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3NOWUU2V3RNWjNXTGJQd2NwOUdtN2RUN0ozRHNOUDhhdVFOblBwUUJ1MzdBI3o2TWtzTllFNld0TVozV0xiUHdjcDlHbTdkVDdKM0RzTlA4YXVRTm5QcFFCdTM3QSJ9',
+                  },
+                ],
+                link: 'bafyreifdw32hgy26yfjtxuc3wokvgtdkrfipm7icrcopg4x2dngoexu6hq',
+              },
+              linkedBlock:
+                'o2RkYXRhpWR0eXBlZm9iamVjdGV0aXRsZW1JZGVudGl0eUluZGV4ZyRzY2hlbWF4J2h0dHA6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQtMDcvc2NoZW1hI2tkZWZpbml0aW9uc6FsQ2VyYW1pY0RvY0lko2R0eXBlZnN0cmluZ2dwYXR0ZXJueBxeY2VyYW1pYzovLy4rKFw/dmVyc2lvbj0uKyk/aW1heExlbmd0aBiWdGFkZGl0aW9uYWxQcm9wZXJ0aWVzoWQkcmVmeBojL2RlZmluaXRpb25zL0NlcmFtaWNEb2NJZGZoZWFkZXKiZnNjaGVtYfdrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWtzTllFNld0TVozV0xiUHdjcDlHbTdkVDdKM0RzTlA4YXVRTm5QcFFCdTM3QWdkb2N0eXBlZHRpbGU=',
             },
-            linkedBlock:
-              'omRkYXRhpmR0eXBlZm9iamVjdGV0aXRsZWlOb3Rlc0xpc3RnJHNjaGVtYXgnaHR0cDovL2pzb24tc2NoZW1hLm9yZy9kcmFmdC0wNy9zY2hlbWEjaHJlcXVpcmVkgGpwcm9wZXJ0aWVzoWVub3Rlc6NkdHlwZWVhcnJheWVpdGVtc6RkdHlwZWZvYmplY3RldGl0bGVoTm90ZUl0ZW1ocmVxdWlyZWSAanByb3BlcnRpZXOiYmlkoWQkcmVmeBojL2RlZmluaXRpb25zL0NlcmFtaWNEb2NJZGV0aXRsZaNkdHlwZWZzdHJpbmdldGl0bGVldGl0bGVpbWF4TGVuZ3RoGGRldGl0bGVlbm90ZXNrZGVmaW5pdGlvbnOhbENlcmFtaWNEb2NJZKNkdHlwZWZzdHJpbmdncGF0dGVybngcXmNlcmFtaWM6Ly8uKyhcP3ZlcnNpb249LispP2ltYXhMZW5ndGgYlmZoZWFkZXKiZnVuaXF1ZXBUTWc0TEdyK3h5YnRVNUZSa2NvbnRyb2xsZXJzgXg4ZGlkOmtleTp6Nk1rb3pBRW51c3RncEtXSFczamhGaVJCR3c2b3JaVFJrSzF0VnI2bWF4WnJwajk=',
-          },
-        ],
-        Note: [
-          {
-            jws: {
-              payload: 'AXESIAdjbJhcP72K_OLxy1FOjvMs4hbLwIeo7mYvfGlci7td',
-              signatures: [
-                {
-                  signature:
-                    '5qO6Bd8d2UdeflYgofamBOkSNjwb5Fy-OFJ8M2Gu8h7_AT09w4LNURjYFT9QTkiuGVH1hNwZUxLqA0bfcXYADQ',
-                  protected:
-                    'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa296QUVudXN0Z3BLV0hXM2poRmlSQkd3Nm9yWlRSa0sxdFZyNm1heFpycGo5I3o2TWtvekFFbnVzdGdwS1dIVzNqaEZpUkJHdzZvclpUUmtLMXRWcjZtYXhacnBqOSJ9',
-                },
-              ],
-              link: 'bafyreiahmnwjqxb7xwfpzyxrzniu5dxtftrbns6aq6uo4zrppruvzc53lu',
+          ],
+          dependencies: {},
+          version: 'k3y52l7qbv1fryjn62sggjh1lpn11c56qfofzmty190d62hwk1cal1c7qc5he54ow',
+        },
+        kjzl6cwe1jw1482rpzfuczmbqkxnevw3risxar23d7z2majhkm9pouujiov58tq: {
+          alias: 'DataStoreDefinition',
+          commits: [
+            {
+              jws: {
+                payload: 'AXESIGVBGu8EHXq5fxC16J4MwEPBCfrWq1bsZWQP2F_WWhT0',
+                signatures: [
+                  {
+                    signature:
+                      'hvv_KWbyYbg7ZP8PQeJxPjHnlAg1VKtPjVa6zXwMq9pug96qGcXFQi5XUAl30RH4QYOHl8Gpv4uZczWxAJllAg',
+                    protected:
+                      'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3NOWUU2V3RNWjNXTGJQd2NwOUdtN2RUN0ozRHNOUDhhdVFOblBwUUJ1MzdBI3o2TWtzTllFNld0TVozV0xiUHdjcDlHbTdkVDdKM0RzTlA4YXVRTm5QcFFCdTM3QSJ9',
+                  },
+                ],
+                link: 'bafyreidfieno6ba5pk4x6efv5cpazqcdyee7vvvlk3wgkzap3bp5mwqu6q',
+              },
+              linkedBlock:
+                'o2RkYXRhpmR0eXBlZm9iamVjdGV0aXRsZWpEZWZpbml0aW9uZyRzY2hlbWF4J2h0dHA6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQtMDcvc2NoZW1hI2hyZXF1aXJlZINkbmFtZWtkZXNjcmlwdGlvbmZzY2hlbWFqcHJvcGVydGllc6VjdXJsomR0eXBlZnN0cmluZ2ltYXhMZW5ndGgY8GRuYW1lomR0eXBlZnN0cmluZ2ltYXhMZW5ndGgYlmZjb25maWehZHR5cGVmb2JqZWN0ZnNjaGVtYaFkJHJlZngaIy9kZWZpbml0aW9ucy9DZXJhbWljRG9jSWRrZGVzY3JpcHRpb26iZHR5cGVmc3RyaW5naW1heExlbmd0aBkBpGtkZWZpbml0aW9uc6FsQ2VyYW1pY0RvY0lko2R0eXBlZnN0cmluZ2dwYXR0ZXJueBxeY2VyYW1pYzovLy4rKFw/dmVyc2lvbj0uKyk/aW1heExlbmd0aBiWZmhlYWRlcqJmc2NoZW1h92tjb250cm9sbGVyc4F4OGRpZDprZXk6ejZNa3NOWUU2V3RNWjNXTGJQd2NwOUdtN2RUN0ozRHNOUDhhdVFOblBwUUJ1MzdBZ2RvY3R5cGVkdGlsZQ==',
             },
-            linkedBlock:
-              'omRkYXRhpWR0eXBlZm9iamVjdGV0aXRsZWROb3RlZyRzY2hlbWF4J2h0dHA6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQtMDcvc2NoZW1hI2hyZXF1aXJlZIBqcHJvcGVydGllc6JkZGF0ZaRkdHlwZWZzdHJpbmdldGl0bGVkZGF0ZWZmb3JtYXRpZGF0ZS10aW1laW1heExlbmd0aBgeZHRleHSjZHR5cGVmc3RyaW5nZXRpdGxlZHRleHRpbWF4TGVuZ3RoGQ+gZmhlYWRlcqJmdW5pcXVlcEhmR3RNK2w5cXRTd2ZaVVRrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWtvekFFbnVzdGdwS1dIVzNqaEZpUkJHdzZvclpUUmtLMXRWcjZtYXhacnBqOQ==',
+          ],
+          dependencies: {},
+          version: 'k3y52l7qbv1fry1fp4s0nwdarh0vahusarpposgevy0pemiykymd2ord6swtharcw',
+        },
+        kjzl6cwe1jw146mi4smwraxjypxq5d1qwq9iei4yydyxf6jwna1d8wouohto87e: {
+          alias: 'Note',
+          commits: [
+            {
+              jws: {
+                payload: 'AXESIKiye0AVOuPrc8DMbos2QCqi4AZovd6PfkRRry7xqynW',
+                signatures: [
+                  {
+                    signature:
+                      'fjs2dgtTkJ59rHxIigfdnGPEVsDn_tFjT0uM_05vgUcs6_UsZVH7GZff3ylLT21Crd6qG_FqLPCfuhCzblyHDA',
+                    protected:
+                      'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lUQnoxeW11ZXBBUTRIRUhZU0YxSDhxdUc1R0xWVlFSM2RqZFgzbURvb1dwI3o2TWtpVEJ6MXltdWVwQVE0SEVIWVNGMUg4cXVHNUdMVlZRUjNkamRYM21Eb29XcCJ9',
+                  },
+                ],
+                link: 'bafyreifiwj5uafj24pvxhqgmn2ftmqbkulqam2f532hx4rcrv4xpdkzj2y',
+              },
+              linkedBlock:
+                'omRkYXRhpWR0eXBlZm9iamVjdGV0aXRsZWROb3RlZyRzY2hlbWF4J2h0dHA6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQtMDcvc2NoZW1hI2hyZXF1aXJlZIBqcHJvcGVydGllc6JkZGF0ZaRkdHlwZWZzdHJpbmdldGl0bGVkZGF0ZWZmb3JtYXRpZGF0ZS10aW1laW1heExlbmd0aBgeZHRleHSjZHR5cGVmc3RyaW5nZXRpdGxlZHRleHRpbWF4TGVuZ3RoGQ+gZmhlYWRlcqJmdW5pcXVlcGNWazlHSkIxejZzU3JYOHJrY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWtpVEJ6MXltdWVwQVE0SEVIWVNGMUg4cXVHNUdMVlZRUjNkamRYM21Eb29XcA==',
+            },
+          ],
+          dependencies: {},
+          version: 'k3y52l7qbv1frxr40y3mwy5qlywfty4sfcqrmv4zckjcdnylk5jdq7cgq66r0acjk',
+        },
+        kjzl6cwe1jw149knipvwi8blih9n07be1f82wlps0qe4pjgq8qlpjgm4ppgi87v: {
+          alias: 'NotesList',
+          commits: [
+            {
+              jws: {
+                payload: 'AXESIFk6k_JCPGisehqBXwSKS-15EqsrM_q6fv_BgzBUQqFg',
+                signatures: [
+                  {
+                    signature:
+                      'GtCSPTsh-Q2aF-cdDegEseH59fIgOT10DnZyzoG6usbxq41cHGTQGK4_pfwS1W97xntjbQ-IU8pC7J6nd4loDQ',
+                    protected:
+                      'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lUQnoxeW11ZXBBUTRIRUhZU0YxSDhxdUc1R0xWVlFSM2RqZFgzbURvb1dwI3o2TWtpVEJ6MXltdWVwQVE0SEVIWVNGMUg4cXVHNUdMVlZRUjNkamRYM21Eb29XcCJ9',
+                  },
+                ],
+                link: 'bafyreiczhkj7eqr4ncwhugubl4cius7npejkwkzt7k5h576bqmyfiqvbma',
+              },
+              linkedBlock:
+                'omRkYXRhpWR0eXBlZm9iamVjdGV0aXRsZWlOb3Rlc0xpc3RnJHNjaGVtYXgnaHR0cDovL2pzb24tc2NoZW1hLm9yZy9kcmFmdC0wNy9zY2hlbWEjaHJlcXVpcmVkgGpwcm9wZXJ0aWVzoWVub3Rlc6NkdHlwZWVhcnJheWVpdGVtc6RkdHlwZWZvYmplY3RldGl0bGVoTm90ZUl0ZW1ocmVxdWlyZWSAanByb3BlcnRpZXOiYmlkomR0eXBlZnN0cmluZ2gkY29tbWVudHhVY2lwODg6cmVmOmNlcmFtaWM6Ly9rM3k1Mmw3cWJ2MWZyeHI0MHkzbXd5NXFseXdmdHk0c2ZjcXJtdjR6Y2tqY2RueWxrNWpkcTdjZ3E2NnIwYWNqa2V0aXRsZaNkdHlwZWZzdHJpbmdldGl0bGVldGl0bGVpbWF4TGVuZ3RoGGRldGl0bGVlbm90ZXNmaGVhZGVyomZ1bmlxdWVwWGNPR3U1N2R6b08wZVd4Smtjb250cm9sbGVyc4F4OGRpZDprZXk6ejZNa2lUQnoxeW11ZXBBUTRIRUhZU0YxSDhxdUc1R0xWVlFSM2RqZFgzbURvb1dw',
+            },
+          ],
+          dependencies: {
+            'notes.id': ['kjzl6cwe1jw146mi4smwraxjypxq5d1qwq9iei4yydyxf6jwna1d8wouohto87e'],
           },
-        ],
+          version: 'k3y52l7qbv1fryc2v942v5n6gzesjlg0zu49gnufb97ohhmeym56dme5dit1dmfwg',
+        },
+      },
+      definitions: {
+        kjzl6cwe1jw145d00g4tuhpps6ozv30hb30cnlaevxmhy8hqbo2x8w58bupuhua: {
+          alias: 'myNotes',
+          commits: [
+            {
+              jws: {
+                payload: 'AXESICreMVjrLh2HUVYljVDC1EXuQCwkx8sh47ndOmpaLY5K',
+                signatures: [
+                  {
+                    signature:
+                      '6gHBHJrAsmbQipRtXR0yQXhssKIuiHG2TisR443NkIsXqtbMrFu7IodxGhJAz_SdZYimgfomqgOr_Hrq2IKJBg',
+                    protected:
+                      'eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lUQnoxeW11ZXBBUTRIRUhZU0YxSDhxdUc1R0xWVlFSM2RqZFgzbURvb1dwI3o2TWtpVEJ6MXltdWVwQVE0SEVIWVNGMUg4cXVHNUdMVlZRUjNkamRYM21Eb29XcCJ9',
+                  },
+                ],
+                link: 'bafyreibk3yyvr2zodwdvcvrfrvimfvcf5zacyjghzmq6hoo5hjvfulmoji',
+              },
+              linkedBlock:
+                'omRkYXRho2RuYW1lZW5vdGVzZnNjaGVtYXhLY2VyYW1pYzovL2szeTUybDdxYnYxZnJ5YzJ2OTQydjVuNmd6ZXNqbGcwenU0OWdudWZiOTdvaGhtZXltNTZkbWU1ZGl0MWRtZndna2Rlc2NyaXB0aW9uaE15IG5vdGVzZmhlYWRlcqNmc2NoZW1heEtjZXJhbWljOi8vazN5NTJsN3FidjFmcnkxZnA0czBud2RhcmgwdmFodXNhcnBwb3NnZXZ5MHBlbWl5a3ltZDJvcmQ2c3d0aGFyY3dmdW5pcXVlcFZmSUd1SkIrYkNFbjJEL25rY29udHJvbGxlcnOBeDhkaWQ6a2V5Ono2TWtpVEJ6MXltdWVwQVE0SEVIWVNGMUg4cXVHNUdMVlZRUjNkamRYM21Eb29XcA==',
+            },
+          ],
+          schema: 'kjzl6cwe1jw149knipvwi8blih9n07be1f82wlps0qe4pjgq8qlpjgm4ppgi87v',
+          version: 'k3y52l7qbv1frxi4g36qc8tyvcflr11ff2tehzre1v33znge36z8sf8l78afsuvb4',
+        },
       },
       tiles: {},
     }
-    await expect(publishEncodedSignedModel(ceramic, signedModel)).resolves.toMatchSnapshot()
+    await expect(publishEncodedModel(ceramic, encodedModel)).resolves.toMatchSnapshot()
   })
 
   test('creation flow', async () => {
-    const NoteSchema = {
+    const manager = new ModelManager(ceramic)
+    await manager.useDataStoreModel()
+
+    const noteSchemaID = await manager.createSchema('Note', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Note',
       type: 'object',
@@ -92,9 +158,9 @@ describe('datamodel', () => {
         },
       },
       required: [],
-    }
+    } as any)
 
-    const NotesListSchema = {
+    const notesListSchemaID = await manager.createSchema('NotesList', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'NotesList',
       type: 'object',
@@ -107,7 +173,8 @@ describe('datamodel', () => {
             title: 'NoteItem',
             properties: {
               id: {
-                $ref: '#/definitions/CeramicDocId',
+                $comment: `cip88:ref:${manager.getSchemaURL(noteSchemaID) as string}`,
+                type: 'string',
               },
               title: {
                 type: 'string',
@@ -120,31 +187,22 @@ describe('datamodel', () => {
         },
       },
       required: [],
-      definitions: {
-        CeramicDocId: {
-          type: 'string',
-          pattern: '^ceramic://.+(\\?version=.+)?',
-          maxLength: 150,
-        },
-      },
-    }
+    } as any)
 
-    const manager = new ModelManager(ceramic)
-    await manager.useDataStoreModel()
-
-    const [notesListSchemaCommitID] = await Promise.all([
-      manager.addSchema('NotesList', NotesListSchema as any),
-      manager.addSchema('Note', NoteSchema as any),
+    expect(manager.schemas).toEqual([
+      'DataStoreDefinition',
+      'DataStoreIdentityIndex',
+      'Note',
+      'NotesList',
     ])
-    expect(manager.schemas).toEqual(['Definition', 'IdentityIndex', 'NotesList', 'Note'])
 
-    await manager.addDefinition('myNotes', {
+    await manager.createDefinition('myNotes', {
       name: 'notes',
       description: 'My notes',
-      schema: notesListSchemaCommitID.toUrl(),
+      schema: manager.getSchemaURL(notesListSchemaID) as string,
     })
     expect(manager.definitions).toEqual(['myNotes'])
 
-    await expect(manager.toSignedJSON()).resolves.toBeDefined()
+    expect(manager.toJSON()).toBeDefined()
   })
 })

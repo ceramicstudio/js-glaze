@@ -54,14 +54,14 @@
     "conf": "^10.0.1",
     "did-resolver": "^3.1.0",
     "dids": "^2.3.0",
-    "inquirer": "^8.1.0",
+    "inquirer": "^8.1.2",
     "key-did-provider-ed25519": "^1.0.1",
     "key-did-resolver": "^1.1.1",
     "keytar": "^7.4.0",
     "listr": "^0.14.3",
     "listr-update-renderer": "^0.5.0",
     "ora": "^5.3.0",
-    "uint8arrays": "^2.1.2",
+    "uint8arrays": "^2.1.7",
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {

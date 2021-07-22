@@ -60,15 +60,15 @@ export class DIDDataStore<
     this._model =
       model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
 
-    const indexURL = this._model.getSchemaURL('IdentityIndex')
+    const indexURL = this._model.getSchemaURL('DataStoreIdentityIndex')
     if (indexURL == null) {
-      throw new Error('Invalid model provided: missing IdentityIndex schema')
+      throw new Error('Invalid model provided: missing DataStoreIdentityIndex schema')
     } else {
       this._indexSchemaURL = indexURL
     }
-    const definitionURL = this._model.getSchemaURL('Definition')
+    const definitionURL = this._model.getSchemaURL('DataStoreDefinition')
     if (definitionURL == null) {
-      throw new Error('Invalid model provided: missing Definition schema')
+      throw new Error('Invalid model provided: missing DataStoreDefinition schema')
     } else {
       this._definitionsSchemaURL = definitionURL
     }

@@ -1,148 +1,114 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
-import { CommitID, StreamID } from '@ceramicnetwork/streamid'
-import type { StreamRef } from '@ceramicnetwork/streamid'
+import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { CIP88_REF_PREFIX } from '@glazed/constants'
 import type { Definition } from '@glazed/did-datastore-model'
 import { model as dataStoreModel } from '@glazed/did-datastore-model'
-import type { EncodedSignedModel, PublishedModel, Schema, SignedModel } from '@glazed/types'
+import type {
+  EncodedManagedModel,
+  ManagedEntry,
+  ManagedID,
+  ManagedModel,
+  ManagedSchema,
+  ModelData,
+  PublishedModel,
+  Schema,
+} from '@glazed/types'
 import type { DagJWSResult } from 'dids'
 
-import { decodeSignedMap, encodeSignedMap } from './encoding'
+import { decodeModel, encodeModel } from './encoding'
 import { createTile, publishCommits } from './publishing'
-import { applyMap, promiseMap, streamIDToString } from './utils'
+import { extractSchemaReferences } from './schema'
+
+type ManagedReferenced = {
+  definitions: Set<ManagedID>
+  schemas: Set<ManagedID>
+  tiles: Set<ManagedID>
+}
 
 type DataStoreModel = {
   definitions: Record<string, never>
   schemas: {
-    Definition: string
-    IdentityIndex: string
+    DataStoreDefinition: string
+    DataStoreIdentityIndex: string
   }
   tiles: Record<string, never>
 }
 
-export type CreatedDoc = {
-  id: StreamRef
-  dependencies: Array<StreamRef>
+function getManagedIDAndVersion(id: StreamRef | string): [ManagedID, string | null] {
+  const streamID = typeof id === 'string' ? StreamRef.from(id) : id
+  return [streamID.baseID.toString(), CommitID.isInstance(streamID) ? streamID.toString() : null]
 }
 
-export type ManagedModel = {
-  docs: Record<string, Promise<TileDocument>>
-  definitions: Record<string, Promise<CreatedDoc>>
-  schemas: Record<string, Promise<CreatedDoc>>
-  schemaAliases: Record<string, string> // Stream ID to alias
-  tiles: Record<string, Promise<CreatedDoc>>
+function getManagedID(id: StreamRef | string): ManagedID {
+  const streamID = typeof id === 'string' ? StreamRef.from(id) : id
+  return streamID.baseID.toString()
 }
 
-export function getReference(schema: Schema): Array<string> | null {
-  if (schema.$comment?.startsWith(CIP88_REF_PREFIX)) {
-    const schemasString = schema.$comment.substr(CIP88_REF_PREFIX.length)
-    if (schemasString.length) {
-      const schemas = schemasString.split('|')
-      schemas.sort()
-      return schemas
-    }
-  }
-  return null
-}
-
-// Recursively extract references to other schemas from a JSON schema arrays and objects
-function extractSchemaReferences(schema: Schema): Array<string> {
-  if (schema.type === 'string') {
-    return getReference(schema) ?? []
-  }
-  if (schema.type === 'array') {
-    return extractSchemaReferences(schema.items)
-  }
-  if (schema.type === 'object' && schema.properties != null) {
-    // TODO: extract collection slice schema URL
-    return Object.values(schema.properties as Record<string, Schema>).flatMap(
-      extractSchemaReferences
-    )
-  }
-  return []
-}
-
-// Publish a signed model to the given Ceramic node
-export async function publishSignedModel(
+// Publish a managed model to the given Ceramic node
+export async function publishModel(
   ceramic: CeramicApi,
-  signed: SignedModel
+  model: ManagedModel
 ): Promise<PublishedModel> {
-  const schemas = await promiseMap(signed.schemas, async (commits) => {
-    const doc = await publishCommits(ceramic, commits)
-    return doc.commitId.toUrl()
-  })
+  const schemas = await Promise.all(
+    Object.values(model.schemas).map(async (schema) => {
+      const stream = await publishCommits(ceramic, schema.commits)
+      return [schema.alias, stream.commitId.toUrl()]
+    })
+  )
   const [definitions, tiles] = await Promise.all([
-    promiseMap(signed.definitions, async (commits) => {
-      const doc = await publishCommits(ceramic, commits)
-      return doc.id.toString()
-    }),
-    promiseMap(signed.tiles, async (commits) => {
-      const doc = await publishCommits(ceramic, commits)
-      return doc.id.toString()
-    }),
+    await Promise.all(
+      Object.values(model.definitions).map(async (entry) => {
+        const stream = await publishCommits(ceramic, entry.commits)
+        return [entry.alias, stream.id.toString()]
+      })
+    ),
+    await Promise.all(
+      Object.values(model.tiles).map(async (entry) => {
+        const stream = await publishCommits(ceramic, entry.commits)
+        return [entry.alias, stream.id.toString()]
+      })
+    ),
   ])
-  return { definitions, schemas, tiles }
+  return {
+    definitions: Object.fromEntries(definitions),
+    schemas: Object.fromEntries(schemas),
+    tiles: Object.fromEntries(tiles),
+  }
 }
 
-// Publish a JSON-encoded signed docset to the given Ceramic node
-export async function publishEncodedSignedModel(
+// Publish a JSON-encoded managed model to the given Ceramic node
+export async function publishEncodedModel(
   ceramic: CeramicApi,
-  model: EncodedSignedModel
+  model: EncodedManagedModel
 ): Promise<PublishedModel> {
-  return await publishSignedModel(ceramic, applyMap(model, decodeSignedMap))
+  return await publishModel(ceramic, decodeModel(model))
 }
 
 export async function publishDataStoreModel(ceramic: CeramicApi): Promise<DataStoreModel> {
-  return (await publishEncodedSignedModel(ceramic, dataStoreModel)) as DataStoreModel
+  return (await publishEncodedModel(ceramic, dataStoreModel)) as DataStoreModel
 }
 export class ModelManager {
-  public static fromPublished(ceramic: CeramicApi, published: PublishedModel): ModelManager {
-    const model: ManagedModel = {
-      docs: {},
-      definitions: {},
-      schemas: {},
-      schemaAliases: {},
-      tiles: {},
-    }
-    for (const [alias, url] of Object.entries(published.schemas)) {
-      model.schemas[alias] = Promise.resolve({ id: CommitID.fromString(url), dependencies: [] })
-      model.schemaAliases[url] = alias
-    }
-    for (const [alias, id] of Object.entries(published.definitions)) {
-      model.definitions[alias] = Promise.resolve({ id: StreamID.fromString(id), dependencies: [] })
-    }
-    for (const [alias, id] of Object.entries(published.tiles)) {
-      model.tiles[alias] = Promise.resolve({ id: StreamID.fromString(id), dependencies: [] })
-    }
-    return new ModelManager(ceramic, model)
+  public static fromJSON(ceramic: CeramicApi, encoded: EncodedManagedModel): ModelManager {
+    return new ModelManager(ceramic, decodeModel(encoded))
   }
 
-  public static async fromSigned(ceramic: CeramicApi, signed: SignedModel): Promise<ModelManager> {
-    const published = await publishSignedModel(ceramic, signed)
-    return ModelManager.fromPublished(ceramic, published)
+  _aliases: ModelData<string> = {
+    definitions: {},
+    schemas: {},
+    tiles: {},
   }
-
-  public static async fromSignedJSON(
-    ceramic: CeramicApi,
-    encoded: EncodedSignedModel
-  ): Promise<ModelManager> {
-    const signed = applyMap(encoded, decodeSignedMap)
-    return await ModelManager.fromSigned(ceramic, signed)
-  }
-
   _ceramic: CeramicApi
   _model: ManagedModel
+  _referenced: Record<ManagedID, ManagedReferenced> = {}
+  _streams: Record<ManagedID, Promise<TileDocument>> = {}
 
   constructor(
     ceramic: CeramicApi,
     model: ManagedModel = {
-      docs: {},
       definitions: {},
       schemas: {},
-      schemaAliases: {},
       tiles: {},
     }
   ) {
@@ -151,320 +117,334 @@ export class ModelManager {
     }
     this._ceramic = ceramic
     this._model = model
+
+    for (const [id, schema] of Object.entries(model.schemas)) {
+      this._aliases.schemas[schema.alias] = id
+      for (const refIDs of Object.values(schema.dependencies)) {
+        for (const refID of refIDs) {
+          if (this._referenced[refID] == null) {
+            this._referenced[refID] = {
+              definitions: new Set<ManagedID>(),
+              schemas: new Set<ManagedID>(),
+              tiles: new Set<ManagedID>(),
+            }
+          }
+          this._referenced[refID].schemas.add(id)
+        }
+      }
+    }
+    for (const [id, definition] of Object.entries(model.definitions)) {
+      this._aliases.definitions[definition.alias] = id
+      if (this._referenced[definition.schema] == null) {
+        this._referenced[definition.schema] = {
+          definitions: new Set<ManagedID>(),
+          schemas: new Set<ManagedID>(),
+          tiles: new Set<ManagedID>(),
+        }
+      }
+      this._referenced[definition.schema].definitions.add(id)
+    }
+    for (const [id, tile] of Object.entries(model.tiles)) {
+      this._aliases.tiles[tile.alias] = id
+      if (this._referenced[tile.schema] == null) {
+        this._referenced[tile.schema] = {
+          definitions: new Set<ManagedID>(),
+          schemas: new Set<ManagedID>(),
+          tiles: new Set<ManagedID>(),
+        }
+      }
+      this._referenced[tile.schema].tiles.add(id)
+    }
   }
 
-  get definitions(): Array<string> {
-    return Object.keys(this._model.definitions)
+  // Getters
+
+  get model(): ManagedModel {
+    return this._model
   }
 
   get schemas(): Array<string> {
-    return Object.keys(this._model.schemas)
+    return Object.keys(this._aliases.schemas).sort()
+  }
+
+  get definitions(): Array<string> {
+    return Object.keys(this._aliases.definitions).sort()
   }
 
   get tiles(): Array<string> {
-    return Object.keys(this._model.tiles)
+    return Object.keys(this._aliases.tiles).sort()
   }
 
   // Loaders
 
-  async loadCreated(created: Promise<CreatedDoc>): Promise<TileDocument> {
-    return await this.loadDoc((await created).id)
-  }
-
-  async loadDoc(streamID: StreamRef | string): Promise<TileDocument> {
-    const id = streamIDToString(streamID)
-    if (this._model.docs[id] == null) {
-      this._model.docs[id] = TileDocument.load(this._ceramic, id)
+  async loadStream(streamID: StreamRef | string): Promise<TileDocument> {
+    const id = typeof streamID === 'string' ? streamID : streamID.baseID.toString()
+    if (this._streams[id] == null) {
+      this._streams[id] = TileDocument.load(this._ceramic, id)
     }
-    return await this._model.docs[id]
+    return await this._streams[id]
   }
 
-  async loadSchema(id: StreamRef | string, alias?: string): Promise<StreamRef> {
-    const existingAlias = this._model.schemaAliases[streamIDToString(id)]
-    if (existingAlias != null) {
-      const existing = this._model.schemas[existingAlias]
-      if (existing == null) {
-        throw new Error(`Alias ${existingAlias} exists for this schema but no schema is attached`)
+  async loadCommits(id: ManagedID): Promise<Array<DagJWSResult>> {
+    const commits = await this._ceramic.loadStreamCommits(id)
+    return commits.map((r) => r.value as DagJWSResult)
+  }
+
+  async loadSchema(id: StreamRef | string, alias?: string): Promise<ManagedID> {
+    const [managedID, commitID] = getManagedIDAndVersion(id)
+    if (commitID === null) {
+      throw new Error(`Expected CommitID to load schema: ${managedID}`)
+    }
+
+    const existing = this._model.schemas[managedID]
+    if (existing != null) {
+      if (existing.version !== commitID) {
+        throw new Error(`Another version for this schema is already set: ${existing.version}`)
       }
-      return (await existing).id
+      if (alias != null && existing.alias !== alias) {
+        throw new Error(`Another alias for this schema is already set: ${existing.alias}`)
+      }
+      return managedID
     }
 
-    const doc = await this.loadDoc(id)
-    const content = (doc.content ?? {}) as Schema
+    const [stream, commits] = await Promise.all([
+      this.loadStream(commitID),
+      this.loadCommits(managedID),
+    ])
+    const content = (stream.content ?? {}) as Schema
     const name = alias ?? content.title
     if (name == null) {
       throw new Error('Schema must have a title property or an alias must be provided')
     }
 
-    const schemaRefs = new Set(extractSchemaReferences(content))
-    this._model.schemas[name] = Promise.all(
-      Array.from(schemaRefs).map(async (id) => await this.loadSchema(id))
-    ).then(
-      (dependencies) => {
-        this._model.schemaAliases[doc.commitId.toUrl()] = name
-        return { id: doc.commitId, dependencies }
-      },
-      (reason: any) => {
-        delete this._model.schemas[name]
-        throw reason
-      }
-    )
+    const dependencies = await this.loadSchemaDependencies(content)
+    this._model.schemas[managedID] = { alias: name, commits, dependencies, version: commitID }
+    this._aliases.schemas[name] = managedID
 
-    return doc.commitId
+    return managedID
+  }
+
+  async loadSchemaDependencies(schema: Schema): Promise<Record<string, Array<string>>> {
+    const references = extractSchemaReferences(schema)
+
+    const ids = new Set<string>()
+    for (const refs of Object.values(references)) {
+      for (const ref of refs) {
+        ids.add(ref)
+      }
+    }
+    const loaded = await Promise.all(
+      Array.from(ids).map(async (id) => [id, await this.loadSchema(id)])
+    )
+    const idToManaged: Record<string, string> = Object.fromEntries(loaded)
+
+    return Object.entries(references).reduce((acc, [path, deps]) => {
+      acc[path] = deps.map((id) => idToManaged[id])
+      return acc
+    }, {} as Record<string, Array<string>>)
   }
 
   async useDataStoreModel(): Promise<void> {
     const { schemas } = await publishDataStoreModel(this._ceramic)
     await Promise.all([
-      this.usePublishedSchema('Definition', schemas.Definition),
-      this.usePublishedSchema('IdentityIndex', schemas.IdentityIndex),
+      this.usePublishedSchema('DataStoreDefinition', schemas.DataStoreDefinition),
+      this.usePublishedSchema('DataStoreIdentityIndex', schemas.DataStoreIdentityIndex),
     ])
   }
 
   // Schemas
 
-  hasSchema(alias: string): boolean {
-    return this._model.schemas[alias] != null
+  getSchemaID(alias: string): ManagedID | null {
+    return this._aliases.schemas[alias] ?? null
   }
 
-  getSchema(alias: string): Promise<CreatedDoc> | null {
-    return this._model.schemas[alias] ?? null
+  hasSchemaAlias(alias: string): boolean {
+    return this.getSchemaID(alias) != null
   }
 
-  deleteSchema(alias: string): boolean {
-    if (this.hasSchema(alias)) {
-      delete this._model.schemas[alias]
-      return true
-    }
-    return false
+  getSchema(id: ManagedID): ManagedSchema | null {
+    return this._model.schemas[id] ?? null
   }
 
-  createSchema(
-    alias: string,
-    schema: Schema,
-    deps: Array<Promise<StreamRef>> = []
-  ): Promise<CreatedDoc> {
-    if (this.hasSchema(alias)) {
+  getSchemaURL(id: ManagedID): string | null {
+    const schema = this._model.schemas[id]
+    return schema ? CommitID.fromString(schema.version).toUrl() : null
+  }
+
+  getSchemaByAlias(alias: string): ManagedSchema | null {
+    const id = this.getSchemaID(alias)
+    return id ? this.getSchema(id) : null
+  }
+
+  async createSchema(alias: string, schema: Schema): Promise<ManagedID> {
+    if (this.hasSchemaAlias(alias)) {
       throw new Error(`Schema ${alias} already exists`)
     }
 
-    this._model.schemas[alias] = Promise.all(deps).then((dependencies) => {
-      return createTile(this._ceramic, schema).then(
-        (doc) => {
-          this._model.schemaAliases[doc.commitId.toUrl()] = alias
-          return { id: doc.commitId, dependencies }
-        },
-        (reason: any) => {
-          delete this._model.schemas[alias]
-          throw reason
-        }
-      )
-    })
-    return this._model.schemas[alias]
-  }
+    const [stream, dependencies] = await Promise.all([
+      createTile(this._ceramic, schema),
+      this.loadSchemaDependencies(schema),
+    ])
 
-  async addSchema(alias: string, schema: Schema): Promise<StreamRef> {
-    if (alias == null) {
-      throw new Error('Schema alias must be provided')
+    const id = stream.id.toString()
+    this._model.schemas[id] = {
+      alias,
+      commits: await this.loadCommits(id),
+      dependencies,
+      version: stream.commitId.toString(),
     }
+    this._aliases.schemas[alias] = id
 
-    const schemaRefs = new Set(extractSchemaReferences(schema))
-    const deps = Array.from(schemaRefs).map(async (id) => await this.loadSchema(id))
-
-    const created = await this.createSchema(alias, schema, deps)
-    return created.id
+    return id
   }
 
-  async usePublishedSchema(alias: string, id: StreamRef | string): Promise<StreamRef> {
+  async usePublishedSchema(alias: string, id: StreamRef | string): Promise<ManagedID> {
     if (alias == null) {
       throw new Error('Schema alias must be provided')
     }
     return await this.loadSchema(id, alias)
   }
 
-  hasDefinition(alias: string): boolean {
-    return this._model.definitions[alias] != null
+  // Definitions
+
+  getDefinitionID(alias: string): ManagedID | null {
+    return this._aliases.definitions[alias] ?? null
   }
 
-  getDefinition(alias: string): Promise<CreatedDoc> | null {
-    return this._model.definitions[alias] ?? null
+  hasDefinitionAlias(alias: string): boolean {
+    return this.getDefinitionID(alias) != null
   }
 
-  deleteDefinition(alias: string): boolean {
-    if (this.hasDefinition(alias)) {
-      delete this._model.definitions[alias]
-      return true
-    }
-    return false
+  getDefinition(id: ManagedID): ManagedEntry | null {
+    return this._model.definitions[id] ?? null
   }
 
-  createDefinition(
-    alias: string,
-    definition: Definition,
-    deps: Array<Promise<StreamRef>> = []
-  ): Promise<CreatedDoc> {
-    if (this.hasDefinition(alias)) {
+  async createDefinition(alias: string, definition: Definition): Promise<ManagedID> {
+    if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
 
-    if (!this.hasSchema('IdentityIndex')) {
+    if (!this.hasSchemaAlias('DataStoreIdentityIndex')) {
       throw new Error('Missing IdentityIndex schema in model, call useDataStoreModel() first')
     }
-    const definitionSchemaCreated = this.getSchema('Definition')
-    if (definitionSchemaCreated == null) {
+    const definitionSchema = this.getSchemaByAlias('DataStoreDefinition')
+    if (definitionSchema == null) {
       throw new Error('Missing Definition schema in model, call useDataStoreModel() first')
     }
 
-    this._model.definitions[alias] = Promise.all([
-      definitionSchemaCreated.then((doc) => doc.id),
-      ...deps,
-    ]).then((dependencies) => {
-      return createTile(this._ceramic, definition, { schema: dependencies[0].toUrl() }).then(
-        (doc) => ({ id: doc.id, dependencies }),
-        (reason: any) => {
-          delete this._model.definitions[alias]
-          throw reason
-        }
-      )
-    })
-    return this._model.definitions[alias]
-  }
-
-  async addDefinition(alias: string, definition: Definition): Promise<StreamRef> {
-    const created = await this.createDefinition(alias, definition, [
+    const [stream, schemaID] = await Promise.all([
+      createTile(this._ceramic, definition, {
+        schema: CommitID.fromString(definitionSchema.version).toUrl(),
+      }),
       this.loadSchema(definition.schema),
     ])
-    return created.id
+
+    const id = stream.id.toString()
+    this._model.definitions[id] = {
+      alias,
+      commits: await this.loadCommits(id),
+      schema: schemaID,
+      version: stream.commitId.toString(),
+    }
+    this._aliases.definitions[alias] = id
+
+    return id
   }
 
-  async usePublishedDefinition(alias: string, id: StreamID | string): Promise<StreamRef> {
-    if (this.hasDefinition(alias)) {
+  async usePublishedDefinition(alias: string, id: StreamID | string): Promise<ManagedID> {
+    if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
 
-    const added = this.loadDoc(id).then((doc) => {
-      return this.loadSchema(doc.content.schemaURL).then(
-        (schemaRef) => ({ id: doc.id, dependencies: [schemaRef] }),
-        (reason: any) => {
-          delete this._model.definitions[alias]
-          throw reason
-        }
-      )
-    })
+    const definitionID = getManagedID(id)
+    const [stream, commits] = await Promise.all([
+      this.loadStream(id),
+      this.loadCommits(definitionID),
+    ])
 
-    this._model.definitions[alias] = added
-    return (await added).id
-  }
-
-  hasTile(alias: string): boolean {
-    return this._model.tiles[alias] != null
-  }
-
-  getTile(alias: string): Promise<CreatedDoc> | null {
-    return this._model.tiles[alias] ?? null
-  }
-
-  deleteTile(alias: string): boolean {
-    if (this.hasTile(alias)) {
-      delete this._model.tiles[alias]
-      return true
+    this._model.definitions[definitionID] = {
+      alias,
+      commits,
+      schema: await this.loadSchema((stream.content as Definition).schema),
+      version: stream.commitId.toString(),
     }
-    return false
+    this._aliases.definitions[alias] = definitionID
+
+    return definitionID
   }
 
-  createTile<T extends Record<string, unknown>>(
-    alias: string,
-    contents: T,
-    meta: Partial<StreamMetadata>,
-    deps: Array<Promise<StreamRef>> = []
-  ): Promise<CreatedDoc> {
-    if (this.hasTile(alias)) {
-      throw new Error(`Tile ${alias} already exists`)
-    }
+  // Tiles
 
-    this._model.tiles[alias] = Promise.all(deps).then((dependencies) => {
-      return createTile(this._ceramic, contents, meta).then(
-        (doc) => ({ id: doc.id, dependencies }),
-        (reason: any) => {
-          delete this._model.tiles[alias]
-          throw reason
-        }
-      )
-    })
-    return this._model.tiles[alias]
+  getTileID(alias: string): ManagedID | null {
+    return this._aliases.tiles[alias] ?? null
   }
 
-  async addTile<T extends Record<string, unknown>>(
+  hasTileAlias(alias: string): boolean {
+    return this.getTileID(alias) != null
+  }
+
+  getTile(id: ManagedID): ManagedEntry | null {
+    return this._model.tiles[id] ?? null
+  }
+
+  async createTile<T extends Record<string, unknown>>(
     alias: string,
     contents: T,
     meta: Partial<StreamMetadata>
-  ): Promise<StreamRef> {
-    if (meta.schema == null) {
-      throw new Error('Missing schema to add tile')
+  ): Promise<ManagedID> {
+    if (this.hasTileAlias(alias)) {
+      throw new Error(`Tile ${alias} already exists`)
     }
-    const created = await this.createTile(alias, contents, meta, [this.loadSchema(meta.schema)])
-    return created.id
+    if (meta.schema == null) {
+      throw new Error(`Missing schema to create tile ${alias}`)
+    }
+
+    const [stream, schemaID] = await Promise.all([
+      createTile(this._ceramic, contents, meta),
+      this.loadSchema(meta.schema),
+    ])
+
+    const id = stream.id.toString()
+    this._model.tiles[id] = {
+      alias,
+      commits: await this.loadCommits(id),
+      schema: schemaID,
+      version: stream.commitId.toString(),
+    }
+    this._aliases.tiles[alias] = id
+
+    return id
   }
 
-  async usePublishedTile(alias: string, id: StreamID | string): Promise<StreamRef> {
-    if (this.hasTile(alias)) {
+  async usePublishedTile(alias: string, id: StreamID | string): Promise<ManagedID> {
+    if (this.hasTileAlias(alias)) {
       throw new Error(`Tile ${alias} already exists`)
     }
 
-    const added = this.loadDoc(id).then((doc) => {
-      return doc.metadata.schema
-        ? this.loadSchema(doc.metadata.schema).then(
-            (schemaRef) => ({ id: doc.id, dependencies: [schemaRef] }),
-            (reason: any) => {
-              delete this._model.tiles[alias]
-              throw reason
-            }
-          )
-        : { id: doc.id, dependencies: [] }
-    })
+    const tileID = getManagedID(id)
+    const [stream, commits] = await Promise.all([this.loadStream(id), this.loadCommits(tileID)])
+    if (stream.metadata.schema == null) {
+      throw new Error('Loaded tile has no schema defined')
+    }
 
-    this._model.tiles[alias] = added
-    return (await added).id
+    this._model.tiles[tileID] = {
+      alias,
+      commits,
+      schema: await this.loadSchema(stream.metadata.schema),
+      version: stream.commitId.toString(),
+    }
+    this._aliases.tiles[alias] = tileID
+
+    return tileID
   }
+
+  // Exports
 
   async toPublished(): Promise<PublishedModel> {
-    const signed = await this.toSigned()
-    return await publishSignedModel(this._ceramic, signed)
+    return await publishModel(this._ceramic, this._model)
   }
 
-  // Export to maps of aliases to signed commits, would allow to publish a docset on a Ceramic node
-  async toSigned(): Promise<SignedModel> {
-    const added = new Set<string>()
-    const deps = new Set<string>()
-
-    const addDoc = async (created: Promise<CreatedDoc>) => {
-      const { id, dependencies } = await created
-      dependencies.forEach((depid) => {
-        deps.add(depid.toString())
-      })
-      const streamid = id.baseID
-      const commits = await this._ceramic.loadStreamCommits(streamid)
-      added.add(id.toString())
-      return commits.map((r) => r.value as DagJWSResult)
-    }
-
-    const addDefinitions = promiseMap(this._model.definitions, addDoc)
-    const addSchemas = promiseMap(this._model.schemas, addDoc)
-    const addTiles = promiseMap(this._model.tiles, addDoc)
-    const [definitions, schemas, tiles] = await Promise.all([addDefinitions, addSchemas, addTiles])
-
-    for (const id of deps) {
-      if (!added.has(id)) {
-        throw new Error(`Missing dependency: ${id}`)
-      }
-    }
-
-    return { definitions, schemas, tiles }
-  }
-
-  // Export signed commits to JSON
-  async toSignedJSON(): Promise<EncodedSignedModel> {
-    const signed = await this.toSigned()
-    return applyMap(signed, encodeSignedMap)
+  toJSON(): EncodedManagedModel {
+    return encodeModel(this._model)
   }
 }

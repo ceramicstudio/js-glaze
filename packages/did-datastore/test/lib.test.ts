@@ -10,8 +10,8 @@ jest.mock('@ceramicnetwork/stream-tile')
 describe('DIDDataStore', () => {
   const model = {
     schemas: {
-      Definition: 'DefinitionSchemaURL',
-      IdentityIndex: 'IndexSchemaURL',
+      DataStoreDefinition: 'DefinitionSchemaURL',
+      DataStoreIdentityIndex: 'IndexSchemaURL',
     },
     definitions: {},
     tiles: {},
@@ -22,19 +22,22 @@ describe('DIDDataStore', () => {
   )
 
   describe('constructor', () => {
-    test('throws if the provided model does not contain the IdentityIndex schema', () => {
+    test('throws if the provided model does not contain the DataStoreIdentityIndex schema', () => {
       expect(() => new DIDDataStore({ ceramic: {}, model: { schemas: {} } } as any)).toThrow(
-        'Invalid model provided: missing IdentityIndex schema'
+        'Invalid model provided: missing DataStoreIdentityIndex schema'
       )
     })
 
-    test('throws if the provided model does not contain the Definition schema', () => {
-      expect(
-        () => new DIDDataStore({ ceramic: {}, model: { schemas: { IdentityIndex: 'url' } } } as any)
-      ).toThrow('Invalid model provided: missing Definition schema')
+    test('throws if the provided model does not contain the DataStoreDefinition schema', () => {
+      expect(() => {
+        new DIDDataStore({
+          ceramic: {},
+          model: { schemas: { DataStoreIdentityIndex: 'url' } },
+        } as any)
+      }).toThrow('Invalid model provided: missing DataStoreDefinition schema')
     })
 
-    test('does not throw if the provided model contains the Definition and IdentityIndex schemas', () => {
+    test('does not throw if the provided model contains the DataStoreDefinition and DataStoreIdentityIndex schemas', () => {
       expect(() => new DIDDataStore({ ceramic: {}, model } as any)).not.toThrow()
     })
   })

@@ -35,16 +35,6 @@ export type CastModelTo<Model extends ModelData<any> | void, ToType> = Model ext
 
 export type PublishedModel<Model extends ModelData<any> | void = void> = CastModelTo<Model, string>
 
-export type SignedModel<Model extends ModelData<any> | void = void> = CastModelTo<
-  Model,
-  Array<DagJWSResult>
->
-
-export type EncodedSignedModel<Model extends ModelData<any> | void = void> = CastModelTo<
-  Model,
-  Array<EncodedDagJWSResult>
->
-
 export type ModelTypeAliases<
   // Schema alias to content type
   Schemas extends Record<string, any> = Record<string, any>,
@@ -62,3 +52,27 @@ export type ModelTypesToAliases<TypeAliases extends ModelTypeAliases> = MapModel
   TypeAliases,
   string
 >
+
+export type ManagedID = string // StreamID
+
+export type ManagedDoc<CommitType = DagJWSResult> = {
+  alias: string
+  commits: Array<CommitType>
+  version: string // CommitID
+}
+
+export type ManagedEntry<CommitType = DagJWSResult> = ManagedDoc<CommitType> & {
+  schema: ManagedID
+}
+
+export type ManagedSchema<CommitType = DagJWSResult> = ManagedDoc<CommitType> & {
+  dependencies: Record<string, Array<ManagedID>> // path to schemas ManagedID
+}
+
+export type ManagedModel<CommitType = DagJWSResult> = {
+  schemas: Record<ManagedID, ManagedSchema<CommitType>>
+  definitions: Record<ManagedID, ManagedEntry<CommitType>>
+  tiles: Record<ManagedID, ManagedEntry<CommitType>>
+}
+
+export type EncodedManagedModel = ManagedModel<EncodedDagJWSResult>
