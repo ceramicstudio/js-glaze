@@ -7,7 +7,7 @@ Object {
   },
   "schemas": Object {
     "DataStoreDefinition": "ceramic://k3y52l7qbv1fry1fp4s0nwdarh0vahusarpposgevy0pemiykymd2ord6swtharcw",
-    "DataStoreIdentityIndex": "ceramic://k3y52l7qbv1fryjn62sggjh1lpn11c56qfofzmty190d62hwk1cal1c7qc5he54ow",
+    "DataStoreIndex": "ceramic://k3y52l7qbv1fryjn62sggjh1lpn11c56qfofzmty190d62hwk1cal1c7qc5he54ow",
     "Note": "ceramic://k3y52l7qbv1frxr40y3mwy5qlywfty4sfcqrmv4zckjcdnylk5jdq7cgq66r0acjk",
     "NotesList": "ceramic://k3y52l7qbv1fryc2v942v5n6gzesjlg0zu49gnufb97ohhmeym56dme5dit1dmfwg",
   },

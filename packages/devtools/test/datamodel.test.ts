@@ -12,7 +12,7 @@ describe('datamodel', () => {
     const encodedModel = {
       schemas: {
         kjzl6cwe1jw14amy1imkbql1d61u00q9cbvhy5c3jtv3nz552fshl013530rauh: {
-          alias: 'DataStoreIdentityIndex',
+          alias: 'DataStoreIndex',
           commits: [
             {
               jws: {
@@ -138,7 +138,6 @@ describe('datamodel', () => {
 
   test('creation flow', async () => {
     const manager = new ModelManager(ceramic)
-    await manager.useDataStoreModel()
 
     const noteSchemaID = await manager.createSchema('Note', {
       $schema: 'http://json-schema.org/draft-07/schema#',
@@ -159,7 +158,6 @@ describe('datamodel', () => {
       },
       required: [],
     } as any)
-
     const notesListSchemaID = await manager.createSchema('NotesList', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'NotesList',
@@ -188,19 +186,14 @@ describe('datamodel', () => {
       },
       required: [],
     } as any)
-
-    expect(manager.schemas).toEqual([
-      'DataStoreDefinition',
-      'DataStoreIdentityIndex',
-      'Note',
-      'NotesList',
-    ])
+    expect(manager.schemas).toEqual(['Note', 'NotesList'])
 
     await manager.createDefinition('myNotes', {
       name: 'notes',
       description: 'My notes',
       schema: manager.getSchemaURL(notesListSchemaID) as string,
     })
+    expect(manager.schemas).toEqual(['DataStoreDefinition', 'DataStoreIndex', 'Note', 'NotesList'])
     expect(manager.definitions).toEqual(['myNotes'])
 
     expect(manager.toJSON()).toBeDefined()

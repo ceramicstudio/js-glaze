@@ -7,7 +7,9 @@ import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
 import type { TileContent, TileDoc } from './proxy'
-import { assertDid } from './utils'
+import { assertDIDstring } from './utils'
+
+export { assertDIDstring, isDIDstring } from './utils'
 
 type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,
@@ -60,9 +62,9 @@ export class DIDDataStore<
     this._model =
       model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
 
-    const indexURL = this._model.getSchemaURL('DataStoreIdentityIndex')
+    const indexURL = this._model.getSchemaURL('DataStoreIndex')
     if (indexURL == null) {
-      throw new Error('Invalid model provided: missing DataStoreIdentityIndex schema')
+      throw new Error('Invalid model provided: missing DataStoreIndex schema')
     } else {
       this._indexSchemaURL = indexURL
     }
@@ -95,7 +97,8 @@ export class DIDDataStore<
 
   // High-level APIs
 
-  async has(definitionID: string, did?: string): Promise<boolean> {
+  async has(key: Alias, did?: string): Promise<boolean> {
+    const definitionID = this.getDefinitionID(key as string)
     const ref = await this.getRecordID(definitionID, did)
     return ref != null
   }
@@ -223,7 +226,7 @@ export class DIDDataStore<
   }
 
   async _createIDXDoc(did: string): Promise<TileDoc> {
-    assertDid(did)
+    assertDIDstring(did)
     return await TileDocument.create<TileContent>(
       this._ceramic,
       null,

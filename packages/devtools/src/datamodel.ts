@@ -31,7 +31,7 @@ type DataStoreModel = {
   definitions: Record<string, never>
   schemas: {
     DataStoreDefinition: string
-    DataStoreIdentityIndex: string
+    DataStoreIndex: string
   }
   tiles: Record<string, never>
 }
@@ -100,23 +100,45 @@ export class ModelManager {
     tiles: {},
   }
   _ceramic: CeramicApi
-  _model: ManagedModel
+  _model: ManagedModel = {
+    definitions: {},
+    schemas: {},
+    tiles: {},
+  }
   _referenced: Record<ManagedID, ManagedReferenced> = {}
   _streams: Record<ManagedID, Promise<TileDocument>> = {}
 
-  constructor(
-    ceramic: CeramicApi,
-    model: ManagedModel = {
-      definitions: {},
-      schemas: {},
-      tiles: {},
-    }
-  ) {
-    if (ceramic.did == null || !ceramic.did.authenticated) {
-      throw new Error('Ceramic instance must be authenticated')
-    }
+  constructor(ceramic: CeramicApi, model?: ManagedModel) {
     this._ceramic = ceramic
-    this._model = model
+    if (model != null) {
+      this.addModel(model)
+    }
+  }
+
+  // Getters
+
+  get model(): ManagedModel {
+    return this._model
+  }
+
+  get schemas(): Array<string> {
+    return Object.keys(this._aliases.schemas).sort()
+  }
+
+  get definitions(): Array<string> {
+    return Object.keys(this._aliases.definitions).sort()
+  }
+
+  get tiles(): Array<string> {
+    return Object.keys(this._aliases.tiles).sort()
+  }
+
+  // Imports
+
+  addModel(model: ManagedModel): void {
+    Object.assign(this._model.definitions, model.definitions)
+    Object.assign(this._model.schemas, model.schemas)
+    Object.assign(this._model.tiles, model.tiles)
 
     for (const [id, schema] of Object.entries(model.schemas)) {
       this._aliases.schemas[schema.alias] = id
@@ -157,22 +179,16 @@ export class ModelManager {
     }
   }
 
-  // Getters
-
-  get model(): ManagedModel {
-    return this._model
+  addJSONModel(encoded: EncodedManagedModel): void {
+    this.addModel(decodeModel(encoded))
   }
 
-  get schemas(): Array<string> {
-    return Object.keys(this._aliases.schemas).sort()
-  }
-
-  get definitions(): Array<string> {
-    return Object.keys(this._aliases.definitions).sort()
-  }
-
-  get tiles(): Array<string> {
-    return Object.keys(this._aliases.tiles).sort()
+  async useDataStoreModel(): Promise<void> {
+    const { schemas } = await publishDataStoreModel(this._ceramic)
+    await Promise.all([
+      this.usePublishedSchema('DataStoreDefinition', schemas.DataStoreDefinition),
+      this.usePublishedSchema('DataStoreIndex', schemas.DataStoreIndex),
+    ])
   }
 
   // Loaders
@@ -244,14 +260,6 @@ export class ModelManager {
     }, {} as Record<string, Array<string>>)
   }
 
-  async useDataStoreModel(): Promise<void> {
-    const { schemas } = await publishDataStoreModel(this._ceramic)
-    await Promise.all([
-      this.usePublishedSchema('DataStoreDefinition', schemas.DataStoreDefinition),
-      this.usePublishedSchema('DataStoreIdentityIndex', schemas.DataStoreIdentityIndex),
-    ])
-  }
-
   // Schemas
 
   getSchemaID(alias: string): ManagedID | null {
@@ -277,6 +285,9 @@ export class ModelManager {
   }
 
   async createSchema(alias: string, schema: Schema): Promise<ManagedID> {
+    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+      throw new Error('Ceramic instance must be authenticated')
+    }
     if (this.hasSchemaAlias(alias)) {
       throw new Error(`Schema ${alias} already exists`)
     }
@@ -320,16 +331,18 @@ export class ModelManager {
   }
 
   async createDefinition(alias: string, definition: Definition): Promise<ManagedID> {
+    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+      throw new Error('Ceramic instance must be authenticated')
+    }
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
-
-    if (!this.hasSchemaAlias('DataStoreIdentityIndex')) {
-      throw new Error('Missing IdentityIndex schema in model, call useDataStoreModel() first')
+    if (!this.hasSchemaAlias('DataStoreDefinition') || !this.hasSchemaAlias('DataStoreIndex')) {
+      await this.useDataStoreModel()
     }
     const definitionSchema = this.getSchemaByAlias('DataStoreDefinition')
     if (definitionSchema == null) {
-      throw new Error('Missing Definition schema in model, call useDataStoreModel() first')
+      throw new Error('Missing DataStoreDefinition schema in model')
     }
 
     const [stream, schemaID] = await Promise.all([
@@ -392,6 +405,9 @@ export class ModelManager {
     contents: T,
     meta: Partial<StreamMetadata>
   ): Promise<ManagedID> {
+    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+      throw new Error('Ceramic instance must be authenticated')
+    }
     if (this.hasTileAlias(alias)) {
       throw new Error(`Tile ${alias} already exists`)
     }

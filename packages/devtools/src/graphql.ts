@@ -9,7 +9,7 @@ import { camelCase, pascalCase } from 'change-case'
 import type { ModelManager } from './datamodel'
 import { getReference } from './schema'
 
-const EXCLUDED_SCHEMAS = ['DataStoreDefinition', 'DataStoreIdentityIndex']
+const EXCLUDED_SCHEMAS = ['DataStoreDefinition', 'DataStoreIndex']
 
 function getName(base: string, prefix = ''): string {
   const withCase = pascalCase(base)

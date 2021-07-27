@@ -11,7 +11,7 @@ describe('DIDDataStore', () => {
   const model = {
     schemas: {
       DataStoreDefinition: 'DefinitionSchemaURL',
-      DataStoreIdentityIndex: 'IndexSchemaURL',
+      DataStoreIndex: 'IndexSchemaURL',
     },
     definitions: {},
     tiles: {},
@@ -22,9 +22,9 @@ describe('DIDDataStore', () => {
   )
 
   describe('constructor', () => {
-    test('throws if the provided model does not contain the DataStoreIdentityIndex schema', () => {
+    test('throws if the provided model does not contain the DataStoreIndex schema', () => {
       expect(() => new DIDDataStore({ ceramic: {}, model: { schemas: {} } } as any)).toThrow(
-        'Invalid model provided: missing DataStoreIdentityIndex schema'
+        'Invalid model provided: missing DataStoreIndex schema'
       )
     })
 
@@ -32,12 +32,12 @@ describe('DIDDataStore', () => {
       expect(() => {
         new DIDDataStore({
           ceramic: {},
-          model: { schemas: { DataStoreIdentityIndex: 'url' } },
+          model: { schemas: { DataStoreIndex: 'url' } },
         } as any)
       }).toThrow('Invalid model provided: missing DataStoreDefinition schema')
     })
 
-    test('does not throw if the provided model contains the DataStoreDefinition and DataStoreIdentityIndex schemas', () => {
+    test('does not throw if the provided model contains the DataStoreDefinition and DataStoreIndex schemas', () => {
       expect(() => new DIDDataStore({ ceramic: {}, model } as any)).not.toThrow()
     })
   })

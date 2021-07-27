@@ -11,8 +11,8 @@ export type Definition<C extends Record<string, any> = Record<string, any>> = {
 export type IdentityIndex = Record<string, string>
 
 export type ModelTypes = ModelTypeAliases<{
-  Definition: Definition
-  IdentityIndex: IdentityIndex
+  DataStoreDefinition: Definition
+  DataStoreIndex: IdentityIndex
 }>
 
 export const model: EncodedManagedModel = {
@@ -42,7 +42,7 @@ export const model: EncodedManagedModel = {
       version: 'k3y52l7qbv1fry1fp4s0nwdarh0vahusarpposgevy0pemiykymd2ord6swtharcw',
     },
     kjzl6cwe1jw14amy1imkbql1d61u00q9cbvhy5c3jtv3nz552fshl013530rauh: {
-      alias: 'DataStoreIdentityIndex',
+      alias: 'DataStoreIndex',
       commits: [
         {
           jws: {

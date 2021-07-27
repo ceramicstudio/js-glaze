@@ -5,7 +5,7 @@ Development tools for Glaze projects
 ## Installation
 
 ```sh
-npm install @glazed/devtools
+npm install --dev @glazed/devtools
 ```
 
 ## Maintainers

@@ -6,7 +6,7 @@ test('DID DataStore model', () => {
   expect(model).toEqual({
     schemas: {
       kjzl6cwe1jw14amy1imkbql1d61u00q9cbvhy5c3jtv3nz552fshl013530rauh: {
-        alias: 'DataStoreIdentityIndex',
+        alias: 'DataStoreIndex',
         commits: [expect.any(Object)],
         dependencies: {},
         version: 'k3y52l7qbv1fryjn62sggjh1lpn11c56qfofzmty190d62hwk1cal1c7qc5he54ow',

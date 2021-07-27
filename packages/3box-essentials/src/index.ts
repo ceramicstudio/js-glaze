@@ -184,7 +184,7 @@ export const model: EncodedManagedModel = {
       version: 'k3y52l7qbv1frxiodfo6f25wocb8zz60ywqw4sqcprs26qx1qx467l4ybxplybvgg',
     },
     kjzl6cwe1jw14amy1imkbql1d61u00q9cbvhy5c3jtv3nz552fshl013530rauh: {
-      alias: 'DataStoreIdentityIndex',
+      alias: 'DataStoreIndex',
       commits: [
         {
           jws: {
