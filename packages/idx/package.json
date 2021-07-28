@@ -39,7 +39,7 @@
     "@glazed/types": "^0.1.0",
     "jest-environment-idx": "^0.8.0",
     "tslib": "^2.1.0",
-    "uint8arrays": "^2.1.7"
+    "uint8arrays": "^2.1.8"
   },
   "husky": {
     "hooks": {

@@ -20,8 +20,6 @@ describe('integration', () => {
 
   test('get and set a definition', async () => {
     const manager = new ModelManager(ceramic)
-    await manager.useDataStoreModel()
-
     const schemaID = await manager.createSchema('Profile', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Profile',
@@ -38,7 +36,6 @@ describe('integration', () => {
       description: 'test profile',
       schema: manager.getSchemaURL(schemaID) as string,
     })
-
     const model = await manager.toPublished()
 
     const writer = new DIDDataStore<ModelTypes>({ ceramic, model })

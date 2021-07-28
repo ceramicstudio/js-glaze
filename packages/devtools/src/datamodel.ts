@@ -3,8 +3,9 @@
 import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { CIP11_DEFINITION_SCHEMA_URL } from '@glazed/constants'
 import type { Definition } from '@glazed/did-datastore-model'
-import { model as dataStoreModel } from '@glazed/did-datastore-model'
+import { model as encodedDataStoreModel } from '@glazed/did-datastore-model'
 import type {
   EncodedManagedModel,
   ManagedEntry,
@@ -27,15 +28,6 @@ type ManagedReferenced = {
   tiles: Set<ManagedID>
 }
 
-type DataStoreModel = {
-  definitions: Record<string, never>
-  schemas: {
-    DataStoreDefinition: string
-    DataStoreIndex: string
-  }
-  tiles: Record<string, never>
-}
-
 function getManagedIDAndVersion(id: StreamRef | string): [ManagedID, string | null] {
   const streamID = typeof id === 'string' ? StreamRef.from(id) : id
   return [streamID.baseID.toString(), CommitID.isInstance(streamID) ? streamID.toString() : null]
@@ -46,17 +38,29 @@ function getManagedID(id: StreamRef | string): ManagedID {
   return streamID.baseID.toString()
 }
 
+const dataStoreModel = decodeModel(encodedDataStoreModel)
+export async function publishDataStoreSchemas(ceramic: CeramicApi): Promise<void> {
+  await Promise.all(
+    Object.values(dataStoreModel.schemas).map(async (schema) => {
+      return await publishCommits(ceramic, schema.commits)
+    })
+  )
+}
+
 // Publish a managed model to the given Ceramic node
 export async function publishModel(
   ceramic: CeramicApi,
   model: ManagedModel
 ): Promise<PublishedModel> {
-  const schemas = await Promise.all(
-    Object.values(model.schemas).map(async (schema) => {
-      const stream = await publishCommits(ceramic, schema.commits)
-      return [schema.alias, stream.commitId.toUrl()]
-    })
-  )
+  const [schemas] = await Promise.all([
+    Promise.all(
+      Object.values(model.schemas).map(async (schema) => {
+        const stream = await publishCommits(ceramic, schema.commits)
+        return [schema.alias, stream.commitId.toUrl()]
+      })
+    ),
+    publishDataStoreSchemas(ceramic),
+  ])
   const [definitions, tiles] = await Promise.all([
     await Promise.all(
       Object.values(model.definitions).map(async (entry) => {
@@ -85,31 +89,27 @@ export async function publishEncodedModel(
 ): Promise<PublishedModel> {
   return await publishModel(ceramic, decodeModel(model))
 }
-
-export async function publishDataStoreModel(ceramic: CeramicApi): Promise<DataStoreModel> {
-  return (await publishEncodedModel(ceramic, dataStoreModel)) as DataStoreModel
-}
 export class ModelManager {
   public static fromJSON(ceramic: CeramicApi, encoded: EncodedManagedModel): ModelManager {
     return new ModelManager(ceramic, decodeModel(encoded))
   }
 
-  _aliases: ModelData<string> = {
+  #aliases: ModelData<string> = {
     definitions: {},
     schemas: {},
     tiles: {},
   }
-  _ceramic: CeramicApi
-  _model: ManagedModel = {
+  #ceramic: CeramicApi
+  #model: ManagedModel = {
     definitions: {},
     schemas: {},
     tiles: {},
   }
-  _referenced: Record<ManagedID, ManagedReferenced> = {}
-  _streams: Record<ManagedID, Promise<TileDocument>> = {}
+  #referenced: Record<ManagedID, ManagedReferenced> = {}
+  #streams: Record<ManagedID, Promise<TileDocument>> = {}
 
   constructor(ceramic: CeramicApi, model?: ManagedModel) {
-    this._ceramic = ceramic
+    this.#ceramic = ceramic
     if (model != null) {
       this.addModel(model)
     }
@@ -118,64 +118,64 @@ export class ModelManager {
   // Getters
 
   get model(): ManagedModel {
-    return this._model
+    return this.#model
   }
 
   get schemas(): Array<string> {
-    return Object.keys(this._aliases.schemas).sort()
+    return Object.keys(this.#aliases.schemas).sort()
   }
 
   get definitions(): Array<string> {
-    return Object.keys(this._aliases.definitions).sort()
+    return Object.keys(this.#aliases.definitions).sort()
   }
 
   get tiles(): Array<string> {
-    return Object.keys(this._aliases.tiles).sort()
+    return Object.keys(this.#aliases.tiles).sort()
   }
 
   // Imports
 
   addModel(model: ManagedModel): void {
-    Object.assign(this._model.definitions, model.definitions)
-    Object.assign(this._model.schemas, model.schemas)
-    Object.assign(this._model.tiles, model.tiles)
+    Object.assign(this.#model.definitions, model.definitions)
+    Object.assign(this.#model.schemas, model.schemas)
+    Object.assign(this.#model.tiles, model.tiles)
 
     for (const [id, schema] of Object.entries(model.schemas)) {
-      this._aliases.schemas[schema.alias] = id
+      this.#aliases.schemas[schema.alias] = id
       for (const refIDs of Object.values(schema.dependencies)) {
         for (const refID of refIDs) {
-          if (this._referenced[refID] == null) {
-            this._referenced[refID] = {
+          if (this.#referenced[refID] == null) {
+            this.#referenced[refID] = {
               definitions: new Set<ManagedID>(),
               schemas: new Set<ManagedID>(),
               tiles: new Set<ManagedID>(),
             }
           }
-          this._referenced[refID].schemas.add(id)
+          this.#referenced[refID].schemas.add(id)
         }
       }
     }
     for (const [id, definition] of Object.entries(model.definitions)) {
-      this._aliases.definitions[definition.alias] = id
-      if (this._referenced[definition.schema] == null) {
-        this._referenced[definition.schema] = {
+      this.#aliases.definitions[definition.alias] = id
+      if (this.#referenced[definition.schema] == null) {
+        this.#referenced[definition.schema] = {
           definitions: new Set<ManagedID>(),
           schemas: new Set<ManagedID>(),
           tiles: new Set<ManagedID>(),
         }
       }
-      this._referenced[definition.schema].definitions.add(id)
+      this.#referenced[definition.schema].definitions.add(id)
     }
     for (const [id, tile] of Object.entries(model.tiles)) {
-      this._aliases.tiles[tile.alias] = id
-      if (this._referenced[tile.schema] == null) {
-        this._referenced[tile.schema] = {
+      this.#aliases.tiles[tile.alias] = id
+      if (this.#referenced[tile.schema] == null) {
+        this.#referenced[tile.schema] = {
           definitions: new Set<ManagedID>(),
           schemas: new Set<ManagedID>(),
           tiles: new Set<ManagedID>(),
         }
       }
-      this._referenced[tile.schema].tiles.add(id)
+      this.#referenced[tile.schema].tiles.add(id)
     }
   }
 
@@ -183,26 +183,18 @@ export class ModelManager {
     this.addModel(decodeModel(encoded))
   }
 
-  async useDataStoreModel(): Promise<void> {
-    const { schemas } = await publishDataStoreModel(this._ceramic)
-    await Promise.all([
-      this.usePublishedSchema('DataStoreDefinition', schemas.DataStoreDefinition),
-      this.usePublishedSchema('DataStoreIndex', schemas.DataStoreIndex),
-    ])
-  }
-
   // Loaders
 
   async loadStream(streamID: StreamRef | string): Promise<TileDocument> {
     const id = typeof streamID === 'string' ? streamID : streamID.baseID.toString()
-    if (this._streams[id] == null) {
-      this._streams[id] = TileDocument.load(this._ceramic, id)
+    if (this.#streams[id] == null) {
+      this.#streams[id] = TileDocument.load(this.#ceramic, id)
     }
-    return await this._streams[id]
+    return await this.#streams[id]
   }
 
   async loadCommits(id: ManagedID): Promise<Array<DagJWSResult>> {
-    const commits = await this._ceramic.loadStreamCommits(id)
+    const commits = await this.#ceramic.loadStreamCommits(id)
     return commits.map((r) => r.value as DagJWSResult)
   }
 
@@ -212,7 +204,7 @@ export class ModelManager {
       throw new Error(`Expected CommitID to load schema: ${managedID}`)
     }
 
-    const existing = this._model.schemas[managedID]
+    const existing = this.#model.schemas[managedID]
     if (existing != null) {
       if (existing.version !== commitID) {
         throw new Error(`Another version for this schema is already set: ${existing.version}`)
@@ -234,8 +226,8 @@ export class ModelManager {
     }
 
     const dependencies = await this.loadSchemaDependencies(content)
-    this._model.schemas[managedID] = { alias: name, commits, dependencies, version: commitID }
-    this._aliases.schemas[name] = managedID
+    this.#model.schemas[managedID] = { alias: name, commits, dependencies, version: commitID }
+    this.#aliases.schemas[name] = managedID
 
     return managedID
   }
@@ -263,7 +255,7 @@ export class ModelManager {
   // Schemas
 
   getSchemaID(alias: string): ManagedID | null {
-    return this._aliases.schemas[alias] ?? null
+    return this.#aliases.schemas[alias] ?? null
   }
 
   hasSchemaAlias(alias: string): boolean {
@@ -271,11 +263,11 @@ export class ModelManager {
   }
 
   getSchema(id: ManagedID): ManagedSchema | null {
-    return this._model.schemas[id] ?? null
+    return this.#model.schemas[id] ?? null
   }
 
   getSchemaURL(id: ManagedID): string | null {
-    const schema = this._model.schemas[id]
+    const schema = this.#model.schemas[id]
     return schema ? CommitID.fromString(schema.version).toUrl() : null
   }
 
@@ -285,7 +277,7 @@ export class ModelManager {
   }
 
   async createSchema(alias: string, schema: Schema): Promise<ManagedID> {
-    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+    if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
     if (this.hasSchemaAlias(alias)) {
@@ -293,18 +285,18 @@ export class ModelManager {
     }
 
     const [stream, dependencies] = await Promise.all([
-      createTile(this._ceramic, schema),
+      createTile(this.#ceramic, schema),
       this.loadSchemaDependencies(schema),
     ])
 
     const id = stream.id.toString()
-    this._model.schemas[id] = {
+    this.#model.schemas[id] = {
       alias,
       commits: await this.loadCommits(id),
       dependencies,
       version: stream.commitId.toString(),
     }
-    this._aliases.schemas[alias] = id
+    this.#aliases.schemas[alias] = id
 
     return id
   }
@@ -319,7 +311,7 @@ export class ModelManager {
   // Definitions
 
   getDefinitionID(alias: string): ManagedID | null {
-    return this._aliases.definitions[alias] ?? null
+    return this.#aliases.definitions[alias] ?? null
   }
 
   hasDefinitionAlias(alias: string): boolean {
@@ -327,39 +319,31 @@ export class ModelManager {
   }
 
   getDefinition(id: ManagedID): ManagedEntry | null {
-    return this._model.definitions[id] ?? null
+    return this.#model.definitions[id] ?? null
   }
 
   async createDefinition(alias: string, definition: Definition): Promise<ManagedID> {
-    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+    if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
-    if (!this.hasSchemaAlias('DataStoreDefinition') || !this.hasSchemaAlias('DataStoreIndex')) {
-      await this.useDataStoreModel()
-    }
-    const definitionSchema = this.getSchemaByAlias('DataStoreDefinition')
-    if (definitionSchema == null) {
-      throw new Error('Missing DataStoreDefinition schema in model')
-    }
 
+    await publishDataStoreSchemas(this.#ceramic)
     const [stream, schemaID] = await Promise.all([
-      createTile(this._ceramic, definition, {
-        schema: CommitID.fromString(definitionSchema.version).toUrl(),
-      }),
+      createTile(this.#ceramic, definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
       this.loadSchema(definition.schema),
     ])
 
     const id = stream.id.toString()
-    this._model.definitions[id] = {
+    this.#model.definitions[id] = {
       alias,
       commits: await this.loadCommits(id),
       schema: schemaID,
       version: stream.commitId.toString(),
     }
-    this._aliases.definitions[alias] = id
+    this.#aliases.definitions[alias] = id
 
     return id
   }
@@ -375,13 +359,13 @@ export class ModelManager {
       this.loadCommits(definitionID),
     ])
 
-    this._model.definitions[definitionID] = {
+    this.#model.definitions[definitionID] = {
       alias,
       commits,
       schema: await this.loadSchema((stream.content as Definition).schema),
       version: stream.commitId.toString(),
     }
-    this._aliases.definitions[alias] = definitionID
+    this.#aliases.definitions[alias] = definitionID
 
     return definitionID
   }
@@ -389,7 +373,7 @@ export class ModelManager {
   // Tiles
 
   getTileID(alias: string): ManagedID | null {
-    return this._aliases.tiles[alias] ?? null
+    return this.#aliases.tiles[alias] ?? null
   }
 
   hasTileAlias(alias: string): boolean {
@@ -397,7 +381,7 @@ export class ModelManager {
   }
 
   getTile(id: ManagedID): ManagedEntry | null {
-    return this._model.tiles[id] ?? null
+    return this.#model.tiles[id] ?? null
   }
 
   async createTile<T extends Record<string, unknown>>(
@@ -405,7 +389,7 @@ export class ModelManager {
     contents: T,
     meta: Partial<StreamMetadata>
   ): Promise<ManagedID> {
-    if (this._ceramic.did == null || !this._ceramic.did.authenticated) {
+    if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
     if (this.hasTileAlias(alias)) {
@@ -416,18 +400,18 @@ export class ModelManager {
     }
 
     const [stream, schemaID] = await Promise.all([
-      createTile(this._ceramic, contents, meta),
+      createTile(this.#ceramic, contents, meta),
       this.loadSchema(meta.schema),
     ])
 
     const id = stream.id.toString()
-    this._model.tiles[id] = {
+    this.#model.tiles[id] = {
       alias,
       commits: await this.loadCommits(id),
       schema: schemaID,
       version: stream.commitId.toString(),
     }
-    this._aliases.tiles[alias] = id
+    this.#aliases.tiles[alias] = id
 
     return id
   }
@@ -443,13 +427,13 @@ export class ModelManager {
       throw new Error('Loaded tile has no schema defined')
     }
 
-    this._model.tiles[tileID] = {
+    this.#model.tiles[tileID] = {
       alias,
       commits,
       schema: await this.loadSchema(stream.metadata.schema),
       version: stream.commitId.toString(),
     }
-    this._aliases.tiles[alias] = tileID
+    this.#aliases.tiles[alias] = tileID
 
     return tileID
   }
@@ -457,10 +441,10 @@ export class ModelManager {
   // Exports
 
   async toPublished(): Promise<PublishedModel> {
-    return await publishModel(this._ceramic, this._model)
+    return await publishModel(this.#ceramic, this.#model)
   }
 
   toJSON(): EncodedManagedModel {
-    return encodeModel(this._model)
+    return encodeModel(this.#model)
   }
 }

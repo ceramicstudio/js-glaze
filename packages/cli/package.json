@@ -61,7 +61,7 @@
     "listr": "^0.14.3",
     "listr-update-renderer": "^0.5.0",
     "ora": "^5.3.0",
-    "uint8arrays": "^2.1.7",
+    "uint8arrays": "^2.1.8",
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
@@ -70,7 +70,7 @@
     "@types/inquirer": "^7.3.3",
     "@types/listr": "^0.14.4",
     "@types/node": "^14.14.21",
-    "@types/update-notifier": "^5.0.1",
+    "@types/update-notifier": "^5.1.0",
     "globby": "^11.0.2",
     "ts-node": "^10.0.0",
     "tslib": "^2.1.0"

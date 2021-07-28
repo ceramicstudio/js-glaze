@@ -4,6 +4,7 @@ export function streamIDToString(id: StreamRef | string): string {
   return typeof id === 'string' ? id : id.toString()
 }
 
+/** @internal */
 export function applyMap<
   M extends Record<string, unknown>,
   V extends M[keyof M] = M[keyof M],
@@ -15,6 +16,7 @@ export function applyMap<
   }, {} as Record<keyof M, R>)
 }
 
+/** @internal */
 export async function promiseMap<
   M extends Record<string, unknown>,
   V extends M[keyof M] = M[keyof M],

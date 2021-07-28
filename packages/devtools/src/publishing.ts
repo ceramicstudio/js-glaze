@@ -10,6 +10,7 @@ import { promiseMap } from './utils'
 
 const PUBLISH_OPTS = { anchor: false, publish: false }
 
+/** @internal */
 export async function createTile<T = Record<string, any>>(
   ceramic: CeramicApi,
   content: T,
@@ -28,6 +29,7 @@ export async function createTile<T = Record<string, any>>(
   return doc
 }
 
+/** @internal */
 export async function publishCommits(
   ceramic: CeramicApi,
   [genesis, ...updates]: Array<CeramicCommit>
@@ -44,6 +46,7 @@ export async function publishCommits(
   return doc
 }
 
+/** @internal */
 export async function publishSignedMap<T extends string = string>(
   ceramic: CeramicApi,
   signed: Record<T, Array<CeramicCommit>>

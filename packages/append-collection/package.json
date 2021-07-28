@@ -24,7 +24,7 @@
     "@ceramicnetwork/stream-tile": "^1.0.4",
     "@ceramicnetwork/streamid": "^1.0.1",
     "@glazed/constants": "^0.1.0",
-    "uint8arrays": "^2.1.7"
+    "uint8arrays": "^2.1.8"
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^1.0.4",

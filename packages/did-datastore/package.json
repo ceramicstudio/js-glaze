@@ -14,6 +14,7 @@
     "node": ">=12"
   },
   "scripts": {
+    "docs": "typedoc --tsconfig tsconfig.docs.json",
     "start": "tsdx watch",
     "build": "tsdx build --tsconfig tsconfig.build.json",
     "test": "tsdx test",
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "@ceramicnetwork/stream-tile": "^1.0.0",
+    "@glazed/constants": "^0.1.0",
     "@glazed/datamodel": "^0.1.0"
   },
   "devDependencies": {

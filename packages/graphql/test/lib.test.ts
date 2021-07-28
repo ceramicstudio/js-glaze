@@ -78,8 +78,6 @@ describe('lib', () => {
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const manager = new ModelManager(ceramic)
-    await manager.useDataStoreModel()
-
     await Promise.all([
       manager.createDefinition('myNotes', {
         name: 'notes',
@@ -92,7 +90,6 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-
     const [graphModel, model] = await Promise.all([
       createGraphQLModel(manager),
       manager.toPublished(),

@@ -1,6 +1,7 @@
 import { CIP88_REF_PREFIX } from '@glazed/constants'
 import type { Schema } from '@glazed/types'
 
+/** @internal */
 export function getReference(schema: Schema): Array<string> | null {
   if (schema.$comment?.startsWith(CIP88_REF_PREFIX)) {
     const schemasString = schema.$comment.substr(CIP88_REF_PREFIX.length)
@@ -13,7 +14,10 @@ export function getReference(schema: Schema): Array<string> | null {
   return null
 }
 
-// Recursively extract references to other schemas from a JSON schema arrays and objects
+/**
+ * Recursively extract references to other schemas from a JSON schema arrays and objects
+ *
+ * @internal */
 export function extractSchemaReferences(schema: Schema, path = ''): Record<string, Array<string>> {
   if (schema.type === 'string') {
     const refs = getReference(schema)

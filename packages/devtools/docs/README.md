@@ -1,11 +1,13 @@
-# DID DataStore
+@glazed/devtools / [Exports](modules.md)
 
-Associate data records to a DID
+# Glaze DevTools
+
+Development tools for Glaze projects
 
 ## Installation
 
 ```sh
-npm install @glazed/did-datastore
+npm install --dev @glazed/devtools
 ```
 
 ## Maintainers

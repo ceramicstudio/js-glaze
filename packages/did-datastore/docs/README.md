@@ -1,3 +1,5 @@
+@glazed/did-datastore / [Exports](modules.md)
+
 # DID DataStore
 
 Associate data records to a DID
