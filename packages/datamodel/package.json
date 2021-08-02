@@ -14,6 +14,7 @@
     "node": ">=14"
   },
   "scripts": {
+    "docs": "typedoc --tsconfig tsconfig.docs.json",
     "start": "tsdx watch",
     "build": "tsdx build --tsconfig tsconfig.build.json",
     "test": "tsdx test",

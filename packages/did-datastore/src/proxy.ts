@@ -12,20 +12,20 @@ type QueueItem<TileDoc> = {
 }
 
 export class TileProxy {
-  _getRemote: () => Promise<TileDoc>
-  _getPromise: Promise<TileDoc> | null = null
-  _queue: Array<QueueItem<TileDoc>> = []
-  _promiseValue!: Promise<TileDoc>
-  _deferValue!: { resolve: (value: TileDoc) => any; reject: RejectFunc }
+  #getRemote: () => Promise<TileDoc>
+  #queue: Array<QueueItem<TileDoc>> = []
+  #promiseValue!: Promise<TileDoc>
+  #deferValue!: { resolve: (value: TileDoc) => any; reject: RejectFunc }
 
   constructor(getRemote: () => Promise<TileDoc>) {
-    this._getRemote = getRemote
+    this.#getRemote = getRemote
     this._createValuePromise()
   }
 
+  /** @internal */
   _createValuePromise(): void {
-    this._promiseValue = new Promise((resolve, reject) => {
-      this._deferValue = { resolve, reject }
+    this.#promiseValue = new Promise((resolve, reject) => {
+      this.#deferValue = { resolve, reject }
     })
   }
 
@@ -42,8 +42,8 @@ export class TileProxy {
         }
       }
 
-      this._queue.push({ reject, run })
-      if (this._queue.length === 1) {
+      this.#queue.push({ reject, run })
+      if (this.#queue.length === 1) {
         void this._start()
       }
     })
@@ -58,25 +58,27 @@ export class TileProxy {
   }
 
   async get(): Promise<TileDoc> {
-    return this._queue.length === 0 ? await this._getRemote() : await this._promiseValue
+    return this.#queue.length === 0 ? await this.#getRemote() : await this.#promiseValue
   }
 
+  /** @internal */
   async _start(): Promise<void> {
     try {
-      const value = await this._getRemote()
+      const value = await this.#getRemote()
       this._next(value)
     } catch (err) {
-      this._queue.forEach((item) => {
+      this.#queue.forEach((item) => {
         item.reject(err)
       })
-      this._queue = []
-      this._deferValue.reject(err)
+      this.#queue = []
+      this.#deferValue.reject(err)
       this._createValuePromise()
     }
   }
 
+  /** @internal */
   _next(value: TileDoc): void {
-    const item = this._queue.shift()
+    const item = this.#queue.shift()
     if (item == null) {
       this._end(value)
     } else {
@@ -84,8 +86,9 @@ export class TileProxy {
     }
   }
 
+  /** @internal */
   _end(value: TileDoc): void {
-    this._deferValue.resolve(value)
+    this.#deferValue.resolve(value)
     this._createValuePromise()
   }
 }

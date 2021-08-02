@@ -1,13 +1,16 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { StreamID } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
 import type { TileContent, TileDoc } from './proxy'
-import { assertDid } from './utils'
+import { assertDIDstring } from './utils'
+
+export { assertDIDstring, isDIDstring } from './utils'
 
 type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,
@@ -46,56 +49,43 @@ export class DIDDataStore<
   ModelTypes extends ModelTypeAliases = ModelTypeAliases,
   Alias extends keyof ModelTypes['definitions'] = keyof ModelTypes['definitions']
 > {
-  _autopin: boolean
-  _ceramic: CeramicApi
-  _definitionsSchemaURL: string
+  #autopin: boolean
+  #ceramic: CeramicApi
+  /** @internal */
   _indexProxy: TileProxy
-  _indexSchemaURL: string
-  _model: DataModel<ModelTypes>
+  #model: DataModel<ModelTypes>
 
   constructor({ autopin, ceramic, model }: DIDDataStoreParams<ModelTypes>) {
-    this._autopin = autopin !== false
-    this._ceramic = ceramic
+    this.#autopin = autopin !== false
+    this.#ceramic = ceramic
     this._indexProxy = new TileProxy(this._getOwnIDXDoc.bind(this))
-    this._model =
+    this.#model =
       model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
-
-    const indexURL = this._model.getSchemaURL('IdentityIndex')
-    if (indexURL == null) {
-      throw new Error('Invalid model provided: missing IdentityIndex schema')
-    } else {
-      this._indexSchemaURL = indexURL
-    }
-    const definitionURL = this._model.getSchemaURL('Definition')
-    if (definitionURL == null) {
-      throw new Error('Invalid model provided: missing Definition schema')
-    } else {
-      this._definitionsSchemaURL = definitionURL
-    }
   }
 
   get authenticated(): boolean {
-    return this._ceramic.did != null
+    return this.#ceramic.did != null
   }
 
   get ceramic(): CeramicApi {
-    return this._ceramic
+    return this.#ceramic
   }
 
   get id(): string {
-    if (this._ceramic.did == null) {
+    if (this.#ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this._ceramic.did.id
+    return this.#ceramic.did.id
   }
 
   get model(): DataModel<ModelTypes> {
-    return this._model
+    return this.#model
   }
 
   // High-level APIs
 
-  async has(definitionID: string, did?: string): Promise<boolean> {
+  async has(key: Alias, did?: string): Promise<boolean> {
+    const definitionID = this.getDefinitionID(key as string)
     const ref = await this.getRecordID(definitionID, did)
     return ref != null
   }
@@ -222,36 +212,39 @@ export class DIDDataStore<
     }
   }
 
+  /** @internal */
   async _createIDXDoc(did: string): Promise<TileDoc> {
-    assertDid(did)
+    assertDIDstring(did)
     return await TileDocument.create<TileContent>(
-      this._ceramic,
+      this.#ceramic,
       null,
       { deterministic: true, controllers: [did], family: 'IDX' },
       { anchor: false, publish: false }
     )
   }
 
+  /** @internal */
   async _getIDXDoc(did: string): Promise<TileDoc | null> {
     const doc = await this._createIDXDoc(did)
     if (doc.content == null || doc.metadata.schema == null) {
       return null
     }
-    if (doc.metadata.schema !== this._indexSchemaURL) {
+    if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
     return doc
   }
 
+  /** @internal */
   async _getOwnIDXDoc(): Promise<TileDoc> {
     const doc = await this._createIDXDoc(this.id)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
-      await doc.update({}, { ...doc.metadata, schema: this._indexSchemaURL })
-      if (this._autopin) {
-        await this._ceramic.pin.add(doc.id)
+      await doc.update({}, { ...doc.metadata, schema: CIP11_INDEX_SCHEMA_URL })
+      if (this.#autopin) {
+        await this.#ceramic.pin.add(doc.id)
       }
-    } else if (doc.metadata.schema !== this._indexSchemaURL) {
+    } else if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
     return doc
@@ -260,12 +253,12 @@ export class DIDDataStore<
   // Definition APIs
 
   getDefinitionID(aliasOrID: string): string {
-    return this._model.getDefinitionID(aliasOrID) ?? aliasOrID
+    return this.#model.getDefinitionID(aliasOrID) ?? aliasOrID
   }
 
   async getDefinition(id: StreamID | string): Promise<DefinitionWithID> {
     const doc = await this._loadDocument(id)
-    if (doc.metadata.schema !== this._definitionsSchemaURL) {
+    if (doc.metadata.schema !== CIP11_DEFINITION_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not Definition')
     }
     return { ...doc.content, id: doc.id } as DefinitionWithID
@@ -303,6 +296,7 @@ export class DIDDataStore<
     return id
   }
 
+  /** @internal */
   async _setRecordOnly(
     definitionID: string,
     content: Record<string, any>,
@@ -320,10 +314,12 @@ export class DIDDataStore<
     }
   }
 
+  /** @internal */
   async _loadDocument(id: StreamID | string): Promise<TileDoc> {
-    return await TileDocument.load(this._ceramic, id)
+    return await TileDocument.load(this.#ceramic, id)
   }
 
+  /** @internal */
   async _createRecord(
     definition: DefinitionWithID,
     content: Record<string, any>,
@@ -335,14 +331,14 @@ export class DIDDataStore<
       family: definition.id.toString(),
     }
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(this._ceramic, null, metadata, {
+    const doc = await TileDocument.create<TileContent>(this.#ceramic, null, metadata, {
       anchor: false,
       publish: false,
     })
     // Then be updated with content and schema
     const updated = doc.update(content, { ...metadata, schema: definition.schema })
-    if (pin ?? this._autopin) {
-      await Promise.all([updated, this._ceramic.pin.add(doc.id)])
+    if (pin ?? this.#autopin) {
+      await Promise.all([updated, this.#ceramic.pin.add(doc.id)])
     } else {
       await updated
     }
@@ -351,12 +347,14 @@ export class DIDDataStore<
 
   // References APIs
 
+  /** @internal */
   async _setReference(definitionID: string, id: StreamID): Promise<void> {
     await this._indexProxy.changeContent((index) => {
       return { ...index, [definitionID]: id.toUrl() }
     })
   }
 
+  /** @internal */
   async _setReferences(references: IdentityIndex): Promise<void> {
     if (Object.keys(references).length !== 0) {
       await this._indexProxy.changeContent((index) => {

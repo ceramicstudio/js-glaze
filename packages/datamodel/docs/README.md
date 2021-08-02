@@ -1,3 +1,5 @@
+@glazed/datamodel / [Exports](modules.md)
+
 # Glaze DataModel
 
 ## Installation

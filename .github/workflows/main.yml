@@ -30,6 +30,3 @@ jobs:
 
       - name: Test
         run: yarn test --ci --coverage
-
-      - name: Build
-        run: yarn build

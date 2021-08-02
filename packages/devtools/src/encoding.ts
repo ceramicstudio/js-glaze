@@ -1,4 +1,4 @@
-import type { EncodedDagJWS, EncodedDagJWSResult } from '@glazed/types'
+import type { EncodedDagJWS, EncodedDagJWSResult, ManagedEntry, ManagedModel } from '@glazed/types'
 import CID from 'cids'
 import type { DagJWS, DagJWSResult } from 'dids'
 import { fromString, toString } from 'uint8arrays'
@@ -21,14 +21,50 @@ export function encodeDagJWSResult({ jws, linkedBlock }: DagJWSResult): EncodedD
   return { jws: encodeDagJWS(jws), linkedBlock: toString(linkedBlock, 'base64pad') }
 }
 
+/** @internal */
 export function decodeSignedMap<K extends string>(
   data: Record<K, Array<EncodedDagJWSResult>>
 ): Record<K, Array<DagJWSResult>> {
   return applyMap(data, (records) => records.map(decodeDagJWSResult))
 }
 
+/** @internal */
 export function encodeSignedMap<K extends string>(
   data: Record<K, Array<DagJWSResult>>
 ): Record<K, Array<EncodedDagJWSResult>> {
   return applyMap(data, (records) => records.map(encodeDagJWSResult))
+}
+
+/** @internal */
+export function decodeEntryCommits(
+  entry: ManagedEntry<EncodedDagJWSResult>
+): ManagedEntry<DagJWSResult> {
+  return { ...entry, commits: entry.commits.map(decodeDagJWSResult) }
+}
+
+export function decodeModel(model: ManagedModel<EncodedDagJWSResult>): ManagedModel<DagJWSResult> {
+  return {
+    schemas: applyMap(model.schemas, (schema) => {
+      return { ...schema, commits: schema.commits.map(decodeDagJWSResult) }
+    }),
+    definitions: applyMap(model.definitions, decodeEntryCommits),
+    tiles: applyMap(model.tiles, decodeEntryCommits),
+  }
+}
+
+/** @internal */
+export function encodeEntryCommits(
+  entry: ManagedEntry<DagJWSResult>
+): ManagedEntry<EncodedDagJWSResult> {
+  return { ...entry, commits: entry.commits.map(encodeDagJWSResult) }
+}
+
+export function encodeModel(model: ManagedModel<DagJWSResult>): ManagedModel<EncodedDagJWSResult> {
+  return {
+    schemas: applyMap(model.schemas, (schema) => {
+      return { ...schema, commits: schema.commits.map(encodeDagJWSResult) }
+    }),
+    definitions: applyMap(model.definitions, encodeEntryCommits),
+    tiles: applyMap(model.tiles, encodeEntryCommits),
+  }
 }

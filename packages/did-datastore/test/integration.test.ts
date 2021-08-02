@@ -20,9 +20,7 @@ describe('integration', () => {
 
   test('get and set a definition', async () => {
     const manager = new ModelManager(ceramic)
-    await manager.useDataStoreModel()
-
-    const schemaRef = await manager.addSchema('Profile', {
+    const schemaID = await manager.createSchema('Profile', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Profile',
       type: 'object',
@@ -33,12 +31,11 @@ describe('integration', () => {
         },
       },
     } as any)
-    const definitionRef = await manager.addDefinition('profile', {
+    await manager.createDefinition('profile', {
       name: 'Profile',
       description: 'test profile',
-      schema: schemaRef.toUrl(),
+      schema: manager.getSchemaURL(schemaID) as string,
     })
-
     const model = await manager.toPublished()
 
     const writer = new DIDDataStore<ModelTypes>({ ceramic, model })
@@ -47,7 +44,7 @@ describe('integration', () => {
 
     const reader = new DIDDataStore<ModelTypes>({ ceramic, model })
     // The definition StreamID can also be used to identify a known resource
-    const doc = await reader.get(definitionRef.toString(), writer.id)
+    const doc = await reader.get('profile', writer.id)
     expect(doc).toEqual({ name: 'Alice' })
   })
 })

@@ -16,30 +16,30 @@ export class DataModel<
   ModelTypes extends ModelTypeAliases,
   ModelAliases extends ModelTypesToAliases<ModelTypes> = ModelTypesToAliases<ModelTypes>
 > {
-  _autopin: boolean
-  _ceramic: CeramicApi
-  _model: ModelAliases
+  #autopin: boolean
+  #ceramic: CeramicApi
+  #model: ModelAliases
 
   constructor({ autopin, ceramic, model }: DataModelParams<ModelAliases>) {
-    this._autopin = autopin !== false
-    this._ceramic = ceramic
-    this._model = model
+    this.#autopin = autopin !== false
+    this.#ceramic = ceramic
+    this.#model = model
   }
 
   get ceramic(): CeramicApi {
-    return this._ceramic
+    return this.#ceramic
   }
 
   getDefinitionID<Alias extends keyof ModelAliases['definitions']>(alias: Alias): string | null {
-    return this._model.definitions[alias] ?? null
+    return this.#model.definitions[alias] ?? null
   }
 
   getSchemaURL<Alias extends keyof ModelAliases['schemas']>(alias: Alias): string | null {
-    return this._model.schemas[alias] ?? null
+    return this.#model.schemas[alias] ?? null
   }
 
   getTileID<Alias extends keyof ModelAliases['tiles']>(alias: Alias): string | null {
-    return this._model.tiles[alias] ?? null
+    return this.#model.tiles[alias] ?? null
   }
 
   async loadTile<
@@ -50,7 +50,7 @@ export class DataModel<
     if (id == null) {
       throw new Error(`Tile alias "${alias as string}" is not defined`)
     }
-    return await TileDocument.load<ContentType>(this._ceramic, id)
+    return await TileDocument.load<ContentType>(this.#ceramic, id)
   }
 
   async createTile<
@@ -66,9 +66,9 @@ export class DataModel<
       throw new Error(`Schema alias "${schemaAlias as string}" is not defined`)
     }
 
-    const doc = await TileDocument.create<ContentType>(this._ceramic, content, { schema })
-    if (pin ?? this._autopin) {
-      await this._ceramic.pin.add(doc.id)
+    const doc = await TileDocument.create<ContentType>(this.#ceramic, content, { schema })
+    if (pin ?? this.#autopin) {
+      await this.#ceramic.pin.add(doc.id)
     }
     return doc
   }

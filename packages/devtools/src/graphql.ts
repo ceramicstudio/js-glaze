@@ -7,15 +7,15 @@ import type { Schema } from '@glazed/types'
 import { camelCase, pascalCase } from 'change-case'
 
 import type { ModelManager } from './datamodel'
-import { getReference } from './datamodel'
+import { getReference } from './schema'
 
-const EXCLUDED_SCHEMAS = ['Definition', 'IdentityIndex']
-
+/** @internal */
 function getName(base: string, prefix = ''): string {
   const withCase = pascalCase(base)
   return withCase.startsWith(prefix) ? withCase : prefix + withCase
 }
 
+/** @internal */
 export function getItemField(
   model: GraphQLModel,
   schema: Schema,
@@ -49,7 +49,11 @@ export type AddModelSchemaOptions = {
   owner?: string
 }
 
-// Add a JSON schema to the provided records based on its type
+/**
+ * Add a JSON schema to the provided records based on its type
+ *
+ * @internal
+ * */
 export function addModelSchema(
   model: GraphQLModel,
   schema: Schema,
@@ -125,63 +129,55 @@ export async function createGraphQLModel(manager: ModelManager): Promise<GraphQL
     roots: {},
   }
 
-  const handleSchemas = manager.schemas
-    .filter((name) => !EXCLUDED_SCHEMAS.includes(name))
-    .map(async (name) => {
-      const created = manager.getSchema(name)
-      if (created != null) {
-        const doc = await manager.loadCreated(created)
-        const schema = doc.content as Schema
-        if (schema == null) {
-          throw new Error(`Could not load schema ${name}`)
-        }
+  const handleSchemas = manager.schemas.map(async (name) => {
+    const id = manager.getSchemaID(name) as string
+    const stream = await manager.loadStream(id)
+    const schema = stream.content as Schema
+    if (schema == null) {
+      throw new Error(`Could not load schema ${name}`)
+    }
 
-        const schemaURL = doc.commitId.toUrl()
-        if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
-          const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
-          await manager.loadSchema(sliceSchemaID)
-          const sliceSchemaDoc = await manager.loadDoc(sliceSchemaID)
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
-          if (itemSchema == null) {
-            throw new Error(`Could not extract item schema ${name}`)
-          }
-          model.collections[name] = {
-            schema: schemaURL,
-            item: getItemField(model, itemSchema, name, name),
-          }
-          model.referenced[schemaURL] = { type: 'collection', name }
-        } else {
-          model.referenced[schemaURL] = {
-            type: 'object',
-            name: addModelSchema(model, schema),
-          }
-        }
+    const schemaURL = stream.commitId.toUrl()
+    if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
+      const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
+      await manager.loadSchema(sliceSchemaID)
+      const sliceSchemaDoc = await manager.loadStream(sliceSchemaID)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
+      if (itemSchema == null) {
+        throw new Error(`Could not extract item schema ${name}`)
       }
-    })
-
-  const handleDefinitions = manager.definitions.map(async (name) => {
-    const created = manager.getDefinition(name)
-    if (created != null) {
-      const doc = await manager.loadCreated(created)
-      const definition = doc.content as Definition
-      if (definition == null) {
-        throw new Error(`Could not load definition ${name}`)
+      model.collections[name] = {
+        schema: schemaURL,
+        item: getItemField(model, itemSchema, name, name),
       }
-      model.index[name] = { id: doc.id.toString(), schema: definition.schema }
+      model.referenced[schemaURL] = { type: 'collection', name }
+    } else {
+      model.referenced[schemaURL] = {
+        type: 'object',
+        name: addModelSchema(model, schema),
+      }
     }
   })
 
-  const handleTiles = manager.tiles.map(async (name) => {
-    const created = manager.getTile(name)
-    if (created != null) {
-      const doc = await manager.loadCreated(created)
-      const { schema } = doc.metadata
-      if (schema == null) {
-        throw new Error(`Missing schema for tile ${name}`)
-      }
-      model.roots[name] = { id: doc.id.toString(), schema }
+  const handleDefinitions = manager.definitions.map(async (name) => {
+    const id = manager.getDefinitionID(name) as string
+    const stream = await manager.loadStream(id)
+    const definition = stream.content as Definition
+    if (definition == null) {
+      throw new Error(`Could not load definition ${name}`)
     }
+    model.index[name] = { id: stream.id.toString(), schema: definition.schema }
+  })
+
+  const handleTiles = manager.tiles.map(async (name) => {
+    const id = manager.getTileID(name) as string
+    const stream = await manager.loadStream(id)
+    const { schema } = stream.metadata
+    if (schema == null) {
+      throw new Error(`Missing schema for tile ${name}`)
+    }
+    model.roots[name] = { id: stream.id.toString(), schema }
   })
 
   await Promise.all([...handleSchemas, ...handleDefinitions, ...handleTiles])

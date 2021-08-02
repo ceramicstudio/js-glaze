@@ -2,6 +2,7 @@
 
 import { StreamID } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 
 import { DIDDataStore } from '../src'
@@ -9,10 +10,7 @@ jest.mock('@ceramicnetwork/stream-tile')
 
 describe('DIDDataStore', () => {
   const model = {
-    schemas: {
-      Definition: 'DefinitionSchemaURL',
-      IdentityIndex: 'IndexSchemaURL',
-    },
+    schemas: {},
     definitions: {},
     tiles: {},
   }
@@ -20,24 +18,6 @@ describe('DIDDataStore', () => {
   const testDocID = StreamID.fromString(
     'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
   )
-
-  describe('constructor', () => {
-    test('throws if the provided model does not contain the IdentityIndex schema', () => {
-      expect(() => new DIDDataStore({ ceramic: {}, model: { schemas: {} } } as any)).toThrow(
-        'Invalid model provided: missing IdentityIndex schema'
-      )
-    })
-
-    test('throws if the provided model does not contain the Definition schema', () => {
-      expect(
-        () => new DIDDataStore({ ceramic: {}, model: { schemas: { IdentityIndex: 'url' } } } as any)
-      ).toThrow('Invalid model provided: missing Definition schema')
-    })
-
-    test('does not throw if the provided model contains the Definition and IdentityIndex schemas', () => {
-      expect(() => new DIDDataStore({ ceramic: {}, model } as any)).not.toThrow()
-    })
-  })
 
   describe('properties', () => {
     test('`authenticated` property', () => {
@@ -288,7 +268,7 @@ describe('DIDDataStore', () => {
 
     describe('_getIDXDoc', () => {
       test('calls _createIDXDoc and check the contents and schema are set', async () => {
-        const doc = { content: {}, metadata: { schema: 'IndexSchemaURL' } } as any
+        const doc = { content: {}, metadata: { schema: CIP11_INDEX_SCHEMA_URL } } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
         const ds = new DIDDataStore({ model } as any)
         ds._createIDXDoc = createDoc
@@ -298,7 +278,7 @@ describe('DIDDataStore', () => {
       })
 
       test('returns null if the contents are not set', async () => {
-        const doc = { content: null, metadata: { schema: 'IndexSchemaURL' } } as any
+        const doc = { content: null, metadata: { schema: CIP11_INDEX_SCHEMA_URL } } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
         const ds = new DIDDataStore({ model } as any)
         ds._createIDXDoc = createDoc
@@ -343,13 +323,13 @@ describe('DIDDataStore', () => {
 
         await expect(ds._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith({}, { ...metadata, schema: 'IndexSchemaURL' })
+        expect(update).toHaveBeenCalledWith({}, { ...metadata, schema: CIP11_INDEX_SCHEMA_URL })
         expect(add).toBeCalledWith('streamId')
       })
 
       test('returns the doc if valid', async () => {
         const id = 'did:test:123'
-        const metadata = { controllers: [id], family: 'IDX', schema: 'IndexSchemaURL' }
+        const metadata = { controllers: [id], family: 'IDX', schema: CIP11_INDEX_SCHEMA_URL }
         const update = jest.fn()
         const doc = { update, metadata, content: {} } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
@@ -401,7 +381,7 @@ describe('DIDDataStore', () => {
         const load = jest.fn(() => {
           return Promise.resolve({
             content: { name: 'definition' },
-            metadata: { schema: 'DefinitionSchemaURL' },
+            metadata: { schema: CIP11_DEFINITION_SCHEMA_URL },
           })
         })
         TileDocument.load.mockImplementationOnce(load)
