@@ -7,7 +7,6 @@ export default class SignDID extends Command<CommandFlags, { did: string; conten
   static flags = Command.flags
 
   static args = [
-    { name: 'did', description: 'DID or label', required: true },
     {
       name: 'contents',
       description: 'String-encoded JSON data',
@@ -19,8 +18,7 @@ export default class SignDID extends Command<CommandFlags, { did: string; conten
   async run(): Promise<void> {
     this.spinner.start('Creating JWS...')
     try {
-      const did = await this.getDID(this.args.did)
-      const jws = await did.createJWS(this.args.contents)
+      const jws = await this.authenticatedDID.createJWS(this.args.contents)
       this.spinner.succeed('JWS:')
       this.logJSON(jws)
     } catch (err) {

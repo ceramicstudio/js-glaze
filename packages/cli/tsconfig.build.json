@@ -2,11 +2,9 @@
   "extends": "../../tsconfig.build.json",
   "include": ["src"],
   "compilerOptions": {
-    "declaration": true,
     "importHelpers": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "module": "commonjs",
+    "module": "CommonJS",
     "outDir": "lib",
     "rootDir": "src",
     "strict": true,

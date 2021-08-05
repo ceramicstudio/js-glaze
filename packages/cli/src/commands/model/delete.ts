@@ -1,29 +1,31 @@
 import { flags } from '@oclif/command'
+import { unlink } from 'fs-extra'
 import inquirer from 'inquirer'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
+import { config } from '../../config'
 
 interface Flags extends CommandFlags {
   force?: boolean
 }
 
-export default class DeleteDID extends Command<Flags, { did: string }> {
-  static description = 'delete a local DID'
+export default class DeleteModel extends Command<Flags, { name: string }> {
+  static description = 'delete a local model'
 
   static flags = {
     ...Command.flags,
     force: flags.boolean({ char: 'f', description: 'bypass confirmation prompt' }),
   }
 
-  static args = [{ name: 'did', required: true }]
+  static args = [{ name: 'name', required: true }]
 
   async run(): Promise<void> {
     try {
-      const cfg = await this.getConfig()
-      const dids = cfg.get('dids')
-      if (dids[this.args.did] == null) {
-        this.spinner.warn(`DID ${this.args.did} does not exist`)
+      const { name } = this.args
+      const models = config.get('models')
+      if (models[name] == null) {
+        this.spinner.warn(`Model ${name} does not exist`)
         return
       }
 
@@ -32,18 +34,19 @@ export default class DeleteDID extends Command<Flags, { did: string }> {
         const { conf } = await inquirer.prompt<{ conf: boolean }>({
           name: 'conf',
           type: 'confirm',
-          message: `Are you sure you want to delete the DID ${this.args.did}? This is NOT reversible.`,
+          message: `Are you sure you want to delete the model named ${name}? This is NOT reversible.`,
           default: false,
         })
         confirmed = conf
       }
 
       if (confirmed) {
-        delete dids[this.args.did]
-        cfg.set('dids', dids)
-        this.spinner.succeed('DID successfully deleted')
+        await unlink(models[name].path)
+        delete models[name]
+        config.set('models', models)
+        this.spinner.succeed('Model successfully deleted')
       } else {
-        this.spinner.info('DID deletion cancelled')
+        this.spinner.info('Model deletion cancelled')
       }
     } catch (err) {
       this.spinner.fail((err as Error).message)

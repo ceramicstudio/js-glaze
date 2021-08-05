@@ -2,7 +2,7 @@
   "name": "@glazed/did-datastore",
   "author": "3Box Labs",
   "homepage": "https://idx.xyz",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "(Apache-2.0 OR MIT)",
   "main": "dist/index.js",
   "module": "dist/did-datastore.esm.js",

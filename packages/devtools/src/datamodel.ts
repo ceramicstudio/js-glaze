@@ -19,13 +19,25 @@ import type {
 import type { DagJWSResult } from 'dids'
 
 import { decodeModel, encodeModel } from './encoding'
-import { createTile, publishCommits } from './publishing'
+import { createModelDoc, publishCommits } from './publishing'
 import { extractSchemaReferences } from './schema'
 
 type ManagedReferenced = {
   definitions: Set<ManagedID>
   schemas: Set<ManagedID>
   tiles: Set<ManagedID>
+}
+
+type CreateContentType = {
+  definition: Definition
+  schema: Schema
+  tile: Record<string, unknown>
+}
+
+type UsePublishedIDType = {
+  definition: StreamID | string
+  schema: StreamRef | string
+  tile: StreamID | string
 }
 
 function getManagedIDAndVersion(id: StreamRef | string): [ManagedID, string | null] {
@@ -36,6 +48,14 @@ function getManagedIDAndVersion(id: StreamRef | string): [ManagedID, string | nu
 function getManagedID(id: StreamRef | string): ManagedID {
   const streamID = typeof id === 'string' ? StreamRef.from(id) : id
   return streamID.baseID.toString()
+}
+
+function isSupportedDID(did: string): boolean {
+  return did.startsWith('did:key')
+}
+
+function docHasSupportedDID(doc: TileDocument<any>): boolean {
+  return isSupportedDID(doc.metadata.controllers[0])
 }
 
 const dataStoreModel = decodeModel(encodedDataStoreModel)
@@ -188,9 +208,34 @@ export class ModelManager {
   async loadStream(streamID: StreamRef | string): Promise<TileDocument> {
     const id = typeof streamID === 'string' ? streamID : streamID.baseID.toString()
     if (this.#streams[id] == null) {
-      this.#streams[id] = TileDocument.load(this.#ceramic, id)
+      this.#streams[id] = this._loadAndValidateStream(id)
     }
     return await this.#streams[id]
+  }
+
+  /** internal */
+  async _loadAndValidateStream(id: string): Promise<TileDocument> {
+    const stream = await TileDocument.load<Record<string, any>>(this.#ceramic, id)
+    if (stream.anchorCommitIds.length > 0) {
+      throw new Error(`Invalid stream ${id}: contains anchor commit`)
+    }
+
+    // Shortcut logic for single commit
+    if (stream.allCommitIds.length === 1 && docHasSupportedDID(stream)) {
+      return stream
+    }
+
+    const commits = await Promise.all(
+      stream.allCommitIds.map(async (commitID) => {
+        return await TileDocument.load(this.#ceramic, commitID)
+      })
+    )
+    const unsupported = commits.find((commit) => !docHasSupportedDID(commit))
+    if (unsupported != null) {
+      throw new Error(`Invalid stream ${id}: contains a commit authored by an unsupported DID`)
+    }
+
+    return stream
   }
 
   async loadCommits(id: ManagedID): Promise<Array<DagJWSResult>> {
@@ -252,6 +297,42 @@ export class ModelManager {
     }, {} as Record<string, Array<string>>)
   }
 
+  // High-level
+
+  async create<T extends keyof CreateContentType, Content = CreateContentType[T]>(
+    type: T,
+    alias: string,
+    content: Content
+  ): Promise<ManagedID> {
+    switch (type) {
+      case 'schema':
+        return await this.createSchema(alias, content as any)
+      case 'definition':
+        return await this.createDefinition(alias, content as any)
+      case 'tile':
+        return await this.createTile(alias, content as any)
+      default:
+        throw new Error(`Unsupported type: ${type as string}`)
+    }
+  }
+
+  async usePublished<T extends keyof UsePublishedIDType, ID = UsePublishedIDType[T]>(
+    type: T,
+    alias: string,
+    id: ID
+  ): Promise<ManagedID> {
+    switch (type) {
+      case 'schema':
+        return await this.usePublishedSchema(alias, id as any)
+      case 'definition':
+        return await this.usePublishedDefinition(alias, id as any)
+      case 'tile':
+        return await this.usePublishedTile(alias, id as any)
+      default:
+        throw new Error(`Unsupported type: ${type as string}`)
+    }
+  }
+
   // Schemas
 
   getSchemaID(alias: string): ManagedID | null {
@@ -280,12 +361,15 @@ export class ModelManager {
     if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
+    if (!isSupportedDID(this.#ceramic.did.id)) {
+      throw new Error('Unsupported DID to create stream for model')
+    }
     if (this.hasSchemaAlias(alias)) {
       throw new Error(`Schema ${alias} already exists`)
     }
 
     const [stream, dependencies] = await Promise.all([
-      createTile(this.#ceramic, schema),
+      createModelDoc(this.#ceramic, schema),
       this.loadSchemaDependencies(schema),
     ])
 
@@ -326,13 +410,16 @@ export class ModelManager {
     if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
     }
+    if (!isSupportedDID(this.#ceramic.did.id)) {
+      throw new Error('Unsupported DID to create stream for model')
+    }
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
 
     await publishDataStoreSchemas(this.#ceramic)
     const [stream, schemaID] = await Promise.all([
-      createTile(this.#ceramic, definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
+      createModelDoc(this.#ceramic, definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
       this.loadSchema(definition.schema),
     ])
 
@@ -387,10 +474,13 @@ export class ModelManager {
   async createTile<T extends Record<string, unknown>>(
     alias: string,
     contents: T,
-    meta: Partial<StreamMetadata>
+    meta: Partial<StreamMetadata> = {}
   ): Promise<ManagedID> {
     if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
+    }
+    if (!isSupportedDID(this.#ceramic.did.id)) {
+      throw new Error('Unsupported DID to create stream for model')
     }
     if (this.hasTileAlias(alias)) {
       throw new Error(`Tile ${alias} already exists`)
@@ -400,7 +490,7 @@ export class ModelManager {
     }
 
     const [stream, schemaID] = await Promise.all([
-      createTile(this.#ceramic, contents, meta),
+      createModelDoc(this.#ceramic, contents, meta),
       this.loadSchema(meta.schema),
     ])
 

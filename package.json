@@ -1,9 +1,12 @@
 {
   "name": "idx",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": ["ajv"]
+  },
   "scripts": {
     "lerna": "lerna",
     "docs": "lerna run docs --parallel",

@@ -13,7 +13,7 @@ export default class VerifyDID extends Command<CommandFlags, { jws: string }> {
   async run(): Promise<void> {
     this.spinner.start('Verifying JWS...')
     try {
-      const did = await this.getDID()
+      const did = this.getDID()
       const jws = this.args.jws.startsWith('{')
         ? (JSON.parse(this.args.jws) as DagJWS)
         : this.args.jws
