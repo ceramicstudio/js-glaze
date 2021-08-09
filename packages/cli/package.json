@@ -52,7 +52,7 @@
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.0",
     "cli-ux": "^5.6.3",
-    "conf": "^10.0.1",
+    "conf": "^10.0.2",
     "did-resolver": "^3.1.0",
     "dids": "^2.3.0",
     "env-paths": "^2.2.1",
@@ -76,7 +76,7 @@
     "@types/node": "^14.14.21",
     "@types/update-notifier": "^5.1.0",
     "globby": "^11.0.2",
-    "ts-node": "^10.0.0",
+    "ts-node": "^10.2.0",
     "tslib": "^2.1.0"
   }
 }

@@ -1,11 +1,16 @@
 import { StreamRef } from '@ceramicnetwork/streamid'
 import { ModelManager } from '@glazed/devtools'
 import type { EncodedManagedModel } from '@glazed/types'
+import { flags } from '@oclif/command'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 import { config } from '../../config'
 import { read, write } from '../../fs'
+
+type Flags = CommandFlags & {
+  schema?: string
+}
 
 type Args = {
   name: string
@@ -14,10 +19,13 @@ type Args = {
   stream: string
 }
 
-export default class AddModel extends Command<CommandFlags, Args> {
+export default class AddModel extends Command<Flags, Args> {
   static description = 'add a stream to a model'
 
-  static flags = Command.flags
+  static flags = {
+    ...Command.flags,
+    schema: flags.string({ name: 'schema', description: 'tile schema' }),
+  }
 
   static args = [
     { name: 'name', required: true },
@@ -44,11 +52,7 @@ export default class AddModel extends Command<CommandFlags, Args> {
         // @ts-ignore
         await manager.usePublished(type, alias, id)
       } catch {
-        try {
-          await manager.create(type, alias, JSON.parse(stream))
-        } catch {
-          throw new Error('Could not parse Stream ID or JSON content')
-        }
+        await manager.create(type, alias, JSON.parse(stream), { schema: this.flags.schema })
       }
 
       await write(models[name].path, manager.toJSON())

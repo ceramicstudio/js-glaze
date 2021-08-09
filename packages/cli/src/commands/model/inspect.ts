@@ -58,7 +58,7 @@ export default class InspectModel extends Command<CommandFlags, Args> {
         tileTree.insert(`alias: ${chalk.green(tile.alias)}`)
         tileTree.insert(`version: ${chalk.magenta(tile.version)}`)
         tileTree.insert(`schema: ${chalk.yellow(tile.schema)}`)
-        tileTree.insert(chalk.yellow(id), tileTree)
+        tilesTree.insert(chalk.yellow(id), tileTree)
       }
       tree.insert('tiles', tilesTree)
 

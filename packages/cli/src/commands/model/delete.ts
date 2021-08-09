@@ -44,7 +44,7 @@ export default class DeleteModel extends Command<Flags, { name: string }> {
         await unlink(models[name].path)
         delete models[name]
         config.set('models', models)
-        this.spinner.succeed('Model successfully deleted')
+        this.spinner.succeed(`Model ${name} successfully deleted`)
       } else {
         this.spinner.info('Model deletion cancelled')
       }

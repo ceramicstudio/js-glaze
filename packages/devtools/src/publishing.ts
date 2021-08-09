@@ -8,7 +8,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { promiseMap } from './utils'
 
-const PUBLISH_OPTS = { anchor: false, publish: false }
+const PUBLISH_OPTS = { anchor: false }
 
 /** @internal */
 export async function createModelDoc<T = Record<string, any>>(

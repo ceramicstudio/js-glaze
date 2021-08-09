@@ -302,7 +302,8 @@ export class ModelManager {
   async create<T extends keyof CreateContentType, Content = CreateContentType[T]>(
     type: T,
     alias: string,
-    content: Content
+    content: Content,
+    meta?: Partial<StreamMetadata>
   ): Promise<ManagedID> {
     switch (type) {
       case 'schema':
@@ -310,7 +311,7 @@ export class ModelManager {
       case 'definition':
         return await this.createDefinition(alias, content as any)
       case 'tile':
-        return await this.createTile(alias, content as any)
+        return await this.createTile(alias, content as any, meta)
       default:
         throw new Error(`Unsupported type: ${type as string}`)
     }
@@ -362,7 +363,11 @@ export class ModelManager {
       throw new Error('Ceramic instance must be authenticated')
     }
     if (!isSupportedDID(this.#ceramic.did.id)) {
-      throw new Error('Unsupported DID to create stream for model')
+      throw new Error(
+        `Invalid DID ${
+          this.#ceramic.did.id
+        } to create stream for model, only "did:key" is supported`
+      )
     }
     if (this.hasSchemaAlias(alias)) {
       throw new Error(`Schema ${alias} already exists`)
@@ -411,7 +416,11 @@ export class ModelManager {
       throw new Error('Ceramic instance must be authenticated')
     }
     if (!isSupportedDID(this.#ceramic.did.id)) {
-      throw new Error('Unsupported DID to create stream for model')
+      throw new Error(
+        `Invalid DID ${
+          this.#ceramic.did.id
+        } to create stream for model, only "did:key" is supported`
+      )
     }
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)

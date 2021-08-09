@@ -29,7 +29,7 @@ describe('publishing', () => {
       ceramic,
       { hello: 'test' },
       { schema: testID },
-      { anchor: false, publish: false }
+      { anchor: false }
     )
     expect(pinAdd).toBeCalledWith(testDocID)
   })
@@ -45,7 +45,7 @@ describe('publishing', () => {
     } as any
 
     const commits = [{ jws: {}, __genesis: true }, { jws: {} }, { jws: {} }]
-    const opts = { anchor: false, publish: false }
+    const opts = { anchor: false }
     await expect(publishCommits(ceramic, commits as any)).resolves.toBe(testDoc)
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(TileDocument.createFromGenesis).toBeCalledWith(
