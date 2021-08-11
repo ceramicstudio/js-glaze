@@ -2,26 +2,28 @@ import { inspect } from 'util'
 
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
 import Ceramic from '@ceramicnetwork/http-client'
-import KeyResolver from 'key-did-resolver'
-import { IDX } from '@ceramicstudio/idx'
-import { definitions } from '@ceramicstudio/idx-constants'
-import type { DefinitionName } from '@ceramicstudio/idx-constants'
-import type { Definition } from '@ceramicstudio/idx-tools'
+import { DataModel } from '@glazed/datamodel'
+import { ModelManager } from '@glazed/devtools'
+import { DIDDataStore } from '@glazed/did-datastore'
+import type { PublishedModel } from '@glazed/types'
 import { Command as Cmd, flags } from '@oclif/command'
+import chalk from 'chalk'
 import { DID } from 'dids'
 import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
+import KeyResolver from 'key-did-resolver'
 import ora from 'ora'
 import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
 
-import { getDID, getConfig } from './config'
-import type { Config } from './config'
+import { config } from './config'
+import { createDataModel, loadManagedModel } from './model'
 
 type StringRecord = Record<string, unknown>
 
 export interface CommandFlags {
   ceramic?: string
+  key?: string
   [key: string]: unknown
 }
 
@@ -31,96 +33,93 @@ export abstract class Command<
 > extends Cmd {
   static flags = {
     ceramic: flags.string({ char: 'c', description: 'Ceramic API URL', env: 'CERAMIC_URL' }),
+    key: flags.string({ char: 'k', description: 'DID Key', env: 'DID_KEY' }),
   }
 
-  _ceramic: Ceramic | null = null
-  _idx: IDX | null = null
-  _resolverRegistry: ResolverRegistry | null = null
+  #authenticatedDID: DID | null = null
+  #ceramic: Ceramic | null = null
+  #resolverRegistry: ResolverRegistry | null = null
+
   args!: Args
   flags!: Flags
   spinner!: Ora
 
-  init(): Promise<void> {
+  async init(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const { args, flags } = this.parse(this.constructor)
     this.args = args as Args
     this.flags = flags as Flags
     this.spinner = ora()
-    return Promise.resolve()
+
+    // Authenticate the Ceramic instance whenever a key is provided
+    if (this.flags.key != null) {
+      const did = await this.getAuthenticatedDID(this.flags.key)
+      this.spinner.info(`Using DID ${chalk.cyan(did.id)}`)
+      this.#authenticatedDID = did
+      this.ceramic.did = did
+    }
   }
 
   async finally(): Promise<void> {
-    if (this._ceramic != null) {
-      await this._ceramic.close()
+    if (this.#ceramic != null) {
+      await this.#ceramic.close()
     }
   }
 
-  async getConfig(): Promise<Config> {
-    return await getConfig()
+  get authenticatedDID(): DID {
+    if (this.#authenticatedDID == null) {
+      throw new Error(
+        'DID is not authenticated, make sure to provide a seed using the "did-key" flag'
+      )
+    }
+    return this.#authenticatedDID
   }
 
-  async getResolverRegistry(): Promise<ResolverRegistry> {
-    if (this._resolverRegistry == null) {
-      const ceramic = await this.getCeramic()
+  get ceramic(): Ceramic {
+    if (this.#ceramic == null) {
+      this.#ceramic = new Ceramic(this.flags.ceramic ?? config.get('user')['ceramic-url'])
+    }
+    return this.#ceramic
+  }
+
+  get resolverRegistry(): ResolverRegistry {
+    if (this.#resolverRegistry == null) {
       const keyResolver = KeyResolver.getResolver()
-      const threeIDResolver = ThreeIDResolver.getResolver(ceramic)
-      this._resolverRegistry = { ...keyResolver, ...threeIDResolver }
+      const threeIDResolver = ThreeIDResolver.getResolver(this.ceramic)
+      this.#resolverRegistry = { ...keyResolver, ...threeIDResolver }
     }
-    return this._resolverRegistry
+    return this.#resolverRegistry
   }
 
-  async getDID(id?: string): Promise<DID> {
-    if (id == null) {
-      return new DID({ resolver: await this.getResolverRegistry() })
-    }
+  getProvider(seed: string): Ed25519Provider {
+    return new Ed25519Provider(fromString(seed, 'base16'))
+  }
 
-    const [provider, resolver] = await Promise.all([
-      this.getProvider(id),
-      this.getResolverRegistry(),
-    ])
-    const did = new DID({ provider, resolver })
+  getDID(): DID {
+    return new DID({ resolver: this.resolverRegistry })
+  }
+
+  async getAuthenticatedDID(seed: string): Promise<DID> {
+    const did = this.getDID()
+    did.setProvider(this.getProvider(seed))
     await did.authenticate()
     return did
   }
 
-  async getCeramic(): Promise<Ceramic> {
-    if (this._ceramic == null) {
-      let url = this.flags.ceramic
-      if (url == null) {
-        const cfg = await getConfig()
-        url = cfg.get('user')['ceramic-url']
-      }
-      this._ceramic = new Ceramic(url)
-    }
-    return this._ceramic
+  async getDataModel(name: string): Promise<DataModel<PublishedModel>> {
+    return await createDataModel(this.ceramic, name)
   }
 
-  async getAuthenticatedCeramic(id: string): Promise<Ceramic> {
-    const [ceramic, did] = await Promise.all([this.getCeramic(), this.getDID(id)])
-    await ceramic.setDID(did)
-    return ceramic
+  getDataStore<ModelTypes extends PublishedModel = PublishedModel>(
+    model: DataModel<ModelTypes>
+  ): DIDDataStore<ModelTypes> {
+    return new DIDDataStore({ autopin: true, ceramic: this.ceramic, model })
   }
 
-  async getIDX(did?: string): Promise<IDX> {
-    if (this._idx == null) {
-      const ceramic = did ? await this.getAuthenticatedCeramic(did) : await this.getCeramic()
-      this._idx = new IDX({ ceramic })
-    }
-    return this._idx
-  }
-
-  async getDefinition(name: string): Promise<Definition> {
-    const idx = await this.getIDX()
-    return await idx.getDefinition(definitions[name as DefinitionName] ?? name)
-  }
-
-  async getProvider(id: string): Promise<Ed25519Provider> {
-    const found = await getDID(id)
-    if (found == null) {
-      throw new Error('Could not load DID from local store')
-    }
-    return new Ed25519Provider(fromString(found[1].seed, 'base16'))
+  async getModelManager(name: string): Promise<ModelManager> {
+    const model = await loadManagedModel(name)
+    return ModelManager.fromJSON(this.ceramic, model)
   }
 
   logJSON(data: unknown): void {

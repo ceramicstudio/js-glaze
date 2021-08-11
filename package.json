@@ -1,9 +1,14 @@
 {
-  "name": "idx",
+  "name": "glaze",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "ajv"
+    ]
+  },
   "scripts": {
     "lerna": "lerna",
     "docs": "lerna run docs --parallel",
@@ -16,9 +21,9 @@
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^5.0.2",
-    "@types/jest": "^26.0.24",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
+    "@types/jest": "^27.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.1",
+    "@typescript-eslint/parser": "^4.29.1",
     "eslint": "^7.31.0",
     "eslint-config-3box": "^0.2.0",
     "eslint-plugin-jest": "^24.4.0",

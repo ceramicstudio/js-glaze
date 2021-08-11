@@ -12,12 +12,12 @@ import { assertDIDstring } from './utils'
 
 export { assertDIDstring, isDIDstring } from './utils'
 
-type DefinitionContentType<
+export type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,
   Alias extends keyof ModelTypes['definitions']
 > = ModelTypes['schemas'][ModelTypes['definitions'][Alias]]
 
-type DefinitionsContentTypes<
+export type DefinitionsContentTypes<
   ModelTypes extends ModelTypeAliases,
   Fallback = Record<string, unknown>
 > = {

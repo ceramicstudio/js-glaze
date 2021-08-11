@@ -1,6 +1,8 @@
+import chalk from 'chalk'
+
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { USER_CONFIG } from '../../config'
+import { USER_CONFIG, config } from '../../config'
 import type { UserConfig, UserConfigKey as Key } from '../../config'
 
 type Args = { key: Key; value: UserConfig[Key] }
@@ -13,11 +15,11 @@ export default class SetConfig extends Command<CommandFlags, Args> {
     { name: 'value', required: true },
   ]
 
-  async run(): Promise<void> {
-    const cfg = await this.getConfig()
-    const config = cfg.get('user')
-    config[this.args.key] = this.args.value
-    cfg.set('user', config)
-    this.spinner.succeed(`${USER_CONFIG[this.args.key]} successfully set`)
+  run(): Promise<void> {
+    const cfg = config.get('user')
+    cfg[this.args.key] = this.args.value
+    config.set('user', cfg)
+    this.spinner.succeed(`${chalk.green(USER_CONFIG[this.args.key])} successfully set`)
+    return Promise.resolve()
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@glazed/devtools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "3Box Labs",
   "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
@@ -29,6 +29,7 @@
     "@ceramicnetwork/stream-tile": "^1.0.0",
     "@ceramicnetwork/streamid": "^1.0.0",
     "@glazed/constants": "^0.1.0",
+    "@glazed/did-datastore-model": "^0.1.0",
     "ajv": "^8.6.2",
     "ajv-formats": "^2.1.0",
     "change-case": "^4.1.2",
@@ -38,10 +39,9 @@
   },
   "devDependencies": {
     "@ceramicnetwork/http-client": "^1.0.0",
-    "@glazed/did-datastore-model": "^0.1.0",
     "@glazed/graphql-types": "^0.1.0",
     "@glazed/types": "^0.1.0",
-    "@types/jest": "^26.0.24",
+    "@types/jest": "^27.0.0",
     "dids": "^2.3.0",
     "fs-extra": "^10.0.0",
     "jest-environment-glaze": "^0.1.0",

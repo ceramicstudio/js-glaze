@@ -8,23 +8,15 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { promiseMap } from './utils'
 
-const PUBLISH_OPTS = { anchor: false, publish: false }
+const PUBLISH_OPTS = { anchor: false }
 
 /** @internal */
-export async function createTile<T = Record<string, any>>(
+export async function createModelDoc<T = Record<string, any>>(
   ceramic: CeramicApi,
   content: T,
   metadata: Partial<StreamMetadata> = {}
 ): Promise<TileDocument<T>> {
-  if (ceramic.did == null) {
-    throw new Error('Ceramic instance is not authenticated')
-  }
-
-  if (metadata.controllers == null || metadata.controllers.length === 0) {
-    metadata.controllers = [ceramic.did.id]
-  }
-
-  const doc = await TileDocument.create<T>(ceramic, content, metadata)
+  const doc = await TileDocument.create<T>(ceramic, content, metadata, PUBLISH_OPTS)
   await ceramic.pin.add(doc.id)
   return doc
 }

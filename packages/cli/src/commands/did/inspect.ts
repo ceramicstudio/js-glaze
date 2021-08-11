@@ -1,4 +1,6 @@
-import { definitions, schemas } from '@ceramicstudio/idx-constants'
+import { DIDDataStore } from '@glazed/did-datastore'
+import { flags } from '@oclif/command'
+import chalk from 'chalk'
 import Listr from 'listr'
 import type { ListrTask } from 'listr'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -7,55 +9,52 @@ import UpdaterRenderer from 'listr-update-renderer'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { getPublicDID } from '../../config'
+import { EMPTY_MODEL } from '../../model'
 
-function reverse(record: Record<string, string>): Record<string, string> {
-  return Object.entries(record).reduce((acc, [key, value]) => {
-    acc[value] = key
-    return acc
-  }, {} as Record<string, string>)
+type Flags = CommandFlags & {
+  did?: string
 }
 
-const DEFINITIONS_LOOKUP = reverse(definitions)
-const SCHEMAS_LOOKUP = reverse(schemas)
+export default class InspectDID extends Command<Flags> {
+  static description = 'inspect the contents of a DID DataStore'
 
-export default class InspectIndex extends Command<CommandFlags, { did: string }> {
-  static description = 'inspect the contents of an IDX stream'
-
-  static flags = Command.flags
-
-  static args = [{ name: 'did', description: 'DID or label', required: true }]
+  static flags = {
+    ...Command.flags,
+    did: flags.string({ description: 'DID', exclusive: ['key'] }),
+  }
 
   async run(): Promise<void> {
-    this.spinner.start('Loading IDX stream...')
+    this.spinner.start('Loading Index stream...')
     try {
-      const did = await getPublicDID(this.args.did)
-      if (did == null) {
-        this.spinner.fail('No local DID found for given label')
-        return
+      let did: string
+      if (this.flags.key != null) {
+        did = this.authenticatedDID.id
+      } else if (this.flags.did != null) {
+        did = this.flags.did
+      } else {
+        throw new Error('Missing DID')
       }
 
-      const idx = await this.getIDX()
-      const index = await idx.getIndex(did)
+      const store = new DIDDataStore({ ceramic: this.ceramic, model: EMPTY_MODEL })
+      const index = await store.getIndex(did)
       if (index == null) {
-        this.spinner.warn('IDX stream is empty')
+        this.spinner.warn('Index stream is empty')
         return
       }
 
-      this.spinner.succeed('IDX stream loaded')
+      this.spinner.succeed('Index stream loaded')
 
       const tasks = Object.keys(index).map((key) => {
-        const keyAlias = DEFINITIONS_LOOKUP[key]
         return {
-          title: keyAlias ? `${key} (IDX ${keyAlias})` : key,
+          title: `${chalk.yellow(key)}`,
           task: () => {
-            const getDef = idx.getDefinition(key)
+            const getDef = store.getDefinition(key)
             return new Listr([
               {
                 title: 'Load definition...',
                 task: async (_ctx, task) => {
                   const def = await getDef
-                  let title = `Definition: ${def.name}`
+                  let title = `Definition: ${chalk.green(def.name)}`
                   if (def.description != null) {
                     title += ` (${def.description})`
                   }
@@ -69,10 +68,7 @@ export default class InspectIndex extends Command<CommandFlags, { did: string }>
                 title: 'Check schema...',
                 task: async (_ctx, task) => {
                   const def = await getDef
-                  const schemaAlias = SCHEMAS_LOOKUP[def.schema]
-                  task.title = schemaAlias
-                    ? `Schema: ${def.schema} (IDX ${schemaAlias})`
-                    : `Schema: ${def.schema}` ?? 'No Schema'
+                  task.title = `Schema: ${chalk.magenta(def.schema)}` ?? 'No Schema'
                 },
               },
             ])
