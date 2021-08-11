@@ -216,7 +216,7 @@ export class ModelManager {
   /** internal */
   async _loadAndValidateStream(id: string): Promise<TileDocument> {
     const stream = await TileDocument.load<Record<string, any>>(this.#ceramic, id)
-    if (stream.anchorCommitIds.length > 0) {
+    if (stream.anchorCommitIds.length !== 0) {
       throw new Error(`Invalid stream ${id}: contains anchor commit`)
     }
 

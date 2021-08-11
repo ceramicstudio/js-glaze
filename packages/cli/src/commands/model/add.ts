@@ -31,7 +31,11 @@ export default class AddModel extends Command<Flags, Args> {
     { name: 'name', required: true },
     { name: 'type', required: true, options: ['schema', 'definition', 'tile'] },
     { name: 'alias', required: true },
-    { name: 'stream', description: 'Stream ID or string-encoded JSON content', required: true },
+    {
+      name: 'stream',
+      description: 'Stream reference or string-encoded JSON content',
+      required: true,
+    },
   ]
 
   async run(): Promise<void> {

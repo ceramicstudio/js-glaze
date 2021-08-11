@@ -41,7 +41,7 @@
     "@ceramicnetwork/http-client": "^1.0.0",
     "@glazed/graphql-types": "^0.1.0",
     "@glazed/types": "^0.1.0",
-    "@types/jest": "^26.0.24",
+    "@types/jest": "^27.0.0",
     "dids": "^2.3.0",
     "fs-extra": "^10.0.0",
     "jest-environment-glaze": "^0.1.0",
