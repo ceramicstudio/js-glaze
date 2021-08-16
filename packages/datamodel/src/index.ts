@@ -1,3 +1,13 @@
+/**
+ * DataModel
+ *
+ * ```sh
+ * npm install @glazed/datamodel
+ * ```
+ *
+ * @module datamodel
+ */
+
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'

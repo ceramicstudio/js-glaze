@@ -213,7 +213,7 @@ export class ModelManager {
     return await this.#streams[id]
   }
 
-  /** internal */
+  /** @internal */
   async _loadAndValidateStream(id: string): Promise<TileDocument> {
     const stream = await TileDocument.load<Record<string, any>>(this.#ceramic, id)
     if (stream.anchorCommitIds.length !== 0) {

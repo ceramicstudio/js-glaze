@@ -1,31 +1,14 @@
-[@glazed/devtools](README.md) / Exports
+# Module: devtools
 
-# @glazed/devtools
+DevTools
 
-## Table of contents
+```sh
+npm install --dev @glazed/devtools
+```
 
-### Classes
+## Classes
 
-- [ModelManager](classes/ModelManager.md)
-
-### Type aliases
-
-- [AddModelSchemaOptions](modules.md#addmodelschemaoptions)
-
-### Functions
-
-- [createGraphQLModel](modules.md#creategraphqlmodel)
-- [decodeDagJWS](modules.md#decodedagjws)
-- [decodeDagJWSResult](modules.md#decodedagjwsresult)
-- [decodeModel](modules.md#decodemodel)
-- [encodeDagJWS](modules.md#encodedagjws)
-- [encodeDagJWSResult](modules.md#encodedagjwsresult)
-- [encodeModel](modules.md#encodemodel)
-- [isSecureSchema](modules.md#issecureschema)
-- [publishDataStoreSchemas](modules.md#publishdatastoreschemas)
-- [publishEncodedModel](modules.md#publishencodedmodel)
-- [publishModel](modules.md#publishmodel)
-- [streamIDToString](modules.md#streamidtostring)
+- [ModelManager](../classes/devtools.ModelManager.md)
 
 ## Type aliases
 
@@ -41,10 +24,6 @@
 | `owner?` | `string` |
 | `parent?` | `string` |
 
-#### Defined in
-
-[graphql.ts:46](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/graphql.ts#L46)
-
 ## Functions
 
 ### createGraphQLModel
@@ -55,15 +34,11 @@
 
 | Name | Type |
 | :------ | :------ |
-| `manager` | [`ModelManager`](classes/ModelManager.md) |
+| `manager` | [`ModelManager`](../classes/devtools.ModelManager.md) |
 
 #### Returns
 
 `Promise`<`GraphQLModel`\>
-
-#### Defined in
-
-[graphql.ts:117](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/graphql.ts#L117)
 
 ___
 
@@ -81,10 +56,6 @@ ___
 
 `DagJWS`
 
-#### Defined in
-
-[encoding.ts:8](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L8)
-
 ___
 
 ### decodeDagJWSResult
@@ -100,10 +71,6 @@ ___
 #### Returns
 
 `DagJWSResult`
-
-#### Defined in
-
-[encoding.ts:16](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L16)
 
 ___
 
@@ -121,10 +88,6 @@ ___
 
 `ManagedModel`<`DagJWSResult`\>
 
-#### Defined in
-
-[encoding.ts:45](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L45)
-
 ___
 
 ### encodeDagJWS
@@ -140,10 +103,6 @@ ___
 #### Returns
 
 `EncodedDagJWS`
-
-#### Defined in
-
-[encoding.ts:12](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L12)
 
 ___
 
@@ -161,10 +120,6 @@ ___
 
 `EncodedDagJWSResult`
 
-#### Defined in
-
-[encoding.ts:20](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L20)
-
 ___
 
 ### encodeModel
@@ -180,10 +135,6 @@ ___
 #### Returns
 
 `ManagedModel`<`EncodedDagJWSResult`\>
-
-#### Defined in
-
-[encoding.ts:62](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/encoding.ts#L62)
 
 ___
 
@@ -207,10 +158,6 @@ ___
 
 `boolean`
 
-#### Defined in
-
-[validation.ts:12](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/validation.ts#L12)
-
 ___
 
 ### publishDataStoreSchemas
@@ -226,10 +173,6 @@ ___
 #### Returns
 
 `Promise`<`void`\>
-
-#### Defined in
-
-[datamodel.ts:42](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/datamodel.ts#L42)
 
 ___
 
@@ -248,10 +191,6 @@ ___
 
 `Promise`<`PublishedModel`\>
 
-#### Defined in
-
-[datamodel.ts:86](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/datamodel.ts#L86)
-
 ___
 
 ### publishModel
@@ -269,10 +208,6 @@ ___
 
 `Promise`<`PublishedModel`\>
 
-#### Defined in
-
-[datamodel.ts:51](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/datamodel.ts#L51)
-
 ___
 
 ### streamIDToString
@@ -288,7 +223,3 @@ ___
 #### Returns
 
 `string`
-
-#### Defined in
-
-[utils.ts:3](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/devtools/src/utils.ts#L3)

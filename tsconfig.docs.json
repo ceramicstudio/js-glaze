@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.build.json",
+  "include": [
+    "./packages/datamodel/src",
+    "./packages/devtools/src",
+    "./packages/did-datastore/src"
+  ],
+  "compilerOptions": {
+    "jsx": "preserve",
+    "lib": ["DOM", "ES2020"],
+    "skipLibCheck": true
+  },
+  "typedocOptions": {
+    "name": "Glaze API",
+    "readme": "none",
+    "entryDocument": "overview.md",
+    "entryPoints": [
+      "./packages/datamodel/src/index.ts",
+      "./packages/devtools/src/index.ts",
+      "./packages/did-datastore/src/index.ts"
+    ],
+    "disableSources": true,
+    "excludeExternals": true,
+    "excludeInternal": true,
+    "excludePrivate": true,
+    "hideBreadcrumbs": true,
+    "hideInPageTOC": true
+  }
+}

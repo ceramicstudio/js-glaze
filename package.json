@@ -11,7 +11,7 @@
   },
   "scripts": {
     "lerna": "lerna",
-    "docs": "lerna run docs --parallel",
+    "docs": "typedoc --tsconfig tsconfig.docs.json",
     "test": "lerna run test --",
     "lint": "lerna run lint --parallel",
     "build": "lerna run build",
@@ -36,11 +36,6 @@
     "typedoc": "^0.21.4",
     "typedoc-plugin-markdown": "^3.10.4",
     "typescript": "^4.2.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint"
-    }
   },
   "size-limit": [
     {

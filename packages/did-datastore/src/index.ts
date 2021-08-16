@@ -1,3 +1,13 @@
+/**
+ * DID DataStore
+ *
+ * ```sh
+ * npm install @glazed/did-datastore
+ * ```
+ *
+ * @module did-datastore
+ */
+
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { StreamID } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'

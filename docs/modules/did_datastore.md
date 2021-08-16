@@ -1,24 +1,14 @@
-[@glazed/did-datastore](README.md) / Exports
+# Module: did-datastore
 
-# @glazed/did-datastore
+DID DataStore
 
-## Table of contents
+```sh
+npm install @glazed/did-datastore
+```
 
-### Classes
+## Classes
 
-- [DIDDataStore](classes/DIDDataStore.md)
-
-### Type aliases
-
-- [CreateOptions](modules.md#createoptions)
-- [DIDDataStoreParams](modules.md#diddatastoreparams)
-- [DefinitionWithID](modules.md#definitionwithid)
-- [Entry](modules.md#entry)
-
-### Functions
-
-- [assertDIDstring](modules.md#assertdidstring)
-- [isDIDstring](modules.md#isdidstring)
+- [DIDDataStore](../classes/did_datastore.DIDDataStore.md)
 
 ## Type aliases
 
@@ -31,10 +21,6 @@
 | Name | Type |
 | :------ | :------ |
 | `pin?` | `boolean` |
-
-#### Defined in
-
-[index.ts:38](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L38)
 
 ___
 
@@ -56,9 +42,18 @@ ___
 | `ceramic` | `CeramicApi` |
 | `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> |
 
-#### Defined in
+___
 
-[index.ts:42](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L42)
+### DefinitionContentType
+
+Ƭ **DefinitionContentType**<`ModelTypes`, `Alias`\>: `ModelTypes`[``"schemas"``][`ModelTypes`[``"definitions"``][`Alias`]]
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ModelTypes` | extends `ModelTypeAliases` |
+| `Alias` | extends keyof `ModelTypes`[``"definitions"``] |
 
 ___
 
@@ -72,9 +67,22 @@ ___
 | :------ | :------ |
 | `Config` | extends `Record`<`string`, `unknown`\>`Record`<`string`, `unknown`\> |
 
-#### Defined in
+___
 
-[index.ts:29](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L29)
+### DefinitionsContentTypes
+
+Ƭ **DefinitionsContentTypes**<`ModelTypes`, `Fallback`\>: `Object`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ModelTypes` | extends `ModelTypeAliases` |
+| `Fallback` | `Record`<`string`, `unknown`\> |
+
+#### Index signature
+
+▪ [Key: `string`]: typeof `Key` extends keyof `ModelTypes`[``"definitions"``] ? [`DefinitionContentType`](did_datastore.md#definitioncontenttype)<`ModelTypes`, typeof `Key`\> : `Fallback`
 
 ___
 
@@ -89,10 +97,6 @@ ___
 | `id` | `string` |
 | `key` | `string` |
 | `record` | `unknown` |
-
-#### Defined in
-
-[index.ts:32](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L32)
 
 ## Functions
 
@@ -110,10 +114,6 @@ ___
 
 `void`
 
-#### Defined in
-
-[utils.ts:6](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/utils.ts#L6)
-
 ___
 
 ### isDIDstring
@@ -129,7 +129,3 @@ ___
 #### Returns
 
 `boolean`
-
-#### Defined in
-
-[utils.ts:2](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/utils.ts#L2)

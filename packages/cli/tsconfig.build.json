@@ -3,11 +3,11 @@
   "include": ["src"],
   "compilerOptions": {
     "importHelpers": true,
-    "esModuleInterop": true,
+    "declaration": false,
+    "sourceMap": false,
     "module": "CommonJS",
     "outDir": "lib",
     "rootDir": "src",
-    "strict": true,
     "target": "es2017"
   }
 }

@@ -1,6 +1,6 @@
-[@glazed/did-datastore](../README.md) / [Exports](../modules.md) / DIDDataStore
-
 # Class: DIDDataStore<ModelTypes, Alias\>
+
+[did-datastore](../modules/did_datastore.md).DIDDataStore
 
 ## Type parameters
 
@@ -8,37 +8,6 @@
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases``ModelTypeAliases` |
 | `Alias` | extends keyof `ModelTypes`[``"definitions"``]keyof `ModelTypes`[``"definitions"``] |
-
-## Table of contents
-
-### Constructors
-
-- [constructor](DIDDataStore.md#constructor)
-
-### Accessors
-
-- [authenticated](DIDDataStore.md#authenticated)
-- [ceramic](DIDDataStore.md#ceramic)
-- [id](DIDDataStore.md#id)
-- [model](DIDDataStore.md#model)
-
-### Methods
-
-- [get](DIDDataStore.md#get)
-- [getDefinition](DIDDataStore.md#getdefinition)
-- [getDefinitionID](DIDDataStore.md#getdefinitionid)
-- [getIndex](DIDDataStore.md#getindex)
-- [getRecord](DIDDataStore.md#getrecord)
-- [getRecordDocument](DIDDataStore.md#getrecorddocument)
-- [getRecordID](DIDDataStore.md#getrecordid)
-- [has](DIDDataStore.md#has)
-- [iterator](DIDDataStore.md#iterator)
-- [merge](DIDDataStore.md#merge)
-- [remove](DIDDataStore.md#remove)
-- [set](DIDDataStore.md#set)
-- [setAll](DIDDataStore.md#setall)
-- [setDefaults](DIDDataStore.md#setdefaults)
-- [setRecord](DIDDataStore.md#setrecord)
 
 ## Constructors
 
@@ -57,11 +26,7 @@
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | [`DIDDataStoreParams`](../modules.md#diddatastoreparams)<`ModelTypes`\> |
-
-#### Defined in
-
-[index.ts:58](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L58)
+| `__namedParameters` | [`DIDDataStoreParams`](../modules/did_datastore.md#diddatastoreparams)<`ModelTypes`\> |
 
 ## Accessors
 
@@ -73,10 +38,6 @@
 
 `boolean`
 
-#### Defined in
-
-[index.ts:66](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L66)
-
 ___
 
 ### ceramic
@@ -86,10 +47,6 @@ ___
 #### Returns
 
 `CeramicApi`
-
-#### Defined in
-
-[index.ts:70](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L70)
 
 ___
 
@@ -101,10 +58,6 @@ ___
 
 `string`
 
-#### Defined in
-
-[index.ts:74](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L74)
-
 ___
 
 ### model
@@ -114,10 +67,6 @@ ___
 #### Returns
 
 `DataModel`<`ModelTypes`, `ModelTypesToAliases`<`ModelTypes`\>\>
-
-#### Defined in
-
-[index.ts:81](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L81)
 
 ## Methods
 
@@ -130,7 +79,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `Key` | extends `string` \| `number` \| `symbol` |
-| `ContentType` | `DefinitionContentType`<`ModelTypes`, `Key`\> |
+| `ContentType` | [`DefinitionContentType`](../modules/did_datastore.md#definitioncontenttype)<`ModelTypes`, `Key`\> |
 
 #### Parameters
 
@@ -143,15 +92,11 @@ ___
 
 `Promise`<``null`` \| `ContentType`\>
 
-#### Defined in
-
-[index.ts:93](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L93)
-
 ___
 
 ### getDefinition
 
-▸ **getDefinition**(`id`): `Promise`<[`DefinitionWithID`](../modules.md#definitionwithid)<`Record`<`string`, `unknown`\>\>\>
+▸ **getDefinition**(`id`): `Promise`<[`DefinitionWithID`](../modules/did_datastore.md#definitionwithid)<`Record`<`string`, `unknown`\>\>\>
 
 #### Parameters
 
@@ -161,11 +106,7 @@ ___
 
 #### Returns
 
-`Promise`<[`DefinitionWithID`](../modules.md#definitionwithid)<`Record`<`string`, `unknown`\>\>\>
-
-#### Defined in
-
-[index.ts:259](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L259)
+`Promise`<[`DefinitionWithID`](../modules/did_datastore.md#definitionwithid)<`Record`<`string`, `unknown`\>\>\>
 
 ___
 
@@ -183,10 +124,6 @@ ___
 
 `string`
 
-#### Defined in
-
-[index.ts:255](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L255)
-
 ___
 
 ### getIndex
@@ -202,10 +139,6 @@ ___
 #### Returns
 
 `Promise`<``null`` \| `IdentityIndex`\>
-
-#### Defined in
-
-[index.ts:183](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L183)
 
 ___
 
@@ -230,10 +163,6 @@ ___
 
 `Promise`<``null`` \| `ContentType`\>
 
-#### Defined in
-
-[index.ts:279](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L279)
-
 ___
 
 ### getRecordDocument
@@ -250,10 +179,6 @@ ___
 #### Returns
 
 `Promise`<``null`` \| `TileDoc`\>
-
-#### Defined in
-
-[index.ts:274](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L274)
 
 ___
 
@@ -272,10 +197,6 @@ ___
 
 `Promise`<``null`` \| `string`\>
 
-#### Defined in
-
-[index.ts:269](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L269)
-
 ___
 
 ### has
@@ -293,15 +214,11 @@ ___
 
 `Promise`<`boolean`\>
 
-#### Defined in
-
-[index.ts:87](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L87)
-
 ___
 
 ### iterator
 
-▸ **iterator**(`did?`): `AsyncIterableIterator`<[`Entry`](../modules.md#entry)\>
+▸ **iterator**(`did?`): `AsyncIterableIterator`<[`Entry`](../modules/did_datastore.md#entry)\>
 
 #### Parameters
 
@@ -311,11 +228,7 @@ ___
 
 #### Returns
 
-`AsyncIterableIterator`<[`Entry`](../modules.md#entry)\>
-
-#### Defined in
-
-[index.ts:191](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L191)
+`AsyncIterableIterator`<[`Entry`](../modules/did_datastore.md#entry)\>
 
 ___
 
@@ -328,7 +241,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `Key` | extends `string` \| `number` \| `symbol` |
-| `ContentType` | `DefinitionContentType`<`ModelTypes`, `Key`\> |
+| `ContentType` | [`DefinitionContentType`](../modules/did_datastore.md#definitioncontenttype)<`ModelTypes`, `Key`\> |
 
 #### Parameters
 
@@ -336,15 +249,11 @@ ___
 | :------ | :------ |
 | `key` | `Key` |
 | `content` | `ContentType` |
-| `options?` | [`CreateOptions`](../modules.md#createoptions) |
+| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
 `Promise`<`StreamID`\>
-
-#### Defined in
-
-[index.ts:114](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L114)
 
 ___
 
@@ -362,10 +271,6 @@ ___
 
 `Promise`<`void`\>
 
-#### Defined in
-
-[index.ts:174](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L174)
-
 ___
 
 ### set
@@ -377,7 +282,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `Key` | extends `string` \| `number` \| `symbol` |
-| `ContentType` | `DefinitionContentType`<`ModelTypes`, `Key`\> |
+| `ContentType` | [`DefinitionContentType`](../modules/did_datastore.md#definitioncontenttype)<`ModelTypes`, `Key`\> |
 
 #### Parameters
 
@@ -385,15 +290,11 @@ ___
 | :------ | :------ |
 | `key` | `Key` |
 | `content` | `ContentType` |
-| `options?` | [`CreateOptions`](../modules.md#createoptions) |
+| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
 `Promise`<`StreamID`\>
-
-#### Defined in
-
-[index.ts:101](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L101)
 
 ___
 
@@ -405,22 +306,18 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Contents` | extends `DefinitionsContentTypes`<`ModelTypes`, `Record`<`string`, `unknown`\>\> |
+| `Contents` | extends [`DefinitionsContentTypes`](../modules/did_datastore.md#definitionscontenttypes)<`ModelTypes`, `Record`<`string`, `unknown`\>\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `contents` | `Contents` |
-| `options?` | [`CreateOptions`](../modules.md#createoptions) |
+| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
 `Promise`<`IdentityIndex`\>
-
-#### Defined in
-
-[index.ts:125](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L125)
 
 ___
 
@@ -432,22 +329,18 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Contents` | extends `DefinitionsContentTypes`<`ModelTypes`, `Record`<`string`, `unknown`\>\> |
+| `Contents` | extends [`DefinitionsContentTypes`](../modules/did_datastore.md#definitionscontenttypes)<`ModelTypes`, `Record`<`string`, `unknown`\>\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `contents` | `Contents` |
-| `options?` | [`CreateOptions`](../modules.md#createoptions) |
+| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
 `Promise`<`IdentityIndex`\>
-
-#### Defined in
-
-[index.ts:147](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L147)
 
 ___
 
@@ -461,12 +354,8 @@ ___
 | :------ | :------ |
 | `definitionID` | `string` |
 | `content` | `Record`<`string`, `any`\> |
-| `options?` | [`CreateOptions`](../modules.md#createoptions) |
+| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
 `Promise`<`StreamID`\>
-
-#### Defined in
-
-[index.ts:287](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/did-datastore/src/index.ts#L287)

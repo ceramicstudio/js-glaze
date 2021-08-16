@@ -1,6 +1,6 @@
-[@glazed/datamodel](../README.md) / [Exports](../modules.md) / DataModel
-
 # Class: DataModel<ModelTypes, ModelAliases\>
+
+[datamodel](../modules/datamodel.md).DataModel
 
 ## Type parameters
 
@@ -8,24 +8,6 @@
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases` |
 | `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\>`ModelTypesToAliases`<`ModelTypes`\> |
-
-## Table of contents
-
-### Constructors
-
-- [constructor](DataModel.md#constructor)
-
-### Accessors
-
-- [ceramic](DataModel.md#ceramic)
-
-### Methods
-
-- [createTile](DataModel.md#createtile)
-- [getDefinitionID](DataModel.md#getdefinitionid)
-- [getSchemaURL](DataModel.md#getschemaurl)
-- [getTileID](DataModel.md#gettileid)
-- [loadTile](DataModel.md#loadtile)
 
 ## Constructors
 
@@ -44,11 +26,7 @@
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | [`DataModelParams`](../modules.md#datamodelparams)<`ModelAliases`\> |
-
-#### Defined in
-
-[index.ts:23](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L23)
+| `__namedParameters` | [`DataModelParams`](../modules/datamodel.md#datamodelparams)<`ModelAliases`\> |
 
 ## Accessors
 
@@ -59,10 +37,6 @@
 #### Returns
 
 `CeramicApi`
-
-#### Defined in
-
-[index.ts:29](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L29)
 
 ## Methods
 
@@ -83,15 +57,11 @@
 | :------ | :------ |
 | `schemaAlias` | `Alias` |
 | `content` | `ContentType` |
-| `__namedParameters` | [`CreateOptions`](../modules.md#createoptions) |
+| `__namedParameters` | [`CreateOptions`](../modules/datamodel.md#createoptions) |
 
 #### Returns
 
 `Promise`<`TileDocument`<`ContentType`\>\>
-
-#### Defined in
-
-[index.ts:56](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L56)
 
 ___
 
@@ -115,10 +85,6 @@ ___
 
 ``null`` \| `string`
 
-#### Defined in
-
-[index.ts:33](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L33)
-
 ___
 
 ### getSchemaURL
@@ -140,10 +106,6 @@ ___
 #### Returns
 
 ``null`` \| `string`
-
-#### Defined in
-
-[index.ts:37](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L37)
 
 ___
 
@@ -167,10 +129,6 @@ ___
 
 ``null`` \| `string`
 
-#### Defined in
-
-[index.ts:41](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L41)
-
 ___
 
 ### loadTile
@@ -193,7 +151,3 @@ ___
 #### Returns
 
 `Promise`<``null`` \| `TileDocument`<`ContentType`\>\>
-
-#### Defined in
-
-[index.ts:45](https://github.com/ceramicstudio/js-idx/blob/53dfead/packages/datamodel/src/index.ts#L45)
