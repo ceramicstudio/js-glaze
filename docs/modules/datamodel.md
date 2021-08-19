@@ -1,7 +1,5 @@
 # Module: datamodel
 
-DataModel
-
 ```sh
 npm install @glazed/datamodel
 ```

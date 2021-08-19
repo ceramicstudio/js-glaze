@@ -1,6 +1,4 @@
 /**
- * DevTools
- *
  * ```sh
  * npm install --dev @glazed/devtools
  * ```

@@ -1,6 +1,4 @@
 /**
- * DID DataStore
- *
  * ```sh
  * npm install @glazed/did-datastore
  * ```
@@ -55,6 +53,11 @@ export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAl
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
+/**
+ * ```sh
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ * ```
+ */
 export class DIDDataStore<
   ModelTypes extends ModelTypeAliases = ModelTypeAliases,
   Alias extends keyof ModelTypes['definitions'] = keyof ModelTypes['definitions']

@@ -2,6 +2,10 @@
 
 [devtools](../modules/devtools.md).ModelManager
 
+```sh
+import { ModelManager } from '@glazed/devtools'
+```
+
 ## Constructors
 
 ### constructor

@@ -109,6 +109,12 @@ export async function publishEncodedModel(
 ): Promise<PublishedModel> {
   return await publishModel(ceramic, decodeModel(model))
 }
+
+/**
+ * ```sh
+ * import { ModelManager } from '@glazed/devtools'
+ * ```
+ */
 export class ModelManager {
   public static fromJSON(ceramic: CeramicApi, encoded: EncodedManagedModel): ModelManager {
     return new ModelManager(ceramic, decodeModel(encoded))

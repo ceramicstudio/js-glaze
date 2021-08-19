@@ -1,6 +1,4 @@
 /**
- * DataModel
- *
  * ```sh
  * npm install @glazed/datamodel
  * ```
@@ -22,6 +20,11 @@ export type DataModelParams<Model> = {
   model: Model
 }
 
+/**
+ * ```sh
+ * import { DataModel } from '@glazed/datamodel'
+ * ```
+ */
 export class DataModel<
   ModelTypes extends ModelTypeAliases,
   ModelAliases extends ModelTypesToAliases<ModelTypes> = ModelTypesToAliases<ModelTypes>

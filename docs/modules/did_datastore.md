@@ -1,7 +1,5 @@
 # Module: did-datastore
 
-DID DataStore
-
 ```sh
 npm install @glazed/did-datastore
 ```

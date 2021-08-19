@@ -2,6 +2,10 @@
 
 [did-datastore](../modules/did_datastore.md).DIDDataStore
 
+```sh
+import { DIDDataStore } from '@glazed/did-datastore'
+```
+
 ## Type parameters
 
 | Name | Type |

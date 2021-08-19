@@ -2,6 +2,10 @@
 
 [datamodel](../modules/datamodel.md).DataModel
 
+```sh
+import { DataModel } from '@glazed/datamodel'
+```
+
 ## Type parameters
 
 | Name | Type |
