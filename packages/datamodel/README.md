@@ -9,7 +9,7 @@ npm install @glazed/datamodel
 ## Example
 
 ```ts
-import Ceramic from '@ceramicnetwork/http-client'
+import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 
 // The model aliases associate human-readable names to Ceramic stream IDs or URLs
@@ -23,7 +23,7 @@ const modelAliases = {
   },
 }
 
-const ceramic = new Ceramic()
+const ceramic = new CeramicClient()
 const model = new DataModel({ ceramic, model: modelAliases })
 
 // The model exposes simple APIs over the provided model aliases

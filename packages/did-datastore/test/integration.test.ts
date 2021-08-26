@@ -7,7 +7,7 @@ import { ModelManager } from '@glazed/devtools'
 import type { ModelTypeAliases } from '@glazed/types'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
-import { DIDDataStore } from '../dist'
+import { DIDDataStore } from '..'
 
 declare global {
   const ceramic: CeramicApi

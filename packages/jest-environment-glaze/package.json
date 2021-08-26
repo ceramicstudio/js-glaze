@@ -1,20 +1,31 @@
 {
   "name": "jest-environment-glaze",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Glaze environment for Jest",
+  "author": "3Box Labs",
+  "license": "(Apache-2.0 OR MIT)",
+  "homepage": "https://github.com/ceramicstudio/js-idx#readme",
+  "keywords": [
+    "jest",
+    "ceramic",
+    "glaze"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-idx",
+    "directory": "packages/jest-environment-glaze"
+  },
   "main": "index.js",
   "files": [],
-  "author": "Paul Le Cam <paul@3box.io>",
-  "license": "(Apache-2.0 OR MIT)",
   "scripts": {
     "lint": "eslint index.js --fix",
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "dids": "^2.3.0",
-    "jest-environment-ceramic": "^0.13.0",
-    "key-did-provider-ed25519": "^1.0.1",
-    "key-did-resolver": "^1.1.1",
-    "uint8arrays": "^2.1.8"
+    "dids": "^2.4.0",
+    "jest-environment-ceramic": "^0.14.0",
+    "key-did-provider-ed25519": "^1.1.0",
+    "key-did-resolver": "^1.4.0",
+    "uint8arrays": "^3.0.0"
   }
 }

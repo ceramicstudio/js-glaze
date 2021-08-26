@@ -1,6 +1,0 @@
-*.log
-.DS_Store
-.pinning.store
-node_modules
-coverage
-dist

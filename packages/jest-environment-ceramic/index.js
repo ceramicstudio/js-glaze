@@ -1,5 +1,5 @@
 const path = require('path')
-const Ceramic = require('@ceramicnetwork/core').default
+const { Ceramic } = require('@ceramicnetwork/core')
 const { convert } = require('blockcodec-to-ipld-format')
 const dagJose = require('dag-jose').default
 const IPFS = require('ipfs-core')
