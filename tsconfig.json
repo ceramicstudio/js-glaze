@@ -1,4 +1,3 @@
-
 {
   "extends": "./tsconfig.build.json",
   "include": ["packages"],
@@ -7,7 +6,6 @@
     "baseUrl": ".",
     "typeRoots": ["./node_modules/@types"],
     "paths": {
-      "@datamodels/3box-essentials": ["packages/3box-essentials/src"],
       "@glazed/append-collection": ["packages/append-collection/src"],
       "@glazed/cli": ["packages/cli/src"],
       "@glazed/constants": ["packages/constants/src"],

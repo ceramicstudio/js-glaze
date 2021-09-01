@@ -8,6 +8,11 @@ import { DataModel } from '@glazed/datamodel'
 import { DIDDataStore } from '../src'
 jest.mock('@ceramicnetwork/stream-tile')
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const createTile = TileDocument.create as jest.Mock<Promise<TileDocument>>
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const loadTile = TileDocument.load as jest.Mock<Promise<TileDocument>>
+
 describe('DIDDataStore', () => {
   const model = {
     schemas: {},
@@ -251,14 +256,14 @@ describe('DIDDataStore', () => {
     test('_createIDXDoc', async () => {
       const ceramic = {}
       const doc = { id: 'streamId' }
-      TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
+      createTile.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
       const ds = new DIDDataStore({ ceramic, model } as any)
 
       await expect(ds._createIDXDoc('did:test:123')).resolves.toBe(doc)
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(TileDocument.create).toHaveBeenCalledTimes(1)
+      expect(createTile).toHaveBeenCalledTimes(1)
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(TileDocument.create).toHaveBeenCalledWith(
+      expect(createTile).toHaveBeenCalledWith(
         ceramic,
         null,
         { deterministic: true, controllers: ['did:test:123'], family: 'IDX' },
@@ -382,9 +387,9 @@ describe('DIDDataStore', () => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: CIP11_DEFINITION_SCHEMA_URL },
-          })
+          } as TileDocument)
         })
-        TileDocument.load.mockImplementationOnce(load)
+        loadTile.mockImplementationOnce(load)
         const ds = new DIDDataStore({ ceramic, model } as any)
         await expect(ds.getDefinition('ceramic://test')).resolves.toEqual({
           name: 'definition',
@@ -398,9 +403,9 @@ describe('DIDDataStore', () => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: 'OtherSchemaURL' },
-          })
+          } as TileDocument)
         })
-        TileDocument.load.mockImplementationOnce(load)
+        loadTile.mockImplementationOnce(load)
         const ds = new DIDDataStore({ ceramic, model } as any)
         await expect(ds.getDefinition('ceramic://test')).rejects.toThrow(
           'Invalid document: schema is not Definition'
@@ -413,7 +418,7 @@ describe('DIDDataStore', () => {
   describe('Records methods', () => {
     test('_loadDocument', async () => {
       const load = jest.fn()
-      TileDocument.load.mockImplementation(load)
+      loadTile.mockImplementation(load)
       const ds = new DIDDataStore({ model } as any)
       await Promise.all([ds._loadDocument('one'), ds._loadDocument('one'), ds._loadDocument('two')])
       expect(load).toBeCalledTimes(3)
@@ -524,9 +529,9 @@ describe('DIDDataStore', () => {
         const id = 'did:test:123'
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(
+        createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata, _opts) => {
-            return Promise.resolve({ id: 'streamId', update, metadata })
+            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
         const ceramic = { did: { id }, pin: { add } }
@@ -558,9 +563,9 @@ describe('DIDDataStore', () => {
       test('pin by default', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(
+        createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata })
+            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
         const ds = new DIDDataStore({
@@ -576,9 +581,9 @@ describe('DIDDataStore', () => {
       test('no pinning by setting instance option', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(
+        createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata })
+            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
         const ds = new DIDDataStore({
@@ -594,9 +599,9 @@ describe('DIDDataStore', () => {
       test('explicit no pinning', async () => {
         const add = jest.fn()
         const update = jest.fn()
-        TileDocument.create.mockImplementationOnce(
+        createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata })
+            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
         const ds = new DIDDataStore({

@@ -1,4 +1,14 @@
 {
-  "extends": "./tsconfig.build.json",
-  "include": ["src", "src/index.js"]
+  "extends": "../../tsconfig.build.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "importHelpers": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "sourceMap": false,
+    "module": "CommonJS",
+    "outDir": "lib",
+    "rootDir": "src",
+    "target": "es2017"
+  }
 }

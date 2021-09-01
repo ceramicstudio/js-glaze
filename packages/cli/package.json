@@ -1,22 +1,26 @@
 {
   "name": "@glazed/cli",
   "description": "Glaze CLI",
+  "version": "0.1.1",
+  "author": "3Box Labs",
+  "license": "(Apache-2.0 OR MIT)",
+  "homepage": "https://github.com/ceramicstudio/js-idx#readme",
   "keywords": [
     "ceramic",
-    "glaze"
+    "glaze",
+    "cli"
   ],
-  "version": "0.1.0",
-  "author": "Paul Le Cam <paul@3box.io>",
-  "license": "(Apache-2.0 OR MIT)",
-  "repository": "ceramicstudio/js-idx",
-  "homepage": "https://github.com/ceramicstudio/js-idx",
-  "bugs": "https://github.com/ceramicstudio/js-idx/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-idx",
+    "directory": "packages/cli"
+  },
   "main": "lib/index.js",
   "bin": {
     "glaze": "./bin/run"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.14"
   },
   "files": [
     "/bin",
@@ -26,10 +30,9 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "lint": "eslint src",
-    "postpack": "rm -f oclif.manifest.json",
-    "posttest": "npm run lint",
-    "build": "rm -rf lib && tsc -p tsconfig.build.json --skipLibCheck && cp src/index.js lib",
-    "prepack": "npm run build && oclif-dev manifest"
+    "postpack": "del oclif.manifest.json",
+    "build": "del lib && tsc && cp src/index.js lib",
+    "prepack": "yarn build && oclif-dev manifest"
   },
   "oclif": {
     "commands": "./lib/commands",
@@ -39,16 +42,16 @@
     ]
   },
   "dependencies": {
-    "@ceramicnetwork/3id-did-resolver": "^1.2.0",
-    "@ceramicnetwork/http-client": "^1.0.0",
-    "@ceramicnetwork/stream-tile": "^1.0.7",
-    "@ceramicnetwork/streamid": "^1.0.0",
-    "@glazed/datamodel": "^0.1.0",
-    "@glazed/devtools": "^0.1.0",
-    "@glazed/did-datastore": "^0.1.0",
+    "@ceramicnetwork/3id-did-resolver": "^1.4.0",
+    "@ceramicnetwork/http-client": "^1.2.0",
+    "@ceramicnetwork/stream-tile": "^1.2.0",
+    "@ceramicnetwork/streamid": "^1.1.2",
+    "@glazed/datamodel": "^0.1.1",
+    "@glazed/devtools": "^0.1.2",
+    "@glazed/did-datastore": "^0.1.2",
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
-    "@oclif/plugin-help": "^3.2.2",
+    "@oclif/plugin-help": "^3.2.3",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.0",
     "cli-ux": "^5.6.3",
@@ -58,25 +61,26 @@
     "env-paths": "^2.2.1",
     "fs-extra": "^10.0.0",
     "inquirer": "^8.1.2",
-    "key-did-provider-ed25519": "^1.0.1",
-    "key-did-resolver": "^1.1.1",
+    "key-did-provider-ed25519": "^1.1.0",
+    "key-did-resolver": "^1.4.0",
     "listr": "^0.14.3",
     "listr-update-renderer": "^0.5.0",
     "ora": "^5.3.0",
-    "uint8arrays": "^2.1.8",
+    "uint8arrays": "^3.0.0",
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^1.0.0",
+    "@ceramicnetwork/common": "^1.3.0",
     "@glazed/types": "^0.1.3",
     "@oclif/dev-cli": "^1.26.0",
     "@types/fs-extra": "^9.0.12",
     "@types/inquirer": "^7.3.3",
     "@types/listr": "^0.14.4",
-    "@types/node": "^14.14.21",
+    "@types/node": "^16.7.6",
     "@types/update-notifier": "^5.1.0",
+    "ajv": "^8.6.2",
     "globby": "^11.0.2",
-    "ts-node": "^10.2.0",
-    "tslib": "^2.1.0"
+    "ts-node": "^10.2.1",
+    "tslib": "^2.3.1"
   }
 }

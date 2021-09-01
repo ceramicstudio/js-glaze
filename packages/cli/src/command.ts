@@ -1,7 +1,7 @@
 import { inspect } from 'util'
 
 import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
-import Ceramic from '@ceramicnetwork/http-client'
+import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
 import { DIDDataStore } from '@glazed/did-datastore'
@@ -37,7 +37,7 @@ export abstract class Command<
   }
 
   #authenticatedDID: DID | null = null
-  #ceramic: Ceramic | null = null
+  #ceramic: CeramicClient | null = null
   #resolverRegistry: ResolverRegistry | null = null
 
   args!: Args
@@ -76,9 +76,9 @@ export abstract class Command<
     return this.#authenticatedDID
   }
 
-  get ceramic(): Ceramic {
+  get ceramic(): CeramicClient {
     if (this.#ceramic == null) {
-      this.#ceramic = new Ceramic(this.flags.ceramic ?? config.get('user')['ceramic-url'])
+      this.#ceramic = new CeramicClient(this.flags.ceramic ?? config.get('user')['ceramic-url'])
     }
     return this.#ceramic
   }

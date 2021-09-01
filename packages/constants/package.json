@@ -1,23 +1,41 @@
 {
   "name": "@glazed/constants",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "3Box Labs",
-  "homepage": "https://idx.xyz",
   "license": "(Apache-2.0 OR MIT)",
-  "main": "dist/index.js",
-  "module": "dist/constants.esm.js",
+  "homepage": "https://github.com/ceramicstudio/js-idx#readme",
+  "keywords": [
+    "ceramic",
+    "glaze"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-idx",
+    "directory": "packages/constants"
+  },
+  "main": "dist/lib.cjs",
+  "module": "dist/lib.mjs",
   "typings": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/lib.mjs",
+    "require": "./dist/lib.cjs",
+    "default": "./dist/lib.cjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=14.14"
   },
+  "sideEffects": false,
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build --tsconfig tsconfig.build.json",
-    "test": "tsdx test",
+    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && rollup -c ../../rollup.config.js",
     "lint": "eslint src test --fix",
-    "prepublish": "npm run build"
+    "prepare": "yarn build",
+    "prepublishOnly": "package-check"
+  },
+  "jest": {
+    "preset": "ts-jest"
   }
 }

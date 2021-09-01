@@ -1,21 +1,31 @@
 {
   "name": "jest-environment-ceramic",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Ceramic environment for Jest",
+  "author": "3Box Labs",
+  "license": "(Apache-2.0 OR MIT)",
+  "homepage": "https://github.com/ceramicstudio/js-idx#readme",
+  "keywords": [
+    "jest",
+    "ceramic"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-idx",
+    "directory": "packages/jest-environment-ceramic"
+  },
   "main": "index.js",
   "files": [],
-  "author": "Paul Le Cam <paul@3box.io>",
-  "license": "(Apache-2.0 OR MIT)",
   "scripts": {
     "lint": "eslint index.js --fix",
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "@ceramicnetwork/core": "^1.0.0",
+    "@ceramicnetwork/core": "^1.4.0",
     "blockcodec-to-ipld-format": "^1.0.0",
     "dag-jose": "^0.3.0",
     "ipfs-core": "^0.5.4",
-    "jest-environment-node": "^27.0.6",
+    "jest-environment-node": "^27.1.0",
     "tmp-promise": "^3.0.2"
   }
 }
