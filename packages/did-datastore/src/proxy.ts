@@ -68,10 +68,10 @@ export class TileProxy {
       this._next(value)
     } catch (err) {
       this.#queue.forEach((item) => {
-        item.reject(err)
+        item.reject(err as Error)
       })
       this.#queue = []
-      this.#deferValue.reject(err)
+      this.#deferValue.reject(err as Error)
       this._createValuePromise()
     }
   }

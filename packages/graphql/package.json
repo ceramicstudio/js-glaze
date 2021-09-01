@@ -42,7 +42,7 @@
     "@glazed/did-datastore": "^0.1.0",
     "@glazed/graphql-types": "^0.1.0",
     "change-case": "^4.1.2",
-    "graphql": "^15.5.0",
+    "graphql": "^15.5.2",
     "graphql-relay": "^0.8.0"
   },
   "devDependencies": {

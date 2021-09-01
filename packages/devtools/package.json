@@ -1,6 +1,6 @@
 {
   "name": "@glazed/devtools",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-idx#readme",
@@ -26,7 +26,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
@@ -40,8 +40,8 @@
     "@ceramicnetwork/common": "^1.3.0",
     "@ceramicnetwork/stream-tile": "^1.2.0",
     "@ceramicnetwork/streamid": "^1.1.2",
-    "@glazed/constants": "^0.1.0",
-    "@glazed/did-datastore-model": "^0.1.0",
+    "@glazed/constants": "^0.1.1",
+    "@glazed/did-datastore-model": "^0.1.1",
     "ajv": "^8.6.2",
     "ajv-formats": "^2.1.1",
     "change-case": "^4.1.2",
