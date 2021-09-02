@@ -2,6 +2,8 @@
 
 Development tools for Glaze projects
 
+## [Documentation](https://developers.ceramic.network/tools/glaze/development/#devtools-library)
+
 ## Installation
 
 ```sh

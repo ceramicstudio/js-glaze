@@ -1,17 +1,10 @@
-![IDX header image](https://uploads-ssl.webflow.com/5ff39a496ca3e515d3359963/5ff48347c70c7d7c48fed7ea_image-idx-rethink-identity.png)
+# Glaze monorepo
 
-# IDX monorepo
-
-[![Discord](https://img.shields.io/badge/Chat%20on-Discord-orange.svg?style=flat)](https://chat.idx.xyz)
-[![Twitter](https://img.shields.io/twitter/follow/identityindex?label=Follow&style=social)](https://twitter.com/identityindex)
-
-Packages providing the JavaScript/TypeScript implementation of the [IDX protocol](https://idx.xyz).
-
-> ⚠️ IDX is in alpha. Libraries may be unstable and APIs are subject to change.
+Packages providing the JavaScript/TypeScript implementation of the [Glaze ecosystem](https://developers.ceramic.network/tools/glaze/overview/).
 
 ## Installation
 
-This monorepo uses Yarn's workspaces, make sure to install it first if you don't already have it.
+This monorepo uses Yarn workspaces, make sure to install it first if you don't already have it.
 
 1. `yarn install` to install the dependencies
 1. `yarn build` to build all the packages
@@ -20,19 +13,25 @@ This monorepo uses Yarn's workspaces, make sure to install it first if you don't
 
 - `yarn lint` to run the linter in all packages
 - `yarn test` to run tests in all packages
+- `yarn docs` to generate API documentation
 
 ## Packages
 
-### IDX
-
-- [`@ceramicstudio/idx`](https://developers.idx.xyz/reference/idx/) in [`packages/idx`](packages/idx)
-- [`@ceramicstudio/idx-constants`](https://developers.idx.xyz/reference/idx-constants/) in [`packages/idx-constants`](packages/constants)
-- [`@ceramicstudio/idx-tools`](https://developers.idx.xyz/reference/idx-tools/) in [`packages/idx-tools`](packages/idx-tools)
-
-### Jest environments
-
-- `jest-environment-ceramic` in [`packages/jest-environment-ceramic`](packages/jest-environment-ceramic)
-- `jest-environment-idx` in [`packages/jest-environment-idx`](packages/jest-environment-idx)
+| Name                                                              | Description                                                                                               | Version                                                                      |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Runtime libraries**                                             |
+| [`@glazed/datamodel`](./packages/datamodel)                       | [Aliases for Ceramic stream references](https://developers.ceramic.network/tools/glaze/datamodel/)        | ![npm version](https://img.shields.io/npm/v/@glazed/datamodel.svg)           |
+| [`@glazed/did-datastore`](./packages/did-datastore)               | [Associate data records to a DID](https://developers.ceramic.network/tools/glaze/did-datastore/)          | ![npm version](https://img.shields.io/npm/v/@glazed/did-datastore.svg)       |
+| **Developer tools**                                               |
+| [`@glazed/devtools`](./packages/devtools)                         | [Development tools library](https://developers.ceramic.network/tools/glaze/development/#devtools-library) | ![npm version](https://img.shields.io/npm/v/@glazed/devtools.svg)            |
+| [`@glazed/cli`](./packages/cli)                                   | [CLI](https://developers.ceramic.network/tools/glaze/development/#cli)                                    | ![npm version](https://img.shields.io/npm/v/@glazed/cli.svg)                 |
+| **Internal libraries**                                            |
+| [`@glazed/constants`](./packages/constants)                       | Shared constants                                                                                          | ![npm version](https://img.shields.io/npm/v/@glazed/constants.svg)           |
+| [`@glazed/did-datastore-model`](./packages/did-datastore-model)   | DataModel for the DID DataStore                                                                           | ![npm version](https://img.shields.io/npm/v/@glazed/did-datastore-model.svg) |
+| [`@glazed/types`](./packages/types)                               | Shared types                                                                                              | ![npm version](https://img.shields.io/npm/v/@glazed/types.svg)               |
+| **Jest environments**                                             |
+| [`jest-environment-ceramic`](./packages/jest-environment-ceramic) | Ceramic environment for Jest tests                                                                        | ![npm version](https://img.shields.io/npm/v/jest-environment-ceramic.svg)    |
+| [`jest-environment-glaze`](./packages/jest-environment-glaze)     | Glaze environment for Jest tests                                                                          | ![npm version](https://img.shields.io/npm/v/jest-environment-glaze.svg)      |
 
 ## Maintainers
 

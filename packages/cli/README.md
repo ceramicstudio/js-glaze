@@ -1,5 +1,7 @@
 # Glaze CLI
 
+## [Documentation](https://developers.ceramic.network/tools/glaze/development/#cli)
+
 ## Installation
 
 ```sh

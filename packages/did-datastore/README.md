@@ -2,6 +2,8 @@
 
 Associate data records to a DID
 
+## [Documentation](https://developers.ceramic.network/tools/glaze/did-datastore/)
+
 ## Installation
 
 ```sh

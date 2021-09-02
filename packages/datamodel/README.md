@@ -1,5 +1,9 @@
 # Glaze DataModel
 
+Aliases for Ceramic stream references
+
+## [Documentation](https://developers.ceramic.network/tools/glaze/datamodel/)
+
 ## Installation
 
 ```sh

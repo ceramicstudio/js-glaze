@@ -15,9 +15,7 @@
     "test": "jest",
     "lint": "lerna run lint --parallel",
     "build": "lerna run build",
-    "prepare": "lerna run prepare",
-    "size": "size-limit",
-    "analyze": "size-limit --why"
+    "prepare": "lerna run prepare"
   },
   "devDependencies": {
     "@skypack/package-check": "^0.2.2",
