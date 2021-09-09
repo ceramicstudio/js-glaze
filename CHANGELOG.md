@@ -1,3 +1,7 @@
+## v0.12.2 (2021-09-09)
+
+Only set metadata changes in updates.
+
 ## v0.12.1 (2021-06-01)
 
 Only pin IDX stream when created by owner.

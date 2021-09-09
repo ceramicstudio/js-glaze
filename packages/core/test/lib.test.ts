@@ -293,7 +293,7 @@ describe('IDX', () => {
 
         await expect(idx._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith(null, { ...metadata, schema: schemas.IdentityIndex })
+        expect(update).toHaveBeenCalledWith(null, { schema: schemas.IdentityIndex })
         expect(add).toBeCalledWith('streamId')
       })
 
@@ -499,12 +499,7 @@ describe('IDX', () => {
           { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(update).toBeCalledWith(content, {
-          deterministic: true,
-          controllers: [id],
-          family: 'defId',
-          schema: 'schemaId',
-        })
+        expect(update).toBeCalledWith(content, { schema: 'schemaId' })
         expect(add).toBeCalledWith('streamId')
       })
 
