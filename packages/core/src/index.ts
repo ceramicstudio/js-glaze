@@ -204,7 +204,7 @@ export class IDX {
     const doc = await this._createIDXDoc(this.id)
     if (doc.metadata.schema == null) {
       // Doc just got created, need to update it with schema
-      await doc.update(null, { ...doc.metadata, schema: schemas.IdentityIndex })
+      await doc.update(null, { schema: schemas.IdentityIndex })
       if (this._autopin) {
         await this._ceramic.pin.add(doc.id)
       }
@@ -281,18 +281,15 @@ export class IDX {
     content: Record<string, any>,
     { pin }: CreateOptions = {}
   ): Promise<StreamID> {
-    const metadata = {
-      deterministic: true,
-      controllers: [this.id],
-      family: definition.id.toString(),
-    }
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(this._ceramic, null, metadata, {
-      anchor: false,
-      publish: false,
-    })
+    const doc = await TileDocument.create<TileContent>(
+      this._ceramic,
+      null,
+      { deterministic: true, controllers: [this.id], family: definition.id.toString() },
+      { anchor: false, publish: false }
+    )
     // Then be updated with content and schema
-    const updated = doc.update(content, { ...metadata, schema: definition.schema })
+    const updated = doc.update(content, { schema: definition.schema })
     if (pin ?? this._autopin) {
       await Promise.all([updated, this._ceramic.pin.add(doc.id)])
     } else {
