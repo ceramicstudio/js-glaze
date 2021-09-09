@@ -253,7 +253,7 @@ export class DIDDataStore<
     const doc = await this._createIDXDoc(this.id)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
-      await doc.update({}, { ...doc.metadata, schema: CIP11_INDEX_SCHEMA_URL })
+      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL })
       if (this.#autopin) {
         await this.#ceramic.pin.add(doc.id)
       }
@@ -338,18 +338,15 @@ export class DIDDataStore<
     content: Record<string, any>,
     { pin }: CreateOptions = {}
   ): Promise<StreamID> {
-    const metadata = {
-      deterministic: true,
-      controllers: [this.id],
-      family: definition.id.toString(),
-    }
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(this.#ceramic, null, metadata, {
-      anchor: false,
-      publish: false,
-    })
+    const doc = await TileDocument.create<TileContent>(
+      this.#ceramic,
+      null,
+      { deterministic: true, controllers: [this.id], family: definition.id.toString() },
+      { anchor: false, publish: false }
+    )
     // Then be updated with content and schema
-    const updated = doc.update(content, { ...metadata, schema: definition.schema })
+    const updated = doc.update(content, { schema: definition.schema })
     if (pin ?? this.#autopin) {
       await Promise.all([updated, this.#ceramic.pin.add(doc.id)])
     } else {
