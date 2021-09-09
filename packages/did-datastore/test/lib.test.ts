@@ -328,7 +328,7 @@ describe('DIDDataStore', () => {
 
         await expect(ds._getOwnIDXDoc()).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith({}, { ...metadata, schema: CIP11_INDEX_SCHEMA_URL })
+        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL })
         expect(add).toBeCalledWith('streamId')
       })
 
@@ -551,12 +551,7 @@ describe('DIDDataStore', () => {
           { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(update).toBeCalledWith(content, {
-          deterministic: true,
-          controllers: [id],
-          family: 'defId',
-          schema: 'schemaId',
-        })
+        expect(update).toBeCalledWith(content, { schema: 'schemaId' })
         expect(add).toBeCalledWith('streamId')
       })
 
