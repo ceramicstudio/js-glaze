@@ -3,7 +3,8 @@
   "include": [
     "./packages/datamodel/src",
     "./packages/devtools/src",
-    "./packages/did-datastore/src"
+    "./packages/did-datastore/src",
+    "./packages/tile-loader/src"
   ],
   "compilerOptions": {
     "jsx": "preserve",
@@ -17,12 +18,14 @@
     "entryPoints": [
       "./packages/datamodel/src/index.ts",
       "./packages/devtools/src/index.ts",
-      "./packages/did-datastore/src/index.ts"
+      "./packages/did-datastore/src/index.ts",
+      "./packages/tile-loader/src/index.ts"
     ],
     "disableSources": true,
     "excludeExternals": true,
     "excludeInternal": true,
     "excludePrivate": true,
+    "githubPages": false,
     "hideBreadcrumbs": true,
     "hideInPageTOC": true
   }

@@ -76,11 +76,11 @@
     "@types/fs-extra": "^9.0.12",
     "@types/inquirer": "^8.1.1",
     "@types/listr": "^0.14.4",
-    "@types/node": "^16.9.1",
+    "@types/node": "^16.11.4",
     "@types/update-notifier": "^5.1.0",
     "ajv": "^8.6.3",
     "globby": "^11.0.2",
-    "ts-node": "^10.2.1",
+    "ts-node": "^10.4.0",
     "tslib": "^2.3.1"
   }
 }

@@ -13,20 +13,24 @@ import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
 import type { CacheMap } from 'dataloader'
 
-type Query = Omit<MultiQuery, 'paths'>
-type Key = CommitID | StreamID | Query | string
+// Omit path and atTime from MultiQuery as the cache needs to be deterministic based on the ID
+type Query = Omit<MultiQuery, 'paths' | 'atTime'>
+
+export type Key = CommitID | StreamID | Query | string
 
 export type TileLoaderParams = {
   ceramic: CeramicApi
   cache?: CacheMap<string, Promise<TileDocument>> | boolean
 }
 
+/** @internal */
 export function keyToQuery(key: Key): Query {
   return typeof key === 'string' || CommitID.isInstance(key) || StreamID.isInstance(key)
     ? { streamId: key }
     : { streamId: key.streamId, genesis: key.genesis }
 }
 
+/** @internal */
 export function keyToString(key: Key): string {
   if (typeof key === 'string') {
     return key
@@ -44,8 +48,8 @@ export class TileLoader extends DataLoader<Key, TileDocument> {
   constructor(params: TileLoaderParams) {
     super(
       async (keys) => {
-        if (params.cache === false) {
-          // Disable cache but keep batching behavior
+        if (!params.cache) {
+          // Disable cache but keep batching behavior - from https://github.com/graphql/dataloader#disabling-cache
           this.clearAll()
         }
         const results = await params.ceramic.multiQuery(keys.map(keyToQuery))
@@ -82,7 +86,10 @@ export class TileLoader extends DataLoader<Key, TileDocument> {
   async deterministic<T extends Record<string, any> = Record<string, any>>(
     metadata: TileMetadataArgs
   ): Promise<TileDocument<T | null | undefined>> {
-    const genesis = (await TileDocument.makeGenesis({} as any, null, metadata)) as GenesisCommit
+    const genesis = (await TileDocument.makeGenesis({} as any, null, {
+      ...metadata,
+      deterministic: true,
+    })) as GenesisCommit
     const streamId = await StreamID.fromGenesis('tile', genesis)
     return (await super.load({ streamId, genesis })) as TileDocument<T | null | undefined>
   }
