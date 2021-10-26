@@ -17,7 +17,7 @@ import { DIDDataStore } from '@glazed/did-datastore'
 
 ### constructor
 
-• **new DIDDataStore**<`ModelTypes`, `Alias`\>(`__namedParameters`)
+• **new DIDDataStore**<`ModelTypes`, `Alias`\>(`params`)
 
 #### Type parameters
 
@@ -30,7 +30,7 @@ import { DIDDataStore } from '@glazed/did-datastore'
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | [`DIDDataStoreParams`](../modules/did_datastore.md#diddatastoreparams)<`ModelTypes`\> |
+| `params` | [`DIDDataStoreParams`](../modules/did_datastore.md#diddatastoreparams)<`ModelTypes`\> |
 
 ## Accessors
 

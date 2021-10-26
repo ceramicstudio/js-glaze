@@ -70,7 +70,8 @@ export class DIDDataStore<
   #indexProxies: Record<string, TileProxy> = {}
   #model: DataModel<ModelTypes>
 
-  constructor({ autopin, ceramic, id, model }: DIDDataStoreParams<ModelTypes>) {
+  constructor(params: DIDDataStoreParams<ModelTypes>) {
+    const { autopin, ceramic, id, model } = params
     this.#autopin = autopin !== false
     this.#ceramic = ceramic
     this.#id = id

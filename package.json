@@ -41,6 +41,11 @@
     "preset": "ts-jest",
     "projects": [
       "<rootDir>/packages/*"
-    ]
+    ],
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
   }
 }
