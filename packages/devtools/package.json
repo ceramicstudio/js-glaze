@@ -59,6 +59,11 @@
     "jest-environment-glaze": "^0.1.1"
   },
   "jest": {
-    "preset": "ts-jest"
+    "preset": "ts-jest",
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
   }
 }
