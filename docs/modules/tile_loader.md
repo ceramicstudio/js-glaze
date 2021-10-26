@@ -10,9 +10,21 @@ npm install @glazed/tile-loader
 
 ## Type aliases
 
+### Cache
+
+Ƭ **Cache**: `CacheMap`<`string`, `Promise`<`TileDocument`\>\>
+
+___
+
 ### Key
 
-Ƭ **Key**: `CommitID` \| `StreamID` \| `Query` \| `string`
+Ƭ **Key**: `CommitID` \| `StreamID` \| [`Query`](tile_loader.md#query) \| `string`
+
+___
+
+### Query
+
+Ƭ **Query**: `Omit`<`MultiQuery`, ``"paths"`` \| ``"atTime"``\>
 
 ___
 
@@ -24,5 +36,5 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `cache?` | `CacheMap`<`string`, `Promise`<`TileDocument`\>\> \| `boolean` |
+| `cache?` | [`Cache`](tile_loader.md#cache) \| `boolean` |
 | `ceramic` | `CeramicApi` |

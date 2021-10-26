@@ -14,13 +14,15 @@ import DataLoader from 'dataloader'
 import type { CacheMap } from 'dataloader'
 
 // Omit path and atTime from MultiQuery as the cache needs to be deterministic based on the ID
-type Query = Omit<MultiQuery, 'paths' | 'atTime'>
+export type Query = Omit<MultiQuery, 'paths' | 'atTime'>
 
 export type Key = CommitID | StreamID | Query | string
 
+export type Cache = CacheMap<string, Promise<TileDocument>>
+
 export type TileLoaderParams = {
   ceramic: CeramicApi
-  cache?: CacheMap<string, Promise<TileDocument>> | boolean
+  cache?: Cache | boolean
 }
 
 /** @internal */
