@@ -43,8 +43,15 @@ describe('DIDDataStore', () => {
       const ds1 = new DIDDataStore({ ceramic: {}, model } as any)
       expect(() => ds1.id).toThrow('Ceramic instance is not authenticated')
 
-      const ds2 = new DIDDataStore({ ceramic: { did: { id: 'did:test' } }, model } as any)
-      expect(ds2.id).toBe('did:test')
+      const ds2 = new DIDDataStore({
+        ceramic: { did: { id: 'did:test' } },
+        id: 'did:123',
+        model,
+      } as any)
+      expect(ds2.id).toBe('did:123')
+
+      const ds3 = new DIDDataStore({ ceramic: { did: { id: 'did:test' } }, model } as any)
+      expect(ds3.id).toBe('did:test')
     })
 
     test('`model` property', () => {
@@ -54,9 +61,7 @@ describe('DIDDataStore', () => {
   })
 
   describe('Main methods', () => {
-    // TODO: check aliases resolution
-
-    describe('has', () => {
+    describe('has()', () => {
       test('returns true', async () => {
         const getRecordID = jest.fn(() => Promise.resolve('streamId'))
         const ds = new DIDDataStore({ model } as any)
@@ -74,7 +79,7 @@ describe('DIDDataStore', () => {
       })
     })
 
-    test('get', async () => {
+    test('get()', async () => {
       const content = {}
       const getRecordDocument = jest.fn(() => ({ content }))
       const ds = new DIDDataStore({ model } as any)
@@ -83,9 +88,9 @@ describe('DIDDataStore', () => {
       expect(getRecordDocument).toBeCalledWith('streamId', 'did')
     })
 
-    describe('set', () => {
+    describe('set()', () => {
       test('does not set the index key if it already exists', async () => {
-        const ds = new DIDDataStore({ model } as any)
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
         const setRecord = jest.fn(() => Promise.resolve([false, 'streamId']))
         ds._setRecordOnly = setRecord as any
         const setReference = jest.fn()
@@ -93,12 +98,12 @@ describe('DIDDataStore', () => {
 
         const content = { test: true }
         await ds.setRecord('defId', content)
-        expect(setRecord).toBeCalledWith('defId', content, undefined)
+        expect(setRecord).toBeCalledWith('defId', content, {})
         expect(setReference).not.toBeCalled()
       })
 
       test('adds the new index key', async () => {
-        const ds = new DIDDataStore({ model } as any)
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
         const setRecord = jest.fn(() => Promise.resolve([true, 'streamId']))
         ds._setRecordOnly = setRecord as any
         const setReference = jest.fn()
@@ -106,12 +111,32 @@ describe('DIDDataStore', () => {
 
         const content = { test: true }
         await ds.setRecord('defId', content)
-        expect(setRecord).toBeCalledWith('defId', content, undefined)
-        expect(setReference).toBeCalledWith('defId', 'streamId')
+        expect(setRecord).toBeCalledWith('defId', content, {})
+        expect(setReference).toBeCalledWith('did:test', 'defId', 'streamId')
+      })
+
+      test('uses the ID attached to the instance', async () => {
+        const ds = new DIDDataStore({ model, id: 'did:test' } as any)
+        const setRecord = jest.fn(() => Promise.resolve([true, 'streamId']))
+        ds._setRecordOnly = setRecord as any
+        const setReference = jest.fn()
+        ds._setReference = setReference
+        await ds.setRecord('defId', { test: true })
+        expect(setReference).toBeCalledWith('did:test', 'defId', 'streamId')
+      })
+
+      test('uses the provided controller', async () => {
+        const ds = new DIDDataStore({ model, id: 'did:test' } as any)
+        const setRecord = jest.fn(() => Promise.resolve([true, 'streamId']))
+        ds._setRecordOnly = setRecord as any
+        const setReference = jest.fn()
+        ds._setReference = setReference
+        await ds.setRecord('defId', { test: true }, { controller: 'did:123' })
+        expect(setReference).toBeCalledWith('did:123', 'defId', 'streamId')
       })
     })
 
-    describe('merge', () => {
+    describe('merge()', () => {
       test('with existing contents', async () => {
         const content = { hello: 'test', foo: 'bar' }
         const getRecord = jest.fn(() => content)
@@ -141,80 +166,157 @@ describe('DIDDataStore', () => {
       })
     })
 
-    test('setAll', async () => {
-      const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
-      const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
-      const setRecordOnly = jest.fn((key) => {
-        return key === 'first'
-          ? [true, StreamID.fromString(ref1)]
-          : [false, StreamID.fromString(ref2)]
+    describe('setAll()', () => {
+      test('uses the ID attached to the instance', async () => {
+        const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+        const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
+        const setRecordOnly = jest.fn((key) => {
+          return key === 'first'
+            ? [true, StreamID.fromString(ref1)]
+            : [false, StreamID.fromString(ref2)]
+        })
+        const setReferences = jest.fn()
+
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
+        ds._setRecordOnly = setRecordOnly as any
+        ds._setReferences = setReferences as any
+
+        const refs = { first: `ceramic://${ref1}` }
+        await expect(ds.setAll({ first: { foo: 'foo' }, second: { bar: 'bar' } })).resolves.toEqual(
+          refs
+        )
+        expect(setRecordOnly).toBeCalledTimes(2)
+        expect(setReferences).toBeCalledWith('did:test', refs)
       })
-      const setReferences = jest.fn()
 
-      const ds = new DIDDataStore({ ceramic: { did: { id: 'did:test' } }, model } as any)
-      ds._setRecordOnly = setRecordOnly as any
-      ds._setReferences = setReferences as any
+      test('uses the provided controller', async () => {
+        const ref1 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+        const ref2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpbbb'
+        const setRecordOnly = jest.fn((key) => {
+          return key === 'first'
+            ? [true, StreamID.fromString(ref1)]
+            : [false, StreamID.fromString(ref2)]
+        })
+        const setReferences = jest.fn()
 
-      const refs = { first: `ceramic://${ref1}` }
-      await expect(ds.setAll({ first: { foo: 'foo' }, second: { bar: 'bar' } })).resolves.toEqual(
-        refs
-      )
-      expect(setRecordOnly).toBeCalledTimes(2)
-      expect(setReferences).toBeCalledWith(refs)
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
+        ds._setRecordOnly = setRecordOnly as any
+        ds._setReferences = setReferences as any
+
+        const refs = { first: `ceramic://${ref1}` }
+        await expect(
+          ds.setAll({ first: { foo: 'foo' }, second: { bar: 'bar' } }, { controller: 'did:123' })
+        ).resolves.toEqual(refs)
+        expect(setRecordOnly).toBeCalledTimes(2)
+        expect(setReferences).toBeCalledWith('did:123', refs)
+      })
     })
 
-    test('setDefaults', async () => {
-      const newID = StreamID.fromString(
-        'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
-      )
-      const definition = {}
-      const getDefinition = jest.fn(() => definition)
-      const getIndex = jest.fn(() => ({ def1: 'ref1', def2: 'ref2' }))
-      const createRecord = jest.fn(() => newID)
-      const setReferences = jest.fn()
+    describe('setDefaults()', () => {
+      test('uses the ID attached to the instance', async () => {
+        const newID = StreamID.fromString(
+          'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+        )
+        const definition = {}
+        const getDefinition = jest.fn(() => definition)
+        const getIndex = jest.fn(() => ({ def1: 'ref1', def2: 'ref2' }))
+        const createRecord = jest.fn(() => newID)
+        const setReferences = jest.fn()
 
-      const ds = new DIDDataStore({ ceramic: { did: { id: 'did:test' } }, model } as any)
-      ds.getDefinition = getDefinition as any
-      ds.getIndex = getIndex as any
-      ds._createRecord = createRecord as any
-      ds._setReferences = setReferences as any
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
+        ds.getDefinition = getDefinition as any
+        ds.getIndex = getIndex as any
+        ds._createRecord = createRecord as any
+        ds._setReferences = setReferences as any
 
-      const refs = { def3: newID.toUrl() }
-      await expect(
-        ds.setDefaults({ def1: { hello: 'world' }, def3: { added: 'value' } })
-      ).resolves.toEqual(refs)
-      expect(getDefinition).toBeCalledWith('def3')
-      expect(createRecord).toBeCalledWith(definition, { added: 'value' }, undefined)
-      expect(setReferences).toBeCalledWith(refs)
+        const refs = { def3: newID.toUrl() }
+        await expect(
+          ds.setDefaults({ def1: { hello: 'world' }, def3: { added: 'value' } })
+        ).resolves.toEqual(refs)
+        expect(getDefinition).toBeCalledWith('def3')
+        expect(createRecord).toBeCalledWith(definition, { added: 'value' }, {})
+        expect(setReferences).toBeCalledWith('did:test', refs)
+      })
+
+      test('uses the provided controller', async () => {
+        const newID = StreamID.fromString(
+          'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexpaaa'
+        )
+        const definition = {}
+        const getDefinition = jest.fn(() => definition)
+        const getIndex = jest.fn(() => ({ def1: 'ref1', def2: 'ref2' }))
+        const createRecord = jest.fn(() => newID)
+        const setReferences = jest.fn()
+
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
+        ds.getDefinition = getDefinition as any
+        ds.getIndex = getIndex as any
+        ds._createRecord = createRecord as any
+        ds._setReferences = setReferences as any
+
+        const refs = { def3: newID.toUrl() }
+        await expect(
+          ds.setDefaults(
+            { def1: { hello: 'world' }, def3: { added: 'value' } },
+            { controller: 'did:123' }
+          )
+        ).resolves.toEqual(refs)
+        expect(getDefinition).toBeCalledWith('def3')
+        expect(createRecord).toBeCalledWith(
+          definition,
+          { added: 'value' },
+          { controller: 'did:123' }
+        )
+        expect(setReferences).toBeCalledWith('did:123', refs)
+      })
     })
 
-    test('remove', async () => {
-      const remove = jest.fn(() => Promise.resolve())
-      const ds = new DIDDataStore({ model } as any)
-      ds.remove = remove
-      await expect(ds.remove('streamId')).resolves.toBeUndefined()
-      expect(remove).toBeCalledWith('streamId')
+    describe('remove()', () => {
+      test('uses the ID attached to the instance', async () => {
+        const getIndexProxy = jest.fn(() => ({
+          changeContent: (input: unknown) => Promise.resolve(input),
+        }))
+        const ds = new DIDDataStore({ model, id: 'did:test' } as any)
+        ds._getIndexProxy = getIndexProxy as any
+        await expect(ds.remove('streamId')).resolves.toBeUndefined()
+        expect(getIndexProxy).toBeCalledWith('did:test')
+      })
+
+      test('uses the provided controller', async () => {
+        const getIndexProxy = jest.fn(() => ({
+          changeContent: (input: unknown) => Promise.resolve(input),
+        }))
+        const ds = new DIDDataStore({ model, id: 'did:test' } as any)
+        ds._getIndexProxy = getIndexProxy as any
+        await expect(ds.remove('streamId', 'did:123')).resolves.toBeUndefined()
+        expect(getIndexProxy).toBeCalledWith('did:123')
+      })
     })
   })
 
   describe('Index methods', () => {
-    test('getIndex with provided DID', async () => {
+    test('getIndex() with provided DID', async () => {
       const get = jest.fn()
+      const getIndexProxy = jest.fn()
       const ds = new DIDDataStore({ ceramic: { did: {} }, model } as any)
       ds._getIDXDoc = get
+      ds._getIndexProxy = getIndexProxy as any
       await ds.getIndex('did:test')
       expect(get).toBeCalledWith('did:test')
+      expect(getIndexProxy).not.toBeCalled()
     })
 
-    test('getIndex with own DID', async () => {
-      const get = jest.fn()
-      const ds = new DIDDataStore({ ceramic: { did: { id: 'did:test' } }, model } as any)
-      ds._indexProxy = { get } as any
-      await ds.getIndex()
+    test('getIndex() with own DID', async () => {
+      const get = jest.fn(() => ({}))
+      const getIndexProxy = jest.fn(() => ({ get }))
+      const ds = new DIDDataStore({ model, id: 'did:test:123', ceramic: { did: {} } } as any)
+      ds._getIndexProxy = getIndexProxy as any
+      await ds.getIndex('did:test:123')
+      expect(getIndexProxy).toBeCalledWith('did:test:123')
       expect(get).toBeCalled()
     })
 
-    test('iterator', async () => {
+    test('iterator()', async () => {
       const index = {
         'ceramic://definition1': 'ceramic://doc1',
         'ceramic://definition2': 'ceramic://doc2',
@@ -253,16 +355,14 @@ describe('DIDDataStore', () => {
       expect(loadDocument).toHaveBeenNthCalledWith(3, 'ceramic://doc3')
     })
 
-    test('_createIDXDoc', async () => {
+    test('_createIDXDoc()', async () => {
       const ceramic = {}
       const doc = { id: 'streamId' }
       createTile.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
       const ds = new DIDDataStore({ ceramic, model } as any)
 
       await expect(ds._createIDXDoc('did:test:123')).resolves.toBe(doc)
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(createTile).toHaveBeenCalledTimes(1)
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(createTile).toHaveBeenCalledWith(
         ceramic,
         null,
@@ -271,8 +371,8 @@ describe('DIDDataStore', () => {
       )
     })
 
-    describe('_getIDXDoc', () => {
-      test('calls _createIDXDoc and check the contents and schema are set', async () => {
+    describe('_getIDXDoc()', () => {
+      test('calls _createIDXDoc() and check the contents and schema are set', async () => {
         const doc = { content: {}, metadata: { schema: CIP11_INDEX_SCHEMA_URL } } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
         const ds = new DIDDataStore({ model } as any)
@@ -315,21 +415,19 @@ describe('DIDDataStore', () => {
       })
     })
 
-    describe('_getOwnIDXDoc', () => {
+    describe('_getOwnIDXDoc()', () => {
       test('creates and sets schema in update', async () => {
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX' }
         const update = jest.fn()
-        const add = jest.fn()
         const doc = { id: 'streamId', update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const ds = new DIDDataStore({ ceramic: { did: { id }, pin: { add } }, model } as any)
+        const ds = new DIDDataStore({ ceramic: { did: { id } }, model } as any)
         ds._createIDXDoc = createDoc
 
-        await expect(ds._getOwnIDXDoc()).resolves.toBe(doc)
+        await expect(ds._getOwnIDXDoc(id)).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL })
-        expect(add).toBeCalledWith('streamId')
+        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: true })
       })
 
       test('returns the doc if valid', async () => {
@@ -338,10 +436,10 @@ describe('DIDDataStore', () => {
         const update = jest.fn()
         const doc = { update, metadata, content: {} } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const ds = new DIDDataStore({ ceramic: { did: { id } }, model } as any)
+        const ds = new DIDDataStore({ id, model } as any)
         ds._createIDXDoc = createDoc
 
-        await expect(ds._getOwnIDXDoc()).resolves.toBe(doc)
+        await expect(ds._getOwnIDXDoc(id)).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
         expect(update).not.toHaveBeenCalled()
       })
@@ -352,20 +450,29 @@ describe('DIDDataStore', () => {
         const update = jest.fn()
         const doc = { update, metadata, content: {} } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const ds = new DIDDataStore({ ceramic: { did: { id } }, model } as any)
+        const ds = new DIDDataStore({ id, model } as any)
         ds._createIDXDoc = createDoc
 
-        await expect(ds._getOwnIDXDoc()).rejects.toThrow(
+        await expect(ds._getOwnIDXDoc(id)).rejects.toThrow(
           'Invalid document: schema is not IdentityIndex'
         )
         expect(createDoc).toHaveBeenCalledWith(id)
         expect(update).not.toHaveBeenCalled()
       })
     })
+
+    test('_getIndexProxy()', () => {
+      const ds = new DIDDataStore({ model } as any)
+      const proxy1 = ds._getIndexProxy('did:123')
+      const proxy1again = ds._getIndexProxy('did:123')
+      expect(proxy1again).toBe(proxy1)
+      const proxy2 = ds._getIndexProxy('did:456')
+      expect(proxy2).not.toBe(proxy1)
+    })
   })
 
   describe('Metadata methods', () => {
-    describe('getDefinitionID', () => {
+    describe('getDefinitionID()', () => {
       test('with alias in model', () => {
         const ds = new DIDDataStore({
           ceramic: {},
@@ -380,14 +487,14 @@ describe('DIDDataStore', () => {
       })
     })
 
-    describe('getDefinition', () => {
+    describe('getDefinition()', () => {
       test('returns valid definition', async () => {
         const ceramic = {}
         const load = jest.fn(() => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: CIP11_DEFINITION_SCHEMA_URL },
-          } as TileDocument)
+          } as unknown as TileDocument)
         })
         loadTile.mockImplementationOnce(load)
         const ds = new DIDDataStore({ ceramic, model } as any)
@@ -403,7 +510,7 @@ describe('DIDDataStore', () => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: 'OtherSchemaURL' },
-          } as TileDocument)
+          } as unknown as TileDocument)
         })
         loadTile.mockImplementationOnce(load)
         const ds = new DIDDataStore({ ceramic, model } as any)
@@ -416,7 +523,7 @@ describe('DIDDataStore', () => {
   })
 
   describe('Records methods', () => {
-    test('_loadDocument', async () => {
+    test('_loadDocument()', async () => {
       const load = jest.fn()
       loadTile.mockImplementation(load)
       const ds = new DIDDataStore({ model } as any)
@@ -424,7 +531,7 @@ describe('DIDDataStore', () => {
       expect(load).toBeCalledTimes(3)
     })
 
-    test('getRecordID', async () => {
+    test('getRecordID()', async () => {
       const ds = new DIDDataStore({ model } as any)
       ds.getIndex = () => Promise.resolve(null)
       await expect(ds.getRecordID('test', 'did')).resolves.toBeNull()
@@ -435,7 +542,7 @@ describe('DIDDataStore', () => {
       expect(get).toHaveBeenCalledWith('did')
     })
 
-    test('getRecordDocument', async () => {
+    test('getRecordDocument()', async () => {
       const ds = new DIDDataStore({ model } as any)
       ds.getRecordID = () => Promise.resolve(null)
       await expect(ds.getRecordDocument('test', 'did')).resolves.toBeNull()
@@ -451,7 +558,7 @@ describe('DIDDataStore', () => {
       expect(load).toHaveBeenCalledWith('ceramic://test')
     })
 
-    test('getRecord', async () => {
+    test('getRecord()', async () => {
       const content = {}
       const getRecordDocument = jest.fn(() => ({ content }))
       const ds = new DIDDataStore({ model } as any)
@@ -460,7 +567,7 @@ describe('DIDDataStore', () => {
       expect(getRecordDocument).toBeCalledWith('streamId', 'did')
     })
 
-    describe('_setRecordOnly', () => {
+    describe('_setRecordOnly()', () => {
       test('existing definition ID', async () => {
         const ds = new DIDDataStore({ ceramic: { did: { id: 'did:foo:123' } }, model } as any)
         const getRecordID = jest.fn(() => Promise.resolve('streamId'))
@@ -478,7 +585,7 @@ describe('DIDDataStore', () => {
 
       test('adding definition ID', async () => {
         const ds = new DIDDataStore({ ceramic: { did: { id: 'did' } }, model } as any)
-        ds._indexProxy = { get: (): Promise<any> => Promise.resolve(null) } as any
+        ds._getIndexProxy = () => ({ get: (): Promise<any> => Promise.resolve(null) } as any)
 
         const definition = { name: 'test', schema: 'ceramic://...' }
         const getDefinition = jest.fn(() => Promise.resolve(definition))
@@ -496,7 +603,7 @@ describe('DIDDataStore', () => {
       })
     })
 
-    describe('setRecord', () => {
+    describe('setRecord()', () => {
       test('does not set the index key if it already exists', async () => {
         const ds = new DIDDataStore({ model } as any)
         const setRecord = jest.fn(() => Promise.resolve([false, 'streamId']))
@@ -506,12 +613,12 @@ describe('DIDDataStore', () => {
 
         const content = { test: true }
         await ds.setRecord('defId', content)
-        expect(setRecord).toBeCalledWith('defId', content, undefined)
+        expect(setRecord).toBeCalledWith('defId', content, {})
         expect(setReference).not.toBeCalled()
       })
 
       test('adds the new index key', async () => {
-        const ds = new DIDDataStore({ model } as any)
+        const ds = new DIDDataStore({ id: 'did:test', model } as any)
         const setRecord = jest.fn(() => Promise.resolve([true, 'streamId']))
         ds._setRecordOnly = setRecord as any
         const setReference = jest.fn()
@@ -519,22 +626,21 @@ describe('DIDDataStore', () => {
 
         const content = { test: true }
         await ds.setRecord('defId', content)
-        expect(setRecord).toBeCalledWith('defId', content, undefined)
-        expect(setReference).toBeCalledWith('defId', 'streamId')
+        expect(setRecord).toBeCalledWith('defId', content, {})
+        expect(setReference).toBeCalledWith('did:test', 'defId', 'streamId')
       })
     })
 
-    describe('_createRecord', () => {
+    describe('_createRecord()', () => {
       test('creates the deterministic doc and updates it', async () => {
         const id = 'did:test:123'
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata, _opts) => {
             return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
-        const ceramic = { did: { id }, pin: { add } }
+        const ceramic = { did: { id } }
         const ds = new DIDDataStore({ ceramic, model } as any)
 
         const definition = {
@@ -551,12 +657,10 @@ describe('DIDDataStore', () => {
           { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(update).toBeCalledWith(content, { schema: 'schemaId' })
-        expect(add).toBeCalledWith('streamId')
+        expect(update).toBeCalledWith(content, { schema: 'schemaId' }, { pin: true })
       })
 
       test('pin by default', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -564,17 +668,15 @@ describe('DIDDataStore', () => {
           })
         )
         const ds = new DIDDataStore({
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
 
-        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {})
-        expect(update).toBeCalled()
-        expect(add).toBeCalledWith('streamId')
+        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: true })
       })
 
       test('no pinning by setting instance option', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -583,16 +685,14 @@ describe('DIDDataStore', () => {
         )
         const ds = new DIDDataStore({
           autopin: false,
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
-        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {})
-        expect(update).toBeCalled()
-        expect(add).not.toBeCalled()
+        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
       })
 
       test('explicit no pinning', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -601,32 +701,33 @@ describe('DIDDataStore', () => {
         )
         const ds = new DIDDataStore({
           autopin: true,
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
-        expect(update).toBeCalled()
-        expect(add).not.toBeCalled()
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
       })
     })
   })
 
   describe('References methods', () => {
-    test('_setReference', async () => {
+    test('_setReference()', async () => {
       const content = { test: true }
       const changeContent = jest.fn((change) => change(content))
-      const ds = new DIDDataStore({ model } as any)
-      ds._indexProxy = { changeContent } as any
-      await expect(ds._setReference('testId', testDocID)).resolves.toBeUndefined()
+      const ds = new DIDDataStore({ id: 'did:test', model } as any)
+      ds._getIndexProxy = () => ({ changeContent } as any)
+      await expect(ds._setReference('did:test', 'testId', testDocID)).resolves.toBeUndefined()
       expect(changeContent).toReturnWith({ test: true, testId: testDocID.toUrl() })
     })
 
-    test('_setReferences', async () => {
+    test('_setReferences()', async () => {
       const content = { test: true }
       const changeContent = jest.fn((change) => change(content))
-      const ds = new DIDDataStore({ model } as any)
-      ds._indexProxy = { changeContent } as any
-      await expect(ds._setReferences({ one: 'one', two: 'two' })).resolves.toBeUndefined()
+      const ds = new DIDDataStore({ id: 'did:test', model } as any)
+      ds._getIndexProxy = () => ({ changeContent } as any)
+      await expect(
+        ds._setReferences('did:test', { one: 'one', two: 'two' })
+      ).resolves.toBeUndefined()
       expect(changeContent).toReturnWith({ test: true, one: 'one', two: 'two' })
     })
   })

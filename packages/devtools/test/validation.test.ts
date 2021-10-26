@@ -1,3 +1,5 @@
+import type { JSONSchemaType } from 'ajv'
+
 import { isSecureSchema, validateSchemaSecure } from '../src'
 
 describe('validate', () => {
@@ -32,7 +34,7 @@ describe('validate', () => {
 
   describe('isSecureSchema', () => {
     it('throws an error for an invalid schema', () => {
-      expect(() => isSecureSchema({ type: 'foo' })).toThrow()
+      expect(() => isSecureSchema({ type: 'foo' } as unknown as JSONSchemaType<any>)).toThrow()
     })
 
     it('returns false for an insecure schema', () => {
@@ -45,7 +47,7 @@ describe('validate', () => {
           },
         },
       }
-      expect(isSecureSchema(schema)).toBe(false)
+      expect(isSecureSchema(schema as unknown as JSONSchemaType<any>)).toBe(false)
     })
 
     it('returns true for an secure schema', () => {
@@ -59,7 +61,7 @@ describe('validate', () => {
           },
         },
       }
-      expect(isSecureSchema(schema)).toBe(true)
+      expect(isSecureSchema(schema as unknown as JSONSchemaType<any>)).toBe(true)
     })
   })
 })

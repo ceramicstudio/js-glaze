@@ -3,6 +3,12 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { DataModel } from '../src'
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const createTile = TileDocument.create as jest.MockedFunction<typeof TileDocument.create>
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const loadTile = TileDocument.load as jest.MockedFunction<typeof TileDocument.load>
+
 jest.mock('@ceramicnetwork/stream-tile')
 
 describe('DataModel', () => {
@@ -57,7 +63,7 @@ describe('DataModel', () => {
         const ceramic = {}
         const stream = {}
         const load = jest.fn(() => Promise.resolve(stream))
-        TileDocument.load.mockImplementationOnce(load)
+        loadTile.mockImplementationOnce(load as unknown as typeof TileDocument.load)
 
         const model = new DataModel({ ceramic, model: aliases } as any)
         await expect(model.loadTile('foo')).resolves.toBe(stream)
@@ -76,7 +82,7 @@ describe('DataModel', () => {
       test('returns the created tile', async () => {
         const stream = { id: 'streamID' }
         const create = jest.fn(() => Promise.resolve(stream))
-        TileDocument.create.mockImplementationOnce(create)
+        createTile.mockImplementationOnce(create as unknown as typeof TileDocument.create)
 
         const ceramic = {
           pin: { add: jest.fn() },
@@ -92,7 +98,7 @@ describe('DataModel', () => {
       test('does not pin if explicitly set', async () => {
         const stream = { id: 'streamID' }
         const create = jest.fn(() => Promise.resolve(stream))
-        TileDocument.create.mockImplementationOnce(create)
+        createTile.mockImplementationOnce(create as unknown as typeof TileDocument.create)
 
         const ceramic = {
           pin: { add: jest.fn() },
@@ -108,7 +114,7 @@ describe('DataModel', () => {
       test('does not pin if autopin is false', async () => {
         const stream = { id: 'streamID' }
         const create = jest.fn(() => Promise.resolve(stream))
-        TileDocument.create.mockImplementationOnce(create)
+        createTile.mockImplementationOnce(create as unknown as typeof TileDocument.create)
 
         const ceramic = {
           pin: { add: jest.fn() },
@@ -124,7 +130,7 @@ describe('DataModel', () => {
       test('pins if autopin is false but option is set', async () => {
         const stream = { id: 'streamID' }
         const create = jest.fn(() => Promise.resolve(stream))
-        TileDocument.create.mockImplementationOnce(create)
+        createTile.mockImplementationOnce(create as unknown as typeof TileDocument.create)
 
         const ceramic = {
           pin: { add: jest.fn() },

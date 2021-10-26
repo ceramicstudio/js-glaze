@@ -18,6 +18,7 @@ npm install @glazed/did-datastore
 
 | Name | Type |
 | :------ | :------ |
+| `controller?` | `string` |
 | `pin?` | `boolean` |
 
 ___
@@ -38,6 +39,7 @@ ___
 | :------ | :------ |
 | `autopin?` | `boolean` |
 | `ceramic` | `CeramicApi` |
+| `id?` | `string` |
 | `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> |
 
 ___
