@@ -2,7 +2,7 @@
  * @jest-environment glaze
  */
 
-import { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi } from '@ceramicnetwork/common'
 import type { CommitID } from '@ceramicnetwork/streamid'
 
 import { AppendCollection, Cursor, publishCollectionSchemas } from '../src'

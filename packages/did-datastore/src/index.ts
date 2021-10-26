@@ -44,12 +44,14 @@ export type Entry = {
 }
 
 export type CreateOptions = {
+  controller?: string
   pin?: boolean
 }
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   autopin?: boolean
   ceramic: CeramicApi
+  id?: string
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
@@ -64,14 +66,14 @@ export class DIDDataStore<
 > {
   #autopin: boolean
   #ceramic: CeramicApi
-  /** @internal */
-  _indexProxy: TileProxy
+  #id: string | undefined
+  #indexProxies: Record<string, TileProxy> = {}
   #model: DataModel<ModelTypes>
 
-  constructor({ autopin, ceramic, model }: DIDDataStoreParams<ModelTypes>) {
+  constructor({ autopin, ceramic, id, model }: DIDDataStoreParams<ModelTypes>) {
     this.#autopin = autopin !== false
     this.#ceramic = ceramic
-    this._indexProxy = new TileProxy(this._getOwnIDXDoc.bind(this))
+    this.#id = id
     this.#model =
       model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
   }
@@ -85,6 +87,9 @@ export class DIDDataStore<
   }
 
   get id(): string {
+    if (this.#id != null) {
+      return this.#id
+    }
     if (this.#ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
@@ -114,12 +119,12 @@ export class DIDDataStore<
   async set<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     content: ContentType,
-    options?: CreateOptions
+    options: CreateOptions = {}
   ): Promise<StreamID> {
     const definitionID = this.getDefinitionID(key as string)
     const [created, id] = await this._setRecordOnly(definitionID, content, options)
     if (created) {
-      await this._setReference(definitionID, id)
+      await this._setReference(options.controller ?? this.id, definitionID, id)
     }
     return id
   }
@@ -137,7 +142,7 @@ export class DIDDataStore<
 
   async setAll<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
-    options?: CreateOptions
+    options: CreateOptions = {}
   ): Promise<IdentityIndex> {
     const updates = Object.entries(contents).map(async ([alias, content]) => {
       const definitionID = this.getDefinitionID(alias)
@@ -152,14 +157,14 @@ export class DIDDataStore<
       }
       return acc
     }, {} as IdentityIndex)
-    await this._setReferences(newReferences)
+    await this._setReferences(options.controller ?? this.id, newReferences)
 
     return newReferences
   }
 
   async setDefaults<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
-    options?: CreateOptions
+    options: CreateOptions = {}
   ): Promise<IdentityIndex> {
     const index = (await this.getIndex()) ?? {}
 
@@ -179,25 +184,27 @@ export class DIDDataStore<
     const newReferences = changes.reduce((acc, keyToID) => {
       return Object.assign(acc, keyToID)
     }, {} as IdentityIndex)
-    await this._setReferences(newReferences)
+    await this._setReferences(options.controller ?? this.id, newReferences)
 
     return newReferences
   }
 
-  async remove(key: Alias): Promise<void> {
-    await this._indexProxy.changeContent((index) => {
-      if (index) delete index[this.getDefinitionID(key as string)]
+  async remove(key: Alias, controller = this.id): Promise<void> {
+    await this._getIndexProxy(controller).changeContent((index) => {
+      if (index != null) {
+        delete index[this.getDefinitionID(key as string)]
+      }
       return index
     })
   }
 
   // Identity Index APIs
 
-  async getIndex(did?: string): Promise<IdentityIndex | null> {
+  async getIndex(did = this.id): Promise<IdentityIndex | null> {
     const rootDoc =
-      this.authenticated && (did === this.id || did == null)
-        ? await this._indexProxy.get()
-        : await this._getIDXDoc(did ?? this.id)
+      this.authenticated && did === this.id
+        ? await this._getIndexProxy(did).get()
+        : await this._getIDXDoc(did)
     return rootDoc ? (rootDoc.content as IdentityIndex) : null
   }
 
@@ -226,12 +233,12 @@ export class DIDDataStore<
   }
 
   /** @internal */
-  async _createIDXDoc(did: string): Promise<TileDoc> {
-    assertDIDstring(did)
+  async _createIDXDoc(controller: string): Promise<TileDoc> {
+    assertDIDstring(controller)
     return await TileDocument.create<TileContent>(
       this.#ceramic,
       null,
-      { deterministic: true, controllers: [did], family: 'IDX' },
+      { deterministic: true, controllers: [controller], family: 'IDX' },
       { anchor: false, publish: false }
     )
   }
@@ -249,8 +256,8 @@ export class DIDDataStore<
   }
 
   /** @internal */
-  async _getOwnIDXDoc(): Promise<TileDoc> {
-    const doc = await this._createIDXDoc(this.id)
+  async _getOwnIDXDoc(did: string): Promise<TileDoc> {
+    const doc = await this._createIDXDoc(did)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
       await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL })
@@ -261,6 +268,16 @@ export class DIDDataStore<
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
     return doc
+  }
+
+  /** @internal */
+  _getIndexProxy(controller: string): TileProxy {
+    let proxy = this.#indexProxies[controller]
+    if (proxy == null) {
+      proxy = new TileProxy(async () => await this._getOwnIDXDoc(controller))
+      this.#indexProxies[controller] = proxy
+    }
+    return proxy
   }
 
   // Definition APIs
@@ -300,11 +317,11 @@ export class DIDDataStore<
   async setRecord(
     definitionID: string,
     content: Record<string, any>,
-    options?: CreateOptions
+    options: CreateOptions = {}
   ): Promise<StreamID> {
     const [created, id] = await this._setRecordOnly(definitionID, content, options)
     if (created) {
-      await this._setReference(definitionID, id)
+      await this._setReference(options.controller ?? this.id, definitionID, id)
     }
     return id
   }
@@ -336,13 +353,17 @@ export class DIDDataStore<
   async _createRecord(
     definition: DefinitionWithID,
     content: Record<string, any>,
-    { pin }: CreateOptions = {}
+    { controller, pin }: CreateOptions
   ): Promise<StreamID> {
     // Doc must first be created in a deterministic way
     const doc = await TileDocument.create<TileContent>(
       this.#ceramic,
       null,
-      { deterministic: true, controllers: [this.id], family: definition.id.toString() },
+      {
+        deterministic: true,
+        controllers: [controller ?? this.id],
+        family: definition.id.toString(),
+      },
       { anchor: false, publish: false }
     )
     // Then be updated with content and schema
@@ -358,16 +379,16 @@ export class DIDDataStore<
   // References APIs
 
   /** @internal */
-  async _setReference(definitionID: string, id: StreamID): Promise<void> {
-    await this._indexProxy.changeContent((index) => {
+  async _setReference(controller: string, definitionID: string, id: StreamID): Promise<void> {
+    await this._getIndexProxy(controller).changeContent((index) => {
       return { ...index, [definitionID]: id.toUrl() }
     })
   }
 
   /** @internal */
-  async _setReferences(references: IdentityIndex): Promise<void> {
+  async _setReferences(controller: string, references: IdentityIndex): Promise<void> {
     if (Object.keys(references).length !== 0) {
-      await this._indexProxy.changeContent((index) => {
+      await this._getIndexProxy(controller).changeContent((index) => {
         return { ...index, ...references }
       })
     }

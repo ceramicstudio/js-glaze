@@ -21,11 +21,11 @@
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "@ceramicnetwork/core": "^1.5.0",
+    "@ceramicnetwork/core": "^1.8.1",
     "blockcodec-to-ipld-format": "^1.0.0",
     "dag-jose": "^0.3.0",
     "ipfs-core": "^0.5.4",
-    "jest-environment-node": "^27.1.1",
+    "jest-environment-node": "^27.3.1",
     "tmp-promise": "^3.0.2"
   }
 }

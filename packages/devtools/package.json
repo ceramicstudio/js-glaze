@@ -37,12 +37,12 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/common": "^1.4.0",
-    "@ceramicnetwork/stream-tile": "^1.3.0",
-    "@ceramicnetwork/streamid": "^1.2.0",
+    "@ceramicnetwork/common": "^1.7.0",
+    "@ceramicnetwork/stream-tile": "^1.3.3",
+    "@ceramicnetwork/streamid": "^1.3.1",
     "@glazed/constants": "^0.1.1",
     "@glazed/did-datastore-model": "^0.1.1",
-    "ajv": "^8.6.2",
+    "ajv": "^8.6.3",
     "ajv-formats": "^2.1.1",
     "change-case": "^4.1.2",
     "cids": "^1.1.9",
@@ -50,20 +50,15 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/http-client": "^1.2.1",
+    "@ceramicnetwork/http-client": "^1.4.2",
     "@glazed/graphql-types": "^0.1.0",
     "@glazed/types": "^0.1.3",
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^27.0.2",
     "dids": "^2.4.0",
     "fs-extra": "^10.0.0",
     "jest-environment-glaze": "^0.1.1"
   },
   "jest": {
-    "preset": "ts-jest",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
-    }
+    "preset": "ts-jest"
   }
 }

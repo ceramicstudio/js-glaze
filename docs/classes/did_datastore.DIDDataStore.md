@@ -138,7 +138,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `did?` | `string` |
+| `did` | `string` |
 
 #### Returns
 
@@ -263,13 +263,14 @@ ___
 
 ### remove
 
-▸ **remove**(`key`): `Promise`<`void`\>
+▸ **remove**(`key`, `controller?`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `key` | `Alias` |
+| `controller` | `string` |
 
 #### Returns
 
@@ -294,7 +295,7 @@ ___
 | :------ | :------ |
 | `key` | `Key` |
 | `content` | `ContentType` |
-| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
@@ -317,7 +318,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `contents` | `Contents` |
-| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
@@ -340,7 +341,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `contents` | `Contents` |
-| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 
@@ -358,7 +359,7 @@ ___
 | :------ | :------ |
 | `definitionID` | `string` |
 | `content` | `Record`<`string`, `any`\> |
-| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 

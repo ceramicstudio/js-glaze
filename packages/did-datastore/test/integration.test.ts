@@ -2,7 +2,7 @@
  * @jest-environment glaze
  */
 
-import { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi } from '@ceramicnetwork/common'
 import { ModelManager } from '@glazed/devtools'
 import type { ModelTypeAliases } from '@glazed/types'
 

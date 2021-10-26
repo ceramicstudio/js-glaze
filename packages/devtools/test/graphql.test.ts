@@ -3,9 +3,14 @@
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { ModelManager, createGraphQLModel } from '../src'
+
+declare global {
+  const ceramic: CeramicApi
+}
 
 describe('graphql', () => {
   jest.setTimeout(20000)
