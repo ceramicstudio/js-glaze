@@ -2,9 +2,11 @@
 
 [tile-loader](../modules/tile_loader.md).TileLoader
 
+A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
+
 ## Hierarchy
 
-- `DataLoader`<[`Key`](../modules/tile_loader.md#key), `TileDocument`\>
+- `DataLoader`<[`TileKey`](../modules/tile_loader.md#tilekey), `TileDocument`\>
 
   ↳ **`TileLoader`**
 
@@ -22,13 +24,15 @@
 
 #### Overrides
 
-DataLoader&lt;Key, TileDocument\&gt;.constructor
+DataLoader&lt;TileKey, TileDocument\&gt;.constructor
 
 ## Methods
 
 ### create
 
 ▸ **create**<`T`\>(`content`, `metadata?`, `options?`): `Promise`<`TileDocument`<`T`\>\>
+
+Create a new TileDocument and add it to the cache if enabled.
 
 #### Type parameters
 
@@ -54,6 +58,8 @@ ___
 
 ▸ **deterministic**<`T`\>(`metadata`): `Promise`<`TileDocument`<`undefined` \| ``null`` \| `T`\>\>
 
+Create or load a deterministic TileDocument based on its metadata.
+
 #### Type parameters
 
 | Name | Type |
@@ -76,6 +82,8 @@ ___
 
 ▸ **load**<`T`\>(`key`): `Promise`<`TileDocument`<`T`\>\>
 
+Load a TileDocument from the cache (if enabled) or remotely.
+
 #### Type parameters
 
 | Name | Type |
@@ -86,7 +94,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `key` | [`Key`](../modules/tile_loader.md#key) |
+| `key` | [`TileKey`](../modules/tile_loader.md#tilekey) |
 
 #### Returns
 

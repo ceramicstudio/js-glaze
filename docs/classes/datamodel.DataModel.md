@@ -17,7 +17,7 @@ import { DataModel } from '@glazed/datamodel'
 
 ### constructor
 
-• **new DataModel**<`ModelTypes`, `ModelAliases`\>(`__namedParameters`)
+• **new DataModel**<`ModelTypes`, `ModelAliases`\>(`params`)
 
 #### Type parameters
 
@@ -30,23 +30,25 @@ import { DataModel } from '@glazed/datamodel'
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | [`DataModelParams`](../modules/datamodel.md#datamodelparams)<`ModelAliases`\> |
+| `params` | [`DataModelParams`](../modules/datamodel.md#datamodelparams)<`ModelAliases`\> |
 
 ## Accessors
 
-### ceramic
+### loader
 
-• `get` **ceramic**(): `CeramicApi`
+• `get` **loader**(): `TileLoader`
 
 #### Returns
 
-`CeramicApi`
+`TileLoader`
 
 ## Methods
 
 ### createTile
 
 ▸ **createTile**<`Alias`, `ContentType`\>(`schemaAlias`, `content`, `__namedParameters?`): `Promise`<`TileDocument`<`ContentType`\>\>
+
+Create a TileDocument using a schema identified by the given `schemaAlias`.
 
 #### Type parameters
 
@@ -138,6 +140,8 @@ ___
 ### loadTile
 
 ▸ **loadTile**<`Alias`, `ContentType`\>(`alias`): `Promise`<``null`` \| `TileDocument`<`ContentType`\>\>
+
+Load the TileDocument identified by the given `alias`.
 
 #### Type parameters
 

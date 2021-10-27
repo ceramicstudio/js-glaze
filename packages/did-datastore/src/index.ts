@@ -39,22 +39,55 @@ export type DefinitionWithID<Config extends Record<string, unknown> = Record<str
   Definition<Config> & { id: StreamID }
 
 export type Entry = {
+  /**
+   * Key (definition ID) identifying the record ID in the index
+   */
   key: string
+  /**
+   * Record ID (Ceramic StreamID)
+   */
   id: string
+  /**
+   * Record contents
+   */
   record: unknown
 }
 
 export type CreateOptions = {
+  /**
+   * Optional controller for the record
+   */
   controller?: string
+  /**
+   * Pin the created record stream (default)
+   */
   pin?: boolean
 }
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
+  /**
+   * Pin all created records streams (default)
+   */
   autopin?: boolean
-  cache?: TileCache
+  /**
+   * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
+   */
+  cache?: TileCache | boolean
+  /**
+   * A Ceramic client instance
+   */
   ceramic: CeramicApi
+  /**
+   * Fallback DID to use when not explicitly set in method calls
+   */
   id?: string
+  /**
+   * An optional {@linkcode TileLoader} instance to use
+   */
   loader?: TileLoader
+  /**
+   * A {@linkcode DataModel} instance or runtime model aliases to use
+   */
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
@@ -114,12 +147,18 @@ export class DIDDataStore<
 
   // High-level APIs
 
+  /**
+   * Returns whether a record exists in the index or not.
+   */
   async has(key: Alias, did?: string): Promise<boolean> {
     const definitionID = this.getDefinitionID(key as string)
     const ref = await this.getRecordID(definitionID, did)
     return ref != null
   }
 
+  /**
+   * Get the record contents.
+   */
   async get<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     did?: string
@@ -128,6 +167,11 @@ export class DIDDataStore<
     return await this.getRecord<ContentType>(definitionID, did)
   }
 
+  /**
+   * Set the record contents.
+   *
+   * **Warning**: calling this method replaces any existing contents in the record, use {@linkcode merge} if you want to only change some fields.
+   */
   async set<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     content: ContentType,
@@ -141,6 +185,9 @@ export class DIDDataStore<
     return id
   }
 
+  /**
+   * Perform a shallow (one level) merge of the record contents.
+   */
   async merge<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     content: ContentType,
@@ -152,6 +199,12 @@ export class DIDDataStore<
     return await this.setRecord(definitionID, newContent, options)
   }
 
+  /**
+   * Set the contents of multiple records at once.
+   * The index only gets updated after all wanted records have been written.
+   *
+   * **Warning**: calling this method replaces any existing contents in the records.
+   */
   async setAll<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
     options: CreateOptions = {}
@@ -174,6 +227,9 @@ export class DIDDataStore<
     return newReferences
   }
 
+  /**
+   * Set the contents of multiple records if they are not already set in the index.
+   */
   async setDefaults<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
     options: CreateOptions = {}
@@ -201,6 +257,11 @@ export class DIDDataStore<
     return newReferences
   }
 
+  /**
+   * Remove a record from the index.
+   *
+   * **Notice**: this *does not* change the contents of the record itself, only the index.
+   */
   async remove(key: Alias, controller = this.id): Promise<void> {
     await this._getIndexProxy(controller).changeContent((index) => {
       if (index != null) {
@@ -212,6 +273,9 @@ export class DIDDataStore<
 
   // Identity Index APIs
 
+  /**
+   * Load the full index contents.
+   */
   async getIndex(did = this.id): Promise<IdentityIndex | null> {
     const rootDoc =
       this.authenticated && did === this.id
@@ -220,6 +284,9 @@ export class DIDDataStore<
     return rootDoc ? (rootDoc.content as IdentityIndex) : null
   }
 
+  /**
+   * Asynchronously iterate over the entries of the index, loading one record at a time.
+   */
   iterator(did?: string): AsyncIterableIterator<Entry> {
     let list: Array<[string, string]>
     let cursor = 0
@@ -289,10 +356,16 @@ export class DIDDataStore<
 
   // Definition APIs
 
+  /**
+   * Get the definition ID for the given alias.
+   */
   getDefinitionID(aliasOrID: string): string {
     return this.#model.getDefinitionID(aliasOrID) ?? aliasOrID
   }
 
+  /**
+   * Load and validate a definition by its ID.
+   */
   async getDefinition(id: StreamID | string): Promise<DefinitionWithID> {
     const doc = await this.#loader.load(id)
     if (doc.metadata.schema !== CIP11_DEFINITION_SCHEMA_URL) {
@@ -303,16 +376,25 @@ export class DIDDataStore<
 
   // Record APIs
 
+  /**
+   * Load a record ID in the index for the given definition ID.
+   */
   async getRecordID(definitionID: string, did?: string): Promise<string | null> {
     const index = await this.getIndex(did ?? this.id)
     return index?.[definitionID] ?? null
   }
 
+  /**
+   * Load a record TileDocument for the given definition ID.
+   */
   async getRecordDocument(definitionID: string, did?: string): Promise<TileDoc | null> {
     const id = await this.getRecordID(definitionID, did)
     return id ? await this.#loader.load(id) : null
   }
 
+  /**
+   * Load a record contents for the given definition ID.
+   */
   async getRecord<ContentType = unknown>(
     definitionID: string,
     did?: string
@@ -321,6 +403,9 @@ export class DIDDataStore<
     return doc ? (doc.content as ContentType) : null
   }
 
+  /**
+   * Set the contents of a record for the given definition ID.
+   */
   async setRecord(
     definitionID: string,
     content: Record<string, any>,

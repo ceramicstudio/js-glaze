@@ -64,6 +64,16 @@ ___
 
 ___
 
+### loader
+
+• `get` **loader**(): `TileLoader`
+
+#### Returns
+
+`TileLoader`
+
+___
+
 ### model
 
 • `get` **model**(): `DataModel`<`ModelTypes`, `ModelTypesToAliases`<`ModelTypes`\>\>
@@ -77,6 +87,8 @@ ___
 ### get
 
 ▸ **get**<`Key`, `ContentType`\>(`key`, `did?`): `Promise`<``null`` \| `ContentType`\>
+
+Get the record contents.
 
 #### Type parameters
 
@@ -102,6 +114,8 @@ ___
 
 ▸ **getDefinition**(`id`): `Promise`<[`DefinitionWithID`](../modules/did_datastore.md#definitionwithid)<`Record`<`string`, `unknown`\>\>\>
 
+Load and validate a definition by its ID.
+
 #### Parameters
 
 | Name | Type |
@@ -117,6 +131,8 @@ ___
 ### getDefinitionID
 
 ▸ **getDefinitionID**(`aliasOrID`): `string`
+
+Get the definition ID for the given alias.
 
 #### Parameters
 
@@ -134,6 +150,8 @@ ___
 
 ▸ **getIndex**(`did?`): `Promise`<``null`` \| `IdentityIndex`\>
 
+Load the full index contents.
+
 #### Parameters
 
 | Name | Type |
@@ -149,6 +167,8 @@ ___
 ### getRecord
 
 ▸ **getRecord**<`ContentType`\>(`definitionID`, `did?`): `Promise`<``null`` \| `ContentType`\>
+
+Load a record contents for the given definition ID.
 
 #### Type parameters
 
@@ -173,6 +193,8 @@ ___
 
 ▸ **getRecordDocument**(`definitionID`, `did?`): `Promise`<``null`` \| `TileDoc`\>
 
+Load a record TileDocument for the given definition ID.
+
 #### Parameters
 
 | Name | Type |
@@ -189,6 +211,8 @@ ___
 ### getRecordID
 
 ▸ **getRecordID**(`definitionID`, `did?`): `Promise`<``null`` \| `string`\>
+
+Load a record ID in the index for the given definition ID.
 
 #### Parameters
 
@@ -207,6 +231,8 @@ ___
 
 ▸ **has**(`key`, `did?`): `Promise`<`boolean`\>
 
+Returns whether a record exists in the index or not.
+
 #### Parameters
 
 | Name | Type |
@@ -224,6 +250,8 @@ ___
 
 ▸ **iterator**(`did?`): `AsyncIterableIterator`<[`Entry`](../modules/did_datastore.md#entry)\>
 
+Asynchronously iterate over the entries of the index, loading one record at a time.
+
 #### Parameters
 
 | Name | Type |
@@ -239,6 +267,8 @@ ___
 ### merge
 
 ▸ **merge**<`Key`, `ContentType`\>(`key`, `content`, `options?`): `Promise`<`StreamID`\>
+
+Perform a shallow (one level) merge of the record contents.
 
 #### Type parameters
 
@@ -265,6 +295,10 @@ ___
 
 ▸ **remove**(`key`, `controller?`): `Promise`<`void`\>
 
+Remove a record from the index.
+
+**Notice**: this *does not* change the contents of the record itself, only the index.
+
 #### Parameters
 
 | Name | Type |
@@ -281,6 +315,10 @@ ___
 ### set
 
 ▸ **set**<`Key`, `ContentType`\>(`key`, `content`, `options?`): `Promise`<`StreamID`\>
+
+Set the record contents.
+
+**Warning**: calling this method replaces any existing contents in the record, use [`merge`](did_datastore.DIDDataStore.md#merge) if you want to only change some fields.
 
 #### Type parameters
 
@@ -307,6 +345,11 @@ ___
 
 ▸ **setAll**<`Contents`\>(`contents`, `options?`): `Promise`<`IdentityIndex`\>
 
+Set the contents of multiple records at once.
+The index only gets updated after all wanted records have been written.
+
+**Warning**: calling this method replaces any existing contents in the records.
+
 #### Type parameters
 
 | Name | Type |
@@ -330,6 +373,8 @@ ___
 
 ▸ **setDefaults**<`Contents`\>(`contents`, `options?`): `Promise`<`IdentityIndex`\>
 
+Set the contents of multiple records if they are not already set in the index.
+
 #### Type parameters
 
 | Name | Type |
@@ -352,6 +397,8 @@ ___
 ### setRecord
 
 ▸ **setRecord**(`definitionID`, `content`, `options?`): `Promise`<`StreamID`\>
+
+Set the contents of a record for the given definition ID.
 
 #### Parameters
 

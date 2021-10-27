@@ -13,14 +13,32 @@ import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 export type CreateOptions = {
+  /**
+   * Pin the created stream (default)
+   */
   pin?: boolean
 }
 
 export type DataModelParams<Model> = {
+  /**
+   * Pin all created streams (default)
+   */
   autopin?: boolean
+  /**
+   * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
+   */
   cache?: TileCache | boolean
+  /**
+   * A Ceramic client instance, only used if `loader` is not provided
+   */
   ceramic?: CeramicApi
+  /**
+   * A {@linkcode TileLoader} instance to use, must be provided if `ceramic` is not provided
+   */
   loader?: TileLoader
+  /**
+   * The runtime model aliases to use
+   */
   model: Model
 }
 
@@ -66,6 +84,9 @@ export class DataModel<
     return this.#model.tiles[alias] ?? null
   }
 
+  /**
+   * Load the TileDocument identified by the given `alias`.
+   */
   async loadTile<
     Alias extends keyof ModelAliases['tiles'],
     ContentType = ModelTypes['schemas'][ModelTypes['tiles'][Alias]]
@@ -77,6 +98,9 @@ export class DataModel<
     return await this.#loader.load<ContentType>(id)
   }
 
+  /**
+   * Create a TileDocument using a schema identified by the given `schemaAlias`.
+   */
   async createTile<
     Alias extends keyof ModelAliases['schemas'],
     ContentType = ModelTypes['schemas'][Alias]

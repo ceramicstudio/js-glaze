@@ -13,7 +13,9 @@ import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
 import type { CacheMap } from 'dataloader'
 
-// Omit path and atTime from MultiQuery as the cache needs to be deterministic based on the ID
+/**
+ * Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
+ */
 export type TileQuery = Omit<MultiQuery, 'paths' | 'atTime'>
 
 export type TileKey = CommitID | StreamID | TileQuery | string
@@ -21,7 +23,13 @@ export type TileKey = CommitID | StreamID | TileQuery | string
 export type TileCache = CacheMap<string, Promise<TileDocument>>
 
 export type TileLoaderParams = {
+  /**
+   * A Ceramic client instance
+   */
   ceramic: CeramicApi
+  /**
+   * A supported cache implementation, `true` to use the default implementation or `false` to disable the cache (default)
+   */
   cache?: TileCache | boolean
 }
 
@@ -44,6 +52,9 @@ export function keyToString(key: TileKey): string {
   return key.streamId.toString()
 }
 
+/**
+ * A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
+ */
 export class TileLoader extends DataLoader<TileKey, TileDocument> {
   #ceramic: CeramicApi
   #useCache: boolean
@@ -74,6 +85,9 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     this.#useCache = params.cache !== false
   }
 
+  /**
+   * Create a new TileDocument and add it to the cache if enabled.
+   */
   async create<T extends Record<string, any> = Record<string, any>>(
     content: T,
     metadata?: TileMetadataArgs,
@@ -86,6 +100,9 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     return stream
   }
 
+  /**
+   * Create or load a deterministic TileDocument based on its metadata.
+   */
   async deterministic<T extends Record<string, any> = Record<string, any>>(
     metadata: TileMetadataArgs
   ): Promise<TileDocument<T | null | undefined>> {
@@ -97,6 +114,9 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     return (await super.load({ streamId, genesis })) as TileDocument<T | null | undefined>
   }
 
+  /**
+   * Load a TileDocument from the cache (if enabled) or remotely.
+   */
   async load<T extends Record<string, any> = Record<string, any>>(
     key: TileKey
   ): Promise<TileDocument<T>> {
