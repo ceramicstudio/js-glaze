@@ -7,7 +7,9 @@
  */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
+import { TileLoader } from '@glazed/tile-loader'
+import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 export type CreateOptions = {
@@ -16,7 +18,9 @@ export type CreateOptions = {
 
 export type DataModelParams<Model> = {
   autopin?: boolean
-  ceramic: CeramicApi
+  cache?: TileCache | boolean
+  ceramic?: CeramicApi
+  loader?: TileLoader
   model: Model
 }
 
@@ -30,17 +34,24 @@ export class DataModel<
   ModelAliases extends ModelTypesToAliases<ModelTypes> = ModelTypesToAliases<ModelTypes>
 > {
   #autopin: boolean
-  #ceramic: CeramicApi
+  #loader: TileLoader
   #model: ModelAliases
 
-  constructor({ autopin, ceramic, model }: DataModelParams<ModelAliases>) {
-    this.#autopin = autopin !== false
-    this.#ceramic = ceramic
-    this.#model = model
+  constructor(params: DataModelParams<ModelAliases>) {
+    this.#autopin = params.autopin !== false
+    this.#model = params.model
+
+    if (params.loader != null) {
+      this.#loader = params.loader
+    } else if (params.ceramic == null) {
+      throw new Error('Invalid DataModel parameters: missing ceramic or loader')
+    } else {
+      this.#loader = new TileLoader({ ceramic: params.ceramic, cache: params.cache })
+    }
   }
 
-  get ceramic(): CeramicApi {
-    return this.#ceramic
+  get loader(): TileLoader {
+    return this.#loader
   }
 
   getDefinitionID<Alias extends keyof ModelAliases['definitions']>(alias: Alias): string | null {
@@ -63,7 +74,7 @@ export class DataModel<
     if (id == null) {
       throw new Error(`Tile alias "${alias as string}" is not defined`)
     }
-    return await TileDocument.load<ContentType>(this.#ceramic, id)
+    return await this.#loader.load<ContentType>(id)
   }
 
   async createTile<
@@ -79,10 +90,10 @@ export class DataModel<
       throw new Error(`Schema alias "${schemaAlias as string}" is not defined`)
     }
 
-    const doc = await TileDocument.create<ContentType>(this.#ceramic, content, { schema })
-    if (pin ?? this.#autopin) {
-      await this.#ceramic.pin.add(doc.id)
-    }
-    return doc
+    return await this.#loader.create<ContentType>(
+      content,
+      { schema },
+      { pin: pin ?? this.#autopin }
+    )
   }
 }

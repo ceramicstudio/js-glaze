@@ -8,11 +8,12 @@ describe('tile-loader', () => {
   const testCID = 'bagcqcerakszw2vsovxznyp5gfnpdj4cqm2xiv76yd24wkjewhhykovorwo6a'
   const testCommitID = new CommitID(1, testCID)
   const testStreamID = new StreamID(1, testCID)
+  const testID1 = testStreamID.toString()
+  const testID2 = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
 
   describe('keyToQuery()', () => {
     test('with string key', () => {
-      const streamId = testStreamID.toString()
-      expect(keyToQuery(streamId)).toEqual({ streamId })
+      expect(keyToQuery(testID1)).toEqual({ streamId: testID1 })
     })
 
     test('with CommitID key', () => {
@@ -35,8 +36,11 @@ describe('tile-loader', () => {
 
   describe('keyToString()', () => {
     test('with string key', () => {
-      const key = testStreamID.toString()
-      expect(keyToString(key)).toBe(key)
+      expect(keyToString(testID1)).toBe(testID1)
+    })
+
+    test('with URL key', () => {
+      expect(keyToString(testStreamID.toUrl())).toBe(testID1)
     })
 
     test('with CommitID key', () => {
@@ -44,7 +48,7 @@ describe('tile-loader', () => {
     })
 
     test('with StreamID key', () => {
-      expect(keyToString(testStreamID)).toBe(testStreamID.toString())
+      expect(keyToString(testStreamID)).toBe(testID1)
     })
 
     test('with Query key', () => {
@@ -56,79 +60,82 @@ describe('tile-loader', () => {
 
   describe('TileLoader', () => {
     test('provides batching', async () => {
-      const multiQuery = jest.fn(() => ({ one: {}, two: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
       const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
-      await Promise.all([loader.load('one'), loader.load('two')])
+      await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(1)
-      expect(multiQuery).toBeCalledWith([{ streamId: 'one' }, { streamId: 'two' }])
+      expect(multiQuery).toBeCalledWith([{ streamId: testID1 }, { streamId: testID2 }])
     })
 
     test('throws if one of the streams is not found', async () => {
-      const multiQuery = jest.fn(() => ({ one: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {} }))
       const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
-      await expect(Promise.all([loader.load('one'), loader.load('two')])).rejects.toThrow(
-        'Failed to load stream: two'
+      await expect(Promise.all([loader.load(testID1), loader.load(testID2)])).rejects.toThrow(
+        `Failed to load stream: ${testID2}`
       )
     })
 
     test('does not throw when using the loadMany() method', async () => {
-      const multiQuery = jest.fn(() => ({ one: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {} }))
       const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
-      await expect(loader.loadMany(['one', 'two'])).resolves.toEqual([
+      await expect(loader.loadMany([testID1, testID2])).resolves.toEqual([
         {},
-        new Error('Failed to load stream: two'),
+        new Error(`Failed to load stream: ${testID2}`),
       ])
     })
 
     test('does not cache by default', async () => {
-      const multiQuery = jest.fn(() => ({ one: {}, two: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
       const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
 
-      await loader.load('one')
+      await loader.load(testID1)
       expect(multiQuery).toBeCalledTimes(1)
 
-      await Promise.all([loader.load('one'), loader.load('two')])
+      await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(2)
-      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: 'one' }, { streamId: 'two' }])
+      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: testID1 }, { streamId: testID2 }])
     })
 
     test('has opt-in cache', async () => {
-      const multiQuery = jest.fn(() => ({ one: {}, two: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
       const loader = new TileLoader({
         cache: true,
         ceramic: { multiQuery } as unknown as CeramicApi,
       })
 
-      await loader.load('one')
+      await loader.load(testID1)
       expect(multiQuery).toBeCalledTimes(1)
 
-      await Promise.all([loader.load('one'), loader.load('two')])
+      await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(2)
-      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: 'two' }])
+      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: testID2 }])
     })
 
     test('use provided cache', async () => {
       const cache = new Map()
-      const multiQuery = jest.fn(() => ({ one: {}, two: {} }))
+      const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
       const loader = new TileLoader({
         cache,
         ceramic: { multiQuery } as unknown as CeramicApi,
       })
 
-      await loader.load('one')
+      await loader.load(testID1)
       expect(multiQuery).toBeCalledTimes(1)
-      expect(cache.has('one')).toBe(true)
-      cache.delete('one')
+      expect(cache.has(testID1)).toBe(true)
+      cache.delete(testID1)
 
-      await Promise.all([loader.load('one'), loader.load('two')])
+      await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(2)
-      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: 'one' }, { streamId: 'two' }])
-      expect(cache.has('one')).toBe(true)
-      expect(cache.has('two')).toBe(true)
+      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: testID1 }, { streamId: testID2 }])
+      expect(cache.has(testID1)).toBe(true)
+      expect(cache.has(testID2)).toBe(true)
     })
 
     test('has a create() method to prime the cache', async () => {
-      const create = jest.fn((_ceramic, content) => ({ id: 'created', content }))
+      const create = jest.fn((_ceramic, content: Record<string, unknown>) => ({
+        id: testID1,
+        content,
+      }))
       TileDocument.create = create as unknown as typeof TileDocument.create
 
       const multiQuery = jest.fn(() => ({}))
@@ -141,7 +148,7 @@ describe('tile-loader', () => {
       await loader.create(content)
       expect(create).toBeCalledTimes(1)
 
-      await expect(loader.load('created')).resolves.toEqual({ id: 'created', content })
+      await expect(loader.load(testID1)).resolves.toEqual({ id: testID1, content })
       expect(multiQuery).not.toBeCalled()
     })
 

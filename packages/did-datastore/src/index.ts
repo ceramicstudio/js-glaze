@@ -8,14 +8,15 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { StreamID } from '@ceramicnetwork/streamid'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
+import { TileLoader } from '@glazed/tile-loader'
+import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
-import type { TileContent, TileDoc } from './proxy'
+import type { TileDoc } from './proxy'
 import { assertDIDstring } from './utils'
 
 export { assertDIDstring, isDIDstring } from './utils'
@@ -50,8 +51,10 @@ export type CreateOptions = {
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   autopin?: boolean
+  cache?: TileCache
   ceramic: CeramicApi
   id?: string
+  loader?: TileLoader
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
@@ -68,15 +71,19 @@ export class DIDDataStore<
   #ceramic: CeramicApi
   #id: string | undefined
   #indexProxies: Record<string, TileProxy> = {}
+  #loader: TileLoader
   #model: DataModel<ModelTypes>
 
   constructor(params: DIDDataStoreParams<ModelTypes>) {
-    const { autopin, ceramic, id, model } = params
+    const { autopin, cache, ceramic, id, loader, model } = params
     this.#autopin = autopin !== false
     this.#ceramic = ceramic
     this.#id = id
+    this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#model =
-      model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
+      model instanceof DataModel
+        ? model
+        : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model })
   }
 
   get authenticated(): boolean {
@@ -95,6 +102,10 @@ export class DIDDataStore<
       throw new Error('Ceramic instance is not authenticated')
     }
     return this.#ceramic.did.id
+  }
+
+  get loader(): TileLoader {
+    return this.#loader
   }
 
   get model(): DataModel<ModelTypes> {
@@ -227,7 +238,7 @@ export class DIDDataStore<
         }
 
         const [key, id] = list[cursor++]
-        const doc = await this._loadDocument(id)
+        const doc = await this.#loader.load(id)
         return { done: false, value: { key, id, record: doc.content } }
       },
     }
@@ -236,12 +247,10 @@ export class DIDDataStore<
   /** @internal */
   async _createIDXDoc(controller: string): Promise<TileDoc> {
     assertDIDstring(controller)
-    return await TileDocument.create<TileContent>(
-      this.#ceramic,
-      null,
-      { deterministic: true, controllers: [controller], family: 'IDX' },
-      { anchor: false, publish: false }
-    )
+    return await this.#loader.deterministic({
+      controllers: [controller],
+      family: 'IDX',
+    })
   }
 
   /** @internal */
@@ -285,7 +294,7 @@ export class DIDDataStore<
   }
 
   async getDefinition(id: StreamID | string): Promise<DefinitionWithID> {
-    const doc = await this._loadDocument(id)
+    const doc = await this.#loader.load(id)
     if (doc.metadata.schema !== CIP11_DEFINITION_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not Definition')
     }
@@ -301,7 +310,7 @@ export class DIDDataStore<
 
   async getRecordDocument(definitionID: string, did?: string): Promise<TileDoc | null> {
     const id = await this.getRecordID(definitionID, did)
-    return id ? await this._loadDocument(id) : null
+    return id ? await this.#loader.load(id) : null
   }
 
   async getRecord<ContentType = unknown>(
@@ -336,15 +345,10 @@ export class DIDDataStore<
       const ref = await this._createRecord(definition, content, { pin })
       return [true, ref]
     } else {
-      const doc = await this._loadDocument(existing)
+      const doc = await this.#loader.load(existing)
       await doc.update(content)
       return [false, doc.id]
     }
-  }
-
-  /** @internal */
-  async _loadDocument(id: StreamID | string): Promise<TileDoc> {
-    return await TileDocument.load(this.#ceramic, id)
   }
 
   /** @internal */
@@ -354,16 +358,10 @@ export class DIDDataStore<
     { controller, pin }: CreateOptions
   ): Promise<StreamID> {
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(
-      this.#ceramic,
-      null,
-      {
-        deterministic: true,
-        controllers: [controller ?? this.id],
-        family: definition.id.toString(),
-      },
-      { anchor: false, publish: false }
-    )
+    const doc = await this.#loader.deterministic({
+      controllers: [controller ?? this.id],
+      family: definition.id.toString(),
+    })
     // Then be updated with content and schema
     await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
     return doc.id

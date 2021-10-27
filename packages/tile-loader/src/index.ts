@@ -9,33 +9,34 @@
 import type { CeramicApi, CreateOpts, GenesisCommit, MultiQuery } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
-import { CommitID, StreamID } from '@ceramicnetwork/streamid'
+import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
 import type { CacheMap } from 'dataloader'
 
 // Omit path and atTime from MultiQuery as the cache needs to be deterministic based on the ID
-export type Query = Omit<MultiQuery, 'paths' | 'atTime'>
+export type TileQuery = Omit<MultiQuery, 'paths' | 'atTime'>
 
-export type Key = CommitID | StreamID | Query | string
+export type TileKey = CommitID | StreamID | TileQuery | string
 
-export type Cache = CacheMap<string, Promise<TileDocument>>
+export type TileCache = CacheMap<string, Promise<TileDocument>>
 
 export type TileLoaderParams = {
   ceramic: CeramicApi
-  cache?: Cache | boolean
+  cache?: TileCache | boolean
 }
 
 /** @internal */
-export function keyToQuery(key: Key): Query {
+export function keyToQuery(key: TileKey): TileQuery {
   return typeof key === 'string' || CommitID.isInstance(key) || StreamID.isInstance(key)
     ? { streamId: key }
     : { streamId: key.streamId, genesis: key.genesis }
 }
 
 /** @internal */
-export function keyToString(key: Key): string {
+export function keyToString(key: TileKey): string {
   if (typeof key === 'string') {
-    return key
+    // Convert possible URL input to string representation to match returned keys format
+    return StreamRef.from(key).toString()
   }
   if (CommitID.isInstance(key) || StreamID.isInstance(key)) {
     return key.toString()
@@ -43,7 +44,7 @@ export function keyToString(key: Key): string {
   return key.streamId.toString()
 }
 
-export class TileLoader extends DataLoader<Key, TileDocument> {
+export class TileLoader extends DataLoader<TileKey, TileDocument> {
   #ceramic: CeramicApi
   #useCache: boolean
 
@@ -97,7 +98,7 @@ export class TileLoader extends DataLoader<Key, TileDocument> {
   }
 
   async load<T extends Record<string, any> = Record<string, any>>(
-    key: Key
+    key: TileKey
   ): Promise<TileDocument<T>> {
     return (await super.load(key)) as TileDocument<T>
   }

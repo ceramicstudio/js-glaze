@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
+import { TileLoader } from '@glazed/tile-loader'
 
 import { DIDDataStore } from '../src'
-jest.mock('@ceramicnetwork/stream-tile')
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const createTile = TileDocument.create as jest.Mock<Promise<TileDocument>>
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const loadTile = TileDocument.load as jest.Mock<Promise<TileDocument>>
+jest.mock('@glazed/tile-loader')
+
+const Loader = TileLoader as jest.MockedClass<typeof TileLoader>
 
 describe('DIDDataStore', () => {
   const model = {
@@ -322,10 +321,10 @@ describe('DIDDataStore', () => {
         'ceramic://definition2': 'ceramic://doc2',
         'ceramic://definition3': 'ceramic://doc3',
       }
-      const loadDocument = jest.fn(() => Promise.resolve({ content: 'doc content' }))
+      const load = jest.fn(() => Promise.resolve({ content: 'doc content' }))
+      Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
       const getIndex = jest.fn(() => Promise.resolve(index))
       const ds = new DIDDataStore({ ceramic: { did: { id: 'did:own' } }, model } as any)
-      ds._loadDocument = loadDocument as any
       ds.getIndex = getIndex
 
       const results = []
@@ -349,26 +348,22 @@ describe('DIDDataStore', () => {
           record: 'doc content',
         },
       ])
-      expect(loadDocument).toBeCalledTimes(3)
-      expect(loadDocument).toHaveBeenNthCalledWith(1, 'ceramic://doc1')
-      expect(loadDocument).toHaveBeenNthCalledWith(2, 'ceramic://doc2')
-      expect(loadDocument).toHaveBeenNthCalledWith(3, 'ceramic://doc3')
+      expect(load).toBeCalledTimes(3)
+      expect(load).toHaveBeenNthCalledWith(1, 'ceramic://doc1')
+      expect(load).toHaveBeenNthCalledWith(2, 'ceramic://doc2')
+      expect(load).toHaveBeenNthCalledWith(3, 'ceramic://doc3')
     })
 
     test('_createIDXDoc()', async () => {
       const ceramic = {}
       const doc = { id: 'streamId' }
-      createTile.mockImplementationOnce(jest.fn(() => Promise.resolve(doc)) as any)
+      const deterministic = jest.fn(() => Promise.resolve(doc))
+      Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
       const ds = new DIDDataStore({ ceramic, model } as any)
 
       await expect(ds._createIDXDoc('did:test:123')).resolves.toBe(doc)
-      expect(createTile).toHaveBeenCalledTimes(1)
-      expect(createTile).toHaveBeenCalledWith(
-        ceramic,
-        null,
-        { deterministic: true, controllers: ['did:test:123'], family: 'IDX' },
-        { anchor: false, publish: false }
-      )
+      expect(deterministic).toHaveBeenCalledTimes(1)
+      expect(deterministic).toHaveBeenCalledWith({ controllers: ['did:test:123'], family: 'IDX' })
     })
 
     describe('_getIDXDoc()', () => {
@@ -489,48 +484,38 @@ describe('DIDDataStore', () => {
 
     describe('getDefinition()', () => {
       test('returns valid definition', async () => {
-        const ceramic = {}
         const load = jest.fn(() => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: CIP11_DEFINITION_SCHEMA_URL },
           } as unknown as TileDocument)
         })
-        loadTile.mockImplementationOnce(load)
-        const ds = new DIDDataStore({ ceramic, model } as any)
+        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+        const ds = new DIDDataStore({ ceramic: {}, model } as any)
         await expect(ds.getDefinition('ceramic://test')).resolves.toEqual({
           name: 'definition',
         })
-        expect(load).toBeCalledWith(ceramic, 'ceramic://test')
+        expect(load).toBeCalledWith('ceramic://test')
       })
 
       test('throws on invalid definition schema', async () => {
-        const ceramic = {}
         const load = jest.fn(() => {
           return Promise.resolve({
             content: { name: 'definition' },
             metadata: { schema: 'OtherSchemaURL' },
           } as unknown as TileDocument)
         })
-        loadTile.mockImplementationOnce(load)
-        const ds = new DIDDataStore({ ceramic, model } as any)
+        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+        const ds = new DIDDataStore({ ceramic: {}, model } as any)
         await expect(ds.getDefinition('ceramic://test')).rejects.toThrow(
           'Invalid document: schema is not Definition'
         )
-        expect(load).toBeCalledWith(ceramic, 'ceramic://test')
+        expect(load).toBeCalledWith('ceramic://test')
       })
     })
   })
 
   describe('Records methods', () => {
-    test('_loadDocument()', async () => {
-      const load = jest.fn()
-      loadTile.mockImplementation(load)
-      const ds = new DIDDataStore({ model } as any)
-      await Promise.all([ds._loadDocument('one'), ds._loadDocument('one'), ds._loadDocument('two')])
-      expect(load).toBeCalledTimes(3)
-    })
-
     test('getRecordID()', async () => {
       const ds = new DIDDataStore({ model } as any)
       ds.getIndex = () => Promise.resolve(null)
@@ -542,20 +527,25 @@ describe('DIDDataStore', () => {
       expect(get).toHaveBeenCalledWith('did')
     })
 
-    test('getRecordDocument()', async () => {
-      const ds = new DIDDataStore({ model } as any)
-      ds.getRecordID = () => Promise.resolve(null)
-      await expect(ds.getRecordDocument('test', 'did')).resolves.toBeNull()
+    describe('getRecordDocument()', () => {
+      test('with no record ID', async () => {
+        const ds = new DIDDataStore({ model } as any)
+        ds.getRecordID = () => Promise.resolve(null)
+        await expect(ds.getRecordDocument('test', 'did')).resolves.toBeNull()
+      })
 
-      const getRecordID = jest.fn(() => Promise.resolve('ceramic://test'))
-      ds.getRecordID = getRecordID
-      const doc = { content: { test: true } }
-      const load = jest.fn(() => Promise.resolve(doc))
-      ds._loadDocument = load as any
+      test('with existing record doc', async () => {
+        const load = jest.fn(() => Promise.resolve(doc))
+        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+        const ds = new DIDDataStore({ model } as any)
+        const getRecordID = jest.fn(() => Promise.resolve('ceramic://test'))
+        ds.getRecordID = getRecordID
+        const doc = { content: { test: true } }
 
-      await expect(ds.getRecordDocument('exists', 'did')).resolves.toBe(doc)
-      expect(getRecordID).toHaveBeenCalledWith('exists', 'did')
-      expect(load).toHaveBeenCalledWith('ceramic://test')
+        await expect(ds.getRecordDocument('exists', 'did')).resolves.toBe(doc)
+        expect(getRecordID).toHaveBeenCalledWith('exists', 'did')
+        expect(load).toHaveBeenCalledWith('ceramic://test')
+      })
     })
 
     test('getRecord()', async () => {
@@ -569,17 +559,18 @@ describe('DIDDataStore', () => {
 
     describe('_setRecordOnly()', () => {
       test('existing definition ID', async () => {
+        const update = jest.fn()
+        const load = jest.fn(() => Promise.resolve({ update, id: 'streamId' }))
+        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+
         const ds = new DIDDataStore({ ceramic: { did: { id: 'did:foo:123' } }, model } as any)
         const getRecordID = jest.fn(() => Promise.resolve('streamId'))
-        const update = jest.fn()
-        const loadDocument = jest.fn(() => Promise.resolve({ update, id: 'streamId' }))
-        ds._loadDocument = loadDocument as any
         ds.getRecordID = getRecordID
-
         const content = { test: true }
+
         await expect(ds._setRecordOnly('defId', content)).resolves.toEqual([false, 'streamId'])
         expect(getRecordID).toBeCalledWith('defId', 'did:foo:123')
-        expect(loadDocument).toBeCalledWith('streamId')
+        expect(load).toBeCalledWith('streamId')
         expect(update).toBeCalledWith(content)
       })
 
@@ -635,11 +626,11 @@ describe('DIDDataStore', () => {
       test('creates the deterministic doc and updates it', async () => {
         const id = 'did:test:123'
         const update = jest.fn()
-        createTile.mockImplementationOnce(
-          jest.fn((_ceramic, _content, metadata, _opts) => {
-            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-          })
-        )
+        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
+          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
+        })
+        Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
+
         const ceramic = { did: { id } }
         const ds = new DIDDataStore({ ceramic, model } as any)
 
@@ -651,38 +642,32 @@ describe('DIDDataStore', () => {
         const content = { test: true }
         await expect(ds._createRecord(definition, content, { pin: true })).resolves.toBe('streamId')
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(TileDocument.create).toBeCalledWith(
-          ceramic,
-          null,
-          { deterministic: true, controllers: [id], family: 'defId' },
-          { anchor: false, publish: false }
-        )
+        expect(deterministic).toBeCalledWith({ controllers: [id], family: 'defId' })
         expect(update).toBeCalledWith(content, { schema: 'schemaId' }, { pin: true })
       })
 
       test('pin by default', async () => {
         const update = jest.fn()
-        createTile.mockImplementationOnce(
-          jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-          })
-        )
+        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
+          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
+        })
+        Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
+
         const ds = new DIDDataStore({
           ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
-
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
         expect(update).toBeCalledWith({}, { schema: undefined }, { pin: true })
       })
 
       test('no pinning by setting instance option', async () => {
         const update = jest.fn()
-        createTile.mockImplementationOnce(
-          jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-          })
-        )
+        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
+          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
+        })
+        Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
+
         const ds = new DIDDataStore({
           autopin: false,
           ceramic: { did: { id: 'did:test:123' } },
@@ -694,11 +679,11 @@ describe('DIDDataStore', () => {
 
       test('explicit no pinning', async () => {
         const update = jest.fn()
-        createTile.mockImplementationOnce(
-          jest.fn((_ceramic, _content, metadata) => {
-            return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-          })
-        )
+        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
+          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
+        })
+        Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
+
         const ds = new DIDDataStore({
           autopin: true,
           ceramic: { did: { id: 'did:test:123' } },
