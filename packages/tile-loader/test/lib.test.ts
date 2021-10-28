@@ -2,7 +2,7 @@ import type { CeramicApi, CeramicSigner, GenesisCommit } from '@ceramicnetwork/c
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 
-import { TileLoader, keyToQuery, keyToString } from '../src'
+import { TileLoader, getDeterministicQuery, keyToQuery, keyToString } from '../src'
 
 describe('tile-loader', () => {
   const testCID = 'bagcqcerakszw2vsovxznyp5gfnpdj4cqm2xiv76yd24wkjewhhykovorwo6a'
@@ -55,6 +55,18 @@ describe('tile-loader', () => {
       expect(keyToString({ streamId: testStreamID, genesis: {} as unknown as GenesisCommit })).toBe(
         testStreamID.toString()
       )
+    })
+  })
+
+  describe('getDeterministicQuery()', () => {
+    test('creates a TileQuery from the input metadata', async () => {
+      const metadata = { controllers: ['did:test:123'], tags: ['test'] }
+      const genesis = await TileDocument.makeGenesis({} as unknown as CeramicSigner, null, {
+        ...metadata,
+        deterministic: true,
+      })
+      const streamId = await StreamID.fromGenesis('tile', genesis)
+      await expect(getDeterministicQuery(metadata)).resolves.toEqual({ genesis, streamId })
     })
   })
 

@@ -40,3 +40,21 @@ ___
 Ƭ **TileQuery**: `Omit`<`MultiQuery`, ``"paths"`` \| ``"atTime"``\>
 
 Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
+
+## Functions
+
+### getDeterministicQuery
+
+▸ **getDeterministicQuery**(`metadata`): `Promise`<[`TileQuery`](tile_loader.md#tilequery)\>
+
+Create a [`TileQuery`](tile_loader.md#tilequery) for a determinitic TileDocument based on its metadata.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `metadata` | `TileMetadataArgs` |
+
+#### Returns
+
+`Promise`<[`TileQuery`](tile_loader.md#tilequery)\>
