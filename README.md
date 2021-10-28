@@ -20,6 +20,7 @@ This monorepo uses Yarn workspaces, make sure to install it first if you don't a
 | Name                                                              | Description                                                                                               | Version                                                                      |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | **Runtime libraries**                                             |
+| [`@glazed/tile-loader`](./packages/tile-loader)                   | [Batching and caching for Ceramic streams](https://developers.ceramic.network/tools/glaze/tile-loader/)   | ![npm version](https://img.shields.io/npm/v/@glazed/tile-loader.svg)         |
 | [`@glazed/datamodel`](./packages/datamodel)                       | [Aliases for Ceramic stream references](https://developers.ceramic.network/tools/glaze/datamodel/)        | ![npm version](https://img.shields.io/npm/v/@glazed/datamodel.svg)           |
 | [`@glazed/did-datastore`](./packages/did-datastore)               | [Associate data records to a DID](https://developers.ceramic.network/tools/glaze/did-datastore/)          | ![npm version](https://img.shields.io/npm/v/@glazed/did-datastore.svg)       |
 | **Developer tools**                                               |
