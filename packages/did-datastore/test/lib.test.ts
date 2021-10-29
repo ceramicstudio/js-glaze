@@ -420,16 +420,14 @@ describe('DIDDataStore', () => {
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX' }
         const update = jest.fn()
-        const add = jest.fn()
         const doc = { id: 'streamId', update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const ds = new DIDDataStore({ ceramic: { did: { id }, pin: { add } }, model } as any)
+        const ds = new DIDDataStore({ ceramic: { did: { id } }, model } as any)
         ds._createIDXDoc = createDoc
 
         await expect(ds._getOwnIDXDoc(id)).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL })
-        expect(add).toBeCalledWith('streamId')
+        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: true })
       })
 
       test('returns the doc if valid', async () => {
@@ -636,14 +634,13 @@ describe('DIDDataStore', () => {
     describe('_createRecord()', () => {
       test('creates the deterministic doc and updates it', async () => {
         const id = 'did:test:123'
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata, _opts) => {
             return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
           })
         )
-        const ceramic = { did: { id }, pin: { add } }
+        const ceramic = { did: { id } }
         const ds = new DIDDataStore({ ceramic, model } as any)
 
         const definition = {
@@ -660,12 +657,10 @@ describe('DIDDataStore', () => {
           { deterministic: true, controllers: [id], family: 'defId' },
           { anchor: false, publish: false }
         )
-        expect(update).toBeCalledWith(content, { schema: 'schemaId' })
-        expect(add).toBeCalledWith('streamId')
+        expect(update).toBeCalledWith(content, { schema: 'schemaId' }, { pin: true })
       })
 
       test('pin by default', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -673,17 +668,15 @@ describe('DIDDataStore', () => {
           })
         )
         const ds = new DIDDataStore({
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
 
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
-        expect(update).toBeCalled()
-        expect(add).toBeCalledWith('streamId')
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: true })
       })
 
       test('no pinning by setting instance option', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -692,16 +685,14 @@ describe('DIDDataStore', () => {
         )
         const ds = new DIDDataStore({
           autopin: false,
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
-        expect(update).toBeCalled()
-        expect(add).not.toBeCalled()
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
       })
 
       test('explicit no pinning', async () => {
-        const add = jest.fn()
         const update = jest.fn()
         createTile.mockImplementationOnce(
           jest.fn((_ceramic, _content, metadata) => {
@@ -710,12 +701,11 @@ describe('DIDDataStore', () => {
         )
         const ds = new DIDDataStore({
           autopin: true,
-          ceramic: { did: { id: 'did:test:123' }, pin: { add } },
+          ceramic: { did: { id: 'did:test:123' } },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
-        expect(update).toBeCalled()
-        expect(add).not.toBeCalled()
+        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
       })
     })
   })

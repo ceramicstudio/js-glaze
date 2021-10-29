@@ -261,10 +261,7 @@ export class DIDDataStore<
     const doc = await this._createIDXDoc(did)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
-      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL })
-      if (this.#autopin) {
-        await this.#ceramic.pin.add(doc.id)
-      }
+      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: this.#autopin })
     } else if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -368,12 +365,7 @@ export class DIDDataStore<
       { anchor: false, publish: false }
     )
     // Then be updated with content and schema
-    const updated = doc.update(content, { schema: definition.schema })
-    if (pin ?? this.#autopin) {
-      await Promise.all([updated, this.#ceramic.pin.add(doc.id)])
-    } else {
-      await updated
-    }
+    await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
     return doc.id
   }
 
