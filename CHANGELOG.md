@@ -1,4 +1,4 @@
-## master (unreleased)
+## 2021-10-29
 
 ### `@glazed/datamodel` v0.2.0
 

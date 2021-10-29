@@ -7,7 +7,7 @@
  */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import type { StreamID } from '@ceramicnetwork/streamid'
+import { StreamID } from '@ceramicnetwork/streamid'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
@@ -187,8 +187,9 @@ export class DIDDataStore<
     for (const query of queries) {
       // Lookup the record ID in the index to access the record contents
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const recordID = streams[query.streamId]?.content?.[definitionID] as string | undefined
-      const record = recordID ? streams[recordID] : null
+      const recordURL = streams[query.streamId]?.content?.[definitionID] as string | undefined
+      // Record IDs are set in URL format in the index, but string format in the streams object
+      const record = recordURL ? streams[StreamID.fromString(recordURL).toString()] : null
       results.push((record?.content as ContentType) ?? null)
     }
     return results

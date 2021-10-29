@@ -21,9 +21,8 @@ describe('DIDDataStore', () => {
     tiles: {},
   }
 
-  const testDocID = StreamID.fromString(
-    'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
-  )
+  const testID = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
+  const testDocID = StreamID.fromString(testID)
 
   describe('properties', () => {
     test('`authenticated` property', () => {
@@ -104,8 +103,8 @@ describe('DIDDataStore', () => {
       })
       const multiQuery = jest.fn(() => ({
         idx123: { content: {} },
-        idx456: { content: { testDefinitionID: 'record' } },
-        record: { content: { ok: true } },
+        idx456: { content: { testDefinitionID: testDocID.toUrl() } },
+        [testID]: { content: { ok: true } },
       }))
       const getDefinitionID = jest.fn(() => 'testDefinitionID')
 
