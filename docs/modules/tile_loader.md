@@ -12,7 +12,16 @@ npm install @glazed/tile-loader
 
 ### TileCache
 
-Ƭ **TileCache**: `CacheMap`<`string`, `Promise`<`TileDocument`\>\>
+Ƭ **TileCache**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `clear` | () => `any` |
+| `delete` | (`id`: `string`) => `any` |
+| `get` | (`id`: `string`) => `void` \| `Promise`<`TileDocument`<`Record`<`string`, `any`\>\>\> |
+| `set` | (`id`: `string`, `value`: `Promise`<`TileDocument`<`Record`<`string`, `any`\>\>\>) => `any` |
 
 ___
 

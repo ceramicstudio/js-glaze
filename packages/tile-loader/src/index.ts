@@ -11,7 +11,6 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
-import type { CacheMap } from 'dataloader'
 
 /**
  * Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
@@ -20,7 +19,25 @@ export type TileQuery = Omit<MultiQuery, 'paths' | 'atTime'>
 
 export type TileKey = CommitID | StreamID | TileQuery | string
 
-export type TileCache = CacheMap<string, Promise<TileDocument>>
+// Implements CacheMap from dataloader, copied here to generate docs
+export type TileCache = {
+  /**
+   * get a Promise of a TileDocument by its stream ID
+   */
+  get(id: string): Promise<TileDocument> | void
+  /**
+   * set a Promise of a TileDocument by its stream ID
+   */
+  set(id: string, value: Promise<TileDocument>): any
+  /**
+   * remove a specific entry from the cache
+   */
+  delete(id: string): any
+  /**
+   * remove all entries from the cache
+   */
+  clear(): any
+}
 
 export type TileLoaderParams = {
   /**
