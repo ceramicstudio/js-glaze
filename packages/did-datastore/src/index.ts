@@ -7,16 +7,17 @@
  */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import type { StreamID } from '@ceramicnetwork/streamid'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { StreamID } from '@ceramicnetwork/streamid'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
+import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
+import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
-import type { TileContent, TileDoc } from './proxy'
-import { assertDIDstring } from './utils'
+import type { TileDoc } from './proxy'
+import { getIDXMetadata } from './utils'
 
 export { assertDIDstring, isDIDstring } from './utils'
 
@@ -38,20 +39,55 @@ export type DefinitionWithID<Config extends Record<string, unknown> = Record<str
   Definition<Config> & { id: StreamID }
 
 export type Entry = {
+  /**
+   * Key (definition ID) identifying the record ID in the index
+   */
   key: string
+  /**
+   * Record ID (Ceramic StreamID)
+   */
   id: string
+  /**
+   * Record contents
+   */
   record: unknown
 }
 
 export type CreateOptions = {
+  /**
+   * Optional controller for the record
+   */
   controller?: string
+  /**
+   * Pin the created record stream (default)
+   */
   pin?: boolean
 }
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
+  /**
+   * Pin all created records streams (default)
+   */
   autopin?: boolean
+  /**
+   * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
+   */
+  cache?: TileCache | boolean
+  /**
+   * A Ceramic client instance
+   */
   ceramic: CeramicApi
+  /**
+   * Fallback DID to use when not explicitly set in method calls
+   */
   id?: string
+  /**
+   * An optional {@linkcode TileLoader} instance to use
+   */
+  loader?: TileLoader
+  /**
+   * A {@linkcode DataModel} instance or runtime model aliases to use
+   */
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
@@ -68,15 +104,19 @@ export class DIDDataStore<
   #ceramic: CeramicApi
   #id: string | undefined
   #indexProxies: Record<string, TileProxy> = {}
+  #loader: TileLoader
   #model: DataModel<ModelTypes>
 
   constructor(params: DIDDataStoreParams<ModelTypes>) {
-    const { autopin, ceramic, id, model } = params
+    const { autopin, cache, ceramic, id, loader, model } = params
     this.#autopin = autopin !== false
     this.#ceramic = ceramic
     this.#id = id
+    this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#model =
-      model instanceof DataModel ? model : new DataModel<ModelTypes>({ autopin, ceramic, model })
+      model instanceof DataModel
+        ? model
+        : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model })
   }
 
   get authenticated(): boolean {
@@ -97,18 +137,28 @@ export class DIDDataStore<
     return this.#ceramic.did.id
   }
 
+  get loader(): TileLoader {
+    return this.#loader
+  }
+
   get model(): DataModel<ModelTypes> {
     return this.#model
   }
 
   // High-level APIs
 
+  /**
+   * Returns whether a record exists in the index or not.
+   */
   async has(key: Alias, did?: string): Promise<boolean> {
     const definitionID = this.getDefinitionID(key as string)
     const ref = await this.getRecordID(definitionID, did)
     return ref != null
   }
 
+  /**
+   * Get the record contents.
+   */
   async get<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     did?: string
@@ -117,6 +167,39 @@ export class DIDDataStore<
     return await this.getRecord<ContentType>(definitionID, did)
   }
 
+  /**
+   * Get the record contents for multiple DIDs at once.
+   */
+  async getMultiple<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
+    key: Key,
+    dids: Array<string>
+  ): Promise<Array<ContentType | null>> {
+    const definitionID = this.getDefinitionID(key as string)
+    // Create determinitic queries for the IDX streams and add path of the definition
+    const queries = await Promise.all(
+      dids.map(async (did) => {
+        const { genesis, streamId } = await getDeterministicQuery(getIDXMetadata(did))
+        return { genesis, streamId: streamId.toString(), paths: [definitionID] }
+      })
+    )
+    const streams = await this.#ceramic.multiQuery(queries)
+    const results = []
+    for (const query of queries) {
+      // Lookup the record ID in the index to access the record contents
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const recordURL = streams[query.streamId]?.content?.[definitionID] as string | undefined
+      // Record IDs are set in URL format in the index, but string format in the streams object
+      const record = recordURL ? streams[StreamID.fromString(recordURL).toString()] : null
+      results.push((record?.content as ContentType) ?? null)
+    }
+    return results
+  }
+
+  /**
+   * Set the record contents.
+   *
+   * **Warning**: calling this method replaces any existing contents in the record, use {@linkcode merge} if you want to only change some fields.
+   */
   async set<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     content: ContentType,
@@ -130,6 +213,9 @@ export class DIDDataStore<
     return id
   }
 
+  /**
+   * Perform a shallow (one level) merge of the record contents.
+   */
   async merge<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,
     content: ContentType,
@@ -141,6 +227,12 @@ export class DIDDataStore<
     return await this.setRecord(definitionID, newContent, options)
   }
 
+  /**
+   * Set the contents of multiple records at once.
+   * The index only gets updated after all wanted records have been written.
+   *
+   * **Warning**: calling this method replaces any existing contents in the records.
+   */
   async setAll<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
     options: CreateOptions = {}
@@ -163,6 +255,9 @@ export class DIDDataStore<
     return newReferences
   }
 
+  /**
+   * Set the contents of multiple records if they are not already set in the index.
+   */
   async setDefaults<Contents extends DefinitionsContentTypes<ModelTypes>>(
     contents: Contents,
     options: CreateOptions = {}
@@ -190,6 +285,11 @@ export class DIDDataStore<
     return newReferences
   }
 
+  /**
+   * Remove a record from the index.
+   *
+   * **Notice**: this *does not* change the contents of the record itself, only the index.
+   */
   async remove(key: Alias, controller = this.id): Promise<void> {
     await this._getIndexProxy(controller).changeContent((index) => {
       if (index != null) {
@@ -201,6 +301,9 @@ export class DIDDataStore<
 
   // Identity Index APIs
 
+  /**
+   * Load the full index contents.
+   */
   async getIndex(did = this.id): Promise<IdentityIndex | null> {
     const rootDoc =
       this.authenticated && did === this.id
@@ -209,6 +312,9 @@ export class DIDDataStore<
     return rootDoc ? (rootDoc.content as IdentityIndex) : null
   }
 
+  /**
+   * Asynchronously iterate over the entries of the index, loading one record at a time.
+   */
   iterator(did?: string): AsyncIterableIterator<Entry> {
     let list: Array<[string, string]>
     let cursor = 0
@@ -227,7 +333,7 @@ export class DIDDataStore<
         }
 
         const [key, id] = list[cursor++]
-        const doc = await this._loadDocument(id)
+        const doc = await this.#loader.load(id)
         return { done: false, value: { key, id, record: doc.content } }
       },
     }
@@ -235,13 +341,7 @@ export class DIDDataStore<
 
   /** @internal */
   async _createIDXDoc(controller: string): Promise<TileDoc> {
-    assertDIDstring(controller)
-    return await TileDocument.create<TileContent>(
-      this.#ceramic,
-      null,
-      { deterministic: true, controllers: [controller], family: 'IDX' },
-      { anchor: false, publish: false }
-    )
+    return await this.#loader.deterministic(getIDXMetadata(controller))
   }
 
   /** @internal */
@@ -280,12 +380,18 @@ export class DIDDataStore<
 
   // Definition APIs
 
+  /**
+   * Get the definition ID for the given alias.
+   */
   getDefinitionID(aliasOrID: string): string {
     return this.#model.getDefinitionID(aliasOrID) ?? aliasOrID
   }
 
+  /**
+   * Load and validate a definition by its ID.
+   */
   async getDefinition(id: StreamID | string): Promise<DefinitionWithID> {
-    const doc = await this._loadDocument(id)
+    const doc = await this.#loader.load(id)
     if (doc.metadata.schema !== CIP11_DEFINITION_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not Definition')
     }
@@ -294,16 +400,25 @@ export class DIDDataStore<
 
   // Record APIs
 
+  /**
+   * Load a record ID in the index for the given definition ID.
+   */
   async getRecordID(definitionID: string, did?: string): Promise<string | null> {
     const index = await this.getIndex(did ?? this.id)
     return index?.[definitionID] ?? null
   }
 
+  /**
+   * Load a record TileDocument for the given definition ID.
+   */
   async getRecordDocument(definitionID: string, did?: string): Promise<TileDoc | null> {
     const id = await this.getRecordID(definitionID, did)
-    return id ? await this._loadDocument(id) : null
+    return id ? await this.#loader.load(id) : null
   }
 
+  /**
+   * Load a record contents for the given definition ID.
+   */
   async getRecord<ContentType = unknown>(
     definitionID: string,
     did?: string
@@ -312,6 +427,9 @@ export class DIDDataStore<
     return doc ? (doc.content as ContentType) : null
   }
 
+  /**
+   * Set the contents of a record for the given definition ID.
+   */
   async setRecord(
     definitionID: string,
     content: Record<string, any>,
@@ -336,15 +454,10 @@ export class DIDDataStore<
       const ref = await this._createRecord(definition, content, { pin })
       return [true, ref]
     } else {
-      const doc = await this._loadDocument(existing)
+      const doc = await this.#loader.load(existing)
       await doc.update(content)
       return [false, doc.id]
     }
-  }
-
-  /** @internal */
-  async _loadDocument(id: StreamID | string): Promise<TileDoc> {
-    return await TileDocument.load(this.#ceramic, id)
   }
 
   /** @internal */
@@ -354,16 +467,10 @@ export class DIDDataStore<
     { controller, pin }: CreateOptions
   ): Promise<StreamID> {
     // Doc must first be created in a deterministic way
-    const doc = await TileDocument.create<TileContent>(
-      this.#ceramic,
-      null,
-      {
-        deterministic: true,
-        controllers: [controller ?? this.id],
-        family: definition.id.toString(),
-      },
-      { anchor: false, publish: false }
-    )
+    const doc = await this.#loader.deterministic({
+      controllers: [controller ?? this.id],
+      family: definition.id.toString(),
+    })
     // Then be updated with content and schema
     await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
     return doc.id

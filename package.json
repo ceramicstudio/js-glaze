@@ -23,7 +23,7 @@
     "@typescript-eslint/eslint-plugin": "^4.31.0",
     "@typescript-eslint/parser": "^4.31.0",
     "del-cli": "^4.0.1",
-    "esbuild": "^0.13.9",
+    "esbuild": "^0.13.10",
     "eslint": "^7.31.0",
     "eslint-config-3box": "^0.3.0",
     "eslint-plugin-jest": "^25.2.2",

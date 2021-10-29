@@ -16,10 +16,10 @@ npm install @glazed/did-datastore
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `controller?` | `string` |
-| `pin?` | `boolean` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `controller?` | `string` | Optional controller for the record |
+| `pin?` | `boolean` | Pin the created record stream (default) |
 
 ___
 
@@ -35,12 +35,14 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `autopin?` | `boolean` |
-| `ceramic` | `CeramicApi` |
-| `id?` | `string` |
-| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `autopin?` | `boolean` | Pin all created records streams (default) |
+| `cache?` | `TileCache` \| `boolean` | [`TileLoader`](../classes/tile_loader.TileLoader.md) cache parameter, only used if `loader` is not provided |
+| `ceramic` | `CeramicApi` | A Ceramic client instance |
+| `id?` | `string` | Fallback DID to use when not explicitly set in method calls |
+| `loader?` | `TileLoader` | An optional [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use |
+| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or runtime model aliases to use |
 
 ___
 
@@ -92,11 +94,11 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `id` | `string` |
-| `key` | `string` |
-| `record` | `unknown` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `id` | `string` | Record ID (Ceramic StreamID) |
+| `key` | `string` | Key (definition ID) identifying the record ID in the index |
+| `record` | `unknown` | Record contents |
 
 ## Functions
 

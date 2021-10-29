@@ -26,6 +26,6 @@
     "dag-jose": "^0.3.0",
     "ipfs-core": "^0.5.4",
     "jest-environment-node": "^27.3.1",
-    "tmp-promise": "^3.0.2"
+    "tmp-promise": "^3.0.3"
   }
 }
