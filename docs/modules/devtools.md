@@ -150,7 +150,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `schema` | `JSONSchemaType`<`T`\> |
+| `schema` | `UncheckedJSONSchemaType`<`T`, ``false``\> |
 
 #### Returns
 
@@ -200,7 +200,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `ceramic` | `CeramicApi` |
-| `model` | `ManagedModel` |
+| `model` | `ManagedModel`<`DagJWSResult`\> |
 
 #### Returns
 
@@ -216,7 +216,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `id` | `StreamRef` \| `string` |
+| `id` | `string` \| `StreamRef` |
 
 #### Returns
 

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { TileProxy } from '../src/proxy'
+import type { MutationFunc, TileDoc } from '../src/proxy'
 
-async function wrapSettle(promise) {
+async function wrapSettle(promise: Promise<unknown>) {
   try {
     const value = await promise
     return { status: 'fulfilled', value }
@@ -13,16 +14,16 @@ async function wrapSettle(promise) {
 
 describe('TileProxy', () => {
   test('calls the getRemote function to get the value when the queue is empty', async () => {
-    const getRemote = jest.fn(() => Promise.resolve('test'))
+    const getRemote = jest.fn(() => Promise.resolve('test' as unknown as TileDoc))
     const proxy = new TileProxy(getRemote)
     await expect(proxy.get()).resolves.toBe('test')
     expect(getRemote).toBeCalledTimes(1)
   })
 
   test('calls the getRemote function to get the first value of the chain', async () => {
-    const getRemote = jest.fn(() => Promise.resolve('remote'))
-    const mutateFirst = jest.fn(() => Promise.resolve('first'))
-    const mutateSecond = jest.fn(() => Promise.resolve('second'))
+    const getRemote = jest.fn(() => Promise.resolve('remote' as unknown as TileDoc))
+    const mutateFirst = jest.fn(() => Promise.resolve('first')) as unknown as MutationFunc
+    const mutateSecond = jest.fn(() => Promise.resolve('second')) as unknown as MutationFunc
 
     const proxy = new TileProxy(getRemote)
     const results = await Promise.all([
@@ -40,10 +41,10 @@ describe('TileProxy', () => {
   })
 
   test('calls the getRemote function before every chain execution', async () => {
-    const getRemote = jest.fn(() => Promise.resolve('remote'))
-    const mutateFirst = jest.fn(() => Promise.resolve('first'))
-    const mutateSecond = jest.fn(() => Promise.resolve('second'))
-    const mutateThird = jest.fn(() => Promise.resolve('third'))
+    const getRemote = jest.fn(() => Promise.resolve('remote' as unknown as TileDoc))
+    const mutateFirst = jest.fn(() => Promise.resolve('first')) as unknown as MutationFunc
+    const mutateSecond = jest.fn(() => Promise.resolve('second')) as unknown as MutationFunc
+    const mutateThird = jest.fn(() => Promise.resolve('third')) as unknown as MutationFunc
 
     const proxy = new TileProxy(getRemote)
 
@@ -83,9 +84,9 @@ describe('TileProxy', () => {
 
   test('skips failed mutations', async () => {
     const error = new Error('failed')
-    const getRemote = jest.fn(() => Promise.resolve('remote'))
-    const mutateFirst = jest.fn(() => Promise.reject(error))
-    const mutateSecond = jest.fn(() => Promise.resolve('second'))
+    const getRemote = jest.fn(() => Promise.resolve('remote' as unknown as TileDoc))
+    const mutateFirst = jest.fn(() => Promise.reject(error)) as unknown as MutationFunc
+    const mutateSecond = jest.fn(() => Promise.resolve('second')) as unknown as MutationFunc
 
     const proxy = new TileProxy(getRemote)
     const [resFirst, resSecond, resGet] = await Promise.all([
@@ -111,7 +112,7 @@ describe('TileProxy', () => {
       doc.content = Object.assign(doc.content, data)
       return doc
     })
-    const getRemote = jest.fn(() => Promise.resolve({ ...doc, update }))
+    const getRemote = jest.fn(() => Promise.resolve({ ...doc, update } as unknown as TileDoc))
     const proxy = new TileProxy(getRemote)
     await proxy.changeContent((content) => ({ ...content, hello: 'test' }))
     expect(getRemote).toBeCalledTimes(1)
@@ -119,9 +120,9 @@ describe('TileProxy', () => {
   })
 
   test('delays get calls until mutations are done', async () => {
-    const getRemote = jest.fn(() => Promise.resolve('remote'))
-    const mutateFirst = jest.fn(() => Promise.resolve('first'))
-    const mutateSecond = jest.fn(() => Promise.resolve('second'))
+    const getRemote = jest.fn(() => Promise.resolve('remote' as unknown as TileDoc))
+    const mutateFirst = jest.fn(() => Promise.resolve('first')) as unknown as MutationFunc
+    const mutateSecond = jest.fn(() => Promise.resolve('second')) as unknown as MutationFunc
 
     const proxy = new TileProxy(getRemote)
     const [value1, _change1, value2, _change2, value3] = await Promise.all([

@@ -23,6 +23,7 @@
     "excludeExternals": true,
     "excludeInternal": true,
     "excludePrivate": true,
+    "githubPages": false,
     "hideBreadcrumbs": true,
     "hideInPageTOC": true
   }
