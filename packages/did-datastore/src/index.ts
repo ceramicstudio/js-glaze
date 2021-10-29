@@ -7,17 +7,17 @@
  */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import type { StreamID } from '@ceramicnetwork/streamid'
+import { StreamID } from '@ceramicnetwork/streamid'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
-import { TileLoader } from '@glazed/tile-loader'
+import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
 import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { TileProxy } from './proxy'
 import type { TileDoc } from './proxy'
-import { assertDIDstring } from './utils'
+import { getIDXMetadata } from './utils'
 
 export { assertDIDstring, isDIDstring } from './utils'
 
@@ -168,6 +168,34 @@ export class DIDDataStore<
   }
 
   /**
+   * Get the record contents for multiple DIDs at once.
+   */
+  async getMultiple<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
+    key: Key,
+    dids: Array<string>
+  ): Promise<Array<ContentType | null>> {
+    const definitionID = this.getDefinitionID(key as string)
+    // Create determinitic queries for the IDX streams and add path of the definition
+    const queries = await Promise.all(
+      dids.map(async (did) => {
+        const { genesis, streamId } = await getDeterministicQuery(getIDXMetadata(did))
+        return { genesis, streamId: streamId.toString(), paths: [definitionID] }
+      })
+    )
+    const streams = await this.#ceramic.multiQuery(queries)
+    const results = []
+    for (const query of queries) {
+      // Lookup the record ID in the index to access the record contents
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const recordURL = streams[query.streamId]?.content?.[definitionID] as string | undefined
+      // Record IDs are set in URL format in the index, but string format in the streams object
+      const record = recordURL ? streams[StreamID.fromString(recordURL).toString()] : null
+      results.push((record?.content as ContentType) ?? null)
+    }
+    return results
+  }
+
+  /**
    * Set the record contents.
    *
    * **Warning**: calling this method replaces any existing contents in the record, use {@linkcode merge} if you want to only change some fields.
@@ -313,11 +341,7 @@ export class DIDDataStore<
 
   /** @internal */
   async _createIDXDoc(controller: string): Promise<TileDoc> {
-    assertDIDstring(controller)
-    return await this.#loader.deterministic({
-      controllers: [controller],
-      family: 'IDX',
-    })
+    return await this.#loader.deterministic(getIDXMetadata(controller))
   }
 
   /** @internal */

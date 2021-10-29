@@ -53,6 +53,18 @@ export function keyToString(key: TileKey): string {
 }
 
 /**
+ * Create a {@linkcode TileQuery} for a determinitic TileDocument based on its metadata.
+ */
+export async function getDeterministicQuery(metadata: TileMetadataArgs): Promise<TileQuery> {
+  const genesis = (await TileDocument.makeGenesis({} as any, null, {
+    ...metadata,
+    deterministic: true,
+  })) as GenesisCommit
+  const streamId = await StreamID.fromGenesis('tile', genesis)
+  return { genesis, streamId }
+}
+
+/**
  * A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
  */
 export class TileLoader extends DataLoader<TileKey, TileDocument> {
@@ -106,12 +118,8 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
   async deterministic<T extends Record<string, any> = Record<string, any>>(
     metadata: TileMetadataArgs
   ): Promise<TileDocument<T | null | undefined>> {
-    const genesis = (await TileDocument.makeGenesis({} as any, null, {
-      ...metadata,
-      deterministic: true,
-    })) as GenesisCommit
-    const streamId = await StreamID.fromGenesis('tile', genesis)
-    return (await super.load({ streamId, genesis })) as TileDocument<T | null | undefined>
+    const query = await getDeterministicQuery(metadata)
+    return (await super.load(query)) as TileDocument<T | null | undefined>
   }
 
   /**

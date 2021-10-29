@@ -164,6 +164,32 @@ Load the full index contents.
 
 ___
 
+### getMultiple
+
+▸ **getMultiple**<`Key`, `ContentType`\>(`key`, `dids`): `Promise`<(``null`` \| `ContentType`)[]\>
+
+Get the record contents for multiple DIDs at once.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `Key` | extends `string` \| `number` \| `symbol` |
+| `ContentType` | [`DefinitionContentType`](../modules/did_datastore.md#definitioncontenttype)<`ModelTypes`, `Key`\> |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `Key` |
+| `dids` | `string`[] |
+
+#### Returns
+
+`Promise`<(``null`` \| `ContentType`)[]\>
+
+___
+
 ### getRecord
 
 ▸ **getRecord**<`ContentType`\>(`definitionID`, `did?`): `Promise`<``null`` \| `ContentType`\>

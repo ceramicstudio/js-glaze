@@ -4,13 +4,15 @@ import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
-import { TileLoader } from '@glazed/tile-loader'
+import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
+import type { TileQuery } from '@glazed/tile-loader'
 
 import { DIDDataStore } from '../src'
 
 jest.mock('@glazed/tile-loader')
 
 const Loader = TileLoader as jest.MockedClass<typeof TileLoader>
+const getQuery = getDeterministicQuery as jest.MockedFunction<typeof getDeterministicQuery>
 
 describe('DIDDataStore', () => {
   const model = {
@@ -19,9 +21,8 @@ describe('DIDDataStore', () => {
     tiles: {},
   }
 
-  const testDocID = StreamID.fromString(
-    'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
-  )
+  const testID = 'kjzl6cwe1jw147dvq16zluojmraqvwdmbh61dx9e0c59i344lcrsgqfohexp60s'
+  const testDocID = StreamID.fromString(testID)
 
   describe('properties', () => {
     test('`authenticated` property', () => {
@@ -85,6 +86,42 @@ describe('DIDDataStore', () => {
       ds.getRecordDocument = getRecordDocument as any
       await expect(ds.get('streamId', 'did')).resolves.toBe(content)
       expect(getRecordDocument).toBeCalledWith('streamId', 'did')
+    })
+
+    test('getMultiple()', async () => {
+      getQuery.mockImplementation((meta) => {
+        switch (meta.controllers?.[0]) {
+          case 'did:test:123':
+            return Promise.resolve({ streamId: 'idx123', genesis: {} } as unknown as TileQuery)
+          case 'did:test:456':
+            return Promise.resolve({ streamId: 'idx456', genesis: {} } as unknown as TileQuery)
+          case 'did:test:789':
+            return Promise.resolve({ streamId: 'idx789', genesis: {} } as unknown as TileQuery)
+          default:
+            throw new Error('Unexpected controller')
+        }
+      })
+      const multiQuery = jest.fn(() => ({
+        idx123: { content: {} },
+        idx456: { content: { testDefinitionID: testDocID.toUrl() } },
+        [testID]: { content: { ok: true } },
+      }))
+      const getDefinitionID = jest.fn(() => 'testDefinitionID')
+
+      const ds = new DIDDataStore({ ceramic: { multiQuery }, model } as any)
+      ds.getDefinitionID = getDefinitionID
+
+      await expect(
+        ds.getMultiple('test', ['did:test:123', 'did:test:456', 'did:test:789'])
+      ).resolves.toEqual([null, { ok: true }, null])
+      expect(getDefinitionID).toBeCalledWith('test')
+      expect(getQuery).toBeCalledTimes(3)
+      expect(getQuery).toHaveBeenLastCalledWith({ controllers: ['did:test:789'], family: 'IDX' })
+      expect(multiQuery).toBeCalledWith([
+        { streamId: 'idx123', genesis: {}, paths: ['testDefinitionID'] },
+        { streamId: 'idx456', genesis: {}, paths: ['testDefinitionID'] },
+        { streamId: 'idx789', genesis: {}, paths: ['testDefinitionID'] },
+      ])
     })
 
     describe('set()', () => {
