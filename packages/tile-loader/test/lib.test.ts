@@ -143,7 +143,36 @@ describe('tile-loader', () => {
       expect(cache.has(testID2)).toBe(true)
     })
 
-    test('has a create() method to prime the cache', async () => {
+    describe('cache() method allows to add streams to the internal cache', () => {
+      test('returns false and does not affect the cache unless enabled', async () => {
+        const stream = { id: testStreamID } as TileDocument
+        const multiQuery = jest.fn(() => ({}))
+        const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
+
+        expect(loader.cache(stream)).toBe(false)
+        await expect(loader.load(testStreamID)).rejects.toThrow(`Failed to load stream: ${testID1}`)
+      })
+
+      test('returns true and writes to the cache if enabled', async () => {
+        const stream1 = { id: testStreamID, content: { ok: false } } as unknown as TileDocument
+        const stream2 = { id: testStreamID, content: { ok: true } } as unknown as TileDocument
+
+        const multiQuery = jest.fn(() => ({}))
+        const loader = new TileLoader({
+          cache: true,
+          ceramic: { multiQuery } as unknown as CeramicApi,
+        })
+
+        expect(loader.cache(stream1)).toBe(true)
+        // Should replace in cache
+        expect(loader.cache(stream2)).toBe(true)
+
+        await expect(loader.load(testStreamID)).resolves.toBe(stream2)
+        expect(multiQuery).not.toBeCalled()
+      })
+    })
+
+    test('create() method add the stream to the cache', async () => {
       const create = jest.fn((_ceramic, content: Record<string, unknown>) => ({
         id: testID1,
         content,
@@ -164,19 +193,51 @@ describe('tile-loader', () => {
       expect(multiQuery).not.toBeCalled()
     })
 
-    test('has a deterministic() method to compute the streamID to load', async () => {
-      const metadata = { controllers: ['did:test:123'], tags: ['foo'] }
-      const genesis = await TileDocument.makeGenesis({} as unknown as CeramicSigner, null, {
-        ...metadata,
-        deterministic: true,
+    describe('deterministic() method computes the streamID to load', () => {
+      test('returns the existing stream', async () => {
+        const metadata = { controllers: ['did:test:123'], tags: ['foo'] }
+        const genesis = await TileDocument.makeGenesis({} as unknown as CeramicSigner, null, {
+          ...metadata,
+          deterministic: true,
+        })
+        const streamId = await StreamID.fromGenesis('tile', genesis)
+        const stream = { id: streamId, content: {} }
+
+        const createStreamFromGenesis = jest.fn()
+        const multiQuery = jest.fn(() => ({ [streamId.toString()]: stream }))
+        const loader = new TileLoader({
+          ceramic: { createStreamFromGenesis, multiQuery } as unknown as CeramicApi,
+        })
+
+        await expect(loader.deterministic(metadata)).resolves.toBe(stream)
+        expect(multiQuery).toBeCalledWith([{ streamId, genesis }])
+        expect(createStreamFromGenesis).not.toBeCalled()
       })
-      const streamId = await StreamID.fromGenesis('tile', genesis)
 
-      const multiQuery = jest.fn(() => ({ [streamId.toString()]: {} }))
-      const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
+      test('creates the stream if needed', async () => {
+        const metadata = { controllers: ['did:test:123'], tags: ['foo'] }
+        const genesis = await TileDocument.makeGenesis({} as unknown as CeramicSigner, null, {
+          ...metadata,
+          deterministic: true,
+        })
+        const streamId = await StreamID.fromGenesis('tile', genesis)
+        const stream = { id: streamId, content: null }
 
-      await loader.deterministic(metadata)
-      expect(multiQuery).toBeCalledWith([{ streamId, genesis }])
+        const createStreamFromGenesis = jest.fn(() => stream)
+        const multiQuery = jest.fn(() => ({}))
+        const loader = new TileLoader({
+          ceramic: { createStreamFromGenesis, multiQuery } as unknown as CeramicApi,
+        })
+
+        const options = { anchor: false, pin: true, publish: false, sync: 0 }
+        await expect(loader.deterministic(metadata, options)).resolves.toBe(stream)
+        expect(multiQuery).toBeCalledWith([{ streamId, genesis }])
+        expect(createStreamFromGenesis).toBeCalledWith(
+          TileDocument.STREAM_TYPE_ID,
+          genesis,
+          options
+        )
+      })
     })
   })
 })
