@@ -6,6 +6,8 @@
  * @module tile-loader
  */
 
+// Polyfill setImmediate for browsers not supporting it - see https://github.com/graphql/dataloader/issues/249
+import 'setimmediate'
 import type { CeramicApi, CreateOpts, GenesisCommit, MultiQuery } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
@@ -111,7 +113,20 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     )
 
     this.#ceramic = params.ceramic
-    this.#useCache = params.cache !== false
+    this.#useCache = !!params.cache
+  }
+
+  /**
+   * Add a TileDocument to the local cache if enabled.
+   */
+  cache(stream: TileDocument): boolean {
+    if (!this.#useCache) {
+      return false
+    }
+
+    const id = stream.id.toString()
+    this.clear(id).prime(id, stream)
+    return true
   }
 
   /**
@@ -123,9 +138,7 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     options?: CreateOpts
   ): Promise<TileDocument<T>> {
     const stream = await TileDocument.create<T>(this.#ceramic, content, metadata, options)
-    if (this.#useCache) {
-      this.prime(stream.id.toString(), stream)
-    }
+    this.cache(stream)
     return stream
   }
 
@@ -133,10 +146,21 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
    * Create or load a deterministic TileDocument based on its metadata.
    */
   async deterministic<T extends Record<string, any> = Record<string, any>>(
-    metadata: TileMetadataArgs
+    metadata: TileMetadataArgs,
+    options?: CreateOpts
   ): Promise<TileDocument<T | null | undefined>> {
     const query = await getDeterministicQuery(metadata)
-    return (await super.load(query)) as TileDocument<T | null | undefined>
+    try {
+      return (await super.load(query)) as TileDocument<T | null | undefined>
+    } catch (err) {
+      const stream = await TileDocument.createFromGenesis<T>(
+        this.#ceramic,
+        query.genesis as GenesisCommit,
+        options
+      )
+      this.cache(stream)
+      return stream
+    }
   }
 
   /**
