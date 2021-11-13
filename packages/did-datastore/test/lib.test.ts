@@ -637,7 +637,7 @@ describe('DIDDataStore', () => {
 
         const ds = new DIDDataStore({ ceramic: { did: { id: 'did' } }, model } as any)
         const getRecordID = jest.fn((_, did) => {
-          return did == "did" ? Promise.resolve('streamId') : Promise.resolve(null)
+          return did == 'did' ? Promise.resolve('streamId') : Promise.resolve(null)
         })
         ds.getRecordID = getRecordID
 
@@ -648,13 +648,15 @@ describe('DIDDataStore', () => {
         ds._createRecord = createRecord as any
 
         const content = { test: true }
-        await expect(ds._setRecordOnly('defId', content, { controller: "did:foo:123", pin: true })).resolves.toEqual([
-          true,
-          'streamId',
-        ])
+        await expect(
+          ds._setRecordOnly('defId', content, { controller: 'did:foo:123', pin: true })
+        ).resolves.toEqual([true, 'streamId'])
         expect(getRecordID).toBeCalledWith('defId', 'did:foo:123')
         expect(getDefinition).toBeCalledWith('defId')
-        expect(createRecord).toBeCalledWith(definition, content, { pin: true })
+        expect(createRecord).toBeCalledWith(definition, content, {
+          controller: 'did:foo:123',
+          pin: true,
+        })
       })
     })
 

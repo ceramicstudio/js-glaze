@@ -446,12 +446,12 @@ export class DIDDataStore<
   async _setRecordOnly(
     definitionID: string,
     content: Record<string, any>,
-    { pin }: CreateOptions = {}
+    options: CreateOptions = {}
   ): Promise<[boolean, StreamID]> {
-    const existing = await this.getRecordID(definitionID, this.id)
+    const existing = await this.getRecordID(definitionID, options.controller ?? this.id)
     if (existing == null) {
       const definition = await this.getDefinition(definitionID)
-      const ref = await this._createRecord(definition, content, { pin })
+      const ref = await this._createRecord(definition, content, options)
       return [true, ref]
     } else {
       const doc = await this.#loader.load(existing)
