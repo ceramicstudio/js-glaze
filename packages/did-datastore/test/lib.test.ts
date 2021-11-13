@@ -629,6 +629,33 @@ describe('DIDDataStore', () => {
         expect(getDefinition).toBeCalledWith('defId')
         expect(createRecord).toBeCalledWith(definition, content, { pin: true })
       })
+
+      test('adding definition ID for custom when provided is existing', async () => {
+        const update = jest.fn()
+        const load = jest.fn(() => Promise.resolve({ update, id: 'streamId' }))
+        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+
+        const ds = new DIDDataStore({ ceramic: { did: { id: 'did' } }, model } as any)
+        const getRecordID = jest.fn((_, did) => {
+          return did == "did" ? Promise.resolve('streamId') : Promise.resolve(null)
+        })
+        ds.getRecordID = getRecordID
+
+        const definition = { name: 'test', schema: 'ceramic://...' }
+        const getDefinition = jest.fn(() => Promise.resolve(definition))
+        ds.getDefinition = getDefinition as any
+        const createRecord = jest.fn(() => Promise.resolve('streamId'))
+        ds._createRecord = createRecord as any
+
+        const content = { test: true }
+        await expect(ds._setRecordOnly('defId', content, { controller: "did:foo:123", pin: true })).resolves.toEqual([
+          true,
+          'streamId',
+        ])
+        expect(getRecordID).toBeCalledWith('defId', 'did:foo:123')
+        expect(getDefinition).toBeCalledWith('defId')
+        expect(createRecord).toBeCalledWith(definition, content, { pin: true })
+      })
     })
 
     describe('setRecord()', () => {
