@@ -8,7 +8,13 @@
 
 // Polyfill setImmediate for browsers not supporting it - see https://github.com/graphql/dataloader/issues/249
 import 'setimmediate'
-import type { CeramicApi, CreateOpts, GenesisCommit, MultiQuery } from '@ceramicnetwork/common'
+import type {
+  CeramicApi,
+  CeramicSigner,
+  CreateOpts,
+  GenesisCommit,
+  MultiQuery,
+} from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
@@ -75,7 +81,7 @@ export function keyToString(key: TileKey): string {
  * Create a {@linkcode TileQuery} for a determinitic TileDocument based on its metadata.
  */
 export async function getDeterministicQuery(metadata: TileMetadataArgs): Promise<TileQuery> {
-  const genesis = (await TileDocument.makeGenesis({} as any, null, {
+  const genesis = (await TileDocument.makeGenesis({} as unknown as CeramicSigner, null, {
     ...metadata,
     deterministic: true,
   })) as GenesisCommit
