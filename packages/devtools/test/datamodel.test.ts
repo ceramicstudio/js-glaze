@@ -1,9 +1,15 @@
 /**
  * @jest-environment glaze
  */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
+
+import type { CeramicApi } from '@ceramicnetwork/common'
 
 import { ModelManager, publishEncodedModel } from '../src'
+
+declare global {
+  const ceramic: CeramicApi
+}
 
 describe('datamodel', () => {
   jest.setTimeout(20000)

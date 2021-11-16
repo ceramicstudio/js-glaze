@@ -7,16 +7,38 @@
  */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
+import { TileLoader } from '@glazed/tile-loader'
+import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 export type CreateOptions = {
+  /**
+   * Pin the created stream (default)
+   */
   pin?: boolean
 }
 
 export type DataModelParams<Model> = {
+  /**
+   * Pin all created streams (default)
+   */
   autopin?: boolean
-  ceramic: CeramicApi
+  /**
+   * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
+   */
+  cache?: TileCache | boolean
+  /**
+   * A Ceramic client instance, only used if `loader` is not provided
+   */
+  ceramic?: CeramicApi
+  /**
+   * A {@linkcode TileLoader} instance to use, must be provided if `ceramic` is not provided
+   */
+  loader?: TileLoader
+  /**
+   * The runtime model aliases to use
+   */
   model: Model
 }
 
@@ -30,17 +52,24 @@ export class DataModel<
   ModelAliases extends ModelTypesToAliases<ModelTypes> = ModelTypesToAliases<ModelTypes>
 > {
   #autopin: boolean
-  #ceramic: CeramicApi
+  #loader: TileLoader
   #model: ModelAliases
 
-  constructor({ autopin, ceramic, model }: DataModelParams<ModelAliases>) {
-    this.#autopin = autopin !== false
-    this.#ceramic = ceramic
-    this.#model = model
+  constructor(params: DataModelParams<ModelAliases>) {
+    this.#autopin = params.autopin !== false
+    this.#model = params.model
+
+    if (params.loader != null) {
+      this.#loader = params.loader
+    } else if (params.ceramic == null) {
+      throw new Error('Invalid DataModel parameters: missing ceramic or loader')
+    } else {
+      this.#loader = new TileLoader({ ceramic: params.ceramic, cache: params.cache })
+    }
   }
 
-  get ceramic(): CeramicApi {
-    return this.#ceramic
+  get loader(): TileLoader {
+    return this.#loader
   }
 
   getDefinitionID<Alias extends keyof ModelAliases['definitions']>(alias: Alias): string | null {
@@ -55,6 +84,9 @@ export class DataModel<
     return this.#model.tiles[alias] ?? null
   }
 
+  /**
+   * Load the TileDocument identified by the given `alias`.
+   */
   async loadTile<
     Alias extends keyof ModelAliases['tiles'],
     ContentType = ModelTypes['schemas'][ModelTypes['tiles'][Alias]]
@@ -63,9 +95,12 @@ export class DataModel<
     if (id == null) {
       throw new Error(`Tile alias "${alias as string}" is not defined`)
     }
-    return await TileDocument.load<ContentType>(this.#ceramic, id)
+    return await this.#loader.load<ContentType>(id)
   }
 
+  /**
+   * Create a TileDocument using a schema identified by the given `schemaAlias`.
+   */
   async createTile<
     Alias extends keyof ModelAliases['schemas'],
     ContentType = ModelTypes['schemas'][Alias]
@@ -79,10 +114,10 @@ export class DataModel<
       throw new Error(`Schema alias "${schemaAlias as string}" is not defined`)
     }
 
-    const doc = await TileDocument.create<ContentType>(this.#ceramic, content, { schema })
-    if (pin ?? this.#autopin) {
-      await this.#ceramic.pin.add(doc.id)
-    }
-    return doc
+    return await this.#loader.create<ContentType>(
+      content,
+      { schema },
+      { pin: pin ?? this.#autopin }
+    )
   }
 }

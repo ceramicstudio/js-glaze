@@ -1,6 +1,6 @@
 {
-  "name": "@glazed/devtools",
-  "version": "0.1.3",
+  "name": "@glazed/tile-loader",
+  "version": "0.1.2",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ceramicstudio/js-glaze",
-    "directory": "packages/devtools"
+    "directory": "packages/tile-loader"
   },
   "main": "dist/lib.cjs",
   "module": "dist/lib.mjs",
@@ -37,33 +37,15 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/common": "^1.7.2",
     "@ceramicnetwork/stream-tile": "^1.4.1",
-    "@ceramicnetwork/streamid": "^1.3.3",
-    "@glazed/constants": "^0.1.1",
-    "@glazed/did-datastore-model": "^0.1.1",
-    "ajv": "^8.8.0",
-    "ajv-formats": "^2.1.1",
-    "change-case": "^4.1.2",
-    "cids": "^1.1.9",
-    "fast-deep-equal": "^3.1.3",
-    "uint8arrays": "^3.0.0"
+    "dataloader": "^2.0.0",
+    "setimmediate": "^1.0.5"
   },
   "devDependencies": {
-    "@ceramicnetwork/http-client": "^1.4.4",
-    "@glazed/graphql-types": "^0.1.0",
-    "@glazed/types": "^0.1.3",
-    "@types/jest": "^27.0.2",
-    "dids": "^2.4.0",
-    "fs-extra": "^10.0.0",
-    "jest-environment-glaze": "^0.1.1"
+    "@ceramicnetwork/common": "^1.7.2",
+    "@ceramicnetwork/streamid": "^1.3.3"
   },
   "jest": {
-    "preset": "ts-jest",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
-    }
+    "preset": "ts-jest"
   }
 }

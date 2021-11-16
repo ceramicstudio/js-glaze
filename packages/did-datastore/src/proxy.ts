@@ -1,6 +1,6 @@
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 
-export type TileContent = Record<string, any> | null
+export type TileContent = Record<string, any> | null | undefined
 export type TileDoc = TileDocument<TileContent>
 export type MutationFunc = (current: TileDoc) => Promise<TileDoc>
 

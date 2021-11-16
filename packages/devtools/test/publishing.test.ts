@@ -1,10 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/unbound-method */
 
-import StreamID from '@ceramicnetwork/streamid'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { StreamID } from '@ceramicnetwork/streamid'
 
 import { createModelDoc, publishCommits } from '../src'
 
-import { TileDocument } from '@ceramicnetwork/stream-tile'
+const createTile = TileDocument.create as jest.MockedFunction<typeof TileDocument.create>
+const createTileFromGenesis = TileDocument.createFromGenesis as jest.MockedFunction<
+  typeof TileDocument.createFromGenesis
+>
+
 jest.mock('@ceramicnetwork/stream-tile')
 
 describe('publishing', () => {
@@ -19,7 +24,9 @@ describe('publishing', () => {
 
   test('createModelDoc', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    TileDocument.create.mockImplementationOnce(jest.fn(() => Promise.resolve({ id: testDocID })))
+    createTile.mockImplementationOnce(
+      jest.fn(() => Promise.resolve({ id: testDocID } as unknown as TileDocument))
+    )
     const pinAdd = jest.fn(() => Promise.resolve())
     const ceramic = { did: { id: 'did:test:123' }, pin: { add: pinAdd } } as any
 
@@ -36,7 +43,9 @@ describe('publishing', () => {
 
   test('publishCommits', async () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    TileDocument.createFromGenesis.mockImplementationOnce(jest.fn(() => Promise.resolve(testDoc)))
+    createTileFromGenesis.mockImplementationOnce(
+      jest.fn(() => Promise.resolve(testDoc as unknown as TileDocument))
+    )
     const applyCommit = jest.fn(() => Promise.resolve(testDoc))
     const pinAdd = jest.fn(() => Promise.resolve())
     const ceramic = {
