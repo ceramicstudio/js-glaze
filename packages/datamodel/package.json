@@ -40,8 +40,8 @@
     "@glazed/tile-loader": "^0.1.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^1.7.0",
-    "@ceramicnetwork/stream-tile": "^1.3.3",
+    "@ceramicnetwork/common": "^1.7.2",
+    "@ceramicnetwork/stream-tile": "^1.4.1",
     "@glazed/types": "^0.1.3"
   },
   "jest": {

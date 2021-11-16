@@ -309,7 +309,7 @@ Perform a shallow (one level) merge of the record contents.
 | :------ | :------ |
 | `key` | `Key` |
 | `content` | `ContentType` |
-| `options?` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/did_datastore.md#createoptions) |
 
 #### Returns
 

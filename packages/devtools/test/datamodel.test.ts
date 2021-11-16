@@ -1,7 +1,7 @@
 /**
  * @jest-environment glaze
  */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 
