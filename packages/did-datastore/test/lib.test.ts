@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
@@ -186,7 +186,7 @@ describe('DIDDataStore', () => {
         expect(setRecord).toBeCalledWith(
           'streamId',
           { hello: 'world', foo: 'bar', added: 'value' },
-          undefined
+          {}
         )
       })
 
@@ -198,7 +198,7 @@ describe('DIDDataStore', () => {
         ds.getRecord = getRecord as any
         ds.setRecord = setRecord as any
         await expect(ds.merge('streamId', content)).resolves.toBe('contentId')
-        expect(setRecord).toBeCalledWith('streamId', content, undefined)
+        expect(setRecord).toBeCalledWith('streamId', content, {})
       })
     })
 
@@ -605,8 +605,10 @@ describe('DIDDataStore', () => {
         ds.getRecordID = getRecordID
         const content = { test: true }
 
-        await expect(ds._setRecordOnly('defId', content)).resolves.toEqual([false, 'streamId'])
-        expect(getRecordID).toBeCalledWith('defId', 'did:foo:123')
+        await expect(
+          ds._setRecordOnly('defId', content, { controller: 'did:foo:456' })
+        ).resolves.toEqual([false, 'streamId'])
+        expect(getRecordID).toBeCalledWith('defId', 'did:foo:456')
         expect(load).toBeCalledWith('streamId')
         expect(update).toBeCalledWith(content)
       })
