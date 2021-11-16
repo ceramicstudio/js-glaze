@@ -1,0 +1,32 @@
+import StreamID from '@ceramicnetwork/streamid'
+
+import { Command } from '../../../command'
+import type { CommandFlags } from '../../../command'
+
+// TODO: Test - can't seem to find if there are any pinned streams.
+export default class Add extends Command<
+  CommandFlags,
+  {
+    streamId: string
+  }
+> {
+  static description = 'List pinned Streams'
+  static args = [{ name: 'streamId', required: true, description: 'Stream ID' }]
+
+  async run(): Promise<void> {
+    this.spinner.start('Listing Streams...')
+    try {
+      const pinnedStreamIds = []
+
+      const iterator = await this.ceramic.pin.ls(StreamID.fromString(this.args.streamId))
+      for await (const id of iterator) {
+        pinnedStreamIds.push(id)
+      }
+      this.spinner.succeed('Streams listed below.')
+      console.log(pinnedStreamIds)
+    } catch (e) {
+      this.spinner.fail((e as Error).message)
+      throw e
+    }
+  }
+}

@@ -1,0 +1,62 @@
+import { flags } from '@oclif/command'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
+
+import { Command } from '../../command'
+import type { CommandFlags } from '../../command'
+import { parseControllers, parseContent } from '../../utils'
+
+type Flags = CommandFlags & {
+  controllers?: string
+}
+
+export default class Update extends Command<
+  Flags,
+  {
+    streamId: string
+    content: string
+  }
+> {
+  static description = 'Update a stream'
+
+  static args = [
+    { name: 'streamId', description: 'Document ID', required: true },
+    { name: 'content', description: 'Document Content', required: true },
+  ]
+  static flags = {
+    ...Command.flags,
+    controllers: flags.string({
+      char: 'c',
+      description: 'Comma separated list of controllers',
+    }),
+  }
+
+  async run(): Promise<void> {
+    this.spinner.start('Updating stream...')
+
+    let did: any
+    if (this.flags.key != null) {
+      did = this.authenticatedDID.id
+    } else if (this.flags.did !== null) {
+      did = this.flags.did
+    } else {
+      throw new Error('Missing DID')
+    }
+    try {
+      const doc = await TileDocument.load(this.ceramic, this.args.streamId)
+
+      const parsedControllers = parseControllers(this.flags.controllers || did)
+      const parsedContent = parseContent(this.args.content)
+
+      const metadata = {
+        controllers: parsedControllers,
+      }
+
+      await doc.update(parsedContent, metadata)
+      this.spinner.succeed('Updated stream')
+      this.logJSON({ commitId: doc.commitId.toString(), content: doc.content })
+    } catch (e) {
+      this.spinner.fail((e as Error).message)
+      throw e
+    }
+  }
+}
