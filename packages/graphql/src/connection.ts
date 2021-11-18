@@ -1,7 +1,6 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { AppendCollection } from '@glazed/append-collection'
 import type { ItemResult, LoadResult } from '@glazed/append-collection'
+import type { TileLoader } from '@glazed/tile-loader'
 import type { Connection, ConnectionArguments, Edge } from 'graphql-relay'
 
 import type { Doc } from './types'
@@ -34,39 +33,39 @@ export function toConnection<T>(args: ConnectionArguments, result: LoadResult<T>
 
 export class ItemConnectionHandler<Node> {
   static async create<Node>(
-    ceramic: CeramicApi,
+    loader: TileLoader,
     schemaURL: string
   ): Promise<ItemConnectionHandler<Node>> {
-    const collection = await AppendCollection.create<Node>(ceramic, schemaURL)
+    const collection = await AppendCollection.create<Node>(loader, schemaURL)
     return new ItemConnectionHandler(collection)
   }
 
-  static async load<Node>(ceramic: CeramicApi, id: string): Promise<ItemConnectionHandler<Node>> {
-    const collection = await AppendCollection.load<Node>(ceramic, id)
+  static async load<Node>(loader: TileLoader, id: string): Promise<ItemConnectionHandler<Node>> {
+    const collection = await AppendCollection.load<Node>(loader, id)
     return new ItemConnectionHandler(collection)
   }
 
-  _collection: AppendCollection<Node>
+  #collection: AppendCollection<Node>
 
   constructor(collection: AppendCollection<Node>) {
-    this._collection = collection
+    this.#collection = collection
   }
 
   get id(): string {
-    return this._collection.id.toString()
+    return this.#collection.id.toString()
   }
 
   async add(node: Node): Promise<Edge<Node>> {
-    const cursor = await this._collection.add(node)
+    const cursor = await this.#collection.add(node)
     return { cursor: cursor.toString(), node }
   }
 
   async load(args: ConnectionArguments): Promise<Connection<Node>> {
     let result
     if (args.first) {
-      result = await this._collection.first(args.first, args.after)
+      result = await this.#collection.first(args.first, args.after)
     } else if (args.last) {
-      result = await this._collection.last(args.last, args.before)
+      result = await this.#collection.last(args.last, args.before)
     } else {
       throw new Error('Invalid connection arguments')
     }
@@ -76,59 +75,57 @@ export class ItemConnectionHandler<Node> {
 
 export class ReferenceConnectionHandler<Node> {
   static async create<Node>(
-    ceramic: CeramicApi,
+    loader: TileLoader,
     schemaURL: string,
     nodeSchemaURL: string
   ): Promise<ReferenceConnectionHandler<Node>> {
-    const collection = await AppendCollection.create<string>(ceramic, schemaURL)
-    return new ReferenceConnectionHandler(ceramic, collection, nodeSchemaURL)
+    const collection = await AppendCollection.create<string>(loader, schemaURL)
+    return new ReferenceConnectionHandler(loader, collection, nodeSchemaURL)
   }
 
   static async load<Node>(
-    ceramic: CeramicApi,
+    loader: TileLoader,
     id: string,
     nodeSchemaURL: string
   ): Promise<ReferenceConnectionHandler<Node>> {
-    const collection = await AppendCollection.load<string>(ceramic, id)
-    return new ReferenceConnectionHandler(ceramic, collection, nodeSchemaURL)
+    const collection = await AppendCollection.load<string>(loader, id)
+    return new ReferenceConnectionHandler(loader, collection, nodeSchemaURL)
   }
 
-  _ceramic: CeramicApi
-  _collection: AppendCollection<string>
-  _nodeSchemaURL: string
+  #loader: TileLoader
+  #collection: AppendCollection<string>
+  #nodeSchemaURL: string
 
-  constructor(ceramic: CeramicApi, collection: AppendCollection<string>, nodeSchemaURL: string) {
-    this._ceramic = ceramic
-    this._collection = collection
-    this._nodeSchemaURL = nodeSchemaURL
+  constructor(loader: TileLoader, collection: AppendCollection<string>, nodeSchemaURL: string) {
+    this.#loader = loader
+    this.#collection = collection
+    this.#nodeSchemaURL = nodeSchemaURL
   }
 
   get id(): string {
-    return this._collection.id.toString()
+    return this.#collection.id.toString()
   }
 
   async add(content: Node): Promise<Edge<Doc<Node>>> {
-    const tile = await TileDocument.create<Node>(this._ceramic, content, {
-      schema: this._nodeSchemaURL,
-    })
+    const tile = await this.#loader.create<Node>(content, { schema: this.#nodeSchemaURL })
     const id = tile.id.toString()
-    const cursor = await this._collection.add(id)
+    const cursor = await this.#collection.add(id)
     return { cursor: cursor.toString(), node: { id, content } }
   }
 
   async load(args: ConnectionArguments): Promise<Connection<Doc<Node>>> {
     let result
     if (args.first) {
-      result = await this._collection.first(args.first, args.after)
+      result = await this.#collection.first(args.first, args.after)
     } else if (args.last) {
-      result = await this._collection.last(args.last, args.before)
+      result = await this.#collection.last(args.last, args.before)
     } else {
       throw new Error('Invalid connection arguments')
     }
 
     const items: Array<ItemResult<Doc<Node>>> = await Promise.all(
       result.items.map(async ({ cursor, data }: ItemResult<string>) => {
-        const tile = await TileDocument.load<Node>(this._ceramic, data)
+        const tile = await this.#loader.load<Node>(data)
         return { cursor, data: toDoc(tile) }
       })
     )

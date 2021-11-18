@@ -4,6 +4,7 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { CommitID } from '@ceramicnetwork/streamid'
+import { TileLoader } from '@glazed/tile-loader'
 
 import { AppendCollection, Cursor, publishCollectionSchemas } from '../src'
 
@@ -25,11 +26,12 @@ function cursorsToString<T = any>(res: Record<string, any>): Record<string, any>
 describe('append-collection', () => {
   jest.setTimeout(20000)
 
+  const loader = new TileLoader({ ceramic })
   let collectionSchemaID: CommitID
 
   beforeAll(async () => {
     collectionSchemaID = await publishCollectionSchemas(
-      ceramic,
+      loader,
       'Test',
       [{ type: 'string', maxLength: 100 }],
       10
@@ -37,11 +39,11 @@ describe('append-collection', () => {
   })
 
   test('create and load static methods', async () => {
-    const created = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    const created = await AppendCollection.create<string>(loader, collectionSchemaID)
     expect(created).toBeInstanceOf(AppendCollection)
     const cursor = await created.add('first')
 
-    const loaded = await AppendCollection.load<string>(ceramic, created.id)
+    const loaded = await AppendCollection.load<string>(loader, created.id)
     expect(loaded).toBeInstanceOf(AppendCollection)
     await expect(loaded.first(1)).resolves.toEqual({
       hasMore: false,
@@ -50,7 +52,7 @@ describe('append-collection', () => {
   })
 
   test('create and load single item', async () => {
-    const collection = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    const collection = await AppendCollection.create<string>(loader, collectionSchemaID)
     expect(collection).toBeInstanceOf(AppendCollection)
 
     const cursor = await collection.add('first')
@@ -68,7 +70,7 @@ describe('append-collection', () => {
   })
 
   test('create and load all items', async () => {
-    const collection = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    const collection = await AppendCollection.create<string>(loader, collectionSchemaID)
     expect(collection).toBeInstanceOf(AppendCollection)
 
     const items = ['one', 'two', 'three', 'four', 'five']
@@ -81,7 +83,7 @@ describe('append-collection', () => {
   })
 
   test('supports cursors', async () => {
-    const collection = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    const collection = await AppendCollection.create<string>(loader, collectionSchemaID)
     expect(collection).toBeInstanceOf(AppendCollection)
 
     const cursors: Array<Cursor> = []
@@ -113,7 +115,7 @@ describe('append-collection', () => {
   })
 
   test('creates multiple slices', async () => {
-    const collection = await AppendCollection.create<string>(ceramic, collectionSchemaID)
+    const collection = await AppendCollection.create<string>(loader, collectionSchemaID)
     expect(collection).toBeInstanceOf(AppendCollection)
 
     const items = [

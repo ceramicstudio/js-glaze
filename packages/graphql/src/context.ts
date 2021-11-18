@@ -1,8 +1,10 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
-import type { DataModel } from '@glazed/datamodel'
+import { DataModel } from '@glazed/datamodel'
 import { DIDDataStore } from '@glazed/did-datastore'
+import { TileLoader } from '@glazed/tile-loader'
+import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
 import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
@@ -11,41 +13,57 @@ import { toDoc } from './utils'
 
 export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   autopin?: boolean
+  cache?: TileCache | boolean
   ceramic: CeramicApi
+  loader?: TileLoader
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
 export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
-  _ceramic: CeramicApi
-  _dataStore: DIDDataStore<ModelTypes>
-  _itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
-  _referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
+  #ceramic: CeramicApi
+  #loader: TileLoader
+  #dataStore: DIDDataStore<ModelTypes>
+  #itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
+  #referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(config: ContextConfig<ModelTypes>) {
-    this._ceramic = config.ceramic
-    this._dataStore = new DIDDataStore<ModelTypes>(config)
+    const { autopin, cache, ceramic, loader, model } = config
+    this.#ceramic = ceramic
+    this.#loader = loader ?? new TileLoader({ ceramic, cache })
+    this.#dataStore = new DIDDataStore<ModelTypes>({
+      ceramic,
+      loader: this.#loader,
+      model:
+        model instanceof DataModel
+          ? model
+          : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model }),
+    })
   }
 
   get ceramic(): CeramicApi {
-    return this._ceramic
+    return this.#ceramic
   }
 
   get dataStore(): DIDDataStore<ModelTypes> {
-    return this._dataStore
+    return this.#dataStore
+  }
+
+  get loader(): TileLoader {
+    return this.#loader
   }
 
   async getItemConnection<Node = unknown>(id: string): Promise<ItemConnectionHandler<Node>> {
-    if (this._itemConnections[id] == null) {
-      this._itemConnections[id] = ItemConnectionHandler.load<Node>(this._ceramic, id)
+    if (this.#itemConnections[id] == null) {
+      this.#itemConnections[id] = ItemConnectionHandler.load<Node>(this.#loader, id)
     }
-    return (await this._itemConnections[id]) as ItemConnectionHandler<Node>
+    return (await this.#itemConnections[id]) as ItemConnectionHandler<Node>
   }
 
   async createItemConnection<Node = unknown>(
     schemaURL: string
   ): Promise<ItemConnectionHandler<Node>> {
-    const handler = await ItemConnectionHandler.create<Node>(this._ceramic, schemaURL)
-    this._itemConnections[handler.id] = Promise.resolve(handler)
+    const handler = await ItemConnectionHandler.create<Node>(this.#loader, schemaURL)
+    this.#itemConnections[handler.id] = Promise.resolve(handler)
     return handler
   }
 
@@ -53,14 +71,14 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     id: string,
     nodeSchemaURL: string
   ): Promise<ReferenceConnectionHandler<Node>> {
-    if (this._referenceConnections[id] == null) {
-      this._referenceConnections[id] = ReferenceConnectionHandler.load<Node>(
-        this._ceramic,
+    if (this.#referenceConnections[id] == null) {
+      this.#referenceConnections[id] = ReferenceConnectionHandler.load<Node>(
+        this.#loader,
         id,
         nodeSchemaURL
       )
     }
-    return (await this._referenceConnections[id]) as ReferenceConnectionHandler<Node>
+    return (await this.#referenceConnections[id]) as ReferenceConnectionHandler<Node>
   }
 
   async createReferenceConnection<Node = unknown>(
@@ -68,18 +86,18 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     nodeSchemaURL: string
   ): Promise<ReferenceConnectionHandler<Node>> {
     const handler = await ReferenceConnectionHandler.create<Node>(
-      this._ceramic,
+      this.#loader,
       schemaURL,
       nodeSchemaURL
     )
-    this._referenceConnections[handler.id] = Promise.resolve(handler)
+    this.#referenceConnections[handler.id] = Promise.resolve(handler)
     return handler
   }
 
   async loadTile<Content = Record<string, any>>(
     id: string | CommitID | StreamID
   ): Promise<TileDocument<Content>> {
-    return await TileDocument.load<Content>(this._ceramic, id)
+    return await this.#loader.load<Content>(id)
   }
 
   async loadDoc<Content = Record<string, any>>(
@@ -93,7 +111,7 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     schema: string,
     content: Content
   ): Promise<Doc<Content>> {
-    const tile = await TileDocument.create<Content>(this._ceramic, content, { schema })
+    const tile = await this.#loader.create<Content>(content, { schema })
     return toDoc(tile)
   }
 

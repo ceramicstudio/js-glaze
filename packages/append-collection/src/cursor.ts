@@ -24,28 +24,28 @@ export class Cursor {
     return typeof input === 'string' ? Cursor.fromString(input) : Cursor.fromBytes(input)
   }
 
-  _sliceID: StreamID
-  _itemIndex: number
+  #sliceID: StreamID
+  #itemIndex: number
 
   constructor(sliceID: StreamID, itemIndex: number) {
-    this._sliceID = sliceID
-    this._itemIndex = itemIndex
+    this.#sliceID = sliceID
+    this.#itemIndex = itemIndex
   }
 
   get sliceID(): StreamID {
-    return this._sliceID
+    return this.#sliceID
   }
 
   get itemIndex(): number {
-    return this._itemIndex
+    return this.#itemIndex
   }
 
   toBytes(): Uint8Array {
-    const id = this._sliceID.bytes
+    const id = this.#sliceID.bytes
     const output = new Uint8Array(id.byteLength + 1)
     output.set(id)
     const view = new DataView(output.buffer)
-    view.setUint8(id.byteLength, this._itemIndex)
+    view.setUint8(id.byteLength, this.#itemIndex)
     return output
   }
 
@@ -54,6 +54,6 @@ export class Cursor {
   }
 
   [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return `Cursor(${this._sliceID.toString()}:${this._itemIndex})`
+    return `Cursor(${this.#sliceID.toString()}:${this.#itemIndex})`
   }
 }

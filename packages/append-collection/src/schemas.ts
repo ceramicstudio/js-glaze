@@ -1,7 +1,6 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { CommitID } from '@ceramicnetwork/streamid'
 import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/constants'
+import type { TileLoader } from '@glazed/tile-loader'
 
 import type { CollectionSchema, SliceSchema } from './types'
 
@@ -54,17 +53,15 @@ export function createCollectionSliceSchema<Item>(
 }
 
 export async function publishCollectionSchemas(
-  ceramic: CeramicApi,
+  loader: TileLoader,
   title: string,
   itemSchemas: Array<any>,
   maxItems?: number
 ): Promise<CommitID> {
-  const sliceSchema = await TileDocument.create(
-    ceramic,
+  const sliceSchema = await loader.create(
     createCollectionSliceSchema(`${title}CollectionSlice`, itemSchemas, maxItems)
   )
-  const collectionSchema = await TileDocument.create(
-    ceramic,
+  const collectionSchema = await loader.create(
     createAppendCollectionSchema(`${title}Collection`, sliceSchema.commitId.toString())
   )
   return collectionSchema.commitId

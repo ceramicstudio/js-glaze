@@ -4,9 +4,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { publishCollectionSchemas } from '@glazed/append-collection'
 import { ModelManager, createGraphQLModel } from '@glazed/devtools'
+import { TileLoader } from '@glazed/tile-loader'
 import { execute, parse, printSchema } from 'graphql'
 import type { GraphQLSchema } from 'graphql'
 
@@ -23,6 +23,8 @@ describe('lib', () => {
   let schema: GraphQLSchema
 
   beforeAll(async () => {
+    const loader = new TileLoader({ ceramic, cache: true })
+
     const NoteSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Note',
@@ -44,7 +46,7 @@ describe('lib', () => {
       },
       required: ['date', 'text', 'title'],
     }
-    const noteSchema = await TileDocument.create(ceramic, NoteSchema)
+    const noteSchema = await loader.create(NoteSchema)
     const noteSchemaURL = noteSchema.commitId.toUrl()
     const noteRef = {
       type: 'string',
@@ -53,9 +55,7 @@ describe('lib', () => {
       maxLength: 100,
     }
 
-    const notesCollectionSchemaCommitID = await publishCollectionSchemas(ceramic, 'Notes', [
-      noteRef,
-    ])
+    const notesCollectionSchemaCommitID = await publishCollectionSchemas(loader, 'Notes', [noteRef])
 
     const NotesSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
@@ -74,7 +74,7 @@ describe('lib', () => {
         },
       },
     }
-    const notesSchema = await TileDocument.create(ceramic, NotesSchema)
+    const notesSchema = await loader.create(NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
     const manager = new ModelManager(ceramic)
@@ -94,7 +94,7 @@ describe('lib', () => {
       createGraphQLModel(manager),
       manager.toPublished(),
     ])
-    context = new Context({ ceramic, model })
+    context = new Context({ ceramic, loader, model })
     schema = createGraphQLSchema(graphModel)
   })
 

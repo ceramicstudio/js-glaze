@@ -1,8 +1,7 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { StreamID } from '@ceramicnetwork/streamid'
 import type { CommitID } from '@ceramicnetwork/streamid'
 import { CIP88_APPEND_COLLECTION_PREFIX as PREFIX } from '@glazed/constants'
+import type { TileLoader } from '@glazed/tile-loader'
 
 import { Cursor } from './cursor'
 import type { CursorInput } from './cursor'
@@ -32,10 +31,10 @@ export type CreateOptions<Item> = {
 }
 
 export async function getSliceSchemaID(
-  ceramic: CeramicApi,
+  loader: TileLoader,
   collectionSchemaID: CommitID | string
 ): Promise<string> {
-  const collectionSchema = await TileDocument.load<CollectionSchema>(ceramic, collectionSchemaID)
+  const collectionSchema = await loader.load<CollectionSchema>(collectionSchemaID)
   if (!collectionSchema?.content?.$comment?.startsWith(PREFIX)) {
     throw new Error('Invalid schema, expecting to be AppendCollection')
   }
@@ -46,32 +45,43 @@ export async function getSliceSchemaID(
   return sliceSchemaCommitID
 }
 
+export type AppendCollectionParams = {
+  controller: string
+  loader: TileLoader
+  collectionID: StreamID
+  sliceSchemaCommitID: string
+}
+
 export class AppendCollection<Item> {
-  _ceramic: CeramicApi
-  _collectionID: StreamID
-  _sliceSchemaCommitID: string
+  #controller: string
+  #loader: TileLoader
+  #collectionID: StreamID
+  #sliceSchemaCommitID: string
 
   static async create<Item>(
-    ceramic: CeramicApi,
+    loader: TileLoader,
     schemaID: CommitID | string,
     options: CreateOptions<Item> = {}
   ): Promise<AppendCollection<Item>> {
-    const sliceSchemaCommitID = await getSliceSchemaID(ceramic, schemaID)
-    const sliceSchemaDoc = await TileDocument.load<SliceSchema<Item>>(ceramic, sliceSchemaCommitID)
+    const sliceSchemaCommitID = await getSliceSchemaID(loader, schemaID)
+    const sliceSchemaDoc = await loader.load<SliceSchema<Item>>(sliceSchemaCommitID)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const sliceMaxItems: number = options.sliceMaxItems
       ? Math.max(10, Math.min(options.sliceMaxItems), 256)
       : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         sliceSchemaDoc.content?.properties?.contents?.maxItems ?? DEFAULT_MAX_ITEMS
-    const collectionDoc = await TileDocument.create<CollectionContent>(
-      ceramic,
+    const collectionDoc = await loader.create<CollectionContent>(
       { slicesCount: 1, sliceMaxItems },
       { schema: typeof schemaID === 'string' ? schemaID : schemaID.toUrl() }
     )
 
-    const collection = new AppendCollection<Item>(ceramic, collectionDoc.id, sliceSchemaCommitID)
-
+    const collection = new AppendCollection<Item>({
+      controller: collectionDoc.metadata.controllers[0],
+      loader,
+      collectionID: collectionDoc.id,
+      sliceSchemaCommitID,
+    })
     if (options.item != null) {
       await collection.add(options.item)
     }
@@ -80,46 +90,51 @@ export class AppendCollection<Item> {
   }
 
   static async load<Item>(
-    ceramic: CeramicApi,
+    loader: TileLoader,
     collectionID: StreamID | string
   ): Promise<AppendCollection<Item>> {
-    const collection = await TileDocument.load<CollectionDoc>(ceramic, collectionID)
+    const collection = await loader.load<CollectionDoc>(collectionID)
     if (collection.metadata.schema == null) {
       throw new Error('Invalid collection: no schema defined')
     }
-    const sliceSchemaCommitID = await getSliceSchemaID(ceramic, collection.metadata.schema)
-    return new AppendCollection<Item>(ceramic, collection.id, sliceSchemaCommitID)
+    const sliceSchemaCommitID = await getSliceSchemaID(loader, collection.metadata.schema)
+    return new AppendCollection<Item>({
+      controller: collection.metadata.controllers[0],
+      loader,
+      collectionID: collection.id,
+      sliceSchemaCommitID,
+    })
   }
 
-  constructor(ceramic: CeramicApi, collectionID: StreamID, sliceSchemaCommitID: string) {
-    this._ceramic = ceramic
-    this._collectionID = collectionID
-    this._sliceSchemaCommitID = sliceSchemaCommitID
+  constructor(params: AppendCollectionParams) {
+    const { controller, loader, collectionID, sliceSchemaCommitID } = params
+    this.#controller = controller
+    this.#loader = loader
+    this.#collectionID = collectionID
+    this.#sliceSchemaCommitID = sliceSchemaCommitID
   }
 
   get id(): StreamID {
-    return this._collectionID
+    return this.#collectionID
   }
 
   _getSliceTag(index: number): string {
-    return `${this._collectionID.toString()}:${index}`
+    return `${this.#collectionID.toString()}:${index}`
   }
 
   async _getCollection(): Promise<CollectionDoc> {
-    return await TileDocument.load(this._ceramic, this._collectionID)
+    return await this.#loader.load(this.#collectionID)
   }
 
   async _getSliceByCursor(cursor: Cursor): Promise<SliceDoc<Item>> {
-    return await TileDocument.load(this._ceramic, cursor.sliceID)
+    return await this.#loader.load(cursor.sliceID)
   }
 
   async _getSliceByTag(tag: string): Promise<SliceDoc<Item>> {
-    return await TileDocument.create(
-      this._ceramic,
-      null as any,
-      { deterministic: true, tags: [tag] },
-      { anchor: false, publish: false }
-    )
+    return (await this.#loader.deterministic({
+      controllers: [this.#controller],
+      tags: [tag],
+    })) as unknown as SliceDoc<Item>
   }
 
   async _getSliceByIndex(index: number): Promise<SliceDoc<Item>> {
@@ -142,11 +157,11 @@ export class AppendCollection<Item> {
     if (slice.contents == null) {
       await sliceDoc.update(
         {
-          collection: this._collectionID.toString(),
+          collection: this.#collectionID.toString(),
           sliceIndex: collection.slicesCount - 1,
           contents: [item],
         },
-        { schema: this._sliceSchemaCommitID }
+        { schema: this.#sliceSchemaCommitID }
       )
       return new Cursor(sliceDoc.id, 0)
     }
@@ -163,11 +178,11 @@ export class AppendCollection<Item> {
       collectionDoc.update({ ...collection, slicesCount: collection.slicesCount + 1 }),
       nextSlice.update(
         {
-          collection: this._collectionID.toString(),
+          collection: this.#collectionID.toString(),
           sliceIndex: collection.slicesCount,
           contents: [item],
         },
-        { schema: this._sliceSchemaCommitID }
+        { schema: this.#sliceSchemaCommitID }
       ),
     ])
     return new Cursor(nextSlice.id, 0)
