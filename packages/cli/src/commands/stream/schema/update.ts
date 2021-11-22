@@ -6,6 +6,7 @@ import type { CommandFlags } from '../../../command'
 import { parseControllers, parseContent } from '../../../utils'
 
 type Flags = CommandFlags & {
+  did?: string
   controllers?: string
 }
 
@@ -28,12 +29,16 @@ export default class Update extends Command<
       char: 'c',
       description: 'Change controllers of this document',
     }),
+    did: flags.string({
+      exclusive: ['key'],
+      description: 'Creator DID',
+    }),
   }
 
   async run(): Promise<void> {
     this.spinner.start('Updating Schema...')
 
-    let did: any
+    let did: string | undefined
     if (this.flags.key != null) {
       did = this.authenticatedDID.id
     } else if (this.flags.did !== null) {
@@ -41,12 +46,17 @@ export default class Update extends Command<
     } else {
       throw new Error('Missing DID')
     }
-
     try {
-      const doc = await TileDocument.load(this.ceramic, this.args.streamId)
-
-      const parsedControllers = parseControllers(this.flags.controllers || did)
+      let parsedControllers: Array<string>
+      if (this.flags.controllers !== undefined) {
+        parsedControllers = parseControllers(this.flags.controllers)
+      } else if (did !== undefined) {
+        parsedControllers = parseControllers(did)
+      } else {
+        throw new Error('No DID to assign as a controller')
+      }
       const parsedContent = parseContent(this.args.content)
+      const doc = await TileDocument.load(this.ceramic, this.args.streamId)
 
       const metadata = {
         controllers: parsedControllers,

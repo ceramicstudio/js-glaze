@@ -9,6 +9,7 @@ type Flags = CommandFlags & {
   determinitic?: boolean
   did?: string
   'only-genesis'?: boolean
+  controllers?: string
 }
 
 export default class Create extends Command<
@@ -16,7 +17,6 @@ export default class Create extends Command<
   {
     schema: string
     content: string
-    controllers?: string
   }
 > {
   static description = 'create a new stream'
@@ -32,11 +32,6 @@ export default class Create extends Command<
       description: 'the stream body',
       required: true,
     },
-    {
-      name: 'controllers',
-      description: 'the stream controllers',
-      required: false,
-    },
   ]
 
   static flags = {
@@ -51,16 +46,39 @@ export default class Create extends Command<
       description: 'generate deterministic stream',
       default: false,
     }),
+    did: flags.string({
+      exclusive: ['key'],
+      description: 'creator did',
+    }),
+    controllers: flags.string({
+      char: 'c',
+      description: 'controllers for the stream',
+    }),
   }
 
   async run(): Promise<void> {
     this.spinner.start('Creating stream')
+    let did: string | undefined
+    if (this.flags.key != null) {
+      did = this.authenticatedDID.id
+    } else if (this.flags.did !== null) {
+      did = this.flags.did
+    } else {
+      throw new Error('Missing DID')
+    }
     try {
-      const parsedControllers = parseControllers(this.args.controllers)
+      let parsedControllers: Array<string>
+      if (this.flags.controllers !== undefined) {
+        parsedControllers = parseControllers(this.flags.controllers)
+      } else if (did !== undefined) {
+        parsedControllers = parseControllers(did)
+      } else {
+        throw new Error('No DID to assign as a controller')
+      }
       const parsedContent = parseContent(this.args.content)
 
       const localDeterministic =
-        this.flags.deterministic != undefined ? this.flags.determinitic : false
+        this.flags.deterministic !== undefined ? this.flags.determinitic : false
 
       const metadata = {
         controllers: parsedControllers,
@@ -73,9 +91,10 @@ export default class Create extends Command<
         publish: !this.flags['only-genesis'],
       })
 
-      this.spinner.succeed(`Created Stream ${tile.commitId}`)
+      this.spinner.succeed(`Created Stream ${tile.commitId.toString()}.`)
       this.logJSON({
-        commitId: tile.id.toString(),
+        streamID: tile.id.toString(),
+        commitId: tile.commitId.toString(),
         body: tile.content,
       })
     } catch (e) {

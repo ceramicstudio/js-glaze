@@ -55,7 +55,7 @@ export default class Create extends Command<
 
   async run(): Promise<void> {
     this.spinner.start('Creating Schema...')
-    let did: any
+    let did: string | undefined
     if (this.flags.key != null) {
       did = this.authenticatedDID.id
     } else if (this.flags.did !== null) {
@@ -64,11 +64,18 @@ export default class Create extends Command<
       throw new Error('Missing DID')
     }
     try {
-      const parsedControllers = parseControllers(did)
+      let parsedControllers: Array<string>
+      if (this.args.controllers !== undefined) {
+        parsedControllers = parseControllers(this.args.controllers)
+      } else if (did !== undefined) {
+        parsedControllers = parseControllers(did)
+      } else {
+        throw new Error('No DID to assign as a controller')
+      }
       const parsedContent = parseContent(this.args.content)
 
       const localDeterministic =
-        this.flags.deterministic != undefined ? this.flags.determinitic : false
+        this.flags.deterministic !== undefined ? this.flags.determinitic : false
 
       const metadata = {
         controllers: parsedControllers,
