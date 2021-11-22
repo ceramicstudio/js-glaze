@@ -6,16 +6,17 @@ import type { CommandFlags } from '../../../command'
 import { parseContent, parseControllers } from '../../../utils'
 
 type Flags = CommandFlags & {
-  did?: string
   determinitic?: boolean
   'only-genesis'?: boolean
+
+  did?: string
+  controllers?: string
 }
 
 export default class Create extends Command<
   Flags,
   {
     content: string
-    controllers?: string
   }
 > {
   static description = 'Create a new Schema'
@@ -25,11 +26,6 @@ export default class Create extends Command<
       name: 'content',
       description: 'Schema Body',
       required: true,
-    },
-    {
-      name: 'controllers',
-      description: 'Controllers for the Schema',
-      required: false,
     },
   ]
   static flags = {
@@ -42,14 +38,19 @@ export default class Create extends Command<
         'will be a no-op.',
       default: false,
     }),
-    did: flags.string({
-      exclusive: ['key'],
-      description: 'Creator DID',
-    }),
     'only-genesis': flags.boolean({
       char: 'g',
       description: 'Only create the genesis object. No anchor will be created',
       default: false,
+    }),
+
+    did: flags.string({
+      exclusive: ['key'],
+      description: 'Creator DID',
+    }),
+    controllers: flags.string({
+      char: 'c',
+      description: 'Comma separated list of controllers',
     }),
   }
 
@@ -65,8 +66,8 @@ export default class Create extends Command<
     }
     try {
       let parsedControllers: Array<string>
-      if (this.args.controllers !== undefined) {
-        parsedControllers = parseControllers(this.args.controllers)
+      if (this.flags.controllers !== undefined) {
+        parsedControllers = parseControllers(this.flags.controllers)
       } else if (did !== undefined) {
         parsedControllers = parseControllers(did)
       } else {
@@ -88,7 +89,7 @@ export default class Create extends Command<
         publish: !this.flags['only-genesis'],
       })
 
-      this.spinner.succeed(`Created Schema ${this.chalk.bold.green(tile.id)}.`)
+      this.spinner.succeed(`Created Schema ${tile.id.toString()}.`)
       this.logJSON({
         streamId: tile.id.toString(),
         commitId: tile.commitId.toString(),
@@ -96,7 +97,6 @@ export default class Create extends Command<
       })
     } catch (e) {
       this.spinner.fail((e as Error).message)
-      throw e
     }
   }
 }

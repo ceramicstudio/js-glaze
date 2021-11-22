@@ -7,16 +7,16 @@ export default class State extends Command<
     streamId: string
   }
 > {
-  static description = 'Get the state of a stream'
+  static description = 'Get the state of a Stream'
 
-  static args = [{ name: 'streamId', description: 'Stream ID', required: true }]
+  static args = [{ name: 'streamId', description: 'Document StreamID', required: true }]
 
   async run(): Promise<void> {
     this.spinner.start(`Querying stream ${this.args.streamId}`)
 
     try {
       const stream = await this.ceramic.loadStream(this.args.streamId)
-      this.spinner.succeed(`Queried stream ${this.args.streamId}`)
+      this.spinner.succeed(`Successfully queried stream ${this.args.streamId}`)
       this.logJSON(stream)
     } catch (e) {
       this.spinner.fail((e as Error).message)

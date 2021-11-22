@@ -1,14 +1,15 @@
 import { flags } from '@oclif/command'
+import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 import { parseContent, parseControllers } from '../../utils'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 type Flags = CommandFlags & {
   determinitic?: boolean
-  did?: string
   'only-genesis'?: boolean
+
+  did?: string
   controllers?: string
 }
 
@@ -24,12 +25,12 @@ export default class Create extends Command<
   static args = [
     {
       name: 'schema',
-      description: 'the streamId of the schema to use',
+      description: 'the StreamId of the schema to use',
       required: true,
     },
     {
       name: 'content',
-      description: 'the stream body',
+      description: 'the Stream body',
       required: true,
     },
   ]
@@ -46,18 +47,19 @@ export default class Create extends Command<
       description: 'generate deterministic stream',
       default: false,
     }),
+
     did: flags.string({
       exclusive: ['key'],
-      description: 'creator did',
+      description: 'Creator DID',
     }),
     controllers: flags.string({
       char: 'c',
-      description: 'controllers for the stream',
+      description: 'Comma separated list of controllers',
     }),
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Creating stream')
+    this.spinner.start('Creating stream...')
     let did: string | undefined
     if (this.flags.key != null) {
       did = this.authenticatedDID.id

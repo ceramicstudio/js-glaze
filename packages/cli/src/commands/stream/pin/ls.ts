@@ -1,9 +1,8 @@
-import StreamID from '@ceramicnetwork/streamid'
+import { StreamID } from '@ceramicnetwork/streamid'
 
 import { Command } from '../../../command'
 import type { CommandFlags } from '../../../command'
 
-// TODO: Test - can't seem to find if there are any pinned streams.
 export default class Add extends Command<
   CommandFlags,
   {
@@ -11,10 +10,10 @@ export default class Add extends Command<
   }
 > {
   static description = 'List pinned Streams'
-  static args = [{ name: 'streamId', required: true, description: 'Stream ID' }]
+  static args = [{ name: 'streamId', required: true, description: 'StreamID' }]
 
   async run(): Promise<void> {
-    this.spinner.start('Listing Streams...')
+    this.spinner.start(`Listing Streams related to ... ${this.args.streamId}`)
     try {
       const pinnedStreamIds = []
 
@@ -26,7 +25,6 @@ export default class Add extends Command<
       console.log(pinnedStreamIds)
     } catch (e) {
       this.spinner.fail((e as Error).message)
-      throw e
     }
   }
 }

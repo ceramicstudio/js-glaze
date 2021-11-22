@@ -7,7 +7,6 @@ import { ModelManager } from '@glazed/devtools'
 import { DIDDataStore } from '@glazed/did-datastore'
 import type { PublishedModel } from '@glazed/types'
 import { Command as Cmd, flags } from '@oclif/command'
-import chalk from 'chalk'
 import { DID } from 'dids'
 import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
@@ -43,7 +42,6 @@ export abstract class Command<
   args!: Args
   flags!: Flags
   spinner!: Ora
-  chalk!: typeof chalk
 
   async init(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,7 +50,6 @@ export abstract class Command<
     this.args = args as Args
     this.flags = flags as Flags
     this.spinner = ora()
-    this.chalk = chalk
 
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags.key != null) {

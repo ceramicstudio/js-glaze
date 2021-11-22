@@ -19,24 +19,25 @@ export default class Update extends Command<
 > {
   static description = 'Update a Schema'
   static args = [
-    { name: 'streamId', description: 'Schema streamId to be updated' },
-    { name: 'content', description: 'updated schema structure' },
+    { name: 'streamId', description: 'Schema StreamID to be updated' },
+    { name: 'content', description: 'Updated Schema structure' },
   ]
 
   static flags = {
     ...Command.flags,
-    controllers: flags.string({
-      char: 'c',
-      description: 'Change controllers of this document',
-    }),
+
     did: flags.string({
       exclusive: ['key'],
       description: 'Creator DID',
     }),
+    controllers: flags.string({
+      char: 'c',
+      description: 'Comma separated list of controllers',
+    }),
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Updating Schema...')
+    this.spinner.start(`Updating Schema ${this.args.streamId}...`)
 
     let did: string | undefined
     if (this.flags.key != null) {
@@ -63,7 +64,7 @@ export default class Update extends Command<
       }
 
       await doc.update(parsedContent, metadata)
-      this.spinner.succeed('Updated Schema')
+      this.spinner.succeed(`Updated Schema ${this.args.streamId}.`)
       this.logJSON({
         streamId: doc.id.toString(),
         commitId: doc.commitId.toString(),
@@ -71,7 +72,6 @@ export default class Update extends Command<
       })
     } catch (e) {
       this.spinner.fail((e as Error).message)
-      throw e
     }
   }
 }

@@ -20,18 +20,19 @@ export default class Update extends Command<
   static description = 'Update a stream'
 
   static args = [
-    { name: 'streamId', description: 'Document ID', required: true },
+    { name: 'streamId', description: 'Document StreamID', required: true },
     { name: 'content', description: 'Document Content', required: true },
   ]
   static flags = {
     ...Command.flags,
+
+    did: flags.string({
+      exclusive: ['key'],
+      description: 'Creator DID',
+    }),
     controllers: flags.string({
       char: 'c',
       description: 'Comma separated list of controllers',
-    }),
-    did: flags.string({
-      exclusive: ['key'],
-      description: 'creator did',
     }),
   }
 
@@ -68,7 +69,6 @@ export default class Update extends Command<
       this.logJSON({ commitId: doc.commitId.toString(), content: doc.content })
     } catch (e) {
       this.spinner.fail((e as Error).message)
-      throw e
     }
   }
 }

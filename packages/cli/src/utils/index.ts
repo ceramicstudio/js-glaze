@@ -5,9 +5,6 @@ export const parseContent = (content: string): Record<string, unknown> | undefin
 }
 
 export const parseControllers = (controllers: string): Array<string> => {
-  // if (controllers == null) {
-  //   return undefined
-  // }
   const result: Array<string> = controllers.includes(',') ? controllers.split(',') : [controllers]
   return result
 }
