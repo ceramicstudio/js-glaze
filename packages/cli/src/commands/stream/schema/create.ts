@@ -24,8 +24,8 @@ export default class Create extends Command<
   static args = [
     {
       name: 'content',
-      description: 'Schema Body',
       required: true,
+      description: 'Schema Body',
     },
   ]
   static flags = {

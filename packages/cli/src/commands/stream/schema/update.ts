@@ -19,8 +19,16 @@ export default class Update extends Command<
 > {
   static description = 'Update a Schema'
   static args = [
-    { name: 'streamId', description: 'Schema StreamID to be updated' },
-    { name: 'content', description: 'Updated Schema structure' },
+    {
+      name: 'streamId',
+      required: true,
+      description: 'Schema StreamID to be updated',
+    },
+    {
+      name: 'content',
+      required: true,
+      description: 'Updated Schema structure',
+    },
   ]
 
   static flags = {

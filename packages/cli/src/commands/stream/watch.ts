@@ -11,7 +11,13 @@ export default class Watch extends Command<
   }
 > {
   static description = 'Monitor stream for any updates.'
-  static args = [{ name: 'streamId', required: true, description: 'Stream ID' }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'Stream ID',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start('Finding Stream...')

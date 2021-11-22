@@ -8,7 +8,13 @@ export default class Commits extends Command<
   }
 > {
   static description = 'List commits contained within a Stream.'
-  static args = [{ name: 'streamId', description: 'StreamID to be queried.' }]
+  static args = [
+    {
+      name: 'streamId',
+      description: 'StreamID to be queried.',
+      required: true,
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start(`Loading Stream ${this.args.streamId}...`)

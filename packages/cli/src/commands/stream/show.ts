@@ -11,7 +11,13 @@ export default class Show extends Command<
   }
 > {
   static description = 'Show content of a Stream'
-  static args = [{ name: 'streamId', description: 'StreamID to be queried' }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'StreamID to be queried',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start(`Querying stream ${this.args.streamId}`)

@@ -10,7 +10,13 @@ export default class Add extends Command<
   }
 > {
   static description = 'Pin Stream'
-  static args = [{ name: 'streamId', required: true, description: 'StreamID' }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'StreamID to be pinned',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start(`Pinning stream ${this.args.streamId}...`)

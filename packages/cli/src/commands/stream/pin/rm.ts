@@ -10,7 +10,13 @@ export default class Add extends Command<
   }
 > {
   static description = 'Unpin Stream'
-  static args = [{ name: 'streamId', required: true, description: 'StreamID' }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'StreamID to be unpinned',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start('Unpinning stream...')

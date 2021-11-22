@@ -20,7 +20,7 @@ export default class Create extends Command<
     content: string
   }
 > {
-  static description = 'create a new stream'
+  static description = 'Create a new Stream'
 
   static args = [
     {

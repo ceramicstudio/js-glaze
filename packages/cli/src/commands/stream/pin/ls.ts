@@ -10,7 +10,13 @@ export default class Add extends Command<
   }
 > {
   static description = 'List pinned Streams'
-  static args = [{ name: 'streamId', required: true, description: 'StreamID' }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'StreamID to be queried',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start(`Listing Streams related to ... ${this.args.streamId}`)

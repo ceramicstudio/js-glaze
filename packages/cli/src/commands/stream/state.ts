@@ -9,7 +9,13 @@ export default class State extends Command<
 > {
   static description = 'Get the state of a Stream'
 
-  static args = [{ name: 'streamId', description: 'Document StreamID', required: true }]
+  static args = [
+    {
+      name: 'streamId',
+      required: true,
+      description: 'Document StreamID',
+    },
+  ]
 
   async run(): Promise<void> {
     this.spinner.start(`Querying stream ${this.args.streamId}`)
