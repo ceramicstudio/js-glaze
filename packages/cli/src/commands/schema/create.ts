@@ -3,7 +3,7 @@ import { flags } from '@oclif/command'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { parseContent, parseControllers } from '../../utils'
+import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
   determinitic?: boolean
@@ -26,6 +26,7 @@ export default class Create extends Command<
       name: 'content',
       required: true,
       description: 'Schema Body',
+      parse: JSON.parse
     },
   ]
   static flags = {
@@ -73,7 +74,6 @@ export default class Create extends Command<
       } else {
         throw new Error('No DID to assign as a controller')
       }
-      const parsedContent = parseContent(this.args.content)
 
       const localDeterministic =
         this.flags.deterministic !== undefined ? this.flags.determinitic : false
@@ -84,7 +84,7 @@ export default class Create extends Command<
         deterministic: localDeterministic,
       }
 
-      const tile = await TileDocument.create(this.ceramic, parsedContent, metadata, {
+      const tile = await TileDocument.create(this.ceramic, this.args.content, metadata, {
         anchor: !this.flags['only-genesis'],
         publish: !this.flags['only-genesis'],
       })

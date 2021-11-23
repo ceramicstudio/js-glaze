@@ -3,7 +3,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { parseControllers, parseContent } from '../../utils'
+import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
   did?: string
@@ -28,6 +28,7 @@ export default class Update extends Command<
       name: 'content',
       required: true,
       description: 'Updated Schema structure',
+      parse: JSON.parse,
     },
   ]
 
@@ -64,14 +65,13 @@ export default class Update extends Command<
       } else {
         throw new Error('No DID to assign as a controller')
       }
-      const parsedContent = parseContent(this.args.content)
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
 
       const metadata = {
         controllers: parsedControllers,
       }
 
-      await doc.update(parsedContent, metadata)
+      await doc.update(this.args.content, metadata)
       this.spinner.succeed(`Updated Schema ${this.args.streamId}.`)
       this.logJSON({
         streamId: doc.id.toString(),

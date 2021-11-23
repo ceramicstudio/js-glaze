@@ -28,7 +28,7 @@ export default class List extends Command<
         pinnedStreamIds.push(id)
       }
       this.spinner.succeed('Streams listed below.')
-      console.log(pinnedStreamIds)
+      this.log(pinnedStreamIds.toString())
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }

@@ -44,7 +44,6 @@ glaze COMMAND
 - [`glaze stream:show STREAMID`](#glaze-streamshow-streamid)
 - [`glaze stream:state STREAMID`](#glaze-streamstate-streamid)
 - [`glaze stream:watch STREAMID`](#glaze-streamwatch-streamid)
-- [License](#license)
 
 ### `glaze config:get KEY`
 

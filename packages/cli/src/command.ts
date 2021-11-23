@@ -8,6 +8,7 @@ import { DIDDataStore } from '@glazed/did-datastore'
 import type { PublishedModel } from '@glazed/types'
 import { Command as Cmd, flags } from '@oclif/command'
 import { DID } from 'dids'
+import chalk from 'chalk'
 import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import KeyResolver from 'key-did-resolver'
@@ -54,7 +55,7 @@ export abstract class Command<
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags.key != null) {
       const did = await this.getAuthenticatedDID(this.flags.key)
-      this.spinner.info(`Using DID ${did.id}`)
+      this.spinner.info(`Using DID ${chalk.cyan(did.id)}`)
       this.#authenticatedDID = did
       this.ceramic.did = did
     }

@@ -3,7 +3,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { parseControllers, parseContent } from '../../utils'
+import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
   controllers?: string
@@ -20,8 +20,17 @@ export default class Update extends Command<
   static description = 'Update a stream'
 
   static args = [
-    { name: 'streamId', description: 'Document StreamID', required: true },
-    { name: 'content', description: 'Document Content', required: true },
+    {
+      name: 'streamId',
+      description: 'Document StreamID',
+      required: true,
+    },
+    {
+      name: 'content',
+      description: 'Document Content',
+      required: true,
+      parse: JSON.parse,
+    },
   ]
   static flags = {
     ...Command.flags,
@@ -48,7 +57,6 @@ export default class Update extends Command<
       throw new Error('Missing DID')
     }
     try {
-      const parsedContent = parseContent(this.args.content)
       let parsedControllers: Array<string>
       if (this.flags.controllers !== undefined) {
         parsedControllers = parseControllers(this.flags.controllers)
@@ -64,7 +72,7 @@ export default class Update extends Command<
         controllers: parsedControllers,
       }
 
-      await doc.update(parsedContent, metadata)
+      await doc.update(this.args.content, metadata)
       this.spinner.succeed('Updated stream')
       this.logJSON({ commitId: doc.commitId.toString(), content: doc.content })
     } catch (e) {

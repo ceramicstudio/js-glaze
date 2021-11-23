@@ -24,7 +24,7 @@ export default class Watch extends Command<
     try {
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
       doc.subscribe(() => {
-        console.log(chalk.green('--- Document updated ---'))
+        this.log(chalk.green('--- Document updated ---'))
         this.logJSON(doc.content)
       })
     } catch (e) {
