@@ -40,7 +40,7 @@ glaze COMMAND
 - [`glaze stream:schema:create CONTENT`](#glaze-streamschemacreate-content)
 - [`glaze stream:schema:update STREAMID CONTENT`](#glaze-streamschemaupdate-streamid-content)
 - [`glaze stream:commits STREAMID`](#glaze-streamcommits-streamid)
-- [`glaze stream:create STREAMID`](#glaze-streamcreate-streamid)
+- [`glaze stream:create STREAMID CONTENT`](#glaze-streamcreate-streamid)
 - [`glaze stream:show STREAMID`](#glaze-streamshow-streamid)
 - [`glaze stream:state STREAMID`](#glaze-streamstate-streamid)
 - [`glaze stream:watch STREAMID`](#glaze-streamwatch-streamid)
