@@ -1,9 +1,9 @@
 import { flags } from '@oclif/command'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
-import { Command } from '../../../command'
-import type { CommandFlags } from '../../../command'
-import { parseControllers, parseContent } from '../../../utils'
+import { Command } from '../../command'
+import type { CommandFlags } from '../../command'
+import { parseControllers, parseContent } from '../../utils'
 
 type Flags = CommandFlags & {
   did?: string

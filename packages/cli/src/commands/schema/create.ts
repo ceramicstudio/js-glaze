@@ -1,9 +1,9 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { flags } from '@oclif/command'
 
-import { Command } from '../../../command'
-import type { CommandFlags } from '../../../command'
-import { parseContent, parseControllers } from '../../../utils'
+import { Command } from '../../command'
+import type { CommandFlags } from '../../command'
+import { parseContent, parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
   determinitic?: boolean

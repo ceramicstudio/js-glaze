@@ -1,7 +1,7 @@
 import { StreamID } from '@ceramicnetwork/streamid'
 
-import { Command } from '../../../command'
-import type { CommandFlags } from '../../../command'
+import { Command } from '../../command'
+import type { CommandFlags } from '../../command'
 
 export default class Add extends Command<
   CommandFlags,
