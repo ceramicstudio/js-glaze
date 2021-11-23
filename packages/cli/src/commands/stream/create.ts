@@ -4,19 +4,19 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 import { parseControllers } from '../../utils'
+import { StreamMetadata } from '@ceramicnetwork/common'
 
 type Flags = CommandFlags & {
   'only-genesis'?: boolean
-
-  did?: string
   controller?: string
+  metadata?: StreamMetadata
 }
 
 export default class Create extends Command<
   Flags,
   {
-    schema: string
     content: string
+    schemaId?: string
   }
 > {
   static description = 'Create a new Stream'
@@ -24,8 +24,8 @@ export default class Create extends Command<
   static args = [
     {
       name: 'schema',
-      description: 'the StreamId of the schema to use',
-      required: true,
+      description: 'StreamID of desired Schema',
+      required: false,
     },
     {
       name: 'content',
@@ -42,14 +42,15 @@ export default class Create extends Command<
       description: 'only generate genesis block',
       default: false,
     }),
-
-    did: flags.string({
-      exclusive: ['key'],
-      description: 'Creator DID',
-    }),
     controller: flags.string({
       char: 'c',
-      description: 'Comma separated list of controller',
+      description:
+        'Stream Controller, once set this is the only DID that will be able to update the stream.',
+    }),
+    metadata: flags.string({
+      char: 'm',
+      description: 'Stream Metadata',
+      parse: JSON.parse,
     }),
   }
 
@@ -58,10 +59,8 @@ export default class Create extends Command<
     let did: string | undefined
     if (this.flags.key != null) {
       did = this.authenticatedDID.id
-    } else if (this.flags.did !== null) {
-      did = this.flags.did
     } else {
-      throw new Error('Missing DID')
+      throw new Error('No DID cached, please provide your key.')
     }
     try {
       let parsedControllers: Array<string>
@@ -74,8 +73,10 @@ export default class Create extends Command<
       }
 
       const metadata = {
-        controller: parsedControllers,
-        schema: this.args.schema,
+        controllers: this.flags.metadata?.controllers || parsedControllers,
+        tags: this.flags.metadata?.tags || [],
+        family: this.flags.metadata?.family || '',
+        schema: this.flags.metadata?.schema || '',
       }
 
       const tile = await TileDocument.create(this.ceramic, this.args.content, metadata, {
