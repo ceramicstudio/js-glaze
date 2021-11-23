@@ -7,7 +7,7 @@ import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
   did?: string
-  controllers?: string
+  controller?: string
 }
 
 export default class Update extends Command<
@@ -39,9 +39,9 @@ export default class Update extends Command<
       exclusive: ['key'],
       description: 'Creator DID',
     }),
-    controllers: flags.string({
+    controller: flags.string({
       char: 'c',
-      description: 'Comma separated list of controllers',
+      description: 'Comma separated list of controller',
     }),
   }
 
@@ -58,8 +58,8 @@ export default class Update extends Command<
     }
     try {
       let parsedControllers: Array<string>
-      if (this.flags.controllers !== undefined) {
-        parsedControllers = parseControllers(this.flags.controllers)
+      if (this.flags.controller !== undefined) {
+        parsedControllers = parseControllers(this.flags.controller)
       } else if (did !== undefined) {
         parsedControllers = parseControllers(did)
       } else {
@@ -68,7 +68,7 @@ export default class Update extends Command<
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
 
       const metadata = {
-        controllers: parsedControllers,
+        controller: parsedControllers,
       }
 
       await doc.update(this.args.content, metadata)

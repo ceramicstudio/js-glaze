@@ -6,11 +6,10 @@ import type { CommandFlags } from '../../command'
 import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
-  determinitic?: boolean
   'only-genesis'?: boolean
 
   did?: string
-  controllers?: string
+  controller?: string
 }
 
 export default class Create extends Command<
@@ -26,19 +25,11 @@ export default class Create extends Command<
       name: 'content',
       required: true,
       description: 'Schema Body',
-      parse: JSON.parse
+      parse: JSON.parse,
     },
   ]
   static flags = {
     ...Command.flags,
-    deterministic: flags.boolean({
-      char: 'd',
-      description:
-        'Document content is created deterministically from the inputs.  This means ' +
-        'that creating a schema document with identical content to an existing schema document ' +
-        'will be a no-op.',
-      default: false,
-    }),
     'only-genesis': flags.boolean({
       char: 'g',
       description: 'Only create the genesis object. No anchor will be created',
@@ -49,9 +40,9 @@ export default class Create extends Command<
       exclusive: ['key'],
       description: 'Creator DID',
     }),
-    controllers: flags.string({
+    controller: flags.string({
       char: 'c',
-      description: 'Comma separated list of controllers',
+      description: 'Comma separated list of controller',
     }),
   }
 
@@ -67,21 +58,17 @@ export default class Create extends Command<
     }
     try {
       let parsedControllers: Array<string>
-      if (this.flags.controllers !== undefined) {
-        parsedControllers = parseControllers(this.flags.controllers)
+      if (this.flags.controller !== undefined) {
+        parsedControllers = parseControllers(this.flags.controller)
       } else if (did !== undefined) {
         parsedControllers = parseControllers(did)
       } else {
         throw new Error('No DID to assign as a controller')
       }
 
-      const localDeterministic =
-        this.flags.deterministic !== undefined ? this.flags.determinitic : false
-
       const metadata = {
-        controllers: parsedControllers,
+        controller: parsedControllers,
         schema: undefined,
-        deterministic: localDeterministic,
       }
 
       const tile = await TileDocument.create(this.ceramic, this.args.content, metadata, {

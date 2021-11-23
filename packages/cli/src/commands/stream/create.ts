@@ -6,11 +6,10 @@ import type { CommandFlags } from '../../command'
 import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
-  determinitic?: boolean
   'only-genesis'?: boolean
 
   did?: string
-  controllers?: string
+  controller?: string
 }
 
 export default class Create extends Command<
@@ -32,7 +31,7 @@ export default class Create extends Command<
       name: 'content',
       description: 'the Stream body',
       required: true,
-      parse: JSON.parse
+      parse: JSON.parse,
     },
   ]
 
@@ -43,19 +42,14 @@ export default class Create extends Command<
       description: 'only generate genesis block',
       default: false,
     }),
-    deterministic: flags.boolean({
-      char: 'd',
-      description: 'generate deterministic stream',
-      default: false,
-    }),
 
     did: flags.string({
       exclusive: ['key'],
       description: 'Creator DID',
     }),
-    controllers: flags.string({
+    controller: flags.string({
       char: 'c',
-      description: 'Comma separated list of controllers',
+      description: 'Comma separated list of controller',
     }),
   }
 
@@ -71,21 +65,17 @@ export default class Create extends Command<
     }
     try {
       let parsedControllers: Array<string>
-      if (this.flags.controllers !== undefined) {
-        parsedControllers = parseControllers(this.flags.controllers)
+      if (this.flags.controller !== undefined) {
+        parsedControllers = parseControllers(this.flags.controller)
       } else if (did !== undefined) {
         parsedControllers = parseControllers(did)
       } else {
         throw new Error('No DID to assign as a controller')
       }
 
-      const localDeterministic =
-        this.flags.deterministic !== undefined ? this.flags.determinitic : false
-
       const metadata = {
-        controllers: parsedControllers,
+        controller: parsedControllers,
         schema: this.args.schema,
-        deterministic: localDeterministic,
       }
 
       const tile = await TileDocument.create(this.ceramic, this.args.content, metadata, {
