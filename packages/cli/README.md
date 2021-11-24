@@ -38,7 +38,7 @@ glaze COMMAND
 - [`glaze pin:rm STREAMID`](#glaze-streampinrm-streamid)
 - [`glaze pin:ls STREAMID`](#glaze-streampinls-streamid)
 - [`glaze stream:commits STREAMID`](#glaze-streamcommits-streamid)
-- [`glaze stream:create STREAMID CONTENT`](#glaze-streamcreate-streamid)
+- [`glaze stream:create CONTENT`](#glaze-streamcreate-streamid)
 - [`glaze stream:show STREAMID`](#glaze-streamshow-streamid)
 - [`glaze stream:state STREAMID`](#glaze-streamstate-streamid)
 - [`glaze stream:watch STREAMID`](#glaze-streamwatch-streamid)
@@ -370,7 +370,7 @@ USAGE
   $ glaze pin:rm STREAMID
 
 ARGUMENTS
-  STREAMID  StreamID
+  STREAMID  StreamID to be unpinned
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
@@ -386,59 +386,11 @@ USAGE
   $ glaze pin:ls STREAMID
 
 ARGUMENTS
-  STREAMID  StreamID
+  STREAMID  StreamID to be queried
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Key
-```
-
-### `glaze stream:schema:create CONTENT`
-
-Create a new Schema
-
-```
-USAGE
-  $ glaze stream:schema:create CONTENT
-
-ARGUMENTS
-  CONTENT  Schema Body
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-
-  -d, --deterministic            Document content is created deterministically
-                                 from the inputs.  This means that creating a
-                                 schema document with identical content to an
-                                 existing schema document will be a no-op.
-
-  -g, --only-genesis             Only create the genesis object. No anchor will
-                                 be created
-
-  -k, --key=key                  DID Key
-
-  --did=did                      Creator DID
-
-```
-
-### `glaze stream:schema:update STREAMID CONTENT`
-
-Update a Schema
-
-```
-USAGE
-  $ glaze stream:schema:update STREAMID CONTENT
-
-ARGUMENTS
-  STREAMID  Schema StreamID to be updated
-  CONTENT   Updated Schema structure
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
 ```
 
 ### `glaze stream:commits STREAMID`
@@ -458,30 +410,22 @@ OPTIONS
 
 ```
 
-### `glaze stream:create STREAMID`
+### `glaze stream:create CONTENT`
 
 Create a new Stream
 
 ```
 USAGE
-  $ glaze stream:create [SCHEMA] CONTENT
+  $ glaze stream:create CONTENT
 
 ARGUMENTS
-  SCHEMA   StreamID of desired Schema
   CONTENT  the Stream body
 
 OPTIONS
-  -c, --ceramic=ceramic        Ceramic API URL
-
-  -c, --controller=controller  Stream Controller, once set this is the only DID
-                               that will be able to update the stream.
-
-  -g, --only-genesis           only generate genesis block
-
-  -k, --key=key                DID Key
-
-  -m, --metadata=metadata      Stream Metadata
-
+  -c, --ceramic=ceramic    Ceramic API URL
+  -g, --only-genesis       only generate genesis block
+  -k, --key=key            DID Key
+  -m, --metadata=metadata  Stream Metadata
 ```
 
 ### `glaze stream:show STREAMID`
@@ -506,17 +450,14 @@ Update a stream
 
 ```
 USAGE
-  $ glaze stream:update STREAMID CONTENT
+  $ glaze stream:state STREAMID
 
 ARGUMENTS
   STREAMID  Document StreamID
-  CONTENT   Document Content
 
 OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
+  -c, --ceramic=ceramic  Ceramic API URL
+  -k, --key=key          DID Key
 ```
 
 ### `glaze stream:watch STREAMID`
