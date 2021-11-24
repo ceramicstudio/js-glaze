@@ -1,14 +1,12 @@
 import { flags } from '@oclif/command'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { StreamMetadata } from '@ceramicnetwork/common'
+import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
-import { parseControllers } from '../../utils'
 
 type Flags = CommandFlags & {
-  controller?: string
-  metadata?: StreamMetadata
+  metadata?: TileMetadataArgs
 }
 
 export default class Update extends Command<
@@ -35,11 +33,6 @@ export default class Update extends Command<
   ]
   static flags = {
     ...Command.flags,
-    controller: flags.string({
-      char: 'c',
-      description:
-        'Stream Controller, once set this is the only DID that will be able to update the stream.',
-    }),
     metadata: flags.string({
       char: 'm',
       description: 'Optional metadata for the stream.',
@@ -57,23 +50,11 @@ export default class Update extends Command<
       throw new Error('No DID cached, please provide your key.')
     }
     try {
-      let parsedControllers: Array<string>
-      if (this.flags.controller !== undefined) {
-        parsedControllers = parseControllers(this.flags.controller)
-      } else if (did !== undefined) {
-        parsedControllers = parseControllers(did)
-      } else {
-        throw new Error('No DID cached, please provide your key.')
-      }
-
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
 
-      const metadata = {
-        controllers: this.flags.metadata?.controllers || parsedControllers,
-        tags: this.flags.metadata?.tags || [],
-        family: this.flags.metadata?.family || '',
-        schema: this.flags.metadata?.schema || '',
-      }
+      const metadata = this.flags.metadata || { controllers: [did] }
+
+      metadata?.controllers ? undefined : (metadata.controllers = [did])
 
       await doc.update(this.args.content, metadata)
       this.spinner.succeed('Updated stream')

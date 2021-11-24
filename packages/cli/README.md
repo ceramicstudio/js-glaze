@@ -34,11 +34,9 @@ glaze COMMAND
 - [`glaze model:inspect NAME`](#glaze-modelinspect-name)
 - [`glaze model:list`](#glaze-modellist)
 - [`glaze model:publish NAME [OUTPUT]`](#glaze-modelpublish-name-output)
-- [`glaze stream:pin:add STREAMID`](#glaze-streampinadd-streamid)
-- [`glaze stream:pin:rm STREAMID`](#glaze-streampinrm-streamid)
-- [`glaze stream:pin:ls STREAMID`](#glaze-streampinls-streamid)
-- [`glaze stream:schema:create CONTENT`](#glaze-streamschemacreate-content)
-- [`glaze stream:schema:update STREAMID CONTENT`](#glaze-streamschemaupdate-streamid-content)
+- [`glaze pin:add STREAMID`](#glaze-streampinadd-streamid)
+- [`glaze pin:rm STREAMID`](#glaze-streampinrm-streamid)
+- [`glaze pin:ls STREAMID`](#glaze-streampinls-streamid)
 - [`glaze stream:commits STREAMID`](#glaze-streamcommits-streamid)
 - [`glaze stream:create STREAMID CONTENT`](#glaze-streamcreate-streamid)
 - [`glaze stream:show STREAMID`](#glaze-streamshow-streamid)
@@ -347,13 +345,13 @@ OPTIONS
   -k, --key=key    DID Key
 ```
 
-### `glaze stream:pin:add STREAMID`
+### `glaze pin:add STREAMID`
 
 Pin Stream
 
 ```
 USAGE
-  $ glaze stream:pin:add STREAMID
+  $ glaze pin:add STREAMID
 
 ARGUMENTS
   STREAMID  StreamID
@@ -363,13 +361,13 @@ OPTIONS
   -k, --key=key          DID Key
 ```
 
-### `glaze stream:pin:rm STREAMID`
+### `glaze pin:rm STREAMID`
 
 Unpin Stream
 
 ```
 USAGE
-  $ glaze stream:pin:rm STREAMID
+  $ glaze pin:rm STREAMID
 
 ARGUMENTS
   STREAMID  StreamID
@@ -379,13 +377,13 @@ OPTIONS
   -k, --key=key          DID Key
 ```
 
-### `glaze stream:pin:ls STREAMID`
+### `glaze pin:ls STREAMID`
 
 List pinned Streams
 
 ```
 USAGE
-  $ glaze stream:pin:ls STREAMID
+  $ glaze pin:ls STREAMID
 
 ARGUMENTS
   STREAMID  StreamID
@@ -466,19 +464,23 @@ Create a new Stream
 
 ```
 USAGE
-  $ glaze stream:create SCHEMA CONTENT
+  $ glaze stream:create [SCHEMA] CONTENT
 
 ARGUMENTS
-  SCHEMA   the StreamId of the schema to use
+  SCHEMA   StreamID of desired Schema
   CONTENT  the Stream body
 
 OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -d, --deterministic            generate deterministic stream
-  -g, --only-genesis             only generate genesis block
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
+  -c, --ceramic=ceramic        Ceramic API URL
+
+  -c, --controller=controller  Stream Controller, once set this is the only DID
+                               that will be able to update the stream.
+
+  -g, --only-genesis           only generate genesis block
+
+  -k, --key=key                DID Key
+
+  -m, --metadata=metadata      Stream Metadata
 
 ```
 
