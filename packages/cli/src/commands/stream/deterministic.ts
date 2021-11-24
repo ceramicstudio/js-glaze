@@ -45,13 +45,9 @@ export default class Deterministic extends Command<
     try {
       const metadata = {
         ...this.flags.metadata,
-        anchor: false,
-        publish: false,
         deterministic: true,
       } || {
         controllers: [did],
-        anchor: false,
-        publish: false,
         deterministic: true,
       }
 
