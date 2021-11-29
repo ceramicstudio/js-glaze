@@ -7,7 +7,7 @@ import { ModelManager } from '@glazed/devtools'
 import { DIDDataStore } from '@glazed/did-datastore'
 import type { PublishedModel } from '@glazed/types'
 import { Command as Cmd, flags } from '@oclif/command'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { DID } from 'dids'
 import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
@@ -15,6 +15,7 @@ import KeyResolver from 'key-did-resolver'
 import ora from 'ora'
 import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
+import type { CeramicApi } from '@ceramicnetwork/common'
 
 import { config } from './config'
 import { createDataModel, loadManagedModel } from './model'
@@ -114,12 +115,16 @@ export abstract class Command<
   getDataStore<ModelTypes extends PublishedModel = PublishedModel>(
     model: DataModel<ModelTypes>
   ): DIDDataStore<ModelTypes> {
-    return new DIDDataStore({ autopin: true, ceramic: this.ceramic, model })
+    return new DIDDataStore({
+      autopin: true,
+      ceramic: this.ceramic as unknown as CeramicApi,
+      model,
+    })
   }
 
   async getModelManager(name: string): Promise<ModelManager> {
     const model = await loadManagedModel(name)
-    return ModelManager.fromJSON(this.ceramic, model)
+    return ModelManager.fromJSON(this.ceramic as unknown as CeramicApi, model)
   }
 
   logJSON(data: unknown): void {

@@ -53,7 +53,7 @@ export default class Deterministic extends Command<
 
       metadata?.controllers ? undefined : (metadata.controllers = [did])
 
-      const tile = await TileDocument.create(this.ceramic, this.args.content, metadata)
+      const tile = await TileDocument.deterministic(this.ceramic, metadata)
 
       this.spinner.succeed(`Created Stream ${tile.commitId.toString()}.`)
       this.logJSON({

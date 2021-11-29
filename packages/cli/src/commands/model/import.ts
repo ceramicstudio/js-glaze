@@ -6,6 +6,7 @@ import type { CommandFlags } from '../../command'
 import { config } from '../../config'
 import { loadManagedModel } from '../../model'
 import { read, write } from '../../fs'
+import { CeramicApi } from '@ceramicnetwork/common'
 
 type Args = {
   localName: string
@@ -32,7 +33,7 @@ export default class ImportModel extends Command<CommandFlags, Args> {
       }
 
       const model = await read<EncodedManagedModel>(models[localName].path)
-      const manager = ModelManager.fromJSON(this.ceramic, model)
+      const manager = ModelManager.fromJSON(this.ceramic as unknown as CeramicApi, model)
 
       const toImport = await loadManagedModel(importName)
       manager.addJSONModel(toImport)
