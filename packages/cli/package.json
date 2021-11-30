@@ -33,7 +33,7 @@
     "postpack": "del oclif.manifest.json",
     "build": "del lib && tsc && cp src/index.js lib",
     "prepack": "yarn build && oclif-dev manifest",
-    "test": " mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": " mocha --forbid-only \"test/**/*.test.ts\" --require ts-node/register",
     "test_coverage": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\" --require ts-node/register"
   },
   "jest": {
@@ -87,6 +87,7 @@
     "listr": "^0.14.3",
     "listr-update-renderer": "^0.5.0",
     "ora": "^5.3.0",
+    "streamtest": "^2.0.0",
     "uint8arrays": "^3.0.0",
     "update-notifier": "^5.1.0"
   },
@@ -101,8 +102,9 @@
     "@types/node": "^16.11.6",
     "@types/update-notifier": "^5.1.0",
     "ajv": "^8.6.3",
+    "get-stream": "^6.0.1",
     "globby": "^11.0.2",
-    "mocha": "^8.2.1",
+    "mocha": "^5",
     "nyc": "^15.1.0",
     "ts-node": "^10.4.0",
     "tslib": "^2.3.1"
