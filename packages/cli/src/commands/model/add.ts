@@ -7,7 +7,6 @@ import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 import { config } from '../../config'
 import { read, write } from '../../fs'
-import { CeramicApi } from '@ceramicnetwork/common'
 
 type Flags = CommandFlags & {
   schema?: string
@@ -49,7 +48,7 @@ export default class AddModel extends Command<Flags, Args> {
       }
 
       const model = await read<EncodedManagedModel>(models[name].path)
-      const manager = ModelManager.fromJSON(this.ceramic as unknown as CeramicApi, model)
+      const manager = ModelManager.fromJSON(this.ceramic, model)
 
       try {
         const id = StreamRef.from(stream)

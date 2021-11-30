@@ -31,7 +31,7 @@
   "scripts": {
     "lint": "eslint src",
     "postpack": "del oclif.manifest.json",
-    "build": "del lib && tsc && cp src/index.js lib",
+    "build": "del lib && tsc -b && cp src/index.js lib",
     "prepack": "yarn build && oclif-dev manifest"
   },
   "oclif": {
@@ -42,13 +42,19 @@
         "description": "Manage local configuration details."
       },
       "did": {
-        "description": "Manage local DIDs."
+        "description": "Create and interact with DIDs."
       },
       "model": {
-        "description": "Interact with DataStore models."
+        "description": "Interact with data models."
+      },
+      "pin": {
+        "description": "Interact with Ceramic streams pins."
       },
       "stream": {
-        "description": "Interact with Ceramic Streams."
+        "description": "Interact with Ceramic streams."
+      },
+      "tile": {
+        "description": "Interact with Ceramic Tile streams."
       }
     },
     "plugins": [

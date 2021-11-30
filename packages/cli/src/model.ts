@@ -1,4 +1,3 @@
-import { CeramicApi } from '@ceramicnetwork/common'
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
@@ -37,14 +36,13 @@ export async function publishManagedModel(
   ceramic: CeramicClient,
   model: EncodedManagedModel
 ): Promise<PublishedModel> {
-  return await ModelManager.fromJSON(ceramic as unknown as CeramicApi, model).toPublished()
+  return await ModelManager.fromJSON(ceramic, model).toPublished()
 }
 
 export async function createDataModel(
-  _ceramic: CeramicClient,
+  ceramic: CeramicClient,
   name: string
 ): Promise<DataModel<PublishedModel>> {
-  const model = await publishManagedModel(_ceramic, await loadManagedModel(name))
-  const ceramic = _ceramic as unknown as CeramicApi
+  const model = await publishManagedModel(ceramic, await loadManagedModel(name))
   return new DataModel<PublishedModel>({ ceramic, model })
 }

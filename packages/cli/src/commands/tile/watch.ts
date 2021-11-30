@@ -4,23 +4,19 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
-export default class Watch extends Command<
-  CommandFlags,
-  {
-    streamId: string
-  }
-> {
-  static description = 'Monitor stream for any updates.'
+export default class Watch extends Command<CommandFlags, { streamId: string }> {
+  static description = 'monitor stream for any updates'
+
   static args = [
     {
       name: 'streamId',
       required: true,
-      description: 'Stream ID',
+      description: 'ID of the stream',
     },
   ]
 
   async run(): Promise<void> {
-    this.spinner.start('Finding Stream...')
+    this.spinner.start('Loading stream...')
     try {
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
       doc.subscribe(() => {

@@ -3,18 +3,14 @@ import { StreamID } from '@ceramicnetwork/streamid'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
-export default class Remove extends Command<
-  CommandFlags,
-  {
-    streamId: string
-  }
-> {
-  static description = 'Unpin Stream'
+export default class Remove extends Command<CommandFlags, { streamId: string }> {
+  static description = 'unpin a stream'
+
   static args = [
     {
       name: 'streamId',
       required: true,
-      description: 'StreamID to be unpinned',
+      description: 'ID of stream to be unpinned',
     },
   ]
 

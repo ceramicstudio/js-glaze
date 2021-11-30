@@ -9,24 +9,18 @@ type Flags = CommandFlags & {
   metadata?: TileMetadataArgs
 }
 
-export default class Update extends Command<
-  Flags,
-  {
-    content: string
-    streamId: string
-  }
-> {
+export default class Update extends Command<Flags, { content: string; streamId: string }> {
   static description = 'Update a stream'
 
   static args = [
     {
       name: 'streamId',
-      description: 'Document StreamID',
+      description: 'ID of the stream',
       required: true,
     },
     {
       name: 'content',
-      description: 'Document Content',
+      description: 'new contents for the stream',
       required: true,
       parse: JSON.parse,
     },
@@ -35,30 +29,18 @@ export default class Update extends Command<
     ...Command.flags,
     metadata: flags.string({
       char: 'm',
-      description: 'Optional metadata for the stream.',
+      description: 'Optional metadata for the stream',
       parse: JSON.parse,
     }),
   }
 
   async run(): Promise<void> {
     this.spinner.start('Updating stream...')
-
-    let did: string | undefined
-    if (this.flags.key != null) {
-      did = this.authenticatedDID.id
-    } else {
-      throw new Error('No DID cached, please provide your key.')
-    }
     try {
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
-
-      const metadata = this.flags.metadata || { controllers: [did] }
-
-      metadata?.controllers ? undefined : (metadata.controllers = [did])
-
-      await doc.update(this.args.content, metadata)
+      await doc.update(this.args.content, this.flags.metadata)
       this.spinner.succeed('Updated stream')
-      this.logJSON({ commitId: doc.commitId.toString(), content: doc.content })
+      this.logJSON({ commitID: doc.commitId.toString(), content: doc.content })
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }

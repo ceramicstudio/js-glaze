@@ -10,7 +10,6 @@ import UpdaterRenderer from 'listr-update-renderer'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 import { EMPTY_MODEL } from '../../model'
-import { CeramicApi } from '@ceramicnetwork/common'
 
 type Flags = CommandFlags & {
   did?: string
@@ -37,7 +36,7 @@ export default class InspectDID extends Command<Flags> {
       }
 
       const store = new DIDDataStore({
-        ceramic: this.ceramic as unknown as CeramicApi,
+        ceramic: this.ceramic,
         model: EMPTY_MODEL,
       })
       const index = await store.getIndex(did)
