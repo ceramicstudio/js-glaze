@@ -114,11 +114,7 @@ export abstract class Command<
   getDataStore<ModelTypes extends PublishedModel = PublishedModel>(
     model: DataModel<ModelTypes>
   ): DIDDataStore<ModelTypes> {
-    return new DIDDataStore({
-      autopin: true,
-      ceramic: this.ceramic,
-      model,
-    })
+    return new DIDDataStore({ autopin: true, ceramic: this.ceramic, model })
   }
 
   async getModelManager(name: string): Promise<ModelManager> {

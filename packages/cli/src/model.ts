@@ -1,4 +1,4 @@
-import { CeramicClient } from '@ceramicnetwork/http-client'
+import type { CeramicApi } from '@ceramicnetwork/common'
 import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
 import type { EncodedManagedModel, PublishedModel } from '@glazed/types'
@@ -33,14 +33,14 @@ export async function loadManagedModel(name: string): Promise<EncodedManagedMode
 }
 
 export async function publishManagedModel(
-  ceramic: CeramicClient,
+  ceramic: CeramicApi,
   model: EncodedManagedModel
 ): Promise<PublishedModel> {
   return await ModelManager.fromJSON(ceramic, model).toPublished()
 }
 
 export async function createDataModel(
-  ceramic: CeramicClient,
+  ceramic: CeramicApi,
   name: string
 ): Promise<DataModel<PublishedModel>> {
   const model = await publishManagedModel(ceramic, await loadManagedModel(name))

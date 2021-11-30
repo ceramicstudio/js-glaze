@@ -35,10 +35,7 @@ export default class InspectDID extends Command<Flags> {
         throw new Error('Missing DID')
       }
 
-      const store = new DIDDataStore({
-        ceramic: this.ceramic,
-        model: EMPTY_MODEL,
-      })
+      const store = new DIDDataStore({ ceramic: this.ceramic, model: EMPTY_MODEL })
       const index = await store.getIndex(did)
       if (index == null) {
         this.spinner.warn('Index stream is empty')
