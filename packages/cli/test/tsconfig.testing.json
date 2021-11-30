@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "esnext",
-    "esModuleInterop": true
-  },
-  "include": ["**/*.test.ts"]
-}
