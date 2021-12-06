@@ -450,7 +450,7 @@ OPTIONS
 
 ### `glaze tile:deterministic METADATA`
 
-load a deterministic Tile stream
+load a deterministic Tile stream, or create it if it doesn't already exist
 
 ```
 USAGE
