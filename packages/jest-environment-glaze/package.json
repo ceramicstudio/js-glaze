@@ -22,7 +22,7 @@
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "dids": "^2.4.0",
+    "dids": "^2.4.3",
     "jest-environment-ceramic": "^0.14.0",
     "key-did-provider-ed25519": "^1.1.0",
     "key-did-resolver": "^1.4.0",
