@@ -1,12 +1,12 @@
 import type { EncodedDagJWS, EncodedDagJWSResult, ManagedEntry, ManagedModel } from '@glazed/types'
-import CID from 'cids'
 import type { DagJWS, DagJWSResult } from 'dids'
+import { CID } from 'multiformats/cid'
 import { fromString, toString } from 'uint8arrays'
 
 import { applyMap } from './utils'
 
 export function decodeDagJWS({ payload, signatures, link }: EncodedDagJWS): DagJWS {
-  return { payload, signatures, link: link ? new CID(link) : undefined }
+  return { payload, signatures, link: link ? CID.parse(link) : undefined }
 }
 
 export function encodeDagJWS({ payload, signatures, link }: DagJWS): EncodedDagJWS {

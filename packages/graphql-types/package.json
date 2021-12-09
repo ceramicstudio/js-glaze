@@ -13,24 +13,22 @@
     "url": "https://github.com/ceramicstudio/js-glaze",
     "directory": "packages/graphql-types"
   },
-  "main": "dist/lib.cjs",
-  "module": "dist/lib.mjs",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "main": "dist/lib.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/lib.mjs",
-    "require": "./dist/lib.cjs",
-    "default": "./dist/lib.cjs"
+    "*": "./dist/lib.js"
   },
   "files": [
     "dist",
     "src"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "sideEffects": false,
   "scripts": {
-    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && rollup -c ../../rollup.config.js",
+    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && swc src -s -d ./dist --config-file ../../swc.json",
     "lint": "eslint src --fix",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"

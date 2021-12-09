@@ -15,6 +15,7 @@
     "url": "https://github.com/ceramicstudio/js-glaze",
     "directory": "packages/jest-environment-glaze"
   },
+  "type": "module",
   "main": "index.js",
   "files": [],
   "scripts": {
@@ -22,10 +23,10 @@
     "prepare": "npm run lint"
   },
   "dependencies": {
-    "dids": "^2.4.0",
+    "dids": "^3.0.0-alpha.1",
     "jest-environment-ceramic": "^0.14.0",
     "key-did-provider-ed25519": "^1.1.0",
-    "key-did-resolver": "^1.4.0",
+    "key-did-resolver": "^2.0.0-alpha.0",
     "uint8arrays": "^3.0.0"
   }
 }

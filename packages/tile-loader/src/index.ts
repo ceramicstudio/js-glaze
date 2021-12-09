@@ -19,6 +19,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
+import type { BatchLoadFn } from 'dataloader'
 
 /**
  * Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
@@ -89,6 +90,8 @@ export async function getDeterministicQuery(metadata: TileMetadataArgs): Promise
   return { genesis, streamId }
 }
 
+const tempBatchLoadFn: BatchLoadFn<TileKey, TileDocument> = () => Promise.resolve([])
+
 /**
  * A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
  */
@@ -97,26 +100,27 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
   #useCache: boolean
 
   constructor(params: TileLoaderParams) {
-    super(
-      async (keys) => {
-        if (!params.cache) {
-          // Disable cache but keep batching behavior - from https://github.com/graphql/dataloader#disabling-cache
-          this.clearAll()
-        }
-        const results = await params.ceramic.multiQuery(keys.map(keyToQuery))
-        return keys.map((key) => {
-          const id = keyToString(key)
-          const doc = results[id]
-          return doc ? (doc as TileDocument) : new Error(`Failed to load stream: ${id}`)
-        })
-      },
-      {
-        cache: true, // Cache needs to be enabled for batching
-        cacheKeyFn: keyToString,
-        cacheMap:
-          params.cache != null && typeof params.cache !== 'boolean' ? params.cache : undefined,
+    super(tempBatchLoadFn, {
+      cache: true, // Cache needs to be enabled for batching
+      cacheKeyFn: keyToString,
+      cacheMap:
+        params.cache != null && typeof params.cache !== 'boolean' ? params.cache : undefined,
+    })
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore internal method
+    this._batchLoadFn = async (keys: ReadonlyArray<TileKey>) => {
+      if (!params.cache) {
+        // Disable cache but keep batching behavior - from https://github.com/graphql/dataloader#disabling-cache
+        this.clearAll()
       }
-    )
+      const results = await params.ceramic.multiQuery(keys.map(keyToQuery))
+      return keys.map((key) => {
+        const id = keyToString(key)
+        const doc = results[id]
+        return doc ? (doc as TileDocument) : new Error(`Failed to load stream: ${id}`)
+      })
+    }
 
     this.#ceramic = params.ceramic
     this.#useCache = !!params.cache
