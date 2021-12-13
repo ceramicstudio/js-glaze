@@ -18,12 +18,11 @@ export default class List extends Command<CommandFlags, { streamId?: string }> {
     try {
       const id = this.args.streamId ? StreamID.fromString(this.args.streamId) : undefined
       const iterator = await this.ceramic.pin.ls(id)
-      const pinnedStreamIds = []
       for await (const id of iterator) {
-        pinnedStreamIds.push(id)
+        this.log(id.toString())
       }
       this.spinner.succeed('Loaded pins list.')
-      this.log(pinnedStreamIds.toString())
+      // this.log(pinnedStreamIds.toString())
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }
