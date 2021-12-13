@@ -3,18 +3,14 @@ import { StreamID } from '@ceramicnetwork/streamid'
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
-export default class Add extends Command<
-  CommandFlags,
-  {
-    streamId: string
-  }
-> {
-  static description = 'Pin Stream'
+export default class Add extends Command<CommandFlags, { streamId: string }> {
+  static description = 'pin a stream'
+
   static args = [
     {
       name: 'streamId',
       required: true,
-      description: 'StreamID to be pinned',
+      description: 'ID of stream to be pinned',
     },
   ]
 

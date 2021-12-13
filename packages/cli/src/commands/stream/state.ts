@@ -1,19 +1,14 @@
 import { Command } from '../../command'
 import type { CommandFlags } from '../../command'
 
-export default class State extends Command<
-  CommandFlags,
-  {
-    streamId: string
-  }
-> {
-  static description = 'Get the state of a Stream'
+export default class State extends Command<CommandFlags, { streamId: string }> {
+  static description = 'get the state of a Stream'
 
   static args = [
     {
       name: 'streamId',
       required: true,
-      description: 'Document StreamID',
+      description: 'ID of the Stream',
     },
   ]
 

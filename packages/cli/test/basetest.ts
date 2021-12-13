@@ -10,3 +10,12 @@ describe('stream', async () => {
       expect(ctx.stderr).to.contain('Created DID')
     })
 })
+
+describe('deterministic', () => {
+  test
+    .stderr()
+    .command([''])
+    .it('', (ctx) => {
+      expect(ctx.stderr).to.contain('')
+    })
+})

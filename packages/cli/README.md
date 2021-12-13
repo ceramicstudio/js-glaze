@@ -14,6 +14,8 @@ npm install -g @glazed/cli
 glaze COMMAND
 ```
 
+<!-- commands -->
+
 - [`glaze config:get KEY`](#glaze-configget-key)
 - [`glaze config:reset KEY`](#glaze-configreset-key)
 - [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
@@ -34,16 +36,16 @@ glaze COMMAND
 - [`glaze model:inspect NAME`](#glaze-modelinspect-name)
 - [`glaze model:list`](#glaze-modellist)
 - [`glaze model:publish NAME [OUTPUT]`](#glaze-modelpublish-name-output)
-- [`glaze stream:pin:add STREAMID`](#glaze-streampinadd-streamid)
-- [`glaze stream:pin:rm STREAMID`](#glaze-streampinrm-streamid)
-- [`glaze stream:pin:ls STREAMID`](#glaze-streampinls-streamid)
-- [`glaze stream:schema:create CONTENT`](#glaze-streamschemacreate-content)
-- [`glaze stream:schema:update STREAMID CONTENT`](#glaze-streamschemaupdate-streamid-content)
+- [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
+- [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
+- [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
 - [`glaze stream:commits STREAMID`](#glaze-streamcommits-streamid)
-- [`glaze stream:create STREAMID CONTENT`](#glaze-streamcreate-streamid)
-- [`glaze stream:show STREAMID`](#glaze-streamshow-streamid)
 - [`glaze stream:state STREAMID`](#glaze-streamstate-streamid)
-- [`glaze stream:watch STREAMID`](#glaze-streamwatch-streamid)
+- [`glaze tile:create CONTENT`](#glaze-tilecreate-content)
+- [`glaze tile:deterministic METADATA`](#glaze-tiledeterministic-metadata)
+- [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
+- [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
+- [`glaze tile:watch STREAMID`](#glaze-tilewatch-streamid)
 
 ### `glaze config:get KEY`
 
@@ -55,7 +57,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze config:reset KEY`
@@ -68,7 +70,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze config:set KEY VALUE`
@@ -81,7 +83,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze config:show`
@@ -94,7 +96,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze did:create`
@@ -107,7 +109,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze did:get MODEL ALIAS`
@@ -124,7 +126,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
   --did=did              DID
 ```
 
@@ -138,7 +140,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
   --did=did              DID
 ```
 
@@ -157,7 +159,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze did:set MODEL ALIAS CONTENTS`
@@ -175,7 +177,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze did:sign CONTENTS`
@@ -191,7 +193,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze did:verify JWS`
@@ -207,7 +209,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze help [COMMAND]`
@@ -237,11 +239,12 @@ ARGUMENTS
   NAME
   TYPE    (schema|definition|tile)
   ALIAS
-  STREAM  Stream ID or string-encoded JSON content
+  STREAM  Stream reference or string-encoded JSON content
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
+  --schema=schema        tile schema
 ```
 
 ### `glaze model:create NAME`
@@ -254,7 +257,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:delete NAME`
@@ -268,7 +271,7 @@ USAGE
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -f, --force            bypass confirmation prompt
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:export NAME [OUTPUT]`
@@ -285,7 +288,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:import LOCALNAME IMPORTNAME`
@@ -298,7 +301,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:inspect NAME`
@@ -314,7 +317,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:list`
@@ -327,7 +330,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
 ### `glaze model:publish NAME [OUTPUT]`
@@ -344,154 +347,67 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key    DID Key
+  -k, --key=key          DID Key
 ```
 
-### `glaze stream:pin:add STREAMID`
+### `glaze pin:add STREAMID`
 
-Pin Stream
+pin a stream
 
 ```
 USAGE
-  $ glaze stream:pin:add STREAMID
+  $ glaze pin:add STREAMID
 
 ARGUMENTS
-  STREAMID  StreamID
+  STREAMID  ID of stream to be pinned
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Key
 ```
 
-### `glaze stream:pin:rm STREAMID`
+### `glaze pin:ls [STREAMID]`
 
-Unpin Stream
+list pinned streams
 
 ```
 USAGE
-  $ glaze stream:pin:rm STREAMID
+  $ glaze pin:ls [STREAMID]
 
 ARGUMENTS
-  STREAMID  StreamID
+  STREAMID  optional stream ID filter
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Key
 ```
 
-### `glaze stream:pin:ls STREAMID`
+### `glaze pin:rm STREAMID`
 
-List pinned Streams
+unpin a stream
 
 ```
 USAGE
-  $ glaze stream:pin:ls STREAMID
+  $ glaze pin:rm STREAMID
 
 ARGUMENTS
-  STREAMID  StreamID
+  STREAMID  ID of stream to be unpinned
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Key
-```
-
-### `glaze stream:schema:create CONTENT`
-
-Create a new Schema
-
-```
-USAGE
-  $ glaze stream:schema:create CONTENT
-
-ARGUMENTS
-  CONTENT  Schema Body
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-
-  -d, --deterministic            Document content is created deterministically
-                                 from the inputs.  This means that creating a
-                                 schema document with identical content to an
-                                 existing schema document will be a no-op.
-
-  -g, --only-genesis             Only create the genesis object. No anchor will
-                                 be created
-
-  -k, --key=key                  DID Key
-
-  --did=did                      Creator DID
-
-```
-
-### `glaze stream:schema:update STREAMID CONTENT`
-
-Update a Schema
-
-```
-USAGE
-  $ glaze stream:schema:update STREAMID CONTENT
-
-ARGUMENTS
-  STREAMID  Schema StreamID to be updated
-  CONTENT   Updated Schema structure
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
 ```
 
 ### `glaze stream:commits STREAMID`
 
-List commits contained within a Stream.
+list commits contained within a stream
 
 ```
 USAGE
   $ glaze stream:commits STREAMID
 
 ARGUMENTS
-  STREAMID  StreamID to be queried.
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Key
-
-```
-
-### `glaze stream:create STREAMID`
-
-Create a new Stream
-
-```
-USAGE
-  $ glaze stream:create SCHEMA CONTENT
-
-ARGUMENTS
-  SCHEMA   the StreamId of the schema to use
-  CONTENT  the Stream body
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -d, --deterministic            generate deterministic stream
-  -g, --only-genesis             only generate genesis block
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
-
-```
-
-### `glaze stream:show STREAMID`
-
-Show content of a Stream
-
-```
-USAGE
-  $ glaze stream:show STREAMID
-
-ARGUMENTS
-  STREAMID  StreamID to be queried
+  STREAMID  ID of the stream
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
@@ -500,38 +416,105 @@ OPTIONS
 
 ### `glaze stream:state STREAMID`
 
-Update a stream
+get the state of a Stream
 
 ```
 USAGE
-  $ glaze stream:update STREAMID CONTENT
+  $ glaze stream:state STREAMID
 
 ARGUMENTS
-  STREAMID  Document StreamID
-  CONTENT   Document Content
-
-OPTIONS
-  -c, --ceramic=ceramic          Ceramic API URL
-  -c, --controllers=controllers  Comma separated list of controllers
-  -k, --key=key                  DID Key
-  --did=did                      Creator DID
-```
-
-### `glaze stream:watch STREAMID`
-
-Monitor Stream for any updates.
-
-```
-USAGE
-  $ glaze stream:watch STREAMID
-
-ARGUMENTS
-  STREAMID  Stream ID
+  STREAMID  ID of the Stream
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Key
 ```
+
+### `glaze tile:create CONTENT`
+
+create a new Tile stream
+
+```
+USAGE
+  $ glaze tile:create CONTENT
+
+ARGUMENTS
+  CONTENT  stream contents (JSON encoded as string)
+
+OPTIONS
+  -c, --ceramic=ceramic    Ceramic API URL
+  -g, --only-genesis       only generate genesis commit
+  -k, --key=key            DID Key
+  -m, --metadata=metadata  stream metadata
+```
+
+### `glaze tile:deterministic METADATA`
+
+load a deterministic Tile stream
+
+```
+USAGE
+  $ glaze tile:deterministic METADATA
+
+ARGUMENTS
+  METADATA  stream metadata
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -k, --key=key          DID Key
+```
+
+### `glaze tile:show STREAMID`
+
+show the contents of a Tile stream
+
+```
+USAGE
+  $ glaze tile:show STREAMID
+
+ARGUMENTS
+  STREAMID  ID of the stream
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -k, --key=key          DID Key
+```
+
+### `glaze tile:update STREAMID CONTENT`
+
+Update a stream
+
+```
+USAGE
+  $ glaze tile:update STREAMID CONTENT
+
+ARGUMENTS
+  STREAMID  ID of the stream
+  CONTENT   new contents for the stream
+
+OPTIONS
+  -c, --ceramic=ceramic    Ceramic API URL
+  -k, --key=key            DID Key
+  -m, --metadata=metadata  Optional metadata for the stream
+```
+
+### `glaze tile:watch STREAMID`
+
+monitor stream for any updates
+
+```
+USAGE
+  $ glaze tile:watch STREAMID
+
+ARGUMENTS
+  STREAMID  ID of the stream
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -k, --key=key          DID Key
+```
+
+<!-- commandsstop -->
 
 ## License
 

@@ -24,6 +24,7 @@ export function extractSchemaReferences(schema: Schema, path = ''): Record<strin
     return refs != null && refs.length > 0 ? { [path]: refs } : {}
   }
   if (schema.type === 'array') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return extractSchemaReferences(schema.items, path)
   }
   if (schema.type === 'object' && schema.properties != null) {

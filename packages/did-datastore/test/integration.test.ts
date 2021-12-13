@@ -1,6 +1,7 @@
 /**
  * @jest-environment glaze
  */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { ModelManager } from '@glazed/devtools'
