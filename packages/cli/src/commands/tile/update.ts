@@ -7,6 +7,7 @@ import type { CommandFlags } from '../../command'
 
 type Flags = CommandFlags & {
   metadata?: TileMetadataArgs
+  content?: Record<string, unknown>
 }
 
 export default class Update extends Command<Flags, { content: string; streamId: string }> {
@@ -18,12 +19,6 @@ export default class Update extends Command<Flags, { content: string; streamId: 
       description: 'ID of the stream',
       required: true,
     },
-    {
-      name: 'content',
-      description: 'new contents for the stream',
-      required: true,
-      parse: JSON.parse,
-    },
   ]
   static flags = {
     ...Command.flags,
@@ -32,15 +27,23 @@ export default class Update extends Command<Flags, { content: string; streamId: 
       description: 'Optional metadata for the stream',
       parse: JSON.parse,
     }),
+    content: flags.string({
+      char: 'b',
+      description: 'new contents for the stream',
+      parse: JSON.parse,
+    }),
   }
 
   async run(): Promise<void> {
     this.spinner.start('Updating stream...')
     try {
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
-      await doc.update(this.args.content, this.flags.metadata)
+      await doc.update(this.flags.content, this.flags.metadata)
       this.spinner.succeed('Updated stream')
-      this.logJSON({ commitID: doc.commitId.toString(), content: doc.content })
+      this.logJSON({
+        streamID: this.args.streamId,
+        content: doc.content,
+      })
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }

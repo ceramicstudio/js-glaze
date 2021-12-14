@@ -31,7 +31,6 @@ export default class DeterministicTile extends Command<
       this.spinner.succeed(`Loaded stream ${tile.id.toString()}.`)
       this.logJSON({
         streamID: tile.id.toString(),
-        commitID: tile.commitId.toString(),
         content: tile.content,
       })
     } catch (e) {
