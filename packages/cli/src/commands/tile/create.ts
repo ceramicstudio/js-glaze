@@ -21,7 +21,7 @@ export default class CreateTile extends Command<Flags, { content: string }> {
       parse: JSON.parse,
     }),
     content: flags.string({
-      char: 'c',
+      char: 'b',
       description: 'stream contents (JSON encoded as string)',
       parse: JSON.parse,
     }),
@@ -33,7 +33,7 @@ export default class CreateTile extends Command<Flags, { content: string }> {
       const metadata = this.flags.metadata ?? {}
       metadata.controllers = [this.authenticatedDID.id]
 
-      const tile = await TileDocument.create(this.ceramic, this.args.content, metadata)
+      const tile = await TileDocument.create(this.ceramic, this.flags.content, metadata)
 
       this.spinner.succeed(`Created stream ${tile.id.toString()}.`)
       this.logJSON({

@@ -28,7 +28,7 @@ export default class Update extends Command<Flags, { content: string; streamId: 
       parse: JSON.parse,
     }),
     content: flags.string({
-      char: 'c',
+      char: 'b',
       description: 'new contents for the stream',
       parse: JSON.parse,
     }),
@@ -38,9 +38,12 @@ export default class Update extends Command<Flags, { content: string; streamId: 
     this.spinner.start('Updating stream...')
     try {
       const doc = await TileDocument.load(this.ceramic, this.args.streamId)
-      await doc.update(this.args.content, this.flags.metadata)
+      await doc.update(this.flags.content, this.flags.metadata)
       this.spinner.succeed('Updated stream')
-      this.logJSON({ content: doc.content })
+      this.logJSON({
+        streamID: this.args.streamId,
+        content: doc.content,
+      })
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }

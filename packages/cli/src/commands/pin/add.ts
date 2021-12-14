@@ -17,9 +17,8 @@ export default class Add extends Command<CommandFlags, { streamId: string }> {
   async run(): Promise<void> {
     this.spinner.start(`Pinning stream ${this.args.streamId}...`)
     try {
-      const result = await this.ceramic.pin.add(StreamID.fromString(this.args.streamId))
+      await this.ceramic.pin.add(StreamID.fromString(this.args.streamId))
       this.spinner.succeed('Stream pinned.')
-      this.logJSON(result)
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }
