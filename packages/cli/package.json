@@ -33,7 +33,7 @@
     "postpack": "del oclif.manifest.json",
     "build": "del lib && tsc && cp src/index.js lib",
     "prepack": "yarn build && oclif-dev manifest",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\" --require ts-node/register",
+    "test": "ceramic daemon --network inmemory & mocha --forbid-only \"test/**/*.test.ts\" --require ts-node/register",
     "test_coverage": "nyc mocha --forbid-only \"test/**/*.test.ts\" --require ts-node/register"
   },
   "jest": {
