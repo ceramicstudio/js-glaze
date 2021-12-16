@@ -12,7 +12,7 @@
   "scripts": {
     "lerna": "lerna",
     "docs": "typedoc --tsconfig tsconfig.docs.json",
-    "test": "jest",
+    "test": "jest && yarn --cwd ./packages/cli mocha",
     "lint": "lerna run lint --parallel",
     "build": "lerna run build",
     "prepare": "lerna run prepare"
@@ -40,7 +40,18 @@
   "jest": {
     "preset": "ts-jest",
     "projects": [
-      "<rootDir>/packages/*"
+      "<rootDir>/packages/append-collection",
+      "<rootDir>/packages/constants",
+      "<rootDir>/packages/datamodel",
+      "<rootDir>/packages/devtools",
+      "<rootDir>/packages/did-datastore",
+      "<rootDir>/packages/did-datastore-model",
+      "<rootDir>/packages/graphql",
+      "<rootDir>/packages/graphql-types",
+      "<rootDir>/packages/jest-environment-ceramic",
+      "<rootDir>/packages/jest-environment-glaze",
+      "<rootDir>/packages/tile-loader",
+      "<rootDir>/packages/types"
     ]
   }
 }
