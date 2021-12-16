@@ -19,8 +19,7 @@
   "main": "index.js",
   "files": [],
   "scripts": {
-    "lint": "eslint index.js --fix",
-    "prepare": "npm run lint"
+    "lint": "eslint index.js --fix"
   },
   "dependencies": {
     "dids": "^3.0.0-alpha.1",

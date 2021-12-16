@@ -18,14 +18,13 @@
   "main": "index.js",
   "files": [],
   "scripts": {
-    "lint": "eslint index.js --fix",
-    "prepare": "npm run lint"
+    "lint": "eslint index.js --fix"
   },
   "dependencies": {
     "@ceramicnetwork/core": "^2.0.0-alpha.0",
     "dag-jose": "^1.0.0",
-    "ipfs-core": "~0.12.1",
-    "jest-environment-node": "^27.4.2",
+    "ipfs-core": "~0.13.0",
+    "jest-environment-node": "^27.4.4",
     "tmp-promise": "^3.0.3"
   }
 }

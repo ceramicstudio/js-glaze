@@ -32,12 +32,15 @@ describe('integration', () => {
         },
       },
     } as any)
+    console.log('schema created')
     await manager.createDefinition('profile', {
       name: 'Profile',
       description: 'test profile',
       schema: manager.getSchemaURL(schemaID) as string,
     })
+    console.log('definition created')
     const model = await manager.toPublished()
+    console.log('model published', model)
 
     const writer = new DIDDataStore<ModelTypes>({ ceramic, model })
     // We can use the alias provided in the definitions to identify a resource

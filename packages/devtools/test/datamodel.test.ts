@@ -7,6 +7,8 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 
 import { ModelManager, publishEncodedModel } from '../src'
 
+// import { TileDocument } from '@ceramicnetwork/stream-tile'
+
 declare global {
   const ceramic: CeramicApi
 }
@@ -14,7 +16,12 @@ declare global {
 describe('datamodel', () => {
   jest.setTimeout(20000)
 
-  test('publish encoded model', async () => {
+  // test.only('create a doc', async () => {
+  //   const doc = await TileDocument.create(ceramic, { foo: 'bar' })
+  //   console.log('created doc', doc.id)
+  // })
+
+  test.only('publish encoded model', async () => {
     const encodedModel = {
       schemas: {
         kjzl6cwe1jw146mi4smwraxjypxq5d1qwq9iei4yydyxf6jwna1d8wouohto87e: {

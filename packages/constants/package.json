@@ -17,10 +17,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    "*": "./dist/index.js"
+    ".": "./dist/index.js"
   },
   "files": [
-    "dist",
     "src"
   ],
   "engines": {
@@ -28,7 +27,10 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && swc src -s -d ./dist --config-file ../../swc.json",
+    "clean": "del dist",
+    "types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "compile": "swc src -d ./dist --config-file ../../swc.json",
+    "build": "yarn clean && yarn types && yarn compile",
     "lint": "eslint src test --fix",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
