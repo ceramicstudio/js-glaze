@@ -12,7 +12,7 @@
   "scripts": {
     "lerna": "lerna",
     "docs": "typedoc --tsconfig tsconfig.docs.json",
-    "test": "jest && yarn --cwd ./packages/cli mocha",
+    "test": "jest && yarn --cwd ./packages/cli mocha+ceramic",
     "lint": "lerna run lint --parallel",
     "build": "lerna run build",
     "prepare": "lerna run prepare"

@@ -14,7 +14,7 @@ beforeEach(async () => {
   }
 })
 
-describe('tiles', () => {
+describe('tiles', async () => {
   describe('create', () => {
     test
       .stderr()
@@ -41,7 +41,7 @@ describe('tiles', () => {
       .it('does not create a deterministic tile.', async (ctx) => {
         await DeterministicTile.run(['{}'])
         expect(ctx.stderr).to.contain(
-          '⠋ Loading stream...✖ Family and/or tags are required when creating a deterministic tile document\n'
+          'Family and/or tags are required when creating a deterministic tile document\n'
         )
       })
 
@@ -53,7 +53,6 @@ describe('tiles', () => {
           `{"controllers": ["${globalKey}"], "tags": ["foo", "bar"], "family": ["baz"]}`,
           `--key=${globalKey}`,
         ])
-        console.log('CREATE DETERMINISTIC TILE', ctx.stderr)
         expect(ctx.stderr).to.contain('Loaded stream')
       })
   })
