@@ -154,10 +154,10 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
   async deterministic<T extends Record<string, any> = Record<string, any>>(
     metadata: TileMetadataArgs,
     options?: CreateOpts
-  ): Promise<TileDocument<T | null | undefined>> {
+  ): Promise<TileDocument<T>> {
     const query = await getDeterministicQuery(metadata)
     try {
-      return (await super.load(query)) as TileDocument<T | null | undefined>
+      return (await super.load(query)) as TileDocument<T>
     } catch (err) {
       const stream = await TileDocument.createFromGenesis<T>(
         this.#ceramic,
