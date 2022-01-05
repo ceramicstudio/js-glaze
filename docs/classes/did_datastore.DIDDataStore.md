@@ -10,8 +10,8 @@ import { DIDDataStore } from '@glazed/did-datastore'
 
 | Name | Type |
 | :------ | :------ |
-| `ModelTypes` | extends `ModelTypeAliases``ModelTypeAliases` |
-| `Alias` | extends keyof `ModelTypes`[``"definitions"``]keyof `ModelTypes`[``"definitions"``] |
+| `ModelTypes` | extends `ModelTypeAliases` = `ModelTypeAliases` |
+| `Alias` | extends keyof `ModelTypes`[``"definitions"``] = keyof `ModelTypes`[``"definitions"``] |
 
 ## Constructors
 
@@ -23,8 +23,8 @@ import { DIDDataStore } from '@glazed/did-datastore'
 
 | Name | Type |
 | :------ | :------ |
-| `ModelTypes` | extends `ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\>`ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\> |
-| `Alias` | extends `string` \| `number` \| `symbol`keyof `ModelTypes`[``"definitions"``] |
+| `ModelTypes` | extends `ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\> = `ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\> |
+| `Alias` | extends `string` \| `number` \| `symbol` = keyof `ModelTypes`[``"definitions"``] |
 
 #### Parameters
 

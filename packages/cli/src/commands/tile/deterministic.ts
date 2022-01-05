@@ -22,7 +22,6 @@ export default class DeterministicTile extends Command<
   static flags = {
     ...Command.flags,
   }
-
   async run(): Promise<void> {
     this.spinner.start('Loading stream...')
 
