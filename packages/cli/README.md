@@ -43,7 +43,7 @@ glaze COMMAND
 - [`glaze stream:state STREAMID`](#glaze-streamstate-streamid)
 - [`glaze tile:create CONTENT`](#glaze-tilecreate-content)
 - [`glaze tile:deterministic METADATA`](#glaze-tiledeterministic-metadata)
-- [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
+- [`glaze tile:content STREAMID`](#glaze-tileshow-streamid)
 - [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
 - [`glaze tile:watch STREAMID`](#glaze-tilewatch-streamid)
 
@@ -461,13 +461,13 @@ OPTIONS
   -k, --key=key          Private DID Key
 ```
 
-### `glaze tile:show STREAMID`
+### `glaze tile:content STREAMID`
 
 show the contents of a Tile stream
 
 ```
 USAGE
-  $ glaze tile:show STREAMID
+  $ glaze tile:content STREAMID
 
 ARGUMENTS
   STREAMID  ID of the stream

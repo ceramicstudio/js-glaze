@@ -31,7 +31,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `ModelTypes` | extends `ModelTypeAliases``ModelTypeAliases` |
+| `ModelTypes` | extends `ModelTypeAliases` = `ModelTypeAliases` |
 
 #### Type declaration
 
@@ -67,7 +67,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Config` | extends `Record`<`string`, `unknown`\>`Record`<`string`, `unknown`\> |
+| `Config` | extends `Record`<`string`, `unknown`\> = `Record`<`string`, `unknown`\> |
 
 ___
 
