@@ -1,52 +1,27 @@
-test('hello', () => {
-  expect(true).toBe(true)
+import execa from 'execa'
+import stripAnsi from 'strip-ansi'
+
+describe('pins', () => {
+  let tileId: string
+  let authKey: string
+  beforeAll(async () => {
+    const createDid = await execa('glaze', ['did:create'])
+    authKey = stripAnsi(createDid.stderr.split('with seed ')[1])
+
+    const createTile = await execa('glaze', [`tile:create`, `-b {"FOO":"BAR"}`, `--key=${authKey}`])
+
+    tileId = createTile.stderr.toString().split('Created stream ')[1].replace('.', '')
+  }, 10000)
+  test('stream is pinned', async () => {
+    const { stderr } = await execa('glaze', ['pin:add', tileId])
+    expect(stderr.toString().includes('Stream pinned.')).toBe(true)
+  }, 10000)
+  test('stream removed', async () => {
+    const { stderr } = await execa('glaze', ['pin:rm', tileId])
+    expect(stderr.toString().includes('Stream unpinned')).toBe(true)
+  }, 10000)
+  test('list pins', async () => {
+    const { stderr } = await execa('glaze', ['pin:ls', tileId])
+    expect(stderr.toString().includes('Loaded pins list.')).toBe(true)
+  }, 20000)
 })
-
-// import { expect, test } from '@oclif/test'
-
-// import { makeDID, createTile, globalKey } from '../utils'
-
-// import Add from '../../src/commands/pin/add'
-// import Remove from '../../src/commands/pin/rm'
-// import List from '../../src/commands/pin/ls'
-
-// describe('pins', () => {
-//   let id: string
-//   beforeEach(async () => {
-//     if (!globalKey) {
-//       await makeDID()
-//     }
-//     if (!id) {
-//       const tile = await createTile()
-//       id = tile.id.toString()
-//     }
-//   })
-
-//   describe('add', () => {
-//     test
-//       .stderr()
-//       .stdout({ print: false })
-//       .it('pins the stream.', async (ctx) => {
-//         await Add.run([id])
-//         expect(ctx.stderr).to.contain('Stream pinned.')
-//       })
-//   })
-//   describe('remove', () => {
-//     test
-//       .stderr()
-//       .stdout({ print: false })
-//       .it('unpins the stream', async (ctx) => {
-//         await Remove.run([id])
-//         expect(ctx.stderr).to.contain('Stream unpinned')
-//       })
-//   })
-//   describe('list', () => {
-//     test
-//       .stderr()
-//       .stdout({ print: false })
-//       .it('list all pinned streamIDs', async (ctx) => {
-//         await List.run([])
-//         expect(ctx.stderr).to.contain('Loaded pins list.')
-//       })
-//   })
-// })
