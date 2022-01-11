@@ -11,7 +11,7 @@ describe('streams', () => {
     const createTile = await execa('glaze', [`tile:create`, `-b {"FOO":"BAR"}`, `--key=${authKey}`])
 
     tileId = createTile.stderr.toString().split('Created stream ')[1].replace('.', '')
-  }, 10000)
+  }, 20000)
   test('lists stream commits', async () => {
     const { stderr } = await execa('glaze', ['stream:commits', tileId])
     expect(stderr.toString().includes('Stream commits loaded.')).toBe(true)

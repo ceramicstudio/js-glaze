@@ -11,7 +11,7 @@ describe('pins', () => {
     const createTile = await execa('glaze', [`tile:create`, `-b {"FOO":"BAR"}`, `--key=${authKey}`])
 
     tileId = createTile.stderr.toString().split('Created stream ')[1].replace('.', '')
-  }, 10000)
+  }, 20000)
   test('stream is pinned', async () => {
     const { stderr } = await execa('glaze', ['pin:add', tileId])
     expect(stderr.toString().includes('Stream pinned.')).toBe(true)
