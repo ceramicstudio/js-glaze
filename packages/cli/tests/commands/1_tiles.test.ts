@@ -1,9 +1,6 @@
 import execa from 'execa'
 import stripAnsi from 'strip-ansi'
 
-let tileId: string
-let authKey: string
-let authDID: string
 describe('tiles', () => {
   describe('tile:create', () => {
     test('tile creation fails', async () => {
@@ -20,55 +17,78 @@ describe('tiles', () => {
     test('tile creation succeeds', async () => {
       const getKey = await execa('glaze', ['did:create'])
       const key = getKey.stderr.split('with seed ')[1]
-      authKey = stripAnsi(key)
-      authDID = stripAnsi(getKey.stderr.split('Created DID ')[1].split(' with seed ')[0])
       const { stderr } = await execa('glaze', [
         `tile:create`,
         `-b {"FOO":"BAR"}`,
         `--key=${stripAnsi(key)}`,
       ])
-      // tileId = lines.split('Created stream ')[1]
-      tileId = stderr.toString().split('Created stream ')[1].replace('.', '')
+      // stderr.toString().split('Created stream ')[1].replace('.', '')
 
       expect(stderr.includes('Created stream ')).toBe(true)
     }, 10000)
   })
   describe('tile:content', () => {
     test('displays tile content', async () => {
-      const proc = await execa('glaze', [`tile:content`, tileId])
+      const key = await execa('glaze', ['did:create'])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `-b {"FOO":"BAR"}`,
+        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
+      ])
+
+      const proc = await execa('glaze', [
+        `tile:content`,
+        tile.stderr.split('Created stream ')[1].replace('.', ''),
+      ])
+
       const lines = stripAnsi(proc.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
     }, 10000)
   })
   describe('tile:update', () => {
     test('successfully updates tile', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `-b {"FOO":"BAR"}`,
+        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
+      ])
+
       const { stderr } = await execa('glaze', [
         'tile:update',
-        tileId,
+        tile.stderr.split('Created stream ')[1].replace('.', ''),
         '-b {"FOO":"BAZ"}',
-        `--key=${authKey}`,
+        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
       ])
       expect(stderr.toString().includes('Updated stream')).toBe(true)
     }, 10000)
   })
   describe('tile:deterministic', () => {
     test('does not create a deterministic tile.', async () => {
-      const { stderr } = await execa('glaze', ['tile:deterministic', '{}', `--key=${authKey}`])
+      const key = await execa('glaze', ['did:create'])
+
+      const { stderr } = await execa('glaze', [
+        'tile:deterministic',
+        '{}',
+        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
+      ])
       expect(
         stderr
           .toString()
           .includes('Family and/or tags are required when creating a deterministic tile document')
-      )
+      ).toBe(true)
     }, 10000)
     test('creates determinstic tile', async () => {
+      const key = await execa('glaze', ['did:create'])
+
       const { stderr } = await execa('glaze', [
         'tile:deterministic',
         JSON.stringify({
-          controllers: [authDID],
+          controllers: [stripAnsi(key.stderr.split('Created DID ')[1].split(' with seed ')[0])],
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--key=${authKey}`,
+        `--key=${stripAnsi(key.stderr.split('with seed ')[1])}`,
       ])
       expect(stderr.toString().includes('Created tile')).toBe(true)
     }, 10000)
