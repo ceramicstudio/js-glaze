@@ -15,7 +15,7 @@ describe('streams', () => {
       tile.stderr.split('Created stream ')[1].replace('.', ''),
     ])
     expect(stderr.toString().includes('Stream commits loaded.')).toBe(true)
-  }, 15000)
+  }, 20000)
   test('displays stream state', async () => {
     const key = await execa('glaze', ['did:create'])
     const tile = await execa('glaze', [
@@ -35,5 +35,5 @@ describe('streams', () => {
           `Successfully queried stream ${tile.stderr.split('Created stream ')[1].replace('.', '')}`
         )
     ).toBe(true)
-  }, 15000)
+  }, 20000)
 })

@@ -12,7 +12,7 @@ describe('tiles', () => {
           'DID is not authenticated, make sure to provide a seed using the "did-key"'
         )
       ).toBe(true)
-    }, 10000)
+    }, 20000)
 
     test('tile creation succeeds', async () => {
       const getKey = await execa('glaze', ['did:create'])
@@ -25,7 +25,7 @@ describe('tiles', () => {
       // stderr.toString().split('Created stream ')[1].replace('.', '')
 
       expect(stderr.includes('Created stream ')).toBe(true)
-    }, 10000)
+    }, 20000)
   })
   describe('tile:content', () => {
     test('displays tile content', async () => {
@@ -43,7 +43,7 @@ describe('tiles', () => {
 
       const lines = stripAnsi(proc.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
-    }, 10000)
+    }, 20000)
   })
   describe('tile:update', () => {
     test('successfully updates tile', async () => {
@@ -61,7 +61,7 @@ describe('tiles', () => {
         `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
       ])
       expect(stderr.toString().includes('Updated stream')).toBe(true)
-    }, 10000)
+    }, 20000)
   })
   describe('tile:deterministic', () => {
     test('does not create a deterministic tile.', async () => {
@@ -77,7 +77,7 @@ describe('tiles', () => {
           .toString()
           .includes('Family and/or tags are required when creating a deterministic tile document')
       ).toBe(true)
-    }, 10000)
+    }, 20000)
     test('creates determinstic tile', async () => {
       const key = await execa('glaze', ['did:create'])
 
@@ -91,6 +91,6 @@ describe('tiles', () => {
         `--key=${stripAnsi(key.stderr.split('with seed ')[1])}`,
       ])
       expect(stderr.toString().includes('Created tile')).toBe(true)
-    }, 10000)
+    }, 20000)
   })
 })
