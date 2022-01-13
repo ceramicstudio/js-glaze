@@ -73,7 +73,7 @@ describe('integration', () => {
     await store.set('profile2', { name: 'Bob' })
     const cachedRecord = await cache.get(recordID.toString())
     // Cached record should have been updated
-    expect(cachedRecord.content).toEqual({ name: 'Bob' })
+    expect(cachedRecord?.content).toEqual({ name: 'Bob' })
     // Check get() method has same content as cache
     await expect(store.get('profile2')).resolves.toEqual({ name: 'Bob' })
   })
