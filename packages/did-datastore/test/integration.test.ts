@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { ModelManager } from '@glazed/devtools'
 import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
 
@@ -60,7 +61,7 @@ describe('integration', () => {
   })
 
   test('create, update and load record from cache', async () => {
-    const cache = new Map()
+    const cache = new Map<string, Promise<TileDocument>>()
     const store = new DIDDataStore<ModelTypes>({ cache, ceramic, model })
 
     // Sanity check to ensure record doesn't already exist
