@@ -57,7 +57,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:reset KEY`
@@ -70,7 +70,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:set KEY VALUE`
@@ -83,7 +83,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:show`
@@ -96,7 +96,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:create`
@@ -109,7 +109,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:get MODEL ALIAS`
@@ -126,7 +126,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
   --did=did              DID
 ```
 
@@ -140,7 +140,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
   --did=did              DID
 ```
 
@@ -159,7 +159,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:set MODEL ALIAS CONTENTS`
@@ -177,7 +177,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:sign CONTENTS`
@@ -193,7 +193,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:verify JWS`
@@ -209,7 +209,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze help [COMMAND]`
@@ -243,7 +243,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
   --schema=schema        tile schema
 ```
 
@@ -257,7 +257,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:delete NAME`
@@ -271,7 +271,7 @@ USAGE
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -f, --force            bypass confirmation prompt
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:export NAME [OUTPUT]`
@@ -288,7 +288,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:import LOCALNAME IMPORTNAME`
@@ -301,7 +301,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:inspect NAME`
@@ -317,7 +317,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:list`
@@ -330,7 +330,7 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:publish NAME [OUTPUT]`
@@ -347,7 +347,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze pin:add STREAMID`
@@ -363,7 +363,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze pin:ls [STREAMID]`
@@ -379,7 +378,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze pin:rm STREAMID`
@@ -395,7 +393,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze stream:commits STREAMID`
@@ -411,7 +408,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze stream:state STREAMID`
@@ -427,7 +423,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze tile:create`
@@ -441,7 +436,7 @@ USAGE
 OPTIONS
   -b, --content=content    stream contents (JSON encoded as string)
   -c, --ceramic=ceramic    Ceramic API URL
-  -k, --key=key            Private DID Key
+  -k, --key=key            DID Private Key
   -m, --metadata=metadata  stream metadata
 ```
 
@@ -458,7 +453,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
+  -k, --key=key          DID Private Key
 ```
 
 ### `glaze tile:content STREAMID`
@@ -474,7 +469,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          Private DID Key
 ```
 
 ### `glaze tile:update STREAMID`
@@ -491,7 +485,7 @@ ARGUMENTS
 OPTIONS
   -b, --content=content    new contents for the stream
   -c, --ceramic=ceramic    Ceramic API URL
-  -k, --key=key            Private DID Key
+  -k, --key=key            DID Private Key
   -m, --metadata=metadata  Optional metadata for the stream
 ```
 
