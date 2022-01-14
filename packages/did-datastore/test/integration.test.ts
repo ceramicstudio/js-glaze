@@ -55,7 +55,7 @@ describe('integration', () => {
     await writer.set('profile1', { name: 'Alice' })
 
     const reader = new DIDDataStore<ModelTypes>({ ceramic, model })
-    // The definition StreamID can also be used to identify a known resource
+    // Read from another client using the known writer DID
     const doc = await reader.get('profile1', writer.id)
     expect(doc).toEqual({ name: 'Alice' })
   })
