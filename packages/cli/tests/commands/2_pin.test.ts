@@ -43,5 +43,5 @@ describe('pins', () => {
       tile.stderr.split('Created stream ')[1].replace('.', ''),
     ])
     expect(stderr.toString().includes('Loaded pins list.')).toBe(true)
-  }, 25000)
+  }, 35000)
 })
