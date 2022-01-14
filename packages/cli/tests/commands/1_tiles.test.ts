@@ -90,7 +90,7 @@ describe('tiles', () => {
         }),
         `--key=${stripAnsi(key.stderr.split('with seed ')[1])}`,
       ])
-      expect(stderr.toString().includes('Created tile')).toBe(true)
+      expect(stderr.toString().includes('Loaded tile')).toBe(true)
     }, 20000)
   })
 })
