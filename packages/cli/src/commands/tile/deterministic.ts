@@ -27,9 +27,10 @@ export default class DeterministicTile extends Command<
 
     try {
       const tile = await TileDocument.deterministic(this.ceramic, this.args.metadata)
-      this.spinner.succeed(`Created tile ${tile.id.toString()}.`)
+      this.spinner.succeed(`Loaded tile ${tile.id.toString()}.`)
       this.logJSON({
         streamID: tile.id.toString(),
+        content: tile.content,
       })
     } catch (e) {
       this.spinner.fail((e as Error).message)
