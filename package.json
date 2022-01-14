@@ -14,7 +14,7 @@
     "test": "yarn turbo run test",
     "test:ci": "yarn turbo run test:ci",
     "lint": "yarn turbo run lint",
-    "build": "yarn turbo run build:js && lerna run build:types",
+    "build": "yarn turbo run build:clean && yarn turbo run build:js && lerna run build:types",
     "prepare": "yarn build"
   },
   "devDependencies": {
@@ -41,11 +41,7 @@
     "baseBranch": "origin/main",
     "pipeline": {
       "build:clean": {},
-      "build:js": {
-        "dependsOn": [
-          "^build:clean"
-        ]
-      },
+      "build:js": {},
       "lint": {},
       "test": {},
       "test:ci": {}
