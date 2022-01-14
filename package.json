@@ -13,7 +13,7 @@
     "lerna": "lerna",
     "docs": "typedoc --tsconfig tsconfig.docs.json",
     "test": "jest",
-    "lint": "lerna run lint --parallel",
+    "lint": "yarn turbo run lint",
     "build": "yarn turbo run compile && lerna run types",
     "prepare": "yarn build"
   },
