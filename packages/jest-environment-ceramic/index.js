@@ -22,7 +22,6 @@ export default class CeramicEnvironment extends NodeEnvironment {
         },
       },
       ipld: { codecs: [dagJose] },
-      offline: true,
       profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,
