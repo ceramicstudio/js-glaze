@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
+import type { CeramicApi, CreateOpts, StreamMetadata, UpdateOpts } from '@ceramicnetwork/common'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL } from '@glazed/constants'
@@ -19,7 +19,7 @@ import type {
 import type { DagJWSResult } from 'dids'
 
 import { decodeModel, encodeModel } from './encoding'
-import { createModelDoc, publishCommits } from './publishing'
+import { publishCommits } from './publishing'
 import { extractSchemaReferences } from './schema'
 
 type ManagedReferenced = {
@@ -59,10 +59,14 @@ function docHasSupportedDID(doc: TileDocument<any>): boolean {
 }
 
 const dataStoreModel = decodeModel(encodedDataStoreModel)
-export async function publishDataStoreSchemas(ceramic: CeramicApi): Promise<void> {
+export async function publishDataStoreSchemas(
+  ceramic: CeramicApi,
+  createOpts?: CreateOpts,
+  commitOpts?: UpdateOpts
+): Promise<void> {
   await Promise.all(
     Object.values(dataStoreModel.schemas).map(async (schema) => {
-      return await publishCommits(ceramic, schema.commits)
+      return await publishCommits(ceramic, schema.commits, createOpts, commitOpts)
     })
   )
 }
@@ -70,12 +74,14 @@ export async function publishDataStoreSchemas(ceramic: CeramicApi): Promise<void
 // Publish a managed model to the given Ceramic node
 export async function publishModel(
   ceramic: CeramicApi,
-  model: ManagedModel
+  model: ManagedModel,
+  createOpts?: CreateOpts,
+  commitOpts?: UpdateOpts
 ): Promise<PublishedModel> {
   const [schemas] = await Promise.all([
     Promise.all(
       Object.values(model.schemas).map(async (schema) => {
-        const stream = await publishCommits(ceramic, schema.commits)
+        const stream = await publishCommits(ceramic, schema.commits, createOpts, commitOpts)
         return [schema.alias, stream.commitId.toUrl()]
       })
     ),
@@ -84,13 +90,13 @@ export async function publishModel(
   const [definitions, tiles] = await Promise.all([
     await Promise.all(
       Object.values(model.definitions).map(async (entry) => {
-        const stream = await publishCommits(ceramic, entry.commits)
+        const stream = await publishCommits(ceramic, entry.commits, createOpts, commitOpts)
         return [entry.alias, stream.id.toString()]
       })
     ),
     await Promise.all(
       Object.values(model.tiles).map(async (entry) => {
-        const stream = await publishCommits(ceramic, entry.commits)
+        const stream = await publishCommits(ceramic, entry.commits, createOpts, commitOpts)
         return [entry.alias, stream.id.toString()]
       })
     ),
@@ -157,6 +163,16 @@ export class ModelManager {
 
   get tiles(): Array<string> {
     return Object.keys(this.#aliases.tiles).sort()
+  }
+
+  // Internal
+
+  async _createDoc<T = Record<string, any>>(
+    content: T,
+    metadata: Partial<StreamMetadata> = {},
+    opts: CreateOpts = { anchor: false, pin: true }
+  ): Promise<TileDocument<T>> {
+    return await TileDocument.create<T>(this.#ceramic, content, metadata, opts)
   }
 
   // Imports
@@ -380,7 +396,7 @@ export class ModelManager {
     }
 
     const [stream, dependencies] = await Promise.all([
-      createModelDoc(this.#ceramic, schema),
+      this._createDoc(schema),
       this.loadSchemaDependencies(schema),
     ])
 
@@ -434,7 +450,7 @@ export class ModelManager {
 
     await publishDataStoreSchemas(this.#ceramic)
     const [stream, schemaID] = await Promise.all([
-      createModelDoc(this.#ceramic, definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
+      this._createDoc(definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
       this.loadSchema(definition.schema),
     ])
 
@@ -505,7 +521,7 @@ export class ModelManager {
     }
 
     const [stream, schemaID] = await Promise.all([
-      createModelDoc(this.#ceramic, contents, meta),
+      this._createDoc(contents, meta),
       this.loadSchema(meta.schema),
     ])
 

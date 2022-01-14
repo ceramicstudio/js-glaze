@@ -9,7 +9,20 @@ export default class CeramicEnvironment extends NodeEnvironment {
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await create({
+      // Note: the "test" profile doesn't seem to do much to disable networking,
+      // so we need to set the relevant config explicitly to run tests in parallel
+      config: {
+        Addresses: {
+          Swarm: [],
+        },
+        Bootstrap: [],
+        Discovery: {
+          MDNS: { Enabled: false },
+          webRTCStar: { Enabled: false },
+        },
+      },
       ipld: { codecs: [dagJose] },
+      offline: true,
       profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,

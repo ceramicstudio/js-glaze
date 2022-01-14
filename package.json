@@ -10,11 +10,10 @@
     ]
   },
   "scripts": {
-    "lerna": "lerna",
     "docs": "typedoc --tsconfig tsconfig.docs.json",
-    "test": "jest",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "lint": "yarn turbo run lint",
-    "build": "yarn turbo run compile && lerna run types",
+    "build": "yarn turbo run build:js && lerna run build:types",
     "prepare": "yarn build"
   },
   "devDependencies": {
@@ -37,21 +36,17 @@
     "typedoc-plugin-markdown": "^3.11.7",
     "typescript": "^4.5.4"
   },
-  "jest": {
-    "projects": [
-      "<rootDir>/packages/*"
-    ]
-  },
   "turbo": {
     "baseBranch": "origin/main",
     "pipeline": {
-      "clean": {},
-      "compile": {
+      "build:clean": {},
+      "build:js": {
         "dependsOn": [
-          "^clean"
+          "^build:clean"
         ]
       },
-      "lint": {}
+      "lint": {},
+      "test": {}
     }
   }
 }

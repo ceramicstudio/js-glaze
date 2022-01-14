@@ -7,6 +7,7 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { ModelManager } from '@glazed/devtools'
 import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
+import { jest } from '@jest/globals'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
 import { DIDDataStore } from '..'

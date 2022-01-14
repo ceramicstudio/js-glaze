@@ -27,10 +27,10 @@
   },
   "sideEffects": false,
   "scripts": {
-    "clean": "del dist",
-    "types": "tsc --emitDeclarationOnly --skipLibCheck",
-    "compile": "swc src -d ./dist --config-file ../../swc.json",
-    "build": "yarn clean && yarn types && yarn compile",
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src --fix",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"

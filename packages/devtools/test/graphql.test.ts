@@ -5,6 +5,7 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { jest } from '@jest/globals'
 
 import { ModelManager, createGraphQLModel } from '../src'
 

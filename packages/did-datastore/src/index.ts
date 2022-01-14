@@ -12,15 +12,13 @@ import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
-import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
-import type { TileCache } from '@glazed/tile-loader'
+import { type TileCache, TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
-import { TileProxy } from './proxy'
-import type { TileDoc } from './proxy'
-import { getIDXMetadata } from './utils'
+import { TileProxy, type TileDoc } from './proxy.js'
+import { getIDXMetadata } from './utils.js'
 
-export { assertDIDstring, isDIDstring } from './utils'
+export { assertDIDstring, isDIDstring } from './utils.js'
 
 export type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,

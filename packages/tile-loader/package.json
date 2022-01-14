@@ -27,12 +27,12 @@
   },
   "sideEffects": false,
   "scripts": {
-    "clean": "del dist",
-    "types": "tsc --emitDeclarationOnly --skipLibCheck",
-    "compile": "swc src -d ./dist --config-file ../../swc.json",
-    "build": "yarn clean && yarn types && yarn compile",
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src test --fix",
-    "test": "jest",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
   },
@@ -49,9 +49,15 @@
     "extensionsToTreatAsEsm": [
       ".ts"
     ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "transform": {
       "^.+\\.(t|j)s$": [
-        "@swc/jest"
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
       ]
     }
   }
