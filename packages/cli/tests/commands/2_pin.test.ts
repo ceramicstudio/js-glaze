@@ -6,7 +6,7 @@ describe('pins', () => {
     const key = await execa('glaze', ['did:create'])
     const tile = await execa('glaze', [
       `tile:create`,
-      `-b {"FOO":"BAR"}`,
+      `--content={"FOO":"BAR"}`,
       `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
     ])
 
@@ -20,7 +20,7 @@ describe('pins', () => {
     const key = await execa('glaze', ['did:create'])
     const tile = await execa('glaze', [
       `tile:create`,
-      `-b {"FOO":"BAR"}`,
+      `--content={"FOO":"BAR"}`,
       `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
     ])
     await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])
@@ -34,7 +34,7 @@ describe('pins', () => {
     const key = await execa('glaze', ['did:create'])
     const tile = await execa('glaze', [
       `tile:create`,
-      `-b {"FOO":"BAR"}`,
+      `--content={"FOO":"BAR"}`,
       `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
     ])
     await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])

@@ -363,7 +363,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze pin:ls [STREAMID]`
@@ -379,7 +378,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze pin:rm STREAMID`
@@ -395,7 +393,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze stream:commits STREAMID`
@@ -411,7 +408,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze stream:state STREAMID`
@@ -427,7 +423,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze tile:create`
@@ -474,7 +469,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze tile:update STREAMID`

@@ -21,7 +21,6 @@ export default class CreateTile extends Command<Flags, { content: string }> {
       parse: JSON.parse,
     }),
     content: flags.string({
-      char: 'b',
       description: 'stream contents (JSON encoded as string)',
       parse: JSON.parse,
     }),

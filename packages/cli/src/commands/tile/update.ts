@@ -28,7 +28,6 @@ export default class Update extends Command<Flags, { content: string; streamId: 
       parse: JSON.parse,
     }),
     content: flags.string({
-      char: 'b',
       description: 'new contents for the stream',
       parse: JSON.parse,
     }),

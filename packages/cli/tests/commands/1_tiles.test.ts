@@ -19,7 +19,7 @@ describe('tiles', () => {
       const key = getKey.stderr.split('with seed ')[1]
       const { stderr } = await execa('glaze', [
         `tile:create`,
-        `-b {"FOO":"BAR"}`,
+        `--content={"FOO":"BAR"}`,
         `--key=${stripAnsi(key)}`,
       ])
       // stderr.toString().split('Created stream ')[1].replace('.', '')
@@ -32,7 +32,7 @@ describe('tiles', () => {
       const key = await execa('glaze', ['did:create'])
       const tile = await execa('glaze', [
         `tile:create`,
-        `-b {"FOO":"BAR"}`,
+        `--content={"FOO":"BAR"}`,
         `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
       ])
 
@@ -50,14 +50,14 @@ describe('tiles', () => {
       const key = await execa('glaze', ['did:create'])
       const tile = await execa('glaze', [
         `tile:create`,
-        `-b {"FOO":"BAR"}`,
+        `--content={"FOO":"BAR"}`,
         `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
       ])
 
       const { stderr } = await execa('glaze', [
         'tile:update',
         tile.stderr.split('Created stream ')[1].replace('.', ''),
-        '-b {"FOO":"BAZ"}',
+        '--content={"FOO":"BAZ"}',
         `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
       ])
       expect(stderr.toString().includes('Updated stream')).toBe(true)
