@@ -238,7 +238,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
   --schema=schema        tile schema
 ```
 
