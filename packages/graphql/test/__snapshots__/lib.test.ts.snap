@@ -220,6 +220,5 @@ input AddNotesAllEdgeInput {
   id: ID!
   content: NoteInput!
   clientMutationId: String
-}
-"
+}"
 `;

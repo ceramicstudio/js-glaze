@@ -20,7 +20,7 @@
     ".": "./dist/index.js"
   },
   "files": [
-    "src"
+    "dist"
   ],
   "engines": {
     "node": ">=16"

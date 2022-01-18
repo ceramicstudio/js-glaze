@@ -160,13 +160,15 @@ ___
 
 ### publishDataStoreSchemas
 
-▸ **publishDataStoreSchemas**(`ceramic`): `Promise`<`void`\>
+▸ **publishDataStoreSchemas**(`ceramic`, `createOpts?`, `commitOpts?`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `ceramic` | `CeramicApi` |
+| `createOpts?` | `CreateOpts` |
+| `commitOpts?` | `UpdateOpts` |
 
 #### Returns
 
@@ -193,7 +195,7 @@ ___
 
 ### publishModel
 
-▸ **publishModel**(`ceramic`, `model`): `Promise`<`PublishedModel`\>
+▸ **publishModel**(`ceramic`, `model`, `createOpts?`, `commitOpts?`): `Promise`<`PublishedModel`\>
 
 #### Parameters
 
@@ -201,6 +203,8 @@ ___
 | :------ | :------ |
 | `ceramic` | `CeramicApi` |
 | `model` | `ManagedModel`<`DagJWSResult`\> |
+| `createOpts?` | `CreateOpts` |
+| `commitOpts?` | `UpdateOpts` |
 
 #### Returns
 

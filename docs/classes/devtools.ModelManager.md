@@ -61,6 +61,30 @@ ___
 
 ## Methods
 
+### \_createDoc
+
+▸ **_createDoc**<`T`\>(`content`, `metadata?`, `opts?`): `Promise`<`TileDocument`<`T`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | `Record`<`string`, `any`\> |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `content` | `T` |
+| `metadata` | `Partial`<`StreamMetadata`\> |
+| `opts` | `CreateOpts` |
+
+#### Returns
+
+`Promise`<`TileDocument`<`T`\>\>
+
+___
+
 ### addJSONModel
 
 ▸ **addJSONModel**(`encoded`): `void`

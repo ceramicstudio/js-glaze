@@ -26,7 +26,7 @@ import {
   nodeDefinitions,
   toGlobalId,
 } from 'graphql-relay'
-import type { Connection } from 'graphql-relay'
+import type { Connection, ConnectionArguments } from 'graphql-relay'
 
 import type { Context } from './context'
 import type { Doc } from './types'
@@ -57,21 +57,13 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
   const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
   const types: Record<string, GraphQLObjectType> = {}
 
-  const resolveType = (doc: Doc): GraphQLObjectType<any, Context> | null => {
-    if (doc.schema == null) {
-      return null
-    }
-    const { name } = model.referenced[doc.schema]
-    if (name == null) {
-      return null
-    }
-    return types[name] ?? null
-  }
-
-  const { nodeInterface, nodeField } = nodeDefinitions(async (globalId: string, ctx: Context) => {
-    const { id } = fromGlobalId(globalId)
-    return await ctx.loadDoc(id)
-  }, resolveType)
+  const { nodeInterface, nodeField } = nodeDefinitions(
+    async (globalId: string, ctx: Context) => {
+      const { id } = fromGlobalId(globalId)
+      return await ctx.loadDoc(id)
+    },
+    (doc: Doc) => (doc.schema == null ? undefined : model.referenced[doc.schema]?.name)
+  )
 
   const nodes = Object.entries(model.referenced).reduce((acc, [schema, { name, type }]) => {
     if (type === 'object') {
@@ -146,7 +138,11 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
                 acc[key] = {
                   type: field.required ? new GraphQLNonNull(connectionType) : connectionType,
                   args: connectionArgs,
-                  resolve: async (doc, args, ctx): Promise<Connection<any> | null> => {
+                  resolve: async (
+                    doc,
+                    args: ConnectionArguments,
+                    ctx
+                  ): Promise<Connection<any> | null> => {
                     const id = doc.content[key] as string | undefined
                     if (id == null) {
                       return null
@@ -372,7 +368,7 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
           args: {
             did: { type: GraphQLString },
           },
-          resolve: (_, args): { did?: string } => args,
+          resolve: (_, args: { did?: string }): { did?: string } => args,
         },
         node: nodeField,
       } as GraphQLFieldConfigMap<any, any>
