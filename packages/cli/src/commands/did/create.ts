@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-
 import chalk from 'chalk'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
