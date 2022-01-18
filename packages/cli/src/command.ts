@@ -33,7 +33,7 @@ export abstract class Command<
 > extends Cmd {
   static flags = {
     ceramic: flags.string({ char: 'c', description: 'Ceramic API URL', env: 'CERAMIC_URL' }),
-    key: flags.string({ char: 'k', description: 'DID Private Key', env: 'DID_KEY' }),
+    key: flags.string({ char: 'k', description: 'DID Key', env: 'DID_KEY' }),
   }
 
   #authenticatedDID: DID | null = null
