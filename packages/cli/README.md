@@ -57,7 +57,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:reset KEY`
@@ -70,7 +69,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:set KEY VALUE`
@@ -83,7 +81,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze config:show`
@@ -96,7 +93,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:create`
@@ -109,7 +105,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze did:get MODEL ALIAS`
@@ -164,7 +159,7 @@ OPTIONS
 
 ### `glaze did:set MODEL ALIAS CONTENTS`
 
-get the contents of a record in a DID DataStore
+set the contents of a record in a DID DataStore
 
 ```
 USAGE
@@ -257,7 +252,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:delete NAME`
@@ -271,7 +265,6 @@ USAGE
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -f, --force            bypass confirmation prompt
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:export NAME [OUTPUT]`
@@ -288,7 +281,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:import LOCALNAME IMPORTNAME`
@@ -301,7 +293,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:inspect NAME`
@@ -317,7 +308,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:list`
@@ -330,7 +320,6 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze model:publish NAME [OUTPUT]`
@@ -347,7 +336,6 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
 ```
 
 ### `glaze pin:add STREAMID`
