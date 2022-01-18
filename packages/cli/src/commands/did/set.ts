@@ -5,7 +5,7 @@ export default class SetIndex extends Command<
   CommandFlags,
   { model: string; alias: string; contents: Record<string, any> }
 > {
-  static description = 'set the contents of a record in a DID DataStore'
+  static description = 'get the contents of a record in a DID DataStore'
 
   static flags = Command.flags
 

@@ -11,7 +11,7 @@ import { DataModel } from '@glazed/datamodel'
 | Name | Type |
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases` |
-| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\> = `ModelTypesToAliases`<`ModelTypes`\> |
+| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\>`ModelTypesToAliases`<`ModelTypes`\> |
 
 ## Constructors
 
@@ -24,7 +24,7 @@ import { DataModel } from '@glazed/datamodel'
 | Name | Type |
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\> |
-| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\> = `ModelTypesToAliases`<`ModelTypes`\> |
+| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\>`ModelTypesToAliases`<`ModelTypes`\> |
 
 #### Parameters
 
