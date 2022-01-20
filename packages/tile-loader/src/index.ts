@@ -14,6 +14,7 @@ import type {
   CreateOpts,
   GenesisCommit,
   MultiQuery,
+  UpdateOpts,
 } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
@@ -180,5 +181,21 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
     key: TileKey
   ): Promise<TileDocument<T>> {
     return (await super.load(key)) as TileDocument<T>
+  }
+
+  /**
+   * Update a TileDocument after loading the stream remotely, bypassing the cache.
+   */
+  async update<T extends Record<string, any> = Record<string, any>>(
+    streamID: string | StreamID,
+    content?: T,
+    metadata?: TileMetadataArgs,
+    options?: UpdateOpts
+  ): Promise<TileDocument<T | null | undefined>> {
+    const id = keyToString(streamID)
+    this.clear(id)
+    const stream = await this.load<T>({ streamId: id })
+    await stream.update(content, metadata, options)
+    return stream
   }
 }

@@ -3,7 +3,7 @@ import type { DagJWS, DagJWSResult } from 'dids'
 import { CID } from 'multiformats/cid'
 import { fromString, toString } from 'uint8arrays'
 
-import { applyMap } from './utils'
+import { applyMap } from './utils.js'
 
 export function decodeDagJWS({ payload, signatures, link }: EncodedDagJWS): DagJWS {
   return { payload, signatures, link: link ? CID.parse(link) : undefined }

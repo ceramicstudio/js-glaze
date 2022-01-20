@@ -18,9 +18,9 @@ import type {
 } from '@glazed/types'
 import type { DagJWSResult } from 'dids'
 
-import { decodeModel, encodeModel } from './encoding'
-import { publishCommits } from './publishing'
-import { extractSchemaReferences } from './schema'
+import { decodeModel, encodeModel } from './encoding.js'
+import { publishCommits } from './publishing.js'
+import { extractSchemaReferences } from './schema.js'
 
 type ManagedReferenced = {
   definitions: Set<ManagedID>

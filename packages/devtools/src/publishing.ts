@@ -7,7 +7,7 @@ import type {
 } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
-import { promiseMap } from './utils'
+import { promiseMap } from './utils.js'
 
 /** @internal */
 export async function publishCommits(

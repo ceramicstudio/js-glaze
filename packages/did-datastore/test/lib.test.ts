@@ -449,19 +449,17 @@ describe('DIDDataStore', () => {
 
     describe('_getOwnIDXDoc()', () => {
       test('creates and sets schema in update', async () => {
-        const cache = jest.fn(() => true)
         const id = 'did:test:123'
         const metadata = { controllers: [id], family: 'IDX' }
         const update = jest.fn()
         const doc = { id: 'streamId', update, metadata } as any
         const createDoc = jest.fn((_did) => Promise.resolve(doc))
-        const ds = new DIDDataStore({ ceramic: { did: { id } }, loader: { cache }, model } as any)
+        const ds = new DIDDataStore({ ceramic: { did: { id } }, model } as any)
         ds._createIDXDoc = createDoc
 
         await expect(ds._getOwnIDXDoc(id)).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
         expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: true })
-        expect(cache).toBeCalledWith(doc)
       })
 
       test('returns the doc if valid', async () => {
@@ -595,14 +593,12 @@ describe('DIDDataStore', () => {
 
     describe('_setRecordOnly()', () => {
       test('existing definition ID', async () => {
-        const update = jest.fn()
-        const record = { update, id: 'streamId' }
-        const load = jest.fn(() => Promise.resolve(record))
-        const cache = jest.fn(() => true)
+        const record = { update: jest.fn(), id: 'streamId' }
+        const update = jest.fn(() => Promise.resolve(record))
 
         const ds = new DIDDataStore({
           ceramic: { did: { id: 'did:foo:123' } },
-          loader: { load, cache },
+          loader: { update },
           model,
         } as any)
         const getRecordID = jest.fn(() => Promise.resolve('streamId'))
@@ -613,9 +609,7 @@ describe('DIDDataStore', () => {
           ds._setRecordOnly('defId', content, { controller: 'did:foo:456' })
         ).resolves.toEqual([false, 'streamId'])
         expect(getRecordID).toBeCalledWith('defId', 'did:foo:456')
-        expect(load).toBeCalledWith('streamId')
-        expect(update).toBeCalledWith(content)
-        expect(cache).toBeCalledWith(record)
+        expect(update).toBeCalledWith('streamId', content)
       })
 
       test('adding definition ID', async () => {
@@ -671,14 +665,13 @@ describe('DIDDataStore', () => {
         let record: TileDocument | null = null
         const id = 'did:test:123'
         const update = jest.fn()
-        const cache = jest.fn(() => true)
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
           record = { id: 'streamId', update, metadata } as unknown as TileDocument
           return Promise.resolve(record)
         })
 
         const ceramic = { did: { id } }
-        const ds = new DIDDataStore({ ceramic, loader: { deterministic, cache }, model } as any)
+        const ds = new DIDDataStore({ ceramic, loader: { deterministic }, model } as any)
 
         const definition = {
           id: { toString: () => 'defId' },
@@ -690,11 +683,9 @@ describe('DIDDataStore', () => {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(deterministic).toBeCalledWith({ controllers: [id], family: 'defId' })
         expect(update).toBeCalledWith(content, { schema: 'schemaId' }, { pin: true })
-        expect(cache).toBeCalledWith(record)
       })
 
       test('pin by default', async () => {
-        const cache = jest.fn(() => true)
         const update = jest.fn()
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
           return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
@@ -702,7 +693,7 @@ describe('DIDDataStore', () => {
 
         const ds = new DIDDataStore({
           ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic, cache },
+          loader: { deterministic },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
@@ -710,7 +701,6 @@ describe('DIDDataStore', () => {
       })
 
       test('no pinning by setting instance option', async () => {
-        const cache = jest.fn(() => true)
         const update = jest.fn()
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
           return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
@@ -719,7 +709,7 @@ describe('DIDDataStore', () => {
         const ds = new DIDDataStore({
           autopin: false,
           ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic, cache },
+          loader: { deterministic },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
@@ -727,7 +717,6 @@ describe('DIDDataStore', () => {
       })
 
       test('explicit no pinning', async () => {
-        const cache = jest.fn(() => true)
         const update = jest.fn()
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
           return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
@@ -736,7 +725,7 @@ describe('DIDDataStore', () => {
         const ds = new DIDDataStore({
           autopin: true,
           ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic, cache },
+          loader: { deterministic },
           model,
         } as any)
         await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
