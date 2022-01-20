@@ -8,16 +8,13 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { StreamID } from '@ceramicnetwork/streamid'
-import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
-import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
-import type { TileCache } from '@glazed/tile-loader'
+import { type TileCache, TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
-import { TileProxy } from './proxy'
-import type { TileDoc } from './proxy'
+import { TileProxy, type TileDoc } from './proxy'
 import { getIDXMetadata } from './utils'
 
 export { assertDIDstring, isDIDstring } from './utils'
@@ -363,7 +360,6 @@ export class DIDDataStore<
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
       await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: this.#autopin })
-      this.#loader.cache(doc as TileDocument<Record<string, any>>)
     } else if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -456,9 +452,7 @@ export class DIDDataStore<
       const ref = await this._createRecord(definition, content, options)
       return [true, ref]
     } else {
-      const doc = await this.#loader.load(existing)
-      await doc.update(content)
-      this.#loader.cache(doc)
+      const doc = await this.#loader.update(existing, content)
       return [false, doc.id]
     }
   }
@@ -476,7 +470,6 @@ export class DIDDataStore<
     })
     // Then be updated with content and schema
     await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
-    this.#loader.cache(doc as TileDocument<Record<string, any>>)
     return doc.id
   }
 

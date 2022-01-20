@@ -2,7 +2,7 @@ import type { CeramicApi, CeramicSigner, GenesisCommit } from '@ceramicnetwork/c
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 
-import { TileLoader, getDeterministicQuery, keyToQuery, keyToString } from '../src'
+import { type TileCache, TileLoader, getDeterministicQuery, keyToQuery, keyToString } from '../src'
 
 describe('tile-loader', () => {
   const testCID = 'bagcqcerakszw2vsovxznyp5gfnpdj4cqm2xiv76yd24wkjewhhykovorwo6a'
@@ -238,6 +238,39 @@ describe('tile-loader', () => {
           options
         )
       })
+    })
+
+    test('update() method removes the stream from the cache before loading and updating', async () => {
+      const cacheMap = new Map<string, Promise<TileDocument>>()
+      const cacheDelete = jest.fn((key: string) => cacheMap.delete(key))
+      const cacheSet = jest.fn((key: string, value: Promise<TileDocument>) => {
+        return cacheMap.set(key, value)
+      })
+      const cache: TileCache = {
+        clear: () => cacheMap.clear(),
+        get: (key) => cacheMap.get(key),
+        delete: cacheDelete,
+        set: cacheSet,
+      }
+
+      const update = jest.fn()
+      const multiQuery = jest.fn(() => ({ [testID1]: { update } }))
+
+      const loader = new TileLoader({
+        cache,
+        ceramic: { multiQuery } as unknown as CeramicApi,
+      })
+
+      await loader.load(testID1)
+      expect(cacheDelete).not.toBeCalled()
+      expect(cacheMap.has(testID1)).toBe(true)
+      expect(cacheSet).toBeCalledTimes(1)
+
+      await loader.update(testID1, { test: true }, { schema: 'foo' }, { pin: true })
+      expect(update).toBeCalledWith({ test: true }, { schema: 'foo' }, { pin: true })
+      expect(cacheDelete).toBeCalledWith(testID1)
+      expect(cacheMap.has(testID1)).toBe(true)
+      expect(cacheSet).toBeCalledTimes(2)
     })
   })
 })
