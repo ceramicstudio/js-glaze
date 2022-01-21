@@ -57,7 +57,11 @@ export type TileLoaderParams = {
   /**
    * A supported cache implementation, `true` to use the default implementation or `false` to disable the cache (default)
    */
-  cache?: TileCache | boolean
+  cache?: TileCache | boolean, 
+  /**
+   * MultiQuery request timeout in milliseconds 
+   */
+  multiqueryTimeout?: number
 }
 
 /** @internal */
@@ -115,7 +119,7 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
         // Disable cache but keep batching behavior - from https://github.com/graphql/dataloader#disabling-cache
         this.clearAll()
       }
-      const results = await params.ceramic.multiQuery(keys.map(keyToQuery))
+      const results = await params.ceramic.multiQuery(keys.map(keyToQuery), params.multiqueryTimeout)
       return keys.map((key) => {
         const id = keyToString(key)
         const doc = results[id]
