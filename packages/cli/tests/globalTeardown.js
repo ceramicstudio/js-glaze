@@ -1,7 +1,7 @@
-const { teardown: teardownDevServer } = require('jest-dev-server')
+import { teardown } from 'jest-dev-server'
 
-module.exports = async function globalTeardown() {
-  await teardownDevServer({
+export default async function globalTeardown() {
+  await teardown({
     command: 'ceramic daemon --network inmemory',
     port: 7007,
     usedPortAction: 'kill',

@@ -1,6 +1,5 @@
 import path from 'path'
 import { Ceramic } from '@ceramicnetwork/core'
-import * as dagJose from 'dag-jose'
 import { create } from 'ipfs-core'
 import NodeEnvironment from 'jest-environment-node'
 import { dir } from 'tmp-promise'
@@ -21,7 +20,6 @@ export default class CeramicEnvironment extends NodeEnvironment {
           webRTCStar: { Enabled: false },
         },
       },
-      ipld: { codecs: [dagJose] },
       profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,

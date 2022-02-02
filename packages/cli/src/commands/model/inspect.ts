@@ -1,8 +1,7 @@
+import { CliUx } from '@oclif/core'
 import chalk from 'chalk'
-import { cli } from 'cli-ux'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 type Args = {
   name: string
@@ -22,17 +21,17 @@ export default class InspectModel extends Command<CommandFlags, Args> {
       const manager = await this.getModelManager(name)
       const model = manager.model
 
-      const tree = cli.tree()
+      const tree = CliUx.ux.tree()
       this.spinner.succeed(`Loaded model ${name}`)
       this.log('model')
 
-      const schemasTree = cli.tree()
+      const schemasTree = CliUx.ux.tree()
       for (const [id, schema] of Object.entries(model.schemas)) {
-        const schemaTree = cli.tree()
+        const schemaTree = CliUx.ux.tree()
         schemaTree.insert(`alias: ${chalk.green(schema.alias)}`)
         schemaTree.insert(`version: ${chalk.magenta(schema.version)}`)
 
-        const dependenciesTree = cli.tree()
+        const dependenciesTree = CliUx.ux.tree()
         for (const [depID, depProp] of Object.entries(schema.dependencies)) {
           dependenciesTree.insert(`${chalk.blue(depProp)}: ${chalk.yellow(depID)}`)
         }
@@ -42,9 +41,9 @@ export default class InspectModel extends Command<CommandFlags, Args> {
       }
       tree.insert('schemas', schemasTree)
 
-      const definitionsTree = cli.tree()
+      const definitionsTree = CliUx.ux.tree()
       for (const [id, definition] of Object.entries(model.definitions)) {
-        const definitionTree = cli.tree()
+        const definitionTree = CliUx.ux.tree()
         definitionTree.insert(`alias: ${chalk.green(definition.alias)}`)
         definitionTree.insert(`version: ${chalk.magenta(definition.version)}`)
         definitionTree.insert(`schema: ${chalk.yellow(definition.schema)}`)
@@ -52,9 +51,9 @@ export default class InspectModel extends Command<CommandFlags, Args> {
       }
       tree.insert('definitions', definitionsTree)
 
-      const tilesTree = cli.tree()
+      const tilesTree = CliUx.ux.tree()
       for (const [id, tile] of Object.entries(model.tiles)) {
-        const tileTree = cli.tree()
+        const tileTree = CliUx.ux.tree()
         tileTree.insert(`alias: ${chalk.green(tile.alias)}`)
         tileTree.insert(`version: ${chalk.magenta(tile.version)}`)
         tileTree.insert(`schema: ${chalk.yellow(tile.schema)}`)

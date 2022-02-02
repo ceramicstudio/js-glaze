@@ -1,7 +1,6 @@
 import type { DagJWS } from 'dids'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class VerifyDID extends Command<CommandFlags, { jws: string }> {
   static description = 'verify a JSON Web Signature'

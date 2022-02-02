@@ -1,8 +1,7 @@
 import Table from 'cli-table3'
 
-import { Command } from '../../command'
-import { USER_CONFIG, config } from '../../config'
-import type { UserConfigKey as Key } from '../../config'
+import { Command } from '../../command.js'
+import { USER_CONFIG, type UserConfigKey as Key, config } from '../../config.js'
 
 export default class ShowConfig extends Command {
   static description = 'show the full config'

@@ -3,8 +3,8 @@ import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
 import type { EncodedManagedModel, PublishedModel } from '@glazed/types'
 
-import { config } from './config'
-import { read } from './fs'
+import { config } from './config.js'
+import { read } from './fs.js'
 
 export const EMPTY_MODEL = { schemas: {}, definitions: {}, tiles: {} }
 

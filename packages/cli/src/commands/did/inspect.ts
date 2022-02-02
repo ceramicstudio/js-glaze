@@ -1,5 +1,5 @@
 import { DIDDataStore } from '@glazed/did-datastore'
-import { flags } from '@oclif/command'
+import { Flags } from '@oclif/core'
 import chalk from 'chalk'
 import Listr from 'listr'
 import type { ListrTask } from 'listr'
@@ -7,9 +7,8 @@ import type { ListrTask } from 'listr'
 // @ts-ignore
 import UpdaterRenderer from 'listr-update-renderer'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { EMPTY_MODEL } from '../../model'
+import { Command, type CommandFlags } from '../../command.js'
+import { EMPTY_MODEL } from '../../model.js'
 
 type Flags = CommandFlags & {
   did?: string
@@ -20,7 +19,7 @@ export default class InspectDID extends Command<Flags> {
 
   static flags = {
     ...Command.flags,
-    did: flags.string({ description: 'DID', exclusive: ['key'] }),
+    did: Flags.string({ description: 'DID', exclusive: ['key'] }),
   }
 
   async run(): Promise<void> {

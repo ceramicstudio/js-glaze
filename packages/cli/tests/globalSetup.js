@@ -1,7 +1,8 @@
-const { setup: setupDevServer } = require('jest-dev-server')
+import { setup } from 'jest-dev-server'
 
-module.exports = async function globalSetup() {
-  await setupDevServer({
+export default async function globalSetup() {
+  await setup({
     command: 'ceramic daemon --network inmemory',
+    debug: true,
   })
 }

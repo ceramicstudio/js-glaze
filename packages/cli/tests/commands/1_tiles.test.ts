@@ -1,4 +1,4 @@
-import execa from 'execa'
+import { execa } from 'execa'
 import stripAnsi from 'strip-ansi'
 
 describe('tiles', () => {
@@ -27,6 +27,7 @@ describe('tiles', () => {
       expect(stderr.includes('Created stream ')).toBe(true)
     }, 20000)
   })
+
   describe('tile:content', () => {
     test('displays tile content', async () => {
       const key = await execa('glaze', ['did:create'])
@@ -63,6 +64,7 @@ describe('tiles', () => {
       expect(stderr.toString().includes('Updated stream')).toBe(true)
     }, 20000)
   })
+
   describe('tile:deterministic', () => {
     test('does not create a deterministic tile.', async () => {
       const key = await execa('glaze', ['did:create'])
@@ -78,7 +80,8 @@ describe('tiles', () => {
           .includes('Family and/or tags are required when creating a deterministic tile document')
       ).toBe(true)
     }, 20000)
-    test('creates determinstic tile', async () => {
+
+    test('creates deterministic tile', async () => {
       const key = await execa('glaze', ['did:create'])
 
       const { stderr } = await execa('glaze', [

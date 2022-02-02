@@ -1,12 +1,11 @@
 import { StreamRef } from '@ceramicnetwork/streamid'
 import { ModelManager } from '@glazed/devtools'
 import type { EncodedManagedModel } from '@glazed/types'
-import { flags } from '@oclif/command'
+import { Flags } from '@oclif/core'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { config } from '../../config'
-import { read, write } from '../../fs'
+import { Command, type CommandFlags } from '../../command.js'
+import { config } from '../../config.js'
+import { read, write } from '../../fs.js'
 
 type Flags = CommandFlags & {
   schema?: string
@@ -24,7 +23,7 @@ export default class AddModel extends Command<Flags, Args> {
 
   static flags = {
     ...Command.flags,
-    schema: flags.string({ name: 'schema', description: 'tile schema' }),
+    schema: Flags.string({ name: 'schema', description: 'tile schema' }),
   }
 
   static args = [

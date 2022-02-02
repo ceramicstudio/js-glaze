@@ -1,11 +1,10 @@
 import { ModelManager } from '@glazed/devtools'
 import type { EncodedManagedModel } from '@glazed/types'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { config } from '../../config'
-import { loadManagedModel } from '../../model'
-import { read, write } from '../../fs'
+import { Command, type CommandFlags } from '../../command.js'
+import { config } from '../../config.js'
+import { loadManagedModel } from '../../model.js'
+import { read, write } from '../../fs.js'
 
 type Args = {
   localName: string

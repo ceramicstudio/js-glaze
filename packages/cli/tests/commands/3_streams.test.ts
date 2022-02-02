@@ -1,4 +1,4 @@
-import execa from 'execa'
+import { execa } from 'execa'
 import stripAnsi from 'strip-ansi'
 
 describe('streams', () => {
@@ -16,6 +16,7 @@ describe('streams', () => {
     ])
     expect(stderr.toString().includes('Stream commits loaded.')).toBe(true)
   }, 20000)
+
   test('displays stream state', async () => {
     const key = await execa('glaze', ['did:create'])
     const tile = await execa('glaze', [

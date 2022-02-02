@@ -1,7 +1,6 @@
 import { StreamID } from '@ceramicnetwork/streamid'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class Remove extends Command<CommandFlags, { streamId: string }> {
   static description = 'unpin a stream'

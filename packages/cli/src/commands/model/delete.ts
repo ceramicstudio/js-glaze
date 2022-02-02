@@ -1,10 +1,9 @@
-import { flags } from '@oclif/command'
-import { unlink } from 'fs-extra'
+import { Flags } from '@oclif/core'
+import fs from 'fs-extra'
 import inquirer from 'inquirer'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { config } from '../../config'
+import { Command, type CommandFlags } from '../../command.js'
+import { config } from '../../config.js'
 
 interface Flags extends CommandFlags {
   force?: boolean
@@ -15,7 +14,7 @@ export default class DeleteModel extends Command<Flags, { name: string }> {
 
   static flags = {
     ...Command.flags,
-    force: flags.boolean({ char: 'f', description: 'bypass confirmation prompt' }),
+    force: Flags.boolean({ char: 'f', description: 'bypass confirmation prompt' }),
   }
 
   static args = [{ name: 'name', required: true }]
@@ -41,7 +40,7 @@ export default class DeleteModel extends Command<Flags, { name: string }> {
       }
 
       if (confirmed) {
-        await unlink(models[name].path)
+        await fs.unlink(models[name].path)
         delete models[name]
         config.set('models', models)
         this.spinner.succeed(`Model ${name} successfully deleted`)

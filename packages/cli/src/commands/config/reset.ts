@@ -1,9 +1,12 @@
 import chalk from 'chalk'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { DEFAULT_CERAMIC_URL, USER_CONFIG, config } from '../../config'
-import type { UserConfigKey as Key } from '../../config'
+import { Command, type CommandFlags } from '../../command.js'
+import {
+  DEFAULT_CERAMIC_URL,
+  USER_CONFIG,
+  type UserConfigKey as Key,
+  config,
+} from '../../config.js'
 
 export default class ResetConfig extends Command<CommandFlags, { key: Key }> {
   static description = 'reset a config value'
