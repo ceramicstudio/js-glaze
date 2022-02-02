@@ -253,35 +253,3 @@ ___
 | `id` | `string` | Record ID (Ceramic StreamID) |
 | `key` | `string` | Key (definition ID) identifying the record ID in the index |
 | `record` | `unknown` | Record contents |
-
-## Functions
-
-### assertDIDstring
-
-▸ **assertDIDstring**(`did`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `did` | `string` |
-
-#### Returns
-
-`void`
-
-___
-
-### isDIDstring
-
-▸ **isDIDstring**(`did`): `boolean`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `did` | `string` |
-
-#### Returns
-
-`boolean`

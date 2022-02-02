@@ -1,5 +1,6 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
 
+/** @internal */
 export function streamIDToString(id: StreamRef | string): string {
   return typeof id === 'string' ? id : id.toString()
 }

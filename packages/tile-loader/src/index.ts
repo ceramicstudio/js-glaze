@@ -3,8 +3,8 @@
  *
  * ## Purpose
  *
- * The `tile-loader` module exports a `TileLoader` providing batching and caching for Tile load and
- * creation in order to improve client-side performance.
+ * The `tile-loader` module exports a `TileLoader` class providing batching and caching for Tile
+ * load and creation in order to improve client-side performance.
  *
  * ## Installation
  *

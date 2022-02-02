@@ -59,6 +59,7 @@ function docHasSupportedDID(doc: TileDocument<any>): boolean {
 }
 
 const dataStoreModel = decodeModel(encodedDataStoreModel)
+/** @internal */
 export async function publishDataStoreSchemas(ceramic: CeramicApi): Promise<void> {
   await Promise.all(
     Object.values(dataStoreModel.schemas).map(async (schema) => {
