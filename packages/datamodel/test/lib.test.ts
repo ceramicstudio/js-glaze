@@ -49,21 +49,21 @@ describe('DataModel', () => {
 
   describe('Aliases methods', () => {
     test('getDefinitionID()', () => {
-      const model = new DataModel({ ceramic: {}, model: aliases } as unknown as Params)
+      const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
       expect(model.getDefinitionID('myFoo')).toBe(aliases.definitions.myFoo)
       // @ts-expect-error invalid definition alias
       expect(model.getDefinitionID('other')).toBeNull()
     })
 
     test('getSchemaURL()', () => {
-      const model = new DataModel({ ceramic: {}, model: aliases } as unknown as Params)
+      const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
       expect(model.getSchemaURL('Foo')).toBe(aliases.schemas.Foo)
       // @ts-expect-error invalid schema alias
       expect(model.getSchemaURL('Other')).toBeNull()
     })
 
     test('getTileID()', () => {
-      const model = new DataModel({ ceramic: {}, model: aliases } as unknown as Params)
+      const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
       expect(model.getTileID('foo')).toBe(aliases.tiles.foo)
       // @ts-expect-error invalid tile alias
       expect(model.getTileID('other')).toBeNull()
@@ -73,7 +73,7 @@ describe('DataModel', () => {
   describe('TileDocument wrappers', () => {
     describe('loadTile()', () => {
       test('throws if the alias does not exist', async () => {
-        const model = new DataModel({ ceramic: {}, model: aliases } as unknown as Params)
+        const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
         // @ts-expect-error invalid tile alias
         await expect(model.loadTile('unknown')).rejects.toThrow(
           'Tile alias "unknown" is not defined'
@@ -86,7 +86,7 @@ describe('DataModel', () => {
         const model = new DataModel({
           ceramic: {},
           loader: { load },
-          model: aliases,
+          aliases,
         } as unknown as Params)
         await expect(model.loadTile('foo')).resolves.toBe(stream)
         expect(load).toHaveBeenCalledWith(aliases.definitions.myFoo)
@@ -95,7 +95,7 @@ describe('DataModel', () => {
 
     describe('createTile()', () => {
       test('throws if the alias does not exist', async () => {
-        const model = new DataModel({ ceramic: {}, model: aliases } as unknown as Params)
+        const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
         // @ts-expect-error invalid schema alias
         await expect(model.createTile('Unknown', {})).rejects.toThrow(
           'Schema alias "Unknown" is not defined'
@@ -108,21 +108,7 @@ describe('DataModel', () => {
         const model = new DataModel({
           ceramic: {},
           loader: { create },
-          model: aliases,
-        } as unknown as Params)
-
-        const content = { test: true }
-        await expect(model.createTile('Foo', content)).resolves.toBe(stream)
-        expect(create).toHaveBeenCalledWith(content, { schema: aliases.schemas.Foo }, { pin: true })
-      })
-
-      test('does not pin if explicitly set', async () => {
-        const stream = { id: streamID }
-        const create = jest.fn(() => Promise.resolve(stream))
-        const model = new DataModel({
-          ceramic: {},
-          loader: { create },
-          model: aliases,
+          aliases,
         } as unknown as Params)
 
         const content = { test: true }
@@ -132,40 +118,6 @@ describe('DataModel', () => {
           { schema: aliases.schemas.Foo },
           { pin: false }
         )
-      })
-
-      test('does not pin if autopin is false', async () => {
-        const stream = { id: streamID }
-        const create = jest.fn(() => Promise.resolve(stream))
-        const model = new DataModel({
-          ceramic: {},
-          loader: { create },
-          model: aliases,
-          autopin: false,
-        } as unknown as Params)
-
-        const content = { test: true }
-        await expect(model.createTile('Foo', content)).resolves.toBe(stream)
-        expect(create).toHaveBeenCalledWith(
-          content,
-          { schema: aliases.schemas.Foo },
-          { pin: false }
-        )
-      })
-
-      test('pins if autopin is false but option is set', async () => {
-        const stream = { id: streamID }
-        const create = jest.fn(() => Promise.resolve(stream))
-        const model = new DataModel({
-          ceramic: {},
-          loader: { create },
-          model: aliases,
-          autopin: false,
-        } as unknown as Params)
-
-        const content = { test: true }
-        await expect(model.createTile('Foo', content, { pin: true })).resolves.toBe(stream)
-        expect(create).toHaveBeenCalledWith(content, { schema: aliases.schemas.Foo }, { pin: true })
       })
     })
   })

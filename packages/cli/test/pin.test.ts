@@ -2,13 +2,10 @@ import { execa } from 'execa'
 import stripAnsi from 'strip-ansi'
 
 describe('pins', () => {
-  test.only('stream is pinned', async () => {
+  test('stream is pinned', async () => {
     const key = await execa('glaze', ['did:create'])
     const seed = stripAnsi(key.stderr.split('with seed ')[1])
-    console.log('use seed', seed)
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
-
-    console.log('tile stderr', tile.stderr)
     const { stderr } = await execa('glaze', [
       'pin:add',
       tile.stderr.split('Created stream ')[1].replace('.', ''),

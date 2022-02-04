@@ -459,7 +459,7 @@ describe('DIDDataStore', () => {
 
         await expect(ds._getOwnIDXDoc(id)).resolves.toBe(doc)
         expect(createDoc).toHaveBeenCalledWith(id)
-        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: true })
+        expect(update).toHaveBeenCalledWith({}, { schema: CIP11_INDEX_SCHEMA_URL })
       })
 
       test('returns the doc if valid', async () => {
@@ -681,55 +681,8 @@ describe('DIDDataStore', () => {
         const content = { test: true }
         await expect(ds._createRecord(definition, content, { pin: true })).resolves.toBe('streamId')
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(deterministic).toBeCalledWith({ controllers: [id], family: 'defId' })
-        expect(update).toBeCalledWith(content, { schema: 'schemaId' }, { pin: true })
-      })
-
-      test('pin by default', async () => {
-        const update = jest.fn()
-        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
-          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-        })
-
-        const ds = new DIDDataStore({
-          ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic },
-          model,
-        } as any)
-        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
-        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: true })
-      })
-
-      test('no pinning by setting instance option', async () => {
-        const update = jest.fn()
-        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
-          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-        })
-
-        const ds = new DIDDataStore({
-          autopin: false,
-          ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic },
-          model,
-        } as any)
-        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, {})
-        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
-      })
-
-      test('explicit no pinning', async () => {
-        const update = jest.fn()
-        const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
-          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
-        })
-
-        const ds = new DIDDataStore({
-          autopin: true,
-          ceramic: { did: { id: 'did:test:123' } },
-          loader: { deterministic },
-          model,
-        } as any)
-        await ds._createRecord({ id: { toString: () => 'defId' } } as any, {}, { pin: false })
-        expect(update).toBeCalledWith({}, { schema: undefined }, { pin: false })
+        expect(deterministic).toBeCalledWith({ controllers: [id], family: 'defId' }, { pin: true })
+        expect(update).toBeCalledWith(content, { schema: 'schemaId' })
       })
     })
   })

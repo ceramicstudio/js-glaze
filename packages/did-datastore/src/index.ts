@@ -64,10 +64,6 @@ export type CreateOptions = {
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   /**
-   * Pin all created records streams (default)
-   */
-  autopin?: boolean
-  /**
    * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
    */
   cache?: TileCache | boolean
@@ -98,7 +94,6 @@ export class DIDDataStore<
   ModelTypes extends ModelTypeAliases = ModelTypeAliases,
   Alias extends keyof ModelTypes['definitions'] = keyof ModelTypes['definitions']
 > {
-  #autopin: boolean
   #ceramic: CeramicApi
   #id: string | undefined
   #indexProxies: Record<string, TileProxy> = {}
@@ -106,15 +101,14 @@ export class DIDDataStore<
   #model: DataModel<ModelTypes>
 
   constructor(params: DIDDataStoreParams<ModelTypes>) {
-    const { autopin, cache, ceramic, id, loader, model } = params
-    this.#autopin = autopin !== false
+    const { cache, ceramic, id, loader, model } = params
     this.#ceramic = ceramic
     this.#id = id
     this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#model =
       model instanceof DataModel
         ? model
-        : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model })
+        : new DataModel<ModelTypes>({ loader: this.#loader, aliases: model })
   }
 
   get authenticated(): boolean {
@@ -359,7 +353,7 @@ export class DIDDataStore<
     const doc = await this._createIDXDoc(did)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
-      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: this.#autopin })
+      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL })
     } else if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -464,12 +458,12 @@ export class DIDDataStore<
     { controller, pin }: CreateOptions
   ): Promise<StreamID> {
     // Doc must first be created in a deterministic way
-    const doc = await this.#loader.deterministic({
-      controllers: [controller ?? this.id],
-      family: definition.id.toString(),
-    })
+    const doc = await this.#loader.deterministic(
+      { controllers: [controller ?? this.id], family: definition.id.toString() },
+      { pin }
+    )
     // Then be updated with content and schema
-    await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
+    await doc.update(content, { schema: definition.schema })
     return doc.id
   }
 

@@ -6,24 +6,17 @@
  * @module datamodel
  */
 
-import type { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi, CreateOpts } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { TileLoader } from '@glazed/tile-loader'
 import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
-export type CreateOptions = {
+export type DataModelParams<Aliases> = {
   /**
-   * Pin the created stream (default)
+   * The runtime model aliases to use
    */
-  pin?: boolean
-}
-
-export type DataModelParams<Model> = {
-  /**
-   * Pin all created streams (default)
-   */
-  autopin?: boolean
+  aliases: Aliases
   /**
    * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
    */
@@ -36,10 +29,6 @@ export type DataModelParams<Model> = {
    * A {@linkcode TileLoader} instance to use, must be provided if `ceramic` is not provided
    */
   loader?: TileLoader
-  /**
-   * The runtime model aliases to use
-   */
-  model: Model
 }
 
 /**
@@ -51,13 +40,11 @@ export class DataModel<
   ModelTypes extends ModelTypeAliases,
   ModelAliases extends ModelTypesToAliases<ModelTypes> = ModelTypesToAliases<ModelTypes>
 > {
-  #autopin: boolean
+  #aliases: ModelAliases
   #loader: TileLoader
-  #model: ModelAliases
 
   constructor(params: DataModelParams<ModelAliases>) {
-    this.#autopin = params.autopin !== false
-    this.#model = params.model
+    this.#aliases = params.aliases
 
     if (params.loader != null) {
       this.#loader = params.loader
@@ -68,20 +55,24 @@ export class DataModel<
     }
   }
 
+  get aliases(): ModelAliases {
+    return this.#aliases
+  }
+
   get loader(): TileLoader {
     return this.#loader
   }
 
   getDefinitionID<Alias extends keyof ModelAliases['definitions']>(alias: Alias): string | null {
-    return this.#model.definitions[alias] ?? null
+    return this.#aliases.definitions[alias] ?? null
   }
 
   getSchemaURL<Alias extends keyof ModelAliases['schemas']>(alias: Alias): string | null {
-    return this.#model.schemas[alias] ?? null
+    return this.#aliases.schemas[alias] ?? null
   }
 
   getTileID<Alias extends keyof ModelAliases['tiles']>(alias: Alias): string | null {
-    return this.#model.tiles[alias] ?? null
+    return this.#aliases.tiles[alias] ?? null
   }
 
   /**
@@ -107,17 +98,13 @@ export class DataModel<
   >(
     schemaAlias: Alias,
     content: ContentType,
-    { pin }: CreateOptions = {}
+    options?: CreateOpts
   ): Promise<TileDocument<ContentType>> {
     const schema = this.getSchemaURL(schemaAlias)
     if (schema == null) {
       throw new Error(`Schema alias "${schemaAlias as string}" is not defined`)
     }
 
-    return await this.#loader.create<ContentType>(
-      content,
-      { schema },
-      { pin: pin ?? this.#autopin }
-    )
+    return await this.#loader.create<ContentType>(content, { schema }, options)
   }
 }
