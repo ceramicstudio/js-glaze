@@ -171,6 +171,7 @@ ___
 | :------ | :------ | :------ |
 | `cache?` | [`TileCache`](tile_loader.md#tilecache) \| `boolean` | A supported cache implementation, `true` to use the default implementation or `false` to disable the cache (default) |
 | `ceramic` | `CeramicApi` | A Ceramic client instance |
+| `multiqueryTimeout?` | `number` | MultiQuery request timeout in milliseconds |
 
 ___
 

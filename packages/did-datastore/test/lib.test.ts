@@ -596,9 +596,9 @@ describe('DIDDataStore', () => {
 
     describe('_setRecordOnly()', () => {
       test('existing definition ID', async () => {
-        const update = jest.fn()
-        const load = jest.fn(() => Promise.resolve({ update, id: 'streamId' }))
-        Loader.mockImplementationOnce(() => ({ load } as unknown as TileLoader))
+        const record = { update: jest.fn(), id: 'streamId' }
+        const update = jest.fn(() => Promise.resolve(record))
+        Loader.mockImplementationOnce(() => ({ update } as unknown as TileLoader))
 
         const ds = new DIDDataStore({ ceramic: { did: { id: 'did:foo:123' } }, model } as any)
         const getRecordID = jest.fn(() => Promise.resolve('streamId'))
@@ -609,8 +609,7 @@ describe('DIDDataStore', () => {
           ds._setRecordOnly('defId', content, { controller: 'did:foo:456' })
         ).resolves.toEqual([false, 'streamId'])
         expect(getRecordID).toBeCalledWith('defId', 'did:foo:456')
-        expect(load).toBeCalledWith('streamId')
-        expect(update).toBeCalledWith(content)
+        expect(update).toBeCalledWith('streamId', content)
       })
 
       test('adding definition ID', async () => {
@@ -663,10 +662,12 @@ describe('DIDDataStore', () => {
 
     describe('_createRecord()', () => {
       test('creates the deterministic doc and updates it', async () => {
+        let record: TileDocument | null = null
         const id = 'did:test:123'
         const update = jest.fn()
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
-          return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
+          record = { id: 'streamId', update, metadata } as unknown as TileDocument
+          return Promise.resolve(record)
         })
         Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
 
@@ -717,11 +718,12 @@ describe('DIDDataStore', () => {
       })
 
       test('explicit no pinning', async () => {
+        const cache = jest.fn(() => true)
         const update = jest.fn()
         const deterministic = jest.fn((_ceramic, _content, metadata, _opts) => {
           return Promise.resolve({ id: 'streamId', update, metadata } as unknown as TileDocument)
         })
-        Loader.mockImplementationOnce(() => ({ deterministic } as unknown as TileLoader))
+        Loader.mockImplementationOnce(() => ({ deterministic, cache } as unknown as TileLoader))
 
         const ds = new DIDDataStore({
           autopin: true,
