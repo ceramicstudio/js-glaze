@@ -98,7 +98,7 @@
  *
  * ### Create and cache a stream
  *
- * The `create` method adss the created stream to the internal cache of the loader. This has no
+ * The `create` method adds the created stream to the internal cache of the loader. This has no
  * effect if the cache is disabled.
  *
  * ```ts
