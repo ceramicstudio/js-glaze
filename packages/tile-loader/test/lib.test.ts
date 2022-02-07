@@ -75,10 +75,16 @@ describe('tile-loader', () => {
   describe('TileLoader', () => {
     test('provides batching', async () => {
       const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
-      const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi, multiqueryTimeout})
+      const loader = new TileLoader({
+        ceramic: { multiQuery } as unknown as CeramicApi,
+        multiqueryTimeout,
+      })
       await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(1)
-      expect(multiQuery).toBeCalledWith([{ streamId: testID1 }, { streamId: testID2 }], multiqueryTimeout)
+      expect(multiQuery).toBeCalledWith(
+        [{ streamId: testID1 }, { streamId: testID2 }],
+        multiqueryTimeout
+      )
     })
 
     test('throws if one of the streams is not found', async () => {
@@ -100,14 +106,20 @@ describe('tile-loader', () => {
 
     test('does not cache by default', async () => {
       const multiQuery = jest.fn(() => ({ [testID1]: {}, [testID2]: {} }))
-      const loader = new TileLoader({ ceramic: { multiQuery } as unknown as CeramicApi, multiqueryTimeout })
+      const loader = new TileLoader({
+        ceramic: { multiQuery } as unknown as CeramicApi,
+        multiqueryTimeout,
+      })
 
       await loader.load(testID1)
       expect(multiQuery).toBeCalledTimes(1)
 
       await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(2)
-      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: testID1 }, { streamId: testID2 }], multiqueryTimeout)
+      expect(multiQuery).toHaveBeenLastCalledWith(
+        [{ streamId: testID1 }, { streamId: testID2 }],
+        multiqueryTimeout
+      )
     })
 
     test('has opt-in cache', async () => {
@@ -115,7 +127,7 @@ describe('tile-loader', () => {
       const loader = new TileLoader({
         cache: true,
         ceramic: { multiQuery } as unknown as CeramicApi,
-        multiqueryTimeout
+        multiqueryTimeout,
       })
 
       await loader.load(testID1)
@@ -132,7 +144,7 @@ describe('tile-loader', () => {
       const loader = new TileLoader({
         cache,
         ceramic: { multiQuery } as unknown as CeramicApi,
-        multiqueryTimeout
+        multiqueryTimeout,
       })
 
       await loader.load(testID1)
@@ -142,7 +154,10 @@ describe('tile-loader', () => {
 
       await Promise.all([loader.load(testID1), loader.load(testID2)])
       expect(multiQuery).toBeCalledTimes(2)
-      expect(multiQuery).toHaveBeenLastCalledWith([{ streamId: testID1 }, { streamId: testID2 }], multiqueryTimeout)
+      expect(multiQuery).toHaveBeenLastCalledWith(
+        [{ streamId: testID1 }, { streamId: testID2 }],
+        multiqueryTimeout
+      )
       expect(cache.has(testID1)).toBe(true)
       expect(cache.has(testID2)).toBe(true)
     })
@@ -211,7 +226,7 @@ describe('tile-loader', () => {
         const multiQuery = jest.fn(() => ({ [streamId.toString()]: stream }))
         const loader = new TileLoader({
           ceramic: { createStreamFromGenesis, multiQuery } as unknown as CeramicApi,
-          multiqueryTimeout
+          multiqueryTimeout,
         })
 
         await expect(loader.deterministic(metadata)).resolves.toBe(stream)
@@ -232,7 +247,7 @@ describe('tile-loader', () => {
         const multiQuery = jest.fn(() => ({}))
         const loader = new TileLoader({
           ceramic: { createStreamFromGenesis, multiQuery } as unknown as CeramicApi,
-          multiqueryTimeout
+          multiqueryTimeout,
         })
 
         const options = { anchor: false, pin: true, publish: false, sync: 0 }

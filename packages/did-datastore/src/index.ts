@@ -1,6 +1,160 @@
 /**
+ * Associate data records to a DID.
+ *
+ * ## Purpose
+ *
+ * The `did-datastore` module exports a `DIDDataStore` class allowing to associate Ceramic tiles to
+ * a DID in a deterministic way by implementing the Identity Index (IDX) protocol described in the
+ * [CIP-11 specification](https://github.com/ceramicnetwork/CIP/blob/main/CIPs/CIP-11/CIP-11.md).
+ *
+ * ## Installation
+ *
  * ```sh
  * npm install @glazed/did-datastore
+ * ```
+ *
+ * ## Common use-cases
+ *
+ * ### Read the contents of a record
+ *
+ * The {@linkcode DIDDataStore} instance uses a {@linkcode datamodel.DataModel DataModel} instance
+ * to support aliases for definitions.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DataModel } from '@glazed/datamodel'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const publishedModel = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const model = new DataModel({ ceramic, model: publishedModel })
+ * const dataStore = new DIDDataStore({ ceramic, model })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Use a published model object
+ *
+ * Instead of using a {@linkcode datamodel.DataModel DataModel} instance, it is possible to provide
+ * a published model object directly.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const publishedModel = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Use a TileLoader instance
+ *
+ * The {@linkcode DIDDataStore} instance uses a {@linkcode tile-loader.TileLoader TileLoader}
+ * instance internally to batch queries. It is possible to provide an instance to use instead, for
+ * example to share it with other functions.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ * import { TileLoader } from '@glazed/tile-loader'
+ *
+ * const ceramic = new CeramicClient()
+ * const loader = new TileLoader({ ceramic })
+ * const publishedModel = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, loader, model: publishedModel })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Set the contents of a record
+ *
+ * It is possible to set the contents of a record when the Ceramic instance is authenticated using
+ * the {@linkcode DIDDataStore.set set} method.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const publishedModel = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+ *
+ * async function setMyDefinitionRecord(content) {
+ *   // This will throw an error if the Ceramic instance is not authenticated
+ *   return await dataStore.set('myDefinition', content)
+ * }
+ * ```
+ *
+ * ### Merge the contents of a record
+ *
+ * Rather than completely replacing the contents of a record using the `set` method, the
+ * {@linkcode DIDDataStore.merge merge} method can be used to only replace the specified fields.
+ *
+ * The `merge` method only applies a shallow (one level) replacement, if you need a deep merge or
+ * more complex logic, you should implement it directly using the {@linkcode DIDDataStore.get get}
+ * and {@linkcode DIDDataStore.set set} methods.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const publishedModel = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+ *
+ * async function setMyDefinitionRecord(content) {
+ *   // This will only replace the fields present in the input `content` object, other fields
+ *   // already present in the record will not be affected
+ *   return await dataStore.merge('myDefinition', content)
+ * }
  * ```
  *
  * @module did-datastore
