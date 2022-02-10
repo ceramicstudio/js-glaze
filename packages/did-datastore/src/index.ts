@@ -1,6 +1,160 @@
 /**
+ * Associate data records to a DID.
+ *
+ * ## Purpose
+ *
+ * The `did-datastore` module exports a `DIDDataStore` class allowing to associate Ceramic tiles to
+ * a DID in a deterministic way by implementing the Identity Index (IDX) protocol described in the
+ * [CIP-11 specification](https://github.com/ceramicnetwork/CIP/blob/main/CIPs/CIP-11/CIP-11.md).
+ *
+ * ## Installation
+ *
  * ```sh
  * npm install @glazed/did-datastore
+ * ```
+ *
+ * ## Common use-cases
+ *
+ * ### Read the contents of a record
+ *
+ * The {@linkcode DIDDataStore} instance uses a {@linkcode datamodel.DataModel DataModel} instance
+ * to support aliases for definitions.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DataModel } from '@glazed/datamodel'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const aliases = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const model = new DataModel({ ceramic, aliases })
+ * const dataStore = new DIDDataStore({ ceramic, model })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Use a published model object
+ *
+ * Instead of using a {@linkcode datamodel.DataModel DataModel} instance, it is possible to provide
+ * a published model aliases object directly.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const aliases = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: aliases })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Use a TileLoader instance
+ *
+ * The {@linkcode DIDDataStore} instance uses a {@linkcode tile-loader.TileLoader TileLoader}
+ * instance internally to batch queries. It is possible to provide an instance to use instead, for
+ * example to share it with other functions.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ * import { TileLoader } from '@glazed/tile-loader'
+ *
+ * const ceramic = new CeramicClient()
+ * const loader = new TileLoader({ ceramic })
+ * const aliases = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, loader, model: aliases })
+ *
+ * async function getMyDefinitionRecord(did) {
+ *   return await dataStore.get('myDefinition', did)
+ * }
+ * ```
+ *
+ * ### Set the contents of a record
+ *
+ * It is possible to set the contents of a record when the Ceramic instance is authenticated using
+ * the {@linkcode DIDDataStore.set set} method.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const aliases = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: aliases })
+ *
+ * async function setMyDefinitionRecord(content) {
+ *   // This will throw an error if the Ceramic instance is not authenticated
+ *   return await dataStore.set('myDefinition', content)
+ * }
+ * ```
+ *
+ * ### Merge the contents of a record
+ *
+ * Rather than completely replacing the contents of a record using the `set` method, the
+ * {@linkcode DIDDataStore.merge merge} method can be used to only replace the specified fields.
+ *
+ * The `merge` method only applies a shallow (one level) replacement, if you need a deep merge or
+ * more complex logic, you should implement it directly using the {@linkcode DIDDataStore.get get}
+ * and {@linkcode DIDDataStore.set set} methods.
+ *
+ * ```ts
+ * import { CeramicClient } from '@ceramicnetwork/http-client'
+ * import { DIDDataStore } from '@glazed/did-datastore'
+ *
+ * const ceramic = new CeramicClient()
+ * const aliases = {
+ *  schemas: {
+ *     MySchema: 'ceramic://k2...ab',
+ *   },
+ *   definitions: {
+ *     myDefinition: 'k2...ef',
+ *   },
+ *   tiles: {},
+ * }
+ * const dataStore = new DIDDataStore({ ceramic, model: aliases })
+ *
+ * async function setMyDefinitionRecord(content) {
+ *   // This will only replace the fields present in the input `content` object, other fields
+ *   // already present in the record will not be affected
+ *   return await dataStore.merge('myDefinition', content)
+ * }
  * ```
  *
  * @module did-datastore
@@ -11,15 +165,13 @@ import { StreamID } from '@ceramicnetwork/streamid'
 import { CIP11_DEFINITION_SCHEMA_URL, CIP11_INDEX_SCHEMA_URL } from '@glazed/constants'
 import { DataModel } from '@glazed/datamodel'
 import type { Definition, IdentityIndex } from '@glazed/did-datastore-model'
-import { TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
-import type { TileCache } from '@glazed/tile-loader'
+import { type TileCache, TileLoader, getDeterministicQuery } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
-import { TileProxy } from './proxy'
-import type { TileDoc } from './proxy'
-import { getIDXMetadata } from './utils'
+import { TileProxy, type TileDoc } from './proxy.js'
+import { getIDXMetadata } from './utils.js'
 
-export { assertDIDstring, isDIDstring } from './utils'
+export { assertDIDstring, isDIDstring } from './utils.js'
 
 export type DefinitionContentType<
   ModelTypes extends ModelTypeAliases,
@@ -66,10 +218,6 @@ export type CreateOptions = {
 
 export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   /**
-   * Pin all created records streams (default)
-   */
-  autopin?: boolean
-  /**
    * {@linkcode TileLoader} cache parameter, only used if `loader` is not provided
    */
   cache?: TileCache | boolean
@@ -100,7 +248,6 @@ export class DIDDataStore<
   ModelTypes extends ModelTypeAliases = ModelTypeAliases,
   Alias extends keyof ModelTypes['definitions'] = keyof ModelTypes['definitions']
 > {
-  #autopin: boolean
   #ceramic: CeramicApi
   #id: string | undefined
   #indexProxies: Record<string, TileProxy> = {}
@@ -108,15 +255,14 @@ export class DIDDataStore<
   #model: DataModel<ModelTypes>
 
   constructor(params: DIDDataStoreParams<ModelTypes>) {
-    const { autopin, cache, ceramic, id, loader, model } = params
-    this.#autopin = autopin !== false
+    const { cache, ceramic, id, loader, model } = params
     this.#ceramic = ceramic
     this.#id = id
     this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#model =
       model instanceof DataModel
         ? model
-        : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model })
+        : new DataModel<ModelTypes>({ loader: this.#loader, aliases: model })
   }
 
   get authenticated(): boolean {
@@ -361,7 +507,7 @@ export class DIDDataStore<
     const doc = await this._createIDXDoc(did)
     if (doc.content == null || doc.metadata.schema == null) {
       // Doc just got created, set to empty object with schema
-      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL }, { pin: this.#autopin })
+      await doc.update({}, { schema: CIP11_INDEX_SCHEMA_URL })
     } else if (doc.metadata.schema !== CIP11_INDEX_SCHEMA_URL) {
       throw new Error('Invalid document: schema is not IdentityIndex')
     }
@@ -454,8 +600,7 @@ export class DIDDataStore<
       const ref = await this._createRecord(definition, content, options)
       return [true, ref]
     } else {
-      const doc = await this.#loader.load(existing)
-      await doc.update(content)
+      const doc = await this.#loader.update(existing, content)
       return [false, doc.id]
     }
   }
@@ -467,12 +612,12 @@ export class DIDDataStore<
     { controller, pin }: CreateOptions
   ): Promise<StreamID> {
     // Doc must first be created in a deterministic way
-    const doc = await this.#loader.deterministic({
-      controllers: [controller ?? this.id],
-      family: definition.id.toString(),
-    })
+    const doc = await this.#loader.deterministic(
+      { controllers: [controller ?? this.id], family: definition.id.toString() },
+      { pin }
+    )
     // Then be updated with content and schema
-    await doc.update(content, { schema: definition.schema }, { pin: pin ?? this.#autopin })
+    await doc.update(content, { schema: definition.schema })
     return doc.id
   }
 

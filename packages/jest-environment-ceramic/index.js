@@ -1,18 +1,25 @@
-const path = require('path')
-const { Ceramic } = require('@ceramicnetwork/core')
-const { convert } = require('blockcodec-to-ipld-format')
-const dagJose = require('dag-jose').default
-const IPFS = require('ipfs-core')
-const NodeEnvironment = require('jest-environment-node')
-const { dir } = require('tmp-promise')
+import path from 'path'
+import { Ceramic } from '@ceramicnetwork/core'
+import { create } from 'ipfs-core'
+import NodeEnvironment from 'jest-environment-node'
+import { dir } from 'tmp-promise'
 
-const dagJoseFormat = convert(dagJose)
-
-module.exports = class CeramicEnvironment extends NodeEnvironment {
+export default class CeramicEnvironment extends NodeEnvironment {
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
-    this.global.ipfs = await IPFS.create({
-      ipld: { formats: [dagJoseFormat] },
+    this.global.ipfs = await create({
+      // Note: the "test" profile doesn't seem to do much to disable networking,
+      // so we need to set the relevant config explicitly to run tests in parallel
+      config: {
+        Addresses: {
+          Swarm: [],
+        },
+        Bootstrap: [],
+        Discovery: {
+          MDNS: { Enabled: false },
+          webRTCStar: { Enabled: false },
+        },
+      },
       profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,
@@ -24,9 +31,9 @@ module.exports = class CeramicEnvironment extends NodeEnvironment {
   }
 
   async teardown() {
-    await super.teardown()
     await this.global.ceramic.close()
     await this.global.ipfs.stop()
     await this.tmpFolder.cleanup()
+    await super.teardown()
   }
 }

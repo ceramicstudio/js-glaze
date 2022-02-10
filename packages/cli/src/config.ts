@@ -1,5 +1,4 @@
-import { join } from 'path'
-
+import { join } from 'node:path'
 import Conf from 'conf'
 import type { Schema } from 'conf'
 import getEnvPaths from 'env-paths'

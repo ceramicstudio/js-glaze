@@ -1,11 +1,10 @@
 import { randomBytes } from 'crypto'
-
 import chalk from 'chalk'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { toString } from 'uint8arrays'
 
-import { Command } from '../../command'
+import { Command } from '../../command.js'
 
 type Flags = {
   ceramic?: string

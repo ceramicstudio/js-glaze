@@ -56,7 +56,7 @@ Create a new TileDocument and add it to the cache if enabled.
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `Record`<`string`, `any`\>`Record`<`string`, `any`\> |
+| `T` | extends `Record`<`string`, `any`\> = `Record`<`string`, `any`\> |
 
 #### Parameters
 
@@ -82,7 +82,7 @@ Create or load a deterministic TileDocument based on its metadata.
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `Record`<`string`, `any`\>`Record`<`string`, `any`\> |
+| `T` | extends `Record`<`string`, `any`\> = `Record`<`string`, `any`\> |
 
 #### Parameters
 
@@ -107,7 +107,7 @@ Load a TileDocument from the cache (if enabled) or remotely.
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `Record`<`string`, `any`\>`Record`<`string`, `any`\> |
+| `T` | extends `Record`<`string`, `any`\> = `Record`<`string`, `any`\> |
 
 #### Parameters
 
@@ -122,3 +122,30 @@ Load a TileDocument from the cache (if enabled) or remotely.
 #### Overrides
 
 DataLoader.load
+
+___
+
+### update
+
+▸ **update**<`T`\>(`streamID`, `content?`, `metadata?`, `options?`): `Promise`<`TileDocument`<`undefined` \| ``null`` \| `T`\>\>
+
+Update a TileDocument after loading the stream remotely, bypassing the cache.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | extends `Record`<`string`, `any`\> = `Record`<`string`, `any`\> |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `streamID` | `string` \| `StreamID` |
+| `content?` | `T` |
+| `metadata?` | `TileMetadataArgs` |
+| `options?` | `UpdateOpts` |
+
+#### Returns
+
+`Promise`<`TileDocument`<`undefined` \| ``null`` \| `T`\>\>

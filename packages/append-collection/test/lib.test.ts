@@ -5,6 +5,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { CommitID } from '@ceramicnetwork/streamid'
 import { TileLoader } from '@glazed/tile-loader'
+import { jest } from '@jest/globals'
 
 import { AppendCollection, Cursor, publishCollectionSchemas } from '../src'
 

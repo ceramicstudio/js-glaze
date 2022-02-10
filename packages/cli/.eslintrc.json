@@ -1,0 +1,13 @@
+{
+  "env": { "node": true },
+  "extends": ["3box", "3box/typescript"],
+  "parserOptions": {
+    "project": ["tsconfig.lint.json"]
+  },
+  "rules": {
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off"
+  }
+}

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import CID from 'cids'
+import { CID } from 'multiformats/cid'
 
 import {
   decodeDagJWS,
@@ -12,7 +12,7 @@ import {
 } from '../src'
 
 describe('encoding', () => {
-  const cid = new CID('mAXASIOnrbGCADfkPyOI37VMkbzluh1eaukBqqnl2oFaFnuIt')
+  const cid = CID.parse('bafybeig6xv5nwphfmvcnektpnojts33jqcuam7bmye2pb54adnrtccjlsu')
   const dagJWS = {
     payload: 'payload',
     signatures: [{ protected: 'protected', signature: 'signature' }],

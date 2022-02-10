@@ -1,7 +1,5 @@
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { USER_CONFIG, config } from '../../config'
-import type { UserConfigKey as Key } from '../../config'
+import { Command, type CommandFlags } from '../../command.js'
+import { USER_CONFIG, type UserConfigKey as Key, config } from '../../config.js'
 
 export default class GetConfig extends Command<CommandFlags, { key: Key }> {
   static description = 'get a config value'

@@ -6,8 +6,8 @@ import type { GraphQLModel, ItemField, ObjectField } from '@glazed/graphql-types
 import type { Schema } from '@glazed/types'
 import { camelCase, pascalCase } from 'change-case'
 
-import type { ModelManager } from './datamodel'
-import { getReference } from './schema'
+import type { ModelManager } from './datamodel.js'
+import { getReference } from './schema.js'
 
 /** @internal */
 function getName(base: string, prefix = ''): string {
@@ -114,6 +114,7 @@ export function addModelSchema(
   return name
 }
 
+/** @internal */
 export async function createGraphQLModel(manager: ModelManager): Promise<GraphQLModel> {
   // TODO: throw error on using reserved names:
   // - "node" and "index" roots

@@ -1,23 +1,23 @@
 import { inspect } from 'util'
 
-import ThreeIDResolver from '@ceramicnetwork/3id-did-resolver'
+import { getResolver as get3IDResolver } from '@ceramicnetwork/3id-did-resolver'
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
 import { DIDDataStore } from '@glazed/did-datastore'
 import type { PublishedModel } from '@glazed/types'
-import { Command as Cmd, flags } from '@oclif/command'
+import { Command as CoreCommand, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { DID } from 'dids'
 import type { ResolverRegistry } from 'did-resolver'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
-import KeyResolver from 'key-did-resolver'
+import { getResolver as getKeyResolver } from 'key-did-resolver'
 import ora from 'ora'
 import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
 
-import { config } from './config'
-import { createDataModel, loadManagedModel } from './model'
+import { config } from './config.js'
+import { createDataModel, loadManagedModel } from './model.js'
 
 type StringRecord = Record<string, unknown>
 
@@ -30,10 +30,10 @@ export interface CommandFlags {
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
   Args extends StringRecord = StringRecord
-> extends Cmd {
+> extends CoreCommand {
   static flags = {
-    ceramic: flags.string({ char: 'c', description: 'Ceramic API URL', env: 'CERAMIC_URL' }),
-    key: flags.string({ char: 'k', description: 'DID Key', env: 'DID_KEY' }),
+    ceramic: Flags.string({ char: 'c', description: 'Ceramic API URL', env: 'CERAMIC_URL' }),
+    key: Flags.string({ char: 'k', description: 'DID Private Key', env: 'DID_KEY' }),
   }
 
   #authenticatedDID: DID | null = null
@@ -46,8 +46,8 @@ export abstract class Command<
 
   async init(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const { args, flags } = this.parse(this.constructor)
+    // @ts-ignore constructor type
+    const { args, flags } = await this.parse(this.constructor)
     this.args = args as Args
     this.flags = flags as Flags
     this.spinner = ora()
@@ -85,9 +85,7 @@ export abstract class Command<
 
   get resolverRegistry(): ResolverRegistry {
     if (this.#resolverRegistry == null) {
-      const keyResolver = KeyResolver.getResolver()
-      const threeIDResolver = ThreeIDResolver.getResolver(this.ceramic)
-      this.#resolverRegistry = { ...keyResolver, ...threeIDResolver }
+      this.#resolverRegistry = { ...getKeyResolver(), ...get3IDResolver(this.ceramic) }
     }
     return this.#resolverRegistry
   }

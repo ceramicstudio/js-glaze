@@ -1,0 +1,9 @@
+{
+  "baseBranch": "origin/main",
+  "pipeline": {
+    "build:js": {},
+    "lint": {},
+    "test": {},
+    "test:ci": {}
+  }
+}

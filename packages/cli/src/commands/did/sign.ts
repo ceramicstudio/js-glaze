@@ -1,5 +1,4 @@
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class SignDID extends Command<CommandFlags, { did: string; contents: unknown }> {
   static description = 'create a JSON Web Signature'

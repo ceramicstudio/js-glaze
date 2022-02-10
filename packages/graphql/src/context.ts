@@ -12,7 +12,6 @@ import type { Doc } from './types'
 import { toDoc } from './utils'
 
 export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
-  autopin?: boolean
   cache?: TileCache | boolean
   ceramic: CeramicApi
   loader?: TileLoader
@@ -27,7 +26,7 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   #referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(config: ContextConfig<ModelTypes>) {
-    const { autopin, cache, ceramic, loader, model } = config
+    const { cache, ceramic, loader, model } = config
     this.#ceramic = ceramic
     this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#dataStore = new DIDDataStore<ModelTypes>({
@@ -36,7 +35,7 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
       model:
         model instanceof DataModel
           ? model
-          : new DataModel<ModelTypes>({ autopin, loader: this.#loader, model }),
+          : new DataModel<ModelTypes>({ loader: this.#loader, aliases: model }),
     })
   }
 

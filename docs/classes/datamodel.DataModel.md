@@ -11,7 +11,7 @@ import { DataModel } from '@glazed/datamodel'
 | Name | Type |
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases` |
-| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\>`ModelTypesToAliases`<`ModelTypes`\> |
+| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\> = `ModelTypesToAliases`<`ModelTypes`\> |
 
 ## Constructors
 
@@ -24,7 +24,7 @@ import { DataModel } from '@glazed/datamodel'
 | Name | Type |
 | :------ | :------ |
 | `ModelTypes` | extends `ModelTypeAliases`<`Record`<`string`, `any`\>, `Record`<`string`, `string`\>, `Record`<`string`, `string`\>\> |
-| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\>`ModelTypesToAliases`<`ModelTypes`\> |
+| `ModelAliases` | extends `ModelTypesToAliases`<`ModelTypes`\> = `ModelTypesToAliases`<`ModelTypes`\> |
 
 #### Parameters
 
@@ -33,6 +33,16 @@ import { DataModel } from '@glazed/datamodel'
 | `params` | [`DataModelParams`](../modules/datamodel.md#datamodelparams)<`ModelAliases`\> |
 
 ## Accessors
+
+### aliases
+
+• `get` **aliases**(): `ModelAliases`
+
+#### Returns
+
+`ModelAliases`
+
+___
 
 ### loader
 
@@ -46,7 +56,7 @@ import { DataModel } from '@glazed/datamodel'
 
 ### createTile
 
-▸ **createTile**<`Alias`, `ContentType`\>(`schemaAlias`, `content`, `__namedParameters?`): `Promise`<`TileDocument`<`ContentType`\>\>
+▸ **createTile**<`Alias`, `ContentType`\>(`schemaAlias`, `content`, `options?`): `Promise`<`TileDocument`<`ContentType`\>\>
 
 Create a TileDocument using a schema identified by the given `schemaAlias`.
 
@@ -63,7 +73,7 @@ Create a TileDocument using a schema identified by the given `schemaAlias`.
 | :------ | :------ |
 | `schemaAlias` | `Alias` |
 | `content` | `ContentType` |
-| `__namedParameters` | [`CreateOptions`](../modules/datamodel.md#createoptions) |
+| `options?` | `CreateOpts` |
 
 #### Returns
 

@@ -1,6 +1,6 @@
 {
   "name": "@glazed/graphql-types",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.1",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -13,24 +13,24 @@
     "url": "https://github.com/ceramicstudio/js-glaze",
     "directory": "packages/graphql-types"
   },
-  "main": "dist/lib.cjs",
-  "module": "dist/lib.mjs",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/lib.mjs",
-    "require": "./dist/lib.cjs",
-    "default": "./dist/lib.cjs"
+    ".": "./dist/index.js"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "sideEffects": false,
   "scripts": {
-    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && rollup -c ../../rollup.config.js",
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src --fix",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"

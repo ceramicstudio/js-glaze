@@ -1,8 +1,7 @@
 import chalk from 'chalk'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { write } from '../../fs'
+import { Command, type CommandFlags } from '../../command.js'
+import { write } from '../../fs.js'
 
 type Args = {
   name: string

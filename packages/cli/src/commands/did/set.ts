@@ -1,11 +1,10 @@
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class SetIndex extends Command<
   CommandFlags,
   { model: string; alias: string; contents: Record<string, any> }
 > {
-  static description = 'get the contents of a record in a DID DataStore'
+  static description = 'set the contents of a record in a DID DataStore'
 
   static flags = Command.flags
 
