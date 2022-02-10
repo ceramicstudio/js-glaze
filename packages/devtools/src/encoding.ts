@@ -5,18 +5,22 @@ import { fromString, toString } from 'uint8arrays'
 
 import { applyMap } from './utils.js'
 
+/** @internal */
 export function decodeDagJWS({ payload, signatures, link }: EncodedDagJWS): DagJWS {
   return { payload, signatures, link: link ? CID.parse(link) : undefined }
 }
 
+/** @internal */
 export function encodeDagJWS({ payload, signatures, link }: DagJWS): EncodedDagJWS {
   return { payload, signatures, link: link?.toString() }
 }
 
+/** @internal */
 export function decodeDagJWSResult({ jws, linkedBlock }: EncodedDagJWSResult): DagJWSResult {
   return { jws: decodeDagJWS(jws), linkedBlock: fromString(linkedBlock, 'base64pad') }
 }
 
+/** @internal */
 export function encodeDagJWSResult({ jws, linkedBlock }: DagJWSResult): EncodedDagJWSResult {
   return { jws: encodeDagJWS(jws), linkedBlock: toString(linkedBlock, 'base64pad') }
 }
@@ -42,6 +46,7 @@ export function decodeEntryCommits(
   return { ...entry, commits: entry.commits.map(decodeDagJWSResult) }
 }
 
+/** @internal */
 export function decodeModel(model: ManagedModel<EncodedDagJWSResult>): ManagedModel<DagJWSResult> {
   return {
     schemas: applyMap(model.schemas, (schema) => {
@@ -59,6 +64,7 @@ export function encodeEntryCommits(
   return { ...entry, commits: entry.commits.map(encodeDagJWSResult) }
 }
 
+/** @internal */
 export function encodeModel(model: ManagedModel<DagJWSResult>): ManagedModel<EncodedDagJWSResult> {
   return {
     schemas: applyMap(model.schemas, (schema) => {

@@ -31,9 +31,9 @@ export default class CeramicEnvironment extends NodeEnvironment {
   }
 
   async teardown() {
-    await super.teardown()
     await this.global.ceramic.close()
     await this.global.ipfs.stop()
     await this.tmpFolder.cleanup()
+    await super.teardown()
   }
 }

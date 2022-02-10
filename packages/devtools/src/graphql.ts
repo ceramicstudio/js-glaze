@@ -114,6 +114,7 @@ export function addModelSchema(
   return name
 }
 
+/** @internal */
 export async function createGraphQLModel(manager: ModelManager): Promise<GraphQLModel> {
   // TODO: throw error on using reserved names:
   // - "node" and "index" roots

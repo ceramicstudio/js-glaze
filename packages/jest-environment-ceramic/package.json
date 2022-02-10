@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@ceramicnetwork/core": "^2.0.0-alpha.0",
-    "ipfs-core": "^0.14.0",
-    "jest-environment-node": "^27.4.6",
+    "ipfs-core": "^0.14.1",
+    "jest-environment-node": "^27.5.1",
     "tmp-promise": "^3.0.3"
   }
 }

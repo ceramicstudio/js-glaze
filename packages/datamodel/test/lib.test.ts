@@ -47,6 +47,13 @@ describe('DataModel', () => {
     })
   })
 
+  describe('getters', () => {
+    test('aliases', () => {
+      const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
+      expect(model.aliases).toBe(aliases)
+    })
+  })
+
   describe('Aliases methods', () => {
     test('getDefinitionID()', () => {
       const model = new DataModel({ ceramic: {}, aliases } as unknown as Params)
