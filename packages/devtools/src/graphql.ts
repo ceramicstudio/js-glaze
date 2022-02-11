@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-import { CIP88_APPEND_COLLECTION_PREFIX } from '@glazed/constants'
+import { CIP88_APPEND_COLLECTION_PREFIX, CIP88_DID } from '@glazed/constants'
 import type { Definition } from '@glazed/did-datastore-model'
 import type { GraphQLModel, ItemField, ObjectField } from '@glazed/graphql-types'
 import type { Schema } from '@glazed/types'
@@ -85,14 +85,18 @@ export function addModelSchema(
         const opts = { name: propName, parent: name, owner: options.owner ?? name }
         const required = requiredProps.includes(key)
         if (value.type === 'string') {
-          const reference = getReference(value)
-          if (reference == null) {
-            acc[prop] = { ...value, required, type: 'string' }
+          if (value.$comment === CIP88_DID) {
+            acc[prop] = { required, type: 'did', maxLength: value.maxLength }
           } else {
-            const refName = getName(propName, name)
-            const ref = { schemas: reference, owner: options.owner ?? name }
-            model.references[refName] = ref
-            acc[prop] = { required, type: 'reference', ...ref }
+            const reference = getReference(value)
+            if (reference == null) {
+              acc[prop] = { ...value, required, type: 'string' }
+            } else {
+              const refName = getName(propName, name)
+              const ref = { schemas: reference, owner: options.owner ?? name }
+              model.references[refName] = ref
+              acc[prop] = { required, type: 'reference', ...ref }
+            }
           }
         } else if (value.type === 'array') {
           if (value.items == null) {

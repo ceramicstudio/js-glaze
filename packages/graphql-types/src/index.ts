@@ -12,6 +12,10 @@ export type FieldString = {
   format?: 'date-time' | 'date' | 'duration' | 'time'
   maxLength?: number
 }
+export type FieldDIDString = {
+  type: 'did'
+  maxLength?: number
+}
 
 export type ReferenceEntry = {
   owner: string
@@ -35,6 +39,7 @@ export type ItemField =
   | FieldInteger
   | FieldFloat
   | FieldString
+  | FieldDIDString
   | FieldObject
   | FieldReference
 

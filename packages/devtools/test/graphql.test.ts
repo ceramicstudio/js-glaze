@@ -52,6 +52,11 @@ describe('graphql', () => {
             type: 'object',
             title: 'item',
             properties: {
+              author: {
+                type: 'string',
+                $comment: 'cip88:did',
+                maxLength: 100,
+              },
               note: {
                 type: 'string',
                 title: 'reference',
@@ -101,6 +106,11 @@ describe('graphql', () => {
       objects: {
         NotesListItem: {
           fields: {
+            author: {
+              type: 'did',
+              required: false,
+              maxLength: 100,
+            },
             note: {
               type: 'reference',
               owner: 'Notes',

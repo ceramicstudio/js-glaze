@@ -1,36 +1,35 @@
+import type { StreamMetadata } from '@ceramicnetwork/common'
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import type { GraphQLModel } from '@glazed/graphql-types'
 import { pascalCase } from 'change-case'
 import {
   GraphQLBoolean,
+  type GraphQLFieldConfig,
+  type GraphQLFieldConfigMap,
+  type GraphQLInputFieldConfigMap,
   GraphQLFloat,
   GraphQLID,
   GraphQLInputObjectType,
   GraphQLInt,
+  GraphQLInterfaceType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
-} from 'graphql'
-import type {
-  GraphQLFieldConfig,
-  GraphQLFieldConfigMap,
-  GraphQLInputFieldConfigMap,
-  GraphQLInterfaceType,
+  assertValidSchema,
 } from 'graphql'
 import {
-  connectionArgs,
-  connectionDefinitions,
+  // connectionArgs,
+  // connectionDefinitions,
   fromGlobalId,
   mutationWithClientMutationId,
   nodeDefinitions,
   toGlobalId,
 } from 'graphql-relay'
-import type { Connection, ConnectionArguments } from 'graphql-relay'
+// import type { Connection, ConnectionArguments } from 'graphql-relay'
 
-import type { Context } from './context'
-import type { Doc } from './types'
-import { createGlobalId, toDoc } from './utils'
+import type { Context } from './context.js'
 
 const SCALARS = {
   boolean: GraphQLBoolean,
@@ -39,6 +38,37 @@ const SCALARS = {
   string: GraphQLString,
 }
 const SCALAR_FIELDS = Object.keys(SCALARS)
+
+type StoreMutationOptions = {
+  merge?: boolean
+}
+
+const storeMutationOptions = new GraphQLInputObjectType({
+  name: 'DataStoreMutationOptions',
+  fields: {
+    merge: {
+      type: GraphQLBoolean,
+    },
+  },
+})
+
+const streamMetadata = new GraphQLObjectType<StreamMetadata, Context>({
+  name: 'StreamMetadata',
+  fields: {
+    controllers: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLID))),
+    },
+    schema: {
+      type: GraphQLString,
+    },
+    family: {
+      type: GraphQLString,
+    },
+    tags: {
+      type: new GraphQLList(GraphQLString),
+    },
+  },
+})
 
 function sortedObject<T = Record<string, any>>(input: T): T {
   const keys = Object.keys(input)
@@ -52,6 +82,104 @@ function sortedObject<T = Record<string, any>>(input: T): T {
   }, {}) as T
 }
 
+function createDIDObject(dataStore: GraphQLObjectType): GraphQLObjectType<string, Context> {
+  return new GraphQLObjectType<string, Context>({
+    name: 'DID',
+    fields: {
+      id: {
+        type: new GraphQLNonNull(GraphQLID),
+        resolve: (did) => did,
+      },
+      isViewer: {
+        type: new GraphQLNonNull(GraphQLBoolean),
+        resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
+      },
+      store: {
+        type: dataStore,
+        resolve: (did) => ({ did }),
+      },
+    },
+  })
+}
+
+function createCeramicMetadataObject(
+  didObject: GraphQLObjectType<string, Context>
+): GraphQLObjectType<TileDocument, Context> {
+  const ceramicMetadata: GraphQLObjectType<TileDocument, Context> = new GraphQLObjectType({
+    name: 'CeramicMetadata',
+    fields: () => ({
+      streamID: {
+        type: new GraphQLNonNull(GraphQLID),
+        resolve: (doc) => doc.id.toString(),
+      },
+      commitID: {
+        type: new GraphQLNonNull(GraphQLID),
+        resolve: (doc) => doc.commitId.toString(),
+      },
+      streamMetadata: {
+        type: new GraphQLNonNull(streamMetadata),
+        resolve: (doc) => doc.metadata,
+      },
+      controllers: {
+        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(didObject))),
+        resolve: (doc) => doc.metadata.controllers,
+      },
+      viewerIsController: {
+        type: new GraphQLNonNull(GraphQLBoolean),
+        resolve: (doc, _, ctx) => {
+          const id = ctx.authenticated && ctx.viewerID
+          return id ? doc.metadata.controllers.includes(id) : false
+        },
+      },
+      schema: {
+        type: ceramicMetadata,
+        resolve: async (doc, _, ctx) => {
+          return doc.metadata.schema ? ctx.loadDoc(doc.metadata.schema) : null
+        },
+      },
+    }),
+  })
+  return ceramicMetadata
+}
+
+function createCeramicStreamInterface(
+  ceramicMetadata: GraphQLObjectType<TileDocument, Context>
+): GraphQLInterfaceType {
+  return new GraphQLInterfaceType({
+    name: 'CeramicStream',
+    fields: () => ({
+      _ceramic: {
+        type: new GraphQLNonNull(ceramicMetadata),
+      },
+    }),
+  })
+}
+
+function createObjectInterfaces(
+  ceramicStreamInterface: GraphQLInterfaceType,
+  others: Array<GraphQLInterfaceType> = []
+): Array<GraphQLInterfaceType> {
+  return [ceramicStreamInterface, ...others]
+}
+
+function createObjectCommonFields(
+  ceramicMetadata: GraphQLObjectType<TileDocument, Context>,
+  typeName?: string
+): GraphQLFieldConfigMap<TileDocument, Context> {
+  const fields: GraphQLFieldConfigMap<TileDocument, Context> = {
+    _ceramic: {
+      type: new GraphQLNonNull(ceramicMetadata),
+    },
+  }
+  if (typeName != null) {
+    fields.id = {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: (doc): string => toGlobalId(typeName, doc.id.toString()),
+    }
+  }
+  return fields
+}
+
 export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
   const inputObjects: Record<string, GraphQLInputObjectType> = {}
   const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
@@ -62,7 +190,9 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
       const { id } = fromGlobalId(globalId)
       return await ctx.loadDoc(id)
     },
-    (doc: Doc) => (doc.schema == null ? undefined : model.referenced[doc.schema]?.name)
+    (doc: TileDocument) => {
+      return doc.metadata.schema == null ? undefined : model.referenced[doc.metadata.schema]?.name
+    }
   )
 
   const nodes = Object.entries(model.referenced).reduce((acc, [schema, { name, type }]) => {
@@ -71,6 +201,32 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
     }
     return acc
   }, {} as Record<string, { interfaces: Array<GraphQLInterfaceType>; schema: string }>)
+
+  const indexEntries = Object.entries(sortedObject(model.index))
+
+  // DataStore object is model-specific and needed to generate object using it
+  const dataStore = new GraphQLObjectType({
+    name: 'DataStore',
+    fields: () => {
+      return indexEntries.reduce((acc, [key, definition]) => {
+        const { name } = model.referenced[definition.schema]
+        acc[key] = {
+          type: types[name],
+          resolve: async (
+            { did },
+            _,
+            ctx
+          ): Promise<TileDocument<Record<string, any> | null | undefined> | null> => {
+            return await ctx.dataStore.getRecordDocument(definition.id, did)
+          },
+        }
+        return acc
+      }, {} as GraphQLFieldConfigMap<{ did?: string }, Context>)
+    },
+  })
+  const didObject = createDIDObject(dataStore)
+  const ceramicMetadata = createCeramicMetadataObject(didObject)
+  const ceramicStreamInterface = createCeramicStreamInterface(ceramicMetadata)
 
   for (const [name, { fields }] of Object.entries(sortedObject(model.objects))) {
     const node = nodes[name]
@@ -93,9 +249,13 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
               type = new GraphQLList(inputObjects[listItem.name])
             } else if (listItem.type === 'reference') {
               type = new GraphQLList(GraphQLID)
+            } else if (listItem.type === 'did') {
+              type = new GraphQLList(GraphQLID)
             } else if (SCALAR_FIELDS.includes(listItem.type)) {
               type = new GraphQLList(SCALARS[listItem.type])
             }
+          } else if (field.type === 'did') {
+            type = GraphQLID
           } else if (SCALAR_FIELDS.includes(field.type)) {
             type = SCALARS[field.type]
           } else {
@@ -109,107 +269,109 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
       },
     })
 
-    types[name] = new GraphQLObjectType<Doc>({
+    types[name] = new GraphQLObjectType<TileDocument>({
       name,
-      interfaces: node?.interfaces,
-      fields: (): GraphQLFieldConfigMap<Doc, Context> => {
-        return Object.entries(fields).reduce(
-          (acc, [key, field]) => {
-            if (field.type === 'reference') {
-              const ref = model.referenced[field.schemas[0]]
-              if (ref.type === 'collection') {
-                const { item } = model.collections[ref.name]
-                let nodeType
-                if (item.type === 'object') {
-                  nodeType = types[item.name]
-                } else if (item.type === 'reference') {
-                  const nodeRef = model.referenced[item.schemas[0]]
-                  nodeType = types[nodeRef.name]
-                } else if (SCALAR_FIELDS.includes(item.type)) {
-                  nodeType = SCALARS[item.type]
-                }
-                if (nodeType == null) {
-                  throw new Error(`Missing node type for collection: ${name}`)
-                }
-                const connectionType = types[`${nodeType.name}Connection`]
-                if (connectionType == null) {
-                  throw new Error(`No connection defined for node: ${nodeType.name}`)
-                }
-                acc[key] = {
-                  type: field.required ? new GraphQLNonNull(connectionType) : connectionType,
-                  args: connectionArgs,
-                  resolve: async (
-                    doc,
-                    args: ConnectionArguments,
-                    ctx
-                  ): Promise<Connection<any> | null> => {
-                    const id = doc.content[key] as string | undefined
-                    if (id == null) {
-                      return null
-                    }
-                    const handler =
-                      item.type === 'reference'
-                        ? await ctx.getReferenceConnection(id, item.schemas[0])
-                        : await ctx.getItemConnection(id)
-                    return await handler.load(args)
-                  },
-                }
-              } else if (ref.type === 'object') {
-                // TODO: support union type when multiple schemas
-                const typeName = ref.name
-                const type = types[typeName]
-                acc[key] = {
-                  type: field.required ? new GraphQLNonNull(type) : type,
-                  resolve: async (doc, _args, ctx): Promise<Doc | null> => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    const id = doc.content[key].id as string | undefined
-                    return id ? await ctx.loadDoc(id) : null
-                  },
-                }
-                acc[`${key}ID`] = {
-                  type: field.required ? new GraphQLNonNull(GraphQLID) : GraphQLID,
-                  resolve: (doc): string | null => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    const id = doc.content[key].id as string | undefined
-                    return id ? toGlobalId(typeName, id) : null
-                  },
-                }
-              } else {
-                throw new Error(`Unsupported reference type: ${ref.type as string}`)
+      interfaces: createObjectInterfaces(ceramicStreamInterface, node?.interfaces),
+      fields: (): GraphQLFieldConfigMap<TileDocument, Context> => {
+        return Object.entries(fields).reduce((acc, [key, field]) => {
+          if (field.type === 'reference') {
+            const ref = model.referenced[field.schemas[0]]
+            // if (ref.type === 'collection') {
+            //   const { item } = model.collections[ref.name]
+            //   let nodeType
+            //   if (item.type === 'object') {
+            //     nodeType = types[item.name]
+            //   } else if (item.type === 'reference') {
+            //     const nodeRef = model.referenced[item.schemas[0]]
+            //     nodeType = types[nodeRef.name]
+            //   } else if (SCALAR_FIELDS.includes(item.type)) {
+            //     nodeType = SCALARS[item.type]
+            //   }
+            //   if (nodeType == null) {
+            //     throw new Error(`Missing node type for collection: ${name}`)
+            //   }
+            //   const connectionType = types[`${nodeType.name}Connection`]
+            //   if (connectionType == null) {
+            //     throw new Error(`No connection defined for node: ${nodeType.name}`)
+            //   }
+            //   acc[key] = {
+            //     type: field.required ? new GraphQLNonNull(connectionType) : connectionType,
+            //     args: connectionArgs,
+            //     resolve: async (
+            //       doc,
+            //       args: ConnectionArguments,
+            //       ctx
+            //     ): Promise<Connection<any> | null> => {
+            //       const id = doc.content[key] as string | undefined
+            //       if (id == null) {
+            //         return null
+            //       }
+            //       const handler =
+            //         item.type === 'reference'
+            //           ? await ctx.getReferenceConnection(id, item.schemas[0])
+            //           : await ctx.getItemConnection(id)
+            //       return await handler.load(args)
+            //     },
+            //   }
+            // } else
+            if (ref.type === 'object') {
+              // TODO: support union type when multiple schemas
+              const typeName = ref.name
+              const type = types[typeName]
+              acc[key] = {
+                type: field.required ? new GraphQLNonNull(type) : type,
+                resolve: async (doc, _args, ctx): Promise<TileDocument | null> => {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  const id = doc.content[key].id as string | undefined
+                  return id ? await ctx.loadDoc(id) : null
+                },
+              }
+              acc[`${key}ID`] = {
+                type: field.required ? new GraphQLNonNull(GraphQLID) : GraphQLID,
+                resolve: (doc): string | null => {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  const id = doc.content[key].id as string | undefined
+                  return id ? toGlobalId(typeName, id) : null
+                },
               }
             } else {
-              let type
-              if (field.type === 'object') {
-                type = types[field.name]
-              } else if (field.type === 'list') {
-                const listItem = model.lists[field.name]
-                if (listItem.type === 'object') {
-                  type = new GraphQLList(types[listItem.name])
-                } else if (listItem.type === 'reference') {
-                  type = new GraphQLList(GraphQLID)
-                } else if (SCALAR_FIELDS.includes(listItem.type)) {
-                  type = new GraphQLList(SCALARS[listItem.type])
-                } else {
-                  throw new Error(`Unsupported list item type ${listItem.type}`)
-                }
-              } else if (SCALAR_FIELDS.includes(field.type)) {
-                type = SCALARS[field.type]
+              throw new Error(`Unsupported reference type: ${ref.type as string}`)
+            }
+          } else {
+            let type
+            if (field.type === 'object') {
+              type = types[field.name]
+            } else if (field.type === 'list') {
+              const listItem = model.lists[field.name]
+              if (listItem.type === 'object') {
+                type = new GraphQLList(types[listItem.name])
+              } else if (listItem.type === 'reference') {
+                type = new GraphQLList(GraphQLID)
+              } else if (listItem.type === 'did') {
+                type = new GraphQLList(didObject)
+              } else if (SCALAR_FIELDS.includes(listItem.type)) {
+                type = new GraphQLList(SCALARS[listItem.type])
               } else {
-                throw new Error(`Unsupported field type ${field.type}`)
+                throw new Error(`Unsupported list item type ${listItem.type}`)
               }
+            } else if (field.type === 'did') {
+              type = didObject
+            } else if (SCALAR_FIELDS.includes(field.type)) {
+              type = SCALARS[field.type]
+            } else {
+              throw new Error(`Unsupported field type ${field.type}`)
+            }
 
-              if (type != null) {
-                acc[key] = {
-                  type: field.required ? new GraphQLNonNull(type) : type,
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                  resolve: (doc: Doc): any => doc.content[key],
-                }
+            if (type != null) {
+              acc[key] = {
+                type: field.required ? new GraphQLNonNull(type) : type,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                resolve: (doc: TileDocument): any => doc.content?.[key],
               }
             }
-            return acc
-          },
-          node ? createGlobalId(name) : {}
-        )
+          }
+          return acc
+        }, createObjectCommonFields(ceramicMetadata, node ? name : undefined))
       },
     })
 
@@ -250,103 +412,101 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
     }
   }
 
-  const indexFields: GraphQLFieldConfigMap<any, any> = {}
-  for (const [key, definition] of Object.entries(sortedObject(model.index))) {
-    const { name } = model.referenced[definition.schema]
-    indexFields[key] = {
-      type: types[name],
-      resolve: async (_, { did }: { did?: string }, ctx: Context): Promise<Doc | null> => {
-        const tile = await ctx.dataStore.getRecordDocument(definition.id, did)
-        return tile ? toDoc<any>(tile) : null
-      },
-    }
+  // for (const [collectionName, { item, schema }] of Object.entries(
+  //   sortedObject(model.collections)
+  // )) {
+  //   let nodeType
+  //   if (item.type === 'object') {
+  //     nodeType = types[item.name]
+  //   } else if (item.type === 'reference') {
+  //     const refID = item.schemas[0]
+  //     const ref = model.referenced[refID]
+  //     nodeType = types[ref.name]
+  //   }
+  //   if (nodeType == null) {
+  //     throw new Error(`Missing node type for collection: ${collectionName}`)
+  //   }
 
+  //   const name = nodeType.name
+  //   const { connectionType, edgeType } = connectionDefinitions({ nodeType })
+  //   types[`${name}Connection`] = connectionType
+  //   types[`${name}Edge`] = edgeType
+
+  //   for (const [label, { owner, schemas }] of Object.entries(model.references)) {
+  //     if (schemas[0] === schema) {
+  //       const field = Object.keys(model.objects[owner].fields).find((key) => {
+  //         const data = model.objects[owner].fields[key]
+  //         return data.type === 'reference' && data.schemas[0] === schema
+  //       })
+  //       if (field == null) {
+  //         throw new Error(`Reference field not found for ${label}`)
+  //       }
+
+  //       mutations[`add${label}Edge`] = mutationWithClientMutationId({
+  //         name: `Add${label}Edge`,
+  //         inputFields: () => ({
+  //           id: { type: new GraphQLNonNull(GraphQLID) },
+  //           content: { type: new GraphQLNonNull(inputObjects[name]) },
+  //         }),
+  //         outputFields: () => ({
+  //           node: { type: new GraphQLNonNull(types[owner]) },
+  //           edge: { type: new GraphQLNonNull(edgeType) },
+  //         }),
+  //         mutateAndGetPayload: async (
+  //           input: { id: string; content: Record<string, any> },
+  //           ctx: Context
+  //         ) => {
+  //           const { id } = fromGlobalId(input.id)
+  //           const tile = await ctx.loadTile(id)
+  //           const content = tile.content ?? {}
+
+  //           let handler
+  //           const existingID = content[field] as string | undefined
+  //           if (existingID == null) {
+  //             handler =
+  //               item.type === 'reference'
+  //                 ? await ctx.createReferenceConnection(schema, item.schemas[0])
+  //                 : await ctx.createItemConnection(schema)
+  //           } else {
+  //             handler =
+  //               item.type === 'reference'
+  //                 ? await ctx.getReferenceConnection(existingID, item.schemas[0])
+  //                 : await ctx.getItemConnection(existingID)
+  //           }
+
+  //           const edge = await handler.add(input.content)
+  //           if (existingID == null) {
+  //             await tile.update({ ...content, [field]: handler.id })
+  //           }
+
+  //           return { edge, node: toDoc(tile) }
+  //         },
+  //       })
+  //     }
+  //   }
+  // }
+
+  for (const [key, definition] of indexEntries) {
+    const { name } = model.referenced[definition.schema]
     const definitionKey = pascalCase(key)
+
     mutations[`set${definitionKey}`] = mutationWithClientMutationId({
       name: `Set${definitionKey}`,
       inputFields: () => ({
         content: { type: new GraphQLNonNull(inputObjects[name]) },
+        options: { type: storeMutationOptions },
       }),
       outputFields: () => ({}),
-      mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
-        await ctx.dataStore.set(definition.id, input.content)
+      mutateAndGetPayload: async (
+        input: { content: Record<string, any>; options?: StoreMutationOptions },
+        ctx: Context
+      ) => {
+        input.options?.merge
+          ? await ctx.dataStore.merge(definition.id, input.content)
+          : await ctx.dataStore.set(definition.id, input.content)
         return {}
       },
     })
-  }
-
-  for (const [collectionName, { item, schema }] of Object.entries(
-    sortedObject(model.collections)
-  )) {
-    let nodeType
-    if (item.type === 'object') {
-      nodeType = types[item.name]
-    } else if (item.type === 'reference') {
-      const refID = item.schemas[0]
-      const ref = model.referenced[refID]
-      nodeType = types[ref.name]
-    }
-    if (nodeType == null) {
-      throw new Error(`Missing node type for collection: ${collectionName}`)
-    }
-
-    const name = nodeType.name
-    const { connectionType, edgeType } = connectionDefinitions({ nodeType })
-    types[`${name}Connection`] = connectionType
-    types[`${name}Edge`] = edgeType
-
-    for (const [label, { owner, schemas }] of Object.entries(model.references)) {
-      if (schemas[0] === schema) {
-        const field = Object.keys(model.objects[owner].fields).find((key) => {
-          const data = model.objects[owner].fields[key]
-          return data.type === 'reference' && data.schemas[0] === schema
-        })
-        if (field == null) {
-          throw new Error(`Reference field not found for ${label}`)
-        }
-
-        mutations[`add${label}Edge`] = mutationWithClientMutationId({
-          name: `Add${label}Edge`,
-          inputFields: () => ({
-            id: { type: new GraphQLNonNull(GraphQLID) },
-            content: { type: new GraphQLNonNull(inputObjects[name]) },
-          }),
-          outputFields: () => ({
-            node: { type: new GraphQLNonNull(types[owner]) },
-            edge: { type: new GraphQLNonNull(edgeType) },
-          }),
-          mutateAndGetPayload: async (
-            input: { id: string; content: Record<string, any> },
-            ctx: Context
-          ) => {
-            const { id } = fromGlobalId(input.id)
-            const tile = await ctx.loadTile(id)
-            const content = tile.content ?? {}
-
-            let handler
-            const existingID = content[field] as string | undefined
-            if (existingID == null) {
-              handler =
-                item.type === 'reference'
-                  ? await ctx.createReferenceConnection(schema, item.schemas[0])
-                  : await ctx.createItemConnection(schema)
-            } else {
-              handler =
-                item.type === 'reference'
-                  ? await ctx.getReferenceConnection(existingID, item.schemas[0])
-                  : await ctx.getItemConnection(existingID)
-            }
-
-            const edge = await handler.add(input.content)
-            if (existingID == null) {
-              await tile.update({ ...content, [field]: handler.id })
-            }
-
-            return { edge, node: toDoc(tile) }
-          },
-        })
-      }
-    }
   }
 
   const query = new GraphQLObjectType({
@@ -356,26 +516,32 @@ export function createGraphQLSchema(model: GraphQLModel): GraphQLSchema {
         const { name } = model.referenced[schema]
         acc[key] = {
           type: new GraphQLNonNull(types[name]),
-          resolve: async (_self, _args, ctx: Context): Promise<any> => {
+          resolve: async (_self, _args, ctx): Promise<any> => {
             return await ctx.loadDoc(id)
           },
         }
         return acc
       },
       {
-        index: {
-          type: new GraphQLNonNull(new GraphQLObjectType({ name: 'Index', fields: indexFields })),
-          args: {
-            did: { type: GraphQLString },
-          },
-          resolve: (_, args: { did?: string }): { did?: string } => args,
-        },
         node: nodeField,
-      } as GraphQLFieldConfigMap<any, any>
+        account: {
+          type: new GraphQLNonNull(didObject),
+          args: {
+            id: { type: new GraphQLNonNull(GraphQLID) },
+          },
+          resolve: (_, args: { id: string }): string => args.id,
+        },
+        viewer: {
+          type: didObject,
+          resolve: (_self, _args, ctx): string | null => ctx.viewerID,
+        },
+      } as GraphQLFieldConfigMap<any, Context>
     ),
   })
 
   const mutation = new GraphQLObjectType({ name: 'Mutation', fields: mutations })
 
-  return new GraphQLSchema({ query, mutation })
+  const schema = new GraphQLSchema({ query, mutation })
+  assertValidSchema(schema)
+  return schema
 }

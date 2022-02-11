@@ -7,9 +7,7 @@ import { TileLoader } from '@glazed/tile-loader'
 import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 
-import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
-import type { Doc } from './types'
-import { toDoc } from './utils'
+// import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
 
 export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   cache?: TileCache | boolean
@@ -22,8 +20,8 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   #ceramic: CeramicApi
   #loader: TileLoader
   #dataStore: DIDDataStore<ModelTypes>
-  #itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
-  #referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
+  // #itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
+  // #referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
   constructor(config: ContextConfig<ModelTypes>) {
     const { cache, ceramic, loader, model } = config
@@ -39,6 +37,10 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     })
   }
 
+  get authenticated(): boolean {
+    return this.#ceramic.did?.authenticated ?? false
+  }
+
   get ceramic(): CeramicApi {
     return this.#ceramic
   }
@@ -51,75 +53,69 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     return this.#loader
   }
 
-  async getItemConnection<Node = unknown>(id: string): Promise<ItemConnectionHandler<Node>> {
-    if (this.#itemConnections[id] == null) {
-      this.#itemConnections[id] = ItemConnectionHandler.load<Node>(this.#loader, id)
-    }
-    return (await this.#itemConnections[id]) as ItemConnectionHandler<Node>
+  get viewerID(): string | null {
+    return this.#ceramic.did?.id ?? null
   }
 
-  async createItemConnection<Node = unknown>(
-    schemaURL: string
-  ): Promise<ItemConnectionHandler<Node>> {
-    const handler = await ItemConnectionHandler.create<Node>(this.#loader, schemaURL)
-    this.#itemConnections[handler.id] = Promise.resolve(handler)
-    return handler
-  }
+  // async getItemConnection<Node = unknown>(id: string): Promise<ItemConnectionHandler<Node>> {
+  //   if (this.#itemConnections[id] == null) {
+  //     this.#itemConnections[id] = ItemConnectionHandler.load<Node>(this.#loader, id)
+  //   }
+  //   return (await this.#itemConnections[id]) as ItemConnectionHandler<Node>
+  // }
 
-  async getReferenceConnection<Node = unknown>(
-    id: string,
-    nodeSchemaURL: string
-  ): Promise<ReferenceConnectionHandler<Node>> {
-    if (this.#referenceConnections[id] == null) {
-      this.#referenceConnections[id] = ReferenceConnectionHandler.load<Node>(
-        this.#loader,
-        id,
-        nodeSchemaURL
-      )
-    }
-    return (await this.#referenceConnections[id]) as ReferenceConnectionHandler<Node>
-  }
+  // async createItemConnection<Node = unknown>(
+  //   schemaURL: string
+  // ): Promise<ItemConnectionHandler<Node>> {
+  //   const handler = await ItemConnectionHandler.create<Node>(this.#loader, schemaURL)
+  //   this.#itemConnections[handler.id] = Promise.resolve(handler)
+  //   return handler
+  // }
 
-  async createReferenceConnection<Node = unknown>(
-    schemaURL: string,
-    nodeSchemaURL: string
-  ): Promise<ReferenceConnectionHandler<Node>> {
-    const handler = await ReferenceConnectionHandler.create<Node>(
-      this.#loader,
-      schemaURL,
-      nodeSchemaURL
-    )
-    this.#referenceConnections[handler.id] = Promise.resolve(handler)
-    return handler
-  }
+  // async getReferenceConnection<Node = unknown>(
+  //   id: string,
+  //   nodeSchemaURL: string
+  // ): Promise<ReferenceConnectionHandler<Node>> {
+  //   if (this.#referenceConnections[id] == null) {
+  //     this.#referenceConnections[id] = ReferenceConnectionHandler.load<Node>(
+  //       this.#loader,
+  //       id,
+  //       nodeSchemaURL
+  //     )
+  //   }
+  //   return (await this.#referenceConnections[id]) as ReferenceConnectionHandler<Node>
+  // }
 
-  async loadTile<Content = Record<string, any>>(
+  // async createReferenceConnection<Node = unknown>(
+  //   schemaURL: string,
+  //   nodeSchemaURL: string
+  // ): Promise<ReferenceConnectionHandler<Node>> {
+  //   const handler = await ReferenceConnectionHandler.create<Node>(
+  //     this.#loader,
+  //     schemaURL,
+  //     nodeSchemaURL
+  //   )
+  //   this.#referenceConnections[handler.id] = Promise.resolve(handler)
+  //   return handler
+  // }
+
+  async loadDoc<Content = Record<string, any>>(
     id: string | CommitID | StreamID
   ): Promise<TileDocument<Content>> {
     return await this.#loader.load<Content>(id)
   }
 
-  async loadDoc<Content = Record<string, any>>(
-    id: string | CommitID | StreamID
-  ): Promise<Doc<Content>> {
-    const tile = await this.loadTile<Content>(id)
-    return toDoc(tile)
-  }
-
   async createDoc<Content = Record<string, any>>(
     schema: string,
     content: Content
-  ): Promise<Doc<Content>> {
-    const tile = await this.#loader.create<Content>(content, { schema })
-    return toDoc(tile)
+  ): Promise<TileDocument<Content>> {
+    return await this.#loader.create<Content>(content, { schema })
   }
 
   async updateDoc<Content = Record<string, any>>(
-    id: string | CommitID | StreamID,
+    id: string | StreamID,
     content: Content
-  ): Promise<Doc<Content>> {
-    const tile = await this.loadTile<Content>(id)
-    await tile.update(content)
-    return toDoc(tile)
+  ): Promise<TileDocument<Content | null | undefined>> {
+    return await this.#loader.update(id, content)
   }
 }

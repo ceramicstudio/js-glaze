@@ -1,29 +1,8 @@
-import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import { GraphQLID, GraphQLNonNull } from 'graphql'
-import type { GraphQLFieldConfigMap } from 'graphql'
-import { toGlobalId } from 'graphql-relay'
+import type { GraphQLModel } from '@glazed/graphql-types'
+import { printSchema } from 'graphql'
 
-import type { Context } from './context'
-import type { Doc } from './types'
+import { createGraphQLSchema } from './schema.js'
 
-export function createGlobalId(typeName: string): GraphQLFieldConfigMap<Doc, Context> {
-  return {
-    id: {
-      type: new GraphQLNonNull(GraphQLID),
-      resolve: (doc): string => {
-        if (doc.id == null) {
-          throw new Error(`No ID associated to doc ${typeName}`)
-        }
-        return toGlobalId(typeName, doc.id)
-      },
-    },
-  }
-}
-
-export function toDoc<T>(tile: TileDocument<T>): Doc<T> {
-  return {
-    content: (tile.content ?? {}) as T,
-    id: tile.id.toString(),
-    schema: tile.metadata.schema,
-  }
+export function printGraphQLSchema(model: GraphQLModel): string {
+  return printSchema(createGraphQLSchema(model))
 }

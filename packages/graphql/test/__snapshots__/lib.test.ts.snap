@@ -1,39 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib add and read notes from a connection 1`] = `
-Object {
-  "data": Object {
-    "node": Object {
-      "all": Object {
-        "edges": Array [
-          Object {
-            "node": Object {
-              "date": "2021-01-06T14:32:00.000Z",
-              "text": "hello first",
-              "title": "first",
-            },
-          },
-          Object {
-            "node": Object {
-              "date": "2021-01-06T14:33:00.000Z",
-              "text": "hello second",
-              "title": "second",
-            },
-          },
-          Object {
-            "node": Object {
-              "date": "2021-01-06T14:34:00.000Z",
-              "text": "hello third",
-              "title": "third",
-            },
-          },
-        ],
-      },
-    },
-  },
-}
-`;
-
 exports[`lib create a note 1`] = `
 Object {
   "data": Object {
@@ -62,36 +28,14 @@ Object {
 
 exports[`lib schema creation 1`] = `
 "type Query {
-  index(did: String): Index!
-
   \\"\\"\\"Fetches an object given its ID\\"\\"\\"
   node(
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
+  account(id: ID!): DID!
+  viewer: DID
   exampleNote: Note!
-}
-
-type Index {
-  myNotes: Notes
-}
-
-type Notes implements Node {
-  id: ID!
-  all(
-    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
-    after: String
-
-    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
-    first: Int
-
-    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
-    before: String
-
-    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
-    last: Int
-  ): NoteConnection
-  favorites: [ID]
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -100,40 +44,45 @@ interface Node {
   id: ID!
 }
 
-\\"\\"\\"A connection to a list of items.\\"\\"\\"
-type NoteConnection {
-  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
-  pageInfo: PageInfo!
-
-  \\"\\"\\"A list of edges.\\"\\"\\"
-  edges: [NoteEdge]
+type DID {
+  id: ID!
+  isViewer: Boolean!
+  store: DataStore
 }
 
-\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
-type PageInfo {
-  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
-  hasNextPage: Boolean!
-
-  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
-  hasPreviousPage: Boolean!
-
-  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
-  startCursor: String
-
-  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
-  endCursor: String
+type DataStore {
+  myNotes: Notes
 }
 
-\\"\\"\\"An edge in a connection.\\"\\"\\"
-type NoteEdge {
-  \\"\\"\\"The item at the end of the edge\\"\\"\\"
-  node: Note
-
-  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
-  cursor: String!
+type Notes implements CeramicStream & Node {
+  _ceramic: CeramicMetadata!
+  id: ID!
+  all: [ID]
+  favorites: [ID]
 }
 
-type Note implements Node {
+interface CeramicStream {
+  _ceramic: CeramicMetadata!
+}
+
+type CeramicMetadata {
+  streamID: ID!
+  commitID: ID!
+  streamMetadata: StreamMetadata!
+  controllers: [DID!]!
+  viewerIsController: Boolean!
+  schema: CeramicMetadata
+}
+
+type StreamMetadata {
+  controllers: [ID!]!
+  schema: String
+  family: String
+  tags: [String]
+}
+
+type Note implements CeramicStream & Node {
+  _ceramic: CeramicMetadata!
   id: ID!
   date: String!
   text: String!
@@ -146,7 +95,6 @@ type Mutation {
   createNotes(input: CreateNotesInput!): CreateNotesPayload
   updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
   setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
-  addNotesAllEdge(input: AddNotesAllEdgeInput!): AddNotesAllEdgePayload
 }
 
 type CreateNotePayload {
@@ -187,6 +135,7 @@ input CreateNotesInput {
 }
 
 input NotesInput {
+  all: [ID]
   favorites: [ID]
 }
 
@@ -207,18 +156,11 @@ type SetMyNotesPayload {
 
 input SetMyNotesInput {
   content: NotesInput!
+  options: DataStoreMutationOptions
   clientMutationId: String
 }
 
-type AddNotesAllEdgePayload {
-  node: Notes!
-  edge: NoteEdge!
-  clientMutationId: String
-}
-
-input AddNotesAllEdgeInput {
-  id: ID!
-  content: NoteInput!
-  clientMutationId: String
+input DataStoreMutationOptions {
+  merge: Boolean
 }"
 `;

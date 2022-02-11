@@ -4,15 +4,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-import { publishCollectionSchemas } from '@glazed/append-collection'
+// import { publishCollectionSchemas } from '@glazed/append-collection'
 import { ModelManager, createGraphQLModel } from '@glazed/devtools'
+import type { GraphQLModel } from '@glazed/graphql-types'
 import { TileLoader } from '@glazed/tile-loader'
 import { jest } from '@jest/globals'
 
-import { execute, parse, printSchema } from 'graphql'
-import type { GraphQLSchema } from 'graphql'
-
-import { Context, createGraphQLSchema } from '../src'
+import { GraphQLClient, printGraphQLSchema } from '../src'
 
 declare global {
   const ceramic: CeramicApi
@@ -21,8 +19,8 @@ declare global {
 describe('lib', () => {
   jest.setTimeout(20000)
 
-  let contextValue: Context
-  let schema: GraphQLSchema
+  let client: GraphQLClient
+  let graphModel: GraphQLModel
 
   beforeAll(async () => {
     const loader = new TileLoader({ ceramic, cache: true })
@@ -57,17 +55,22 @@ describe('lib', () => {
       maxLength: 100,
     }
 
-    const notesCollectionSchemaCommitID = await publishCollectionSchemas(loader, 'Notes', [noteRef])
+    // const notesCollectionSchemaCommitID = await publishCollectionSchemas(loader, 'Notes', [noteRef])
 
     const NotesSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Notes',
       type: 'object',
       properties: {
+        // all: {
+        //   type: 'string',
+        //   $comment: `cip88:ref:${notesCollectionSchemaCommitID.toUrl()}`,
+        //   maxLength: 100,
+        // },
         all: {
-          type: 'string',
-          $comment: `cip88:ref:${notesCollectionSchemaCommitID.toUrl()}`,
-          maxLength: 100,
+          type: 'array',
+          title: 'list',
+          items: noteRef,
         },
         favorites: {
           type: 'array',
@@ -92,34 +95,28 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-    const [graphModel, model] = await Promise.all([
-      createGraphQLModel(manager),
+    const [dataModel, graphqlModel] = await Promise.all([
       manager.toPublished(),
+      createGraphQLModel(manager),
     ])
-    contextValue = new Context({ ceramic, loader, model })
-    schema = createGraphQLSchema(graphModel)
+    client = new GraphQLClient({ ceramic, loader, dataModel, graphqlModel })
+    graphModel = graphqlModel
   })
 
   test('schema creation', () => {
-    expect(printSchema(schema)).toMatchSnapshot()
+    expect(printGraphQLSchema(graphModel)).toMatchSnapshot()
   })
 
   test('read existing note', async () => {
-    const resRoot = await execute({
-      schema,
-      document: parse(`
-        query TestReadNote {
-          exampleNote {
-            id
-          }
+    const resRoot = await client.execute(`
+      query TestReadNote {
+        exampleNote {
+          id
         }
-      `),
-      contextValue,
-    })
-    const resNode = await execute({
-      schema,
-      contextValue,
-      document: parse(`
+      }
+    `)
+    const resNode = await client.execute(
+      `
         query TestReadNote($id: ID!) {
           node(id: $id) {
             ...on Note {
@@ -129,19 +126,15 @@ describe('lib', () => {
             }
           }
         }
-      `),
-      variableValues: {
-        id: resRoot.data!.exampleNote.id,
-      },
-    })
+      `,
+      { id: resRoot.data!.exampleNote.id }
+    )
     expect(resNode).toMatchSnapshot()
   })
 
   test('create a note', async () => {
-    const res = await execute({
-      schema,
-      contextValue,
-      document: parse(`
+    const res = await client.execute(
+      `
         mutation TestCreateNote($input: CreateNoteInput!) {
           createNote(input: $input) {
             node {
@@ -151,23 +144,21 @@ describe('lib', () => {
             }
           }
         }
-      `),
-      variableValues: {
+      `,
+      {
         input: {
           content: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' },
         },
-      },
-    })
+      }
+    )
     expect(res).toMatchSnapshot()
   })
 
   test('create, update and read a note', async () => {
     jest.setTimeout(30000)
 
-    const created = await execute({
-      schema,
-      contextValue,
-      document: parse(`
+    const created = await client.execute(
+      `
         mutation TestCreateNote($input: CreateNoteInput!) {
           createNote(input: $input) {
             node {
@@ -175,19 +166,17 @@ describe('lib', () => {
             }
           }
         }
-      `),
-      variableValues: {
+      `,
+      {
         input: {
           content: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' },
         },
-      },
-    })
+      }
+    )
     const { id } = created.data!.createNote.node
 
-    await execute({
-      schema,
-      contextValue,
-      document: parse(`
+    await client.execute(
+      `
         mutation TestUpdateNote($input: UpdateNoteInput!) {
           updateNote(input: $input) {
             node {
@@ -198,18 +187,17 @@ describe('lib', () => {
             }
           }
         }
-      `),
-      variableValues: {
+      `,
+      {
         input: {
           id,
           content: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
         },
-      },
-    })
+      }
+    )
 
-    const res = await execute({
-      schema,
-      document: parse(`
+    const res = await client.execute(
+      `
         query TestReadNote($id: ID!) {
           node(id: $id) {
             ...on Note {
@@ -219,10 +207,9 @@ describe('lib', () => {
             }
           }
         }
-      `),
-      contextValue,
-      variableValues: { id },
-    })
+      `,
+      { id }
+    )
     expect(res).toEqual({
       data: {
         node: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
@@ -230,73 +217,141 @@ describe('lib', () => {
     })
   })
 
-  test('add and read notes from a connection', async () => {
+  test('add and read a note from the store', async () => {
     jest.setTimeout(30000)
 
-    const created = await execute({
-      schema,
-      contextValue,
-      document: parse(`
-        mutation TestCreateNotes($input: CreateNotesInput!) {
-          createNotes(input: $input) {
+    const created = await client.execute(
+      `
+        mutation TestAddNote($input: CreateNoteInput!) {
+          createNote(input: $input) {
             node {
               id
             }
           }
-        }
-      `),
-      variableValues: {
-        input: { content: {} },
-      },
-    })
-    const { id } = created.data!.createNotes.node
+        }`,
+      {
+        input: {
+          content: { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
+        },
+      }
+    )
+    const { id } = created.data!.createNote.node
 
-    const document = parse(`
-      mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
-        addNotesAllEdge(input: $input) {
-          edge {
-            cursor
+    // First add the ID to the `all` list
+    await client.execute(
+      `
+        mutation SetMyNote($input: SetMyNotesInput!) {
+          setMyNotes(input: $input) {
+            clientMutationId
           }
-        }
-      }`)
+        }`,
+      {
+        input: { content: { all: [id] } },
+      }
+    )
 
-    const toAdd = [
-      { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
-      { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
-      { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
-    ]
-    for (const content of toAdd) {
-      await execute({
-        schema,
-        contextValue,
-        document,
-        variableValues: { input: { id, content } },
-      })
-    }
+    // Test `merge` option by adding the ID to the `favorites` list
+    // This should keep the `all` list unchanged
+    await client.execute(
+      `
+        mutation SetMyFavoriteNote($input: SetMyNotesInput!) {
+          setMyNotes(input: $input) {
+            clientMutationId
+          }
+        }`,
+      {
+        input: {
+          content: { favorites: [id] },
+          options: { merge: true },
+        },
+      }
+    )
 
-    await expect(
-      execute({
-        schema,
-        contextValue,
-        document: parse(`
-          query TestReadNotes($id: ID!) {
-            node(id: $id) {
-              ...on Notes {
-                all(first: 3) {
-                  edges {
-                  node {
-                    date
-                    text
-                    title
-                  }
-                  }
-                }
-              }
+    const read = await client.execute(`
+      query TestReadNotes {
+        viewer {
+          id
+          store {
+            myNotes {
+              all
+              favorites
             }
           }
-        `),
-        variableValues: { id },
-      })
-    ).resolves.toMatchSnapshot()
+        }
+      }
+    `)
+    const { myNotes } = read.data!.viewer.store
+    expect(myNotes.all).toEqual([id])
+    expect(myNotes.favorites).toEqual([id])
   })
+
+  // test('add and read notes from a connection', async () => {
+  //   jest.setTimeout(30000)
+
+  //   const created = await execute({
+  //     schema,
+  //     contextValue,
+  //     document: parse(`
+  //       mutation TestCreateNotes($input: CreateNotesInput!) {
+  //         createNotes(input: $input) {
+  //           node {
+  //             id
+  //           }
+  //         }
+  //       }
+  //     `),
+  //     variableValues: {
+  //       input: { content: {} },
+  //     },
+  //   })
+  //   const { id } = created.data!.createNotes.node
+
+  //   const document = parse(`
+  //     mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
+  //       addNotesAllEdge(input: $input) {
+  //         edge {
+  //           cursor
+  //         }
+  //       }
+  //     }`)
+
+  //   const toAdd = [
+  //     { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
+  //     { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
+  //     { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
+  //   ]
+  //   for (const content of toAdd) {
+  //     await execute({
+  //       schema,
+  //       contextValue,
+  //       document,
+  //       variableValues: { input: { id, content } },
+  //     })
+  //   }
+
+  //   await expect(
+  //     execute({
+  //       schema,
+  //       contextValue,
+  //       document: parse(`
+  //         query TestReadNotes($id: ID!) {
+  //           node(id: $id) {
+  //             ...on Notes {
+  //               all(first: 3) {
+  //                 edges {
+  //                   node {
+  //                     date
+  //                     text
+  //                     title
+  //                   }
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       `),
+  //       variableValues: { id },
+  //     })
+  //   ).resolves.toMatchSnapshot()
+  // })
 })

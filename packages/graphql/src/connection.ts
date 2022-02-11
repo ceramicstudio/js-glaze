@@ -1,10 +1,8 @@
+import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { AppendCollection } from '@glazed/append-collection'
 import type { ItemResult, LoadResult } from '@glazed/append-collection'
 import type { TileLoader } from '@glazed/tile-loader'
 import type { Connection, ConnectionArguments, Edge } from 'graphql-relay'
-
-import type { Doc } from './types'
-import { toDoc } from './utils'
 
 export function toConnection<T>(args: ConnectionArguments, result: LoadResult<T>): Connection<T> {
   const edges = result.items.map((item) => ({
@@ -106,14 +104,13 @@ export class ReferenceConnectionHandler<Node> {
     return this.#collection.id.toString()
   }
 
-  async add(content: Node): Promise<Edge<Doc<Node>>> {
-    const tile = await this.#loader.create<Node>(content, { schema: this.#nodeSchemaURL })
-    const id = tile.id.toString()
-    const cursor = await this.#collection.add(id)
-    return { cursor: cursor.toString(), node: { id, content } }
+  async add(content: Node): Promise<Edge<TileDocument<Node>>> {
+    const node = await this.#loader.create<Node>(content, { schema: this.#nodeSchemaURL })
+    const cursor = await this.#collection.add(node.id.toString())
+    return { cursor: cursor.toString(), node }
   }
 
-  async load(args: ConnectionArguments): Promise<Connection<Doc<Node>>> {
+  async load(args: ConnectionArguments): Promise<Connection<TileDocument<Node>>> {
     let result
     if (args.first) {
       result = await this.#collection.first(args.first, args.after)
@@ -123,10 +120,9 @@ export class ReferenceConnectionHandler<Node> {
       throw new Error('Invalid connection arguments')
     }
 
-    const items: Array<ItemResult<Doc<Node>>> = await Promise.all(
+    const items: Array<ItemResult<TileDocument<Node>>> = await Promise.all(
       result.items.map(async ({ cursor, data }: ItemResult<string>) => {
-        const tile = await this.#loader.load<Node>(data)
-        return { cursor, data: toDoc(tile) }
+        return { cursor, data: await this.#loader.load<Node>(data) }
       })
     )
 
