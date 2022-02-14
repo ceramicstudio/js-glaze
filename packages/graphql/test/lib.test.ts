@@ -78,7 +78,7 @@ describe('lib', () => {
     const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
     await Promise.all([
       manager.createDefinition('myNotes', {
         name: 'notes',

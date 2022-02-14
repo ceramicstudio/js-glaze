@@ -4,16 +4,18 @@
   "packageManager": "yarn@1.18.0",
   "workspaces": {
     "packages": [
+      "examples/*",
       "packages/*"
     ],
     "nohoist": [
-      "ajv"
+      "ajv",
+      "execa"
     ]
   },
   "scripts": {
     "docs": "typedoc --tsconfig tsconfig.docs.json",
-    "test": "yarn turbo run test && yarn workspace @glazed/cli run test:cli",
-    "test:ci": "yarn turbo run test:ci && yarn workspace @glazed/cli run test:cli",
+    "test": "yarn turbo run test",
+    "test:ci": "yarn turbo run test:ci",
     "lint": "yarn turbo run lint",
     "build": "lerna run build:types && yarn turbo run build:js",
     "prepare": "yarn build"

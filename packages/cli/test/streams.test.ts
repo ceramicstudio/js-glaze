@@ -4,37 +4,32 @@ import stripAnsi from 'strip-ansi'
 describe('streams', () => {
   test('lists stream commits', async () => {
     const key = await execa('glaze', ['did:create'])
-    const tile = await execa('glaze', [
-      `tile:create`,
-      `--content={"FOO":"BAR"}`,
-      `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
-    ])
+    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
 
-    const { stderr } = await execa('glaze', [
+    const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+    const commits = await execa('glaze', [
       'stream:commits',
-      tile.stderr.split('Created stream ')[1].replace('.', ''),
+      tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
     ])
-    expect(stderr.toString().includes('Stream commits loaded.')).toBe(true)
+    expect(commits.stderr.toString().includes('Stream commits loaded.')).toBe(true)
   }, 20000)
 
   test('displays stream state', async () => {
     const key = await execa('glaze', ['did:create'])
-    const tile = await execa('glaze', [
-      `tile:create`,
-      `--content={"FOO":"BAR"}`,
-      `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
-    ])
+    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
 
-    const { stderr } = await execa('glaze', [
+    const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+    const tileOutput = tile.stderr.toString()
+
+    const state = await execa('glaze', [
       'stream:state',
-      tile.stderr.split('Created stream ')[1].replace('.', ''),
+      tileOutput.split('Created stream ')[1].replace('.', ''),
     ])
+    const stateOutput = state.stderr.toString()
     expect(
-      stderr
-        .toString()
-        .includes(
-          `Successfully queried stream ${tile.stderr.split('Created stream ')[1].replace('.', '')}`
-        )
+      stateOutput.includes(
+        `Successfully queried stream ${tileOutput.split('Created stream ')[1].replace('.', '')}`
+      )
     ).toBe(true)
   }, 20000)
 })

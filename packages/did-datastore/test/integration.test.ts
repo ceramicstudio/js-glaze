@@ -26,7 +26,7 @@ describe('integration', () => {
 
   let model: PublishedModel<ModelTypes>
   beforeAll(async () => {
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
     const schemaID = await manager.createSchema('Profile', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Profile',

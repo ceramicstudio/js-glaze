@@ -38,7 +38,8 @@
     "build:js": "swc src -d ./dist --config-file ../../.swcrc",
     "build": "yarn build:clean && yarn build:js",
     "lint": "eslint src test --fix",
-    "test:cli": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "test:ci": "yarn test --ci",
     "prepare": "yarn build",
     "prepack": "oclif manifest",
     "prepublishOnly": "package-check"

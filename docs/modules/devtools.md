@@ -29,7 +29,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Set the alias (human-readable name) and stream reference (stream or commit ID or URL) of the
 // schema to add to the model. The schema must be already present on the Ceramic node.
@@ -51,7 +51,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Set the alias (human-readable name) and JSON schema contents
 await manager.createSchema('MySchema', {
@@ -78,7 +78,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 await manager.usePublishedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
@@ -94,7 +94,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 await manager.usePublishedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
@@ -147,7 +147,7 @@ import { model as cryptoAccountsModel } from '@datamodels/identity-accounts-cryp
 import { model as webAccountsModel } from '@datamodels/identity-accounts-web'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Add the imported models to the manager
 manager.addJSONModel(basicProfileModel)
@@ -175,6 +175,32 @@ await manager.toPublished()
 | `name?` | `string` |
 | `owner?` | `string` |
 | `parent?` | `string` |
+
+___
+
+### FromJSONParams
+
+Ƭ **FromJSONParams**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `model` | `EncodedManagedModel` |
+
+___
+
+### ModelManagerConfig
+
+Ƭ **ModelManagerConfig**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `model?` | `ManagedModel` |
 
 ## Functions
 

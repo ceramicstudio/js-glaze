@@ -116,14 +116,23 @@ export async function publishEncodedModel(
   return await publishModel(ceramic, decodeModel(model))
 }
 
+export type ModelManagerConfig = {
+  ceramic: CeramicApi
+  model?: ManagedModel
+}
+
+export type FromJSONParams = {
+  ceramic: CeramicApi
+  model: EncodedManagedModel
+}
 /**
  * ```sh
  * import { ModelManager } from '@glazed/devtools'
  * ```
  */
 export class ModelManager {
-  public static fromJSON(ceramic: CeramicApi, encoded: EncodedManagedModel): ModelManager {
-    return new ModelManager(ceramic, decodeModel(encoded))
+  public static fromJSON(params: FromJSONParams): ModelManager {
+    return new ModelManager({ ceramic: params.ceramic, model: decodeModel(params.model) })
   }
 
   #aliases: ModelData<string> = {
@@ -140,10 +149,10 @@ export class ModelManager {
   #referenced: Record<ManagedID, ManagedReferenced> = {}
   #streams: Record<ManagedID, Promise<TileDocument>> = {}
 
-  constructor(ceramic: CeramicApi, model?: ManagedModel) {
-    this.#ceramic = ceramic
-    if (model != null) {
-      this.addModel(model)
+  constructor(config: ModelManagerConfig) {
+    this.#ceramic = config.ceramic
+    if (config.model != null) {
+      this.addModel(config.model)
     }
   }
 

@@ -98,7 +98,7 @@ describe('datamodel', () => {
   })
 
   test('creation flow', async () => {
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
 
     const noteSchemaID = await manager.createSchema('Note', {
       $schema: 'http://json-schema.org/draft-07/schema#',

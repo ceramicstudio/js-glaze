@@ -10,14 +10,13 @@ import { ModelManager } from '@glazed/devtools'
 
 ### constructor
 
-• **new ModelManager**(`ceramic`, `model?`)
+• **new ModelManager**(`config`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model?` | `ManagedModel`<`DagJWSResult`\> |
+| `config` | [`ModelManagerConfig`](../modules/devtools.md#modelmanagerconfig) |
 
 ## Accessors
 
@@ -540,14 +539,13 @@ ___
 
 ### fromJSON
 
-▸ `Static` **fromJSON**(`ceramic`, `encoded`): [`ModelManager`](devtools.ModelManager.md)
+▸ `Static` **fromJSON**(`params`): [`ModelManager`](devtools.ModelManager.md)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `encoded` | `EncodedManagedModel` |
+| `params` | [`FromJSONParams`](../modules/devtools.md#fromjsonparams) |
 
 #### Returns
 
