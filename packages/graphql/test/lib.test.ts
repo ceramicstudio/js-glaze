@@ -82,7 +82,7 @@ describe('lib', () => {
     const notesSchema = await loader.create(NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
     await Promise.all([
       manager.createDefinition('myNotes', {
         name: 'notes',
@@ -96,7 +96,7 @@ describe('lib', () => {
       ),
     ])
     const [dataModel, graphqlModel] = await Promise.all([
-      manager.toPublished(),
+      manager.deploy(),
       createGraphQLModel(manager),
     ])
     client = new GraphQLClient({ ceramic, loader, dataModel, graphqlModel })

@@ -4,8 +4,8 @@ import stripAnsi from 'strip-ansi'
 describe('tiles', () => {
   describe('tile:create', () => {
     test('tile creation fails', async () => {
-      const proc = await execa('glaze', ['tile:create'])
-      const lines = proc.stderr.split('\n')
+      const create = await execa('glaze', ['tile:create'])
+      const lines = create.stderr.toString().split('\n')
 
       expect(
         lines[1].includes(
@@ -15,67 +15,63 @@ describe('tiles', () => {
     }, 20000)
 
     test('tile creation succeeds', async () => {
-      const getKey = await execa('glaze', ['did:create'])
-      const key = getKey.stderr.split('with seed ')[1]
-      const { stderr } = await execa('glaze', [
+      const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--key=${stripAnsi(key)}`,
+        `--key=${seed}`,
       ])
       // stderr.toString().split('Created stream ')[1].replace('.', '')
 
-      expect(stderr.includes('Created stream ')).toBe(true)
+      expect(create.stderr.toString().includes('Created stream ')).toBe(true)
     }, 20000)
   })
 
   describe('tile:content', () => {
     test('displays tile content', async () => {
       const key = await execa('glaze', ['did:create'])
-      const tile = await execa('glaze', [
-        `tile:create`,
-        `--content={"FOO":"BAR"}`,
-        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
-      ])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
 
-      const proc = await execa('glaze', [
+      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const content = await execa('glaze', [
         `tile:content`,
-        tile.stderr.split('Created stream ')[1].replace('.', ''),
+        tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
       ])
-
-      const lines = stripAnsi(proc.stderr.toString())
+      const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
     }, 20000)
   })
+
   describe('tile:update', () => {
     test('successfully updates tile', async () => {
       const key = await execa('glaze', ['did:create'])
-      const tile = await execa('glaze', [
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
+        `--key=${seed}`,
       ])
-
-      const { stderr } = await execa('glaze', [
+      const update = await execa('glaze', [
         'tile:update',
-        tile.stderr.split('Created stream ')[1].replace('.', ''),
+        create.stderr.toString().split('Created stream ')[1].replace('.', ''),
         '--content={"FOO":"BAZ"}',
-        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
+        `--key=${seed}`,
       ])
-      expect(stderr.toString().includes('Updated stream')).toBe(true)
+      expect(update.stderr.toString().includes('Updated stream')).toBe(true)
     }, 20000)
   })
 
   describe('tile:deterministic', () => {
-    test('does not create a deterministic tile.', async () => {
+    test('does not create a deterministic tile', async () => {
       const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
 
-      const { stderr } = await execa('glaze', [
-        'tile:deterministic',
-        '{}',
-        `--key=${stripAnsi(stripAnsi(key.stderr.split('with seed ')[1]))}`,
-      ])
+      const tile = await execa('glaze', ['tile:deterministic', '{}', `--key=${seed}`])
       expect(
-        stderr
+        tile.stderr
           .toString()
           .includes('Family and/or tags are required when creating a deterministic tile document')
       ).toBe(true)
@@ -83,17 +79,18 @@ describe('tiles', () => {
 
     test('creates deterministic tile', async () => {
       const key = await execa('glaze', ['did:create'])
+      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
 
-      const { stderr } = await execa('glaze', [
+      const tile = await execa('glaze', [
         'tile:deterministic',
         JSON.stringify({
-          controllers: [stripAnsi(key.stderr.split('Created DID ')[1].split(' with seed ')[0])],
+          controllers: [did],
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--key=${stripAnsi(key.stderr.split('with seed ')[1])}`,
+        `--key=${seed}`,
       ])
-      expect(stderr.toString().includes('Loaded tile')).toBe(true)
+      expect(tile.stderr.toString().includes('Loaded tile')).toBe(true)
     }, 20000)
   })
 })

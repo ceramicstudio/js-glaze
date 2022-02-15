@@ -33,7 +33,7 @@ export type CastModelTo<Model extends ModelData<any> | void, ToType> = Model ext
   ? MapModelTypes<Model, ToType>
   : ModelData<ToType>
 
-export type PublishedModel<Model extends ModelData<any> | void = void> = CastModelTo<Model, string>
+export type ModelAliases<Model extends ModelData<any> | void = void> = CastModelTo<Model, string>
 
 export type ModelTypeAliases<
   // Schema alias to content type

@@ -5,7 +5,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 import { ModelManager } from '@glazed/devtools'
 import { DIDDataStore } from '@glazed/did-datastore'
-import type { PublishedModel } from '@glazed/types'
+import type { ModelAliases } from '@glazed/types'
 import { Command as CoreCommand, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { DID } from 'dids'
@@ -105,19 +105,19 @@ export abstract class Command<
     return did
   }
 
-  async getDataModel(name: string): Promise<DataModel<PublishedModel>> {
+  async getDataModel(name: string): Promise<DataModel<ModelAliases>> {
     return await createDataModel(this.ceramic, name)
   }
 
-  getDataStore<ModelTypes extends PublishedModel = PublishedModel>(
+  getDataStore<ModelTypes extends ModelAliases = ModelAliases>(
     model: DataModel<ModelTypes>
   ): DIDDataStore<ModelTypes> {
-    return new DIDDataStore({ autopin: true, ceramic: this.ceramic, model })
+    return new DIDDataStore({ ceramic: this.ceramic, model })
   }
 
   async getModelManager(name: string): Promise<ModelManager> {
     const model = await loadManagedModel(name)
-    return ModelManager.fromJSON(this.ceramic, model)
+    return ModelManager.fromJSON({ ceramic: this.ceramic, model })
   }
 
   logJSON(data: unknown): void {
