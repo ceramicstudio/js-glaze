@@ -6,7 +6,7 @@ Example Web app using [Glaze libraries](https://developers.ceramic.network/tools
 
 1. Install dependencies using `yarn install`
 1. Start a local Ceramic node using `yarn ceramic`
-1. Publish the model to your Ceramic node with `yarn publish-model`
+1. Deploy the model to your Ceramic node with `yarn deploy-model`
 
 ## Scripts
 

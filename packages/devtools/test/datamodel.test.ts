@@ -6,7 +6,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { jest } from '@jest/globals'
 
-import { ModelManager, publishEncodedModel } from '../src'
+import { ModelManager, deployEncodedModel } from '../src'
 
 declare global {
   const ceramic: CeramicApi
@@ -15,7 +15,7 @@ declare global {
 describe('datamodel', () => {
   jest.setTimeout(20000)
 
-  test('publish encoded model', async () => {
+  test('deploy encoded model', async () => {
     const encodedModel = {
       schemas: {
         kjzl6cwe1jw146mi4smwraxjypxq5d1qwq9iei4yydyxf6jwna1d8wouohto87e: {
@@ -94,7 +94,7 @@ describe('datamodel', () => {
       },
       tiles: {},
     }
-    await expect(publishEncodedModel(ceramic, encodedModel)).resolves.toMatchSnapshot()
+    await expect(deployEncodedModel(ceramic, encodedModel)).resolves.toMatchSnapshot()
   })
 
   test('creation flow', async () => {

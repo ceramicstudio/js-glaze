@@ -6,7 +6,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { ModelManager } from '@glazed/devtools'
-import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
+import type { ModelAliases, ModelTypeAliases } from '@glazed/types'
 import { jest } from '@jest/globals'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
@@ -24,7 +24,7 @@ type ModelTypes = ModelTypeAliases<
 describe('integration', () => {
   jest.setTimeout(20000)
 
-  let model: PublishedModel<ModelTypes>
+  let model: ModelAliases<ModelTypes>
   beforeAll(async () => {
     const manager = new ModelManager({ ceramic })
     const schemaID = await manager.createSchema('Profile', {
@@ -47,7 +47,7 @@ describe('integration', () => {
       manager.createDefinition('profile1', definition),
       manager.createDefinition('profile2', definition),
     ])
-    model = await manager.toPublished()
+    model = await manager.deploy()
   })
 
   test('get and set a record', async () => {

@@ -91,10 +91,7 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-    const [graphModel, model] = await Promise.all([
-      createGraphQLModel(manager),
-      manager.toPublished(),
-    ])
+    const [graphModel, model] = await Promise.all([createGraphQLModel(manager), manager.deploy()])
     contextValue = new Context({ ceramic, model })
     schema = createGraphQLSchema(graphModel)
   })

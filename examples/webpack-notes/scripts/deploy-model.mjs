@@ -10,7 +10,7 @@ const bytes = await readFile(new URL('model.json', import.meta.url))
 const manager = ModelManager.fromJSON({ ceramic, model: JSON.parse(bytes.toString()) })
 
 // Write model to JSON file
-const publishedModel = await manager.toPublished()
-await writeFile(new URL('../src/model.json', import.meta.url), JSON.stringify(publishedModel))
+const aliases = await manager.deploy()
+await writeFile(new URL('../src/__generated__/aliases.ts', import.meta.url), `export const aliases = ${JSON.stringify(aliases)}`)
 
-console.log('Model written to src/model.json file:', publishedModel)
+console.log('Model aliases written to src/__generated__/aliases.ts file:', aliases)

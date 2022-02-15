@@ -200,6 +200,16 @@ ___
 
 ___
 
+### deploy
+
+▸ **deploy**(): `Promise`<`ModelData`<`string`\>\>
+
+#### Returns
+
+`Promise`<`ModelData`<`string`\>\>
+
+___
+
 ### getDefinition
 
 ▸ **getDefinition**(`id`): ``null`` \| `ManagedEntry`<`DagJWSResult`\>
@@ -451,26 +461,16 @@ ___
 
 ___
 
-### toPublished
+### useDeployed
 
-▸ **toPublished**(): `Promise`<`ModelData`<`string`\>\>
-
-#### Returns
-
-`Promise`<`ModelData`<`string`\>\>
-
-___
-
-### usePublished
-
-▸ **usePublished**<`T`, `ID`\>(`type`, `alias`, `id`): `Promise`<`string`\>
+▸ **useDeployed**<`T`, `ID`\>(`type`, `alias`, `id`): `Promise`<`string`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends keyof `UsePublishedIDType` |
-| `ID` | `UsePublishedIDType`[`T`] |
+| `T` | extends keyof `UseDeployedIDType` |
+| `ID` | `UseDeployedIDType`[`T`] |
 
 #### Parameters
 
@@ -486,9 +486,9 @@ ___
 
 ___
 
-### usePublishedDefinition
+### useDeployedDefinition
 
-▸ **usePublishedDefinition**(`alias`, `id`): `Promise`<`string`\>
+▸ **useDeployedDefinition**(`alias`, `id`): `Promise`<`string`\>
 
 #### Parameters
 
@@ -503,9 +503,9 @@ ___
 
 ___
 
-### usePublishedSchema
+### useDeployedSchema
 
-▸ **usePublishedSchema**(`alias`, `id`): `Promise`<`string`\>
+▸ **useDeployedSchema**(`alias`, `id`): `Promise`<`string`\>
 
 #### Parameters
 
@@ -520,9 +520,9 @@ ___
 
 ___
 
-### usePublishedTile
+### useDeployedTile
 
-▸ **usePublishedTile**(`alias`, `id`): `Promise`<`string`\>
+▸ **useDeployedTile**(`alias`, `id`): `Promise`<`string`\>
 
 #### Parameters
 

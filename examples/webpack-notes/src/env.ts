@@ -6,7 +6,7 @@ import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { getResolver } from 'key-did-resolver'
 
-import aliases from './model.json'
+import { aliases } from './__generated__/aliases'
 
 export type Note = {
   date: string

@@ -12,8 +12,8 @@ import type {
   ManagedID,
   ManagedModel,
   ManagedSchema,
+  ModelAliases,
   ModelData,
-  PublishedModel,
   Schema,
 } from '@glazed/types'
 import type { DagJWSResult } from 'dids'
@@ -34,7 +34,7 @@ type CreateContentType = {
   tile: Record<string, unknown>
 }
 
-type UsePublishedIDType = {
+type UseDeployedIDType = {
   definition: StreamID | string
   schema: StreamRef | string
   tile: StreamID | string
@@ -59,7 +59,7 @@ function docHasSupportedDID(doc: TileDocument<any>): boolean {
 }
 
 const dataStoreModel = decodeModel(encodedDataStoreModel)
-export async function publishDataStoreSchemas(
+export async function deployDataStoreSchemas(
   ceramic: CeramicApi,
   createOpts?: CreateOpts,
   commitOpts?: UpdateOpts
@@ -71,13 +71,13 @@ export async function publishDataStoreSchemas(
   )
 }
 
-// Publish a managed model to the given Ceramic node
-export async function publishModel(
+// Deploy a managed model to the given Ceramic node
+export async function deployModel(
   ceramic: CeramicApi,
   model: ManagedModel,
   createOpts?: CreateOpts,
   commitOpts?: UpdateOpts
-): Promise<PublishedModel> {
+): Promise<ModelAliases> {
   const [schemas] = await Promise.all([
     Promise.all(
       Object.values(model.schemas).map(async (schema) => {
@@ -85,7 +85,7 @@ export async function publishModel(
         return [schema.alias, stream.commitId.toUrl()]
       })
     ),
-    publishDataStoreSchemas(ceramic),
+    deployDataStoreSchemas(ceramic),
   ])
   const [definitions, tiles] = await Promise.all([
     await Promise.all(
@@ -108,12 +108,12 @@ export async function publishModel(
   }
 }
 
-// Publish a JSON-encoded managed model to the given Ceramic node
-export async function publishEncodedModel(
+// Deploy a JSON-encoded managed model to the given Ceramic node
+export async function deployEncodedModel(
   ceramic: CeramicApi,
   model: EncodedManagedModel
-): Promise<PublishedModel> {
-  return await publishModel(ceramic, decodeModel(model))
+): Promise<ModelAliases> {
+  return await deployModel(ceramic, decodeModel(model))
 }
 
 export type ModelManagerConfig = {
@@ -348,18 +348,18 @@ export class ModelManager {
     }
   }
 
-  async usePublished<T extends keyof UsePublishedIDType, ID = UsePublishedIDType[T]>(
+  async useDeployed<T extends keyof UseDeployedIDType, ID = UseDeployedIDType[T]>(
     type: T,
     alias: string,
     id: ID
   ): Promise<ManagedID> {
     switch (type) {
       case 'schema':
-        return await this.usePublishedSchema(alias, id as any)
+        return await this.useDeployedSchema(alias, id as any)
       case 'definition':
-        return await this.usePublishedDefinition(alias, id as any)
+        return await this.useDeployedDefinition(alias, id as any)
       case 'tile':
-        return await this.usePublishedTile(alias, id as any)
+        return await this.useDeployedTile(alias, id as any)
       default:
         throw new Error(`Unsupported type: ${type as string}`)
     }
@@ -421,7 +421,7 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedSchema(alias: string, id: StreamRef | string): Promise<ManagedID> {
+  async useDeployedSchema(alias: string, id: StreamRef | string): Promise<ManagedID> {
     if (alias == null) {
       throw new Error('Schema alias must be provided')
     }
@@ -457,7 +457,7 @@ export class ModelManager {
       throw new Error(`Definition ${alias} already exists`)
     }
 
-    await publishDataStoreSchemas(this.#ceramic)
+    await deployDataStoreSchemas(this.#ceramic)
     const [stream, schemaID] = await Promise.all([
       this._createDoc(definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
       this.loadSchema(definition.schema),
@@ -475,7 +475,7 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedDefinition(alias: string, id: StreamID | string): Promise<ManagedID> {
+  async useDeployedDefinition(alias: string, id: StreamID | string): Promise<ManagedID> {
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
@@ -546,7 +546,7 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedTile(alias: string, id: StreamID | string): Promise<ManagedID> {
+  async useDeployedTile(alias: string, id: StreamID | string): Promise<ManagedID> {
     if (this.hasTileAlias(alias)) {
       throw new Error(`Tile ${alias} already exists`)
     }
@@ -570,8 +570,8 @@ export class ModelManager {
 
   // Exports
 
-  async toPublished(): Promise<PublishedModel> {
-    return await publishModel(this.#ceramic, this.#model)
+  async deploy(): Promise<ModelAliases> {
+    return await deployModel(this.#ceramic, this.#model)
   }
 
   toJSON(): EncodedManagedModel {

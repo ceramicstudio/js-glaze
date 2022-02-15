@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datamodel publish encoded model 1`] = `
+exports[`datamodel deploy encoded model 1`] = `
 Object {
   "definitions": Object {
     "myNotes": "kjzl6cwe1jw145d00g4tuhpps6ozv30hb30cnlaevxmhy8hqbo2x8w58bupuhua",
