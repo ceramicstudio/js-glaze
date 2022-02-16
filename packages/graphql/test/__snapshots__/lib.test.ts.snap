@@ -1,5 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib add and read notes from a connection 1`] = `
+Array [
+  Object {
+    "node": Object {
+      "date": "2021-01-06T14:32:00.000Z",
+      "text": "hello first",
+      "title": "first",
+    },
+  },
+  Object {
+    "node": Object {
+      "date": "2021-01-06T14:33:00.000Z",
+      "text": "hello second",
+      "title": "second",
+    },
+  },
+]
+`;
+
+exports[`lib add and read notes from a connection 2`] = `
+Object {
+  "data": Object {
+    "node": Object {
+      "allConnection": Object {
+        "edges": Array [
+          Object {
+            "node": Object {
+              "date": "2021-01-06T14:34:00.000Z",
+              "text": "hello third",
+              "title": "third",
+            },
+          },
+        ],
+        "pageInfo": Object {
+          "hasNextPage": false,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`lib add and read notes from a connection 3`] = `
+Array [
+  Object {
+    "node": Object {
+      "date": "2021-01-06T14:34:00.000Z",
+      "text": "hello third",
+      "title": "third",
+    },
+  },
+  Object {
+    "node": Object {
+      "date": "2021-01-06T14:33:00.000Z",
+      "text": "hello second",
+      "title": "second",
+    },
+  },
+]
+`;
+
+exports[`lib add and read notes from a connection 4`] = `
+Object {
+  "data": Object {
+    "node": Object {
+      "allConnection": Object {
+        "edges": Array [
+          Object {
+            "node": Object {
+              "date": "2021-01-06T14:32:00.000Z",
+              "text": "hello first",
+              "title": "first",
+            },
+          },
+        ],
+        "pageInfo": Object {
+          "hasPreviousPage": false,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`lib add and read notes from a connection in the store 1`] = `
+Object {
+  "data": Object {
+    "viewer": Object {
+      "store": Object {
+        "notePad": Object {
+          "allConnection": Object {
+            "edges": Array [
+              Object {
+                "node": Object {
+                  "date": "2021-01-06T14:32:00.000Z",
+                  "text": "hello first",
+                  "title": "first",
+                },
+              },
+              Object {
+                "node": Object {
+                  "date": "2021-01-06T14:33:00.000Z",
+                  "text": "hello second",
+                  "title": "second",
+                },
+              },
+              Object {
+                "node": Object {
+                  "date": "2021-01-06T14:34:00.000Z",
+                  "text": "hello third",
+                  "title": "third",
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+}
+`;
+
 exports[`lib create a note 1`] = `
 Object {
   "data": Object {
@@ -51,14 +173,28 @@ type DID {
 }
 
 type DataStore {
-  myNotes: Notes
+  notePad: Notes
 }
 
 type Notes implements CeramicStream & Node {
   _ceramic: CeramicMetadata!
   id: ID!
-  all: [ID]
-  favorites: [ID]
+  allConnection(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): NoteConnection
+  allNodeIDs: [ID]
+  all: [String]
+  favorites: [String]
 }
 
 interface CeramicStream {
@@ -81,6 +217,39 @@ type StreamMetadata {
   tags: [String]
 }
 
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type NoteConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [NoteEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type NoteEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Note
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
+}
+
 type Note implements CeramicStream & Node {
   _ceramic: CeramicMetadata!
   id: ID!
@@ -94,7 +263,9 @@ type Mutation {
   updateNote(input: UpdateNoteInput!): UpdateNotePayload
   createNotes(input: CreateNotesInput!): CreateNotesPayload
   updateNotes(input: UpdateNotesInput!): UpdateNotesPayload
-  setMyNotes(input: SetMyNotesInput!): SetMyNotesPayload
+  addNotesAllEdge(input: AddNotesAllEdgeInput!): AddNotesAllEdgePayload
+  addNotePadNotesAllEdge(input: AddNotePadNotesAllEdgeInput!): AddNotePadNotesAllEdgePayload
+  setNotePad(input: SetNotePadInput!): SetNotePadPayload
 }
 
 type CreateNotePayload {
@@ -136,7 +307,7 @@ input CreateNotesInput {
 
 input NotesInput {
   all: [ID]
-  favorites: [ID]
+  favorites: [String]
 }
 
 type UpdateNotesPayload {
@@ -150,11 +321,35 @@ input UpdateNotesInput {
   clientMutationId: String
 }
 
-type SetMyNotesPayload {
+type AddNotesAllEdgePayload {
+  node: Notes!
+  edge: NoteEdge!
   clientMutationId: String
 }
 
-input SetMyNotesInput {
+input AddNotesAllEdgeInput {
+  id: ID!
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type AddNotePadNotesAllEdgePayload {
+  viewer: DID!
+  edge: NoteEdge!
+  clientMutationId: String
+}
+
+input AddNotePadNotesAllEdgeInput {
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type SetNotePadPayload {
+  viewer: DID!
+  clientMutationId: String
+}
+
+input SetNotePadInput {
   content: NotesInput!
   options: DataStoreMutationOptions
   clientMutationId: String

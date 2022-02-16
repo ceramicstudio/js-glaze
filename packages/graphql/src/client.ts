@@ -32,17 +32,17 @@ export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliase
   constructor(config: GraphQLClientConfig<ModelTypes>) {
     const { dataModel, graphqlModel, ...contextConfig } = config
     this.#context = new Context({ ...contextConfig, model: dataModel })
-    this.#schema = createGraphQLSchema(graphqlModel)
+    this.#schema = createGraphQLSchema({ model: graphqlModel })
   }
 
   get context(): Context<ModelTypes> {
     return this.#context
   }
 
-  execute(
+  async execute(
     source: string | Source,
     variableValues?: Record<string, unknown>
-  ): ExecutionResult | Promise<ExecutionResult> {
+  ): Promise<ExecutionResult> {
     let document: DocumentNode
     try {
       document = parse(source)
@@ -59,7 +59,7 @@ export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliase
       }
     }
 
-    return execute({
+    return await execute({
       document,
       variableValues,
       contextValue: this.#context,

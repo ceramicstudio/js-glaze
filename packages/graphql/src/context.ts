@@ -6,8 +6,17 @@ import { DIDDataStore } from '@glazed/did-datastore'
 import { TileLoader } from '@glazed/tile-loader'
 import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
+import {
+  type Connection,
+  type ConnectionArguments,
+  type Edge,
+  cursorToOffset,
+  offsetToCursor,
+} from 'graphql-relay'
 
 // import { ItemConnectionHandler, ReferenceConnectionHandler } from './connection'
+
+const SLICE_DEFAULT_SIZE = 20
 
 export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   cache?: TileCache | boolean
@@ -99,9 +108,20 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   //   return handler
   // }
 
+  async getRecordID(aliasOrID: string): Promise<string> {
+    const definitionID = this.dataStore.getDefinitionID(aliasOrID)
+    const recordID = await this.dataStore.getRecordID(definitionID)
+    // Create an empty record if not already existing
+    return recordID ?? (await this.dataStore.setRecord(definitionID, {})).toString()
+  }
+
   async loadDoc<Content = Record<string, any>>(
-    id: string | CommitID | StreamID
+    id: string | CommitID | StreamID,
+    fresh = false
   ): Promise<TileDocument<Content>> {
+    if (fresh) {
+      this.#loader.clear(id)
+    }
     return await this.#loader.load<Content>(id)
   }
 
@@ -117,5 +137,62 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     content: Content
   ): Promise<TileDocument<Content | null | undefined>> {
     return await this.#loader.update(id, content)
+  }
+
+  async loadListConnection(
+    list: Array<string>,
+    args: ConnectionArguments = {}
+  ): Promise<Connection<TileDocument | null>> {
+    let sliceStart: number
+    let sliceEnd: number
+    if (args.last != null) {
+      sliceEnd = Math.min(args.before ? cursorToOffset(args.before) : list.length, list.length)
+      sliceStart = Math.max(0, sliceEnd - args.last)
+    } else {
+      sliceStart = Math.min(args.after ? cursorToOffset(args.after) + 1 : 0, list.length)
+      sliceEnd = Math.min(sliceStart + (args.first ?? SLICE_DEFAULT_SIZE), list.length)
+    }
+
+    const sliceIDs = list.slice(sliceStart, sliceEnd)
+    const results = await this.#loader.loadMany(sliceIDs)
+    const edges = results.map((doc, i) => ({
+      cursor: offsetToCursor(sliceStart + i),
+      node: doc instanceof Error ? null : doc,
+    }))
+
+    return {
+      pageInfo: {
+        startCursor: edges[0]?.cursor,
+        endCursor: edges[edges.length - 1]?.cursor,
+        hasNextPage: sliceEnd !== list.length,
+        hasPreviousPage: sliceStart !== 0,
+      },
+      edges: args.last ? edges.reverse() : edges,
+    }
+  }
+
+  async addListConnectionEdges<T = Record<string, any>>(
+    ownerID: string,
+    listKey: string,
+    schema: string,
+    contents: Array<T>
+  ): Promise<{ node: TileDocument; edges: Array<Edge<TileDocument<T>>> }> {
+    const createEdgeDocs = contents.map(async (content) => await this.createDoc(schema, content))
+    const [ownerDoc, ...edgeDocs] = await Promise.all([
+      this.loadDoc(ownerID, true), // Force fresh load to ensure the list is up-to-date
+      ...createEdgeDocs,
+    ])
+    const content = ownerDoc.content ?? {}
+    const existing = (content[listKey] ?? []) as Array<string>
+
+    const edgeIDs: Array<string> = []
+    const edges: Array<Edge<TileDocument<T>>> = []
+    edgeDocs.forEach((doc, i) => {
+      edgeIDs.push(doc.id.toString())
+      edges.push({ cursor: offsetToCursor(existing.length + i), node: doc })
+    })
+    await ownerDoc.update({ ...content, [listKey]: [...existing, ...edgeIDs] })
+
+    return { edges, node: ownerDoc }
   }
 }

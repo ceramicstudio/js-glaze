@@ -69,13 +69,14 @@ describe('lib', () => {
         // },
         all: {
           type: 'array',
-          title: 'list',
           items: noteRef,
         },
         favorites: {
           type: 'array',
-          title: 'list',
-          items: noteRef,
+          items: {
+            type: 'string',
+            maxLength: 100,
+          },
         },
       },
     }
@@ -84,9 +85,9 @@ describe('lib', () => {
 
     const manager = new ModelManager({ ceramic })
     await Promise.all([
-      manager.createDefinition('myNotes', {
-        name: 'notes',
-        description: 'My notes',
+      manager.createDefinition('notePad', {
+        name: 'notePad',
+        description: 'My note pad',
         schema: notesSchemaURL,
       }),
       manager.createTile(
@@ -217,6 +218,199 @@ describe('lib', () => {
     })
   })
 
+  test('add and read notes from a connection', async () => {
+    jest.setTimeout(30000)
+
+    const created = await client.execute(
+      `
+        mutation TestCreateNotes($input: CreateNotesInput!) {
+          createNotes(input: $input) {
+            node {
+              id
+            }
+          }
+        }
+      `,
+      { input: { content: {} } }
+    )
+    const { id } = created.data!.createNotes.node
+
+    const toAdd = [
+      { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
+      { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
+      { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
+    ]
+    for (const content of toAdd) {
+      await client.execute(
+        `
+        mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
+          addNotesAllEdge(input: $input) {
+            edge {
+              cursor
+            }
+          }
+        }
+      `,
+        { input: { id, content } }
+      )
+    }
+
+    const firstTwo = await client.execute(
+      `
+      query TestReadNotes($id: ID!) {
+        node(id: $id) {
+          ...on Notes {
+            allConnection(first: 2) {
+              edges {
+                node {
+                  date
+                  text
+                  title
+                }
+              }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+            }
+          }
+        }
+      }
+    `,
+      { id }
+    )
+    expect(firstTwo.data.node.allConnection.edges).toMatchSnapshot()
+
+    const lastOne = await client.execute(
+      `
+      query TestReadNotes($id: ID!, $cursor: String!) {
+        node(id: $id) {
+          ...on Notes {
+            allConnection(first: 2, after: $cursor) {
+              edges {
+                node {
+                  date
+                  text
+                  title
+                }
+              }
+              pageInfo {
+                hasNextPage
+              }
+            }
+          }
+        }
+      }
+    `,
+      { id, cursor: firstTwo.data.node.allConnection.pageInfo.endCursor }
+    )
+    expect(lastOne).toMatchSnapshot()
+
+    const lastTwo = await client.execute(
+      `
+      query TestReadNotes($id: ID!) {
+        node(id: $id) {
+          ...on Notes {
+            allConnection(last: 2) {
+              edges {
+                node {
+                  date
+                  text
+                  title
+                }
+              }
+              pageInfo {
+                hasPreviousPage
+                startCursor
+              }
+            }
+          }
+        }
+      }
+    `,
+      { id }
+    )
+    expect(lastTwo.data.node.allConnection.edges).toMatchSnapshot()
+
+    const firstOne = await client.execute(
+      `
+      query TestReadNotes($id: ID!, $cursor: String!) {
+        node(id: $id) {
+          ...on Notes {
+            allConnection(last: 2, before: $cursor) {
+              edges {
+                node {
+                  date
+                  text
+                  title
+                }
+              }
+              pageInfo {
+                hasPreviousPage
+              }
+            }
+          }
+        }
+      }
+    `,
+      { id, cursor: lastTwo.data.node.allConnection.pageInfo.startCursor }
+    )
+    expect(firstOne).toMatchSnapshot()
+  })
+
+  test('add and read notes from a connection in the store', async () => {
+    jest.setTimeout(30000)
+
+    const toAdd = [
+      { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
+      { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
+      { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
+    ]
+    for (const content of toAdd) {
+      await client.execute(
+        `
+        mutation TestAddNoteEdge($input: AddNotePadNotesAllEdgeInput!) {
+          addNotePadNotesAllEdge(input: $input) {
+            edge {
+              cursor
+            }
+            viewer {
+              store {
+                notePad {
+                  all
+                }
+              }
+            }
+          }
+        }
+      `,
+        { input: { content } }
+      )
+    }
+
+    await expect(
+      client.execute(`
+        query TestReadNotes {
+          viewer {
+            store {
+              notePad {
+                allConnection(first: 3) {
+                  edges {
+                    node {
+                      date
+                      text
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `)
+    ).resolves.toMatchSnapshot()
+  })
+
   test('add and read a note from the store', async () => {
     jest.setTimeout(30000)
 
@@ -240,8 +434,8 @@ describe('lib', () => {
     // First add the ID to the `all` list
     await client.execute(
       `
-        mutation SetMyNote($input: SetMyNotesInput!) {
-          setMyNotes(input: $input) {
+        mutation SetNotePad($input: SetNotePadInput!) {
+          setNotePad(input: $input) {
             clientMutationId
           }
         }`,
@@ -254,8 +448,8 @@ describe('lib', () => {
     // This should keep the `all` list unchanged
     await client.execute(
       `
-        mutation SetMyFavoriteNote($input: SetMyNotesInput!) {
-          setMyNotes(input: $input) {
+        mutation SetMyFavoriteNote($input: SetNotePadInput!) {
+          setNotePad(input: $input) {
             clientMutationId
           }
         }`,
@@ -272,7 +466,7 @@ describe('lib', () => {
         viewer {
           id
           store {
-            myNotes {
+            notePad {
               all
               favorites
             }
@@ -280,78 +474,8 @@ describe('lib', () => {
         }
       }
     `)
-    const { myNotes } = read.data!.viewer.store
-    expect(myNotes.all).toEqual([id])
-    expect(myNotes.favorites).toEqual([id])
+    const { notePad } = read.data!.viewer.store
+    expect(notePad.all).toEqual([id])
+    expect(notePad.favorites).toEqual([id])
   })
-
-  // test('add and read notes from a connection', async () => {
-  //   jest.setTimeout(30000)
-
-  //   const created = await execute({
-  //     schema,
-  //     contextValue,
-  //     document: parse(`
-  //       mutation TestCreateNotes($input: CreateNotesInput!) {
-  //         createNotes(input: $input) {
-  //           node {
-  //             id
-  //           }
-  //         }
-  //       }
-  //     `),
-  //     variableValues: {
-  //       input: { content: {} },
-  //     },
-  //   })
-  //   const { id } = created.data!.createNotes.node
-
-  //   const document = parse(`
-  //     mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
-  //       addNotesAllEdge(input: $input) {
-  //         edge {
-  //           cursor
-  //         }
-  //       }
-  //     }`)
-
-  //   const toAdd = [
-  //     { date: '2021-01-06T14:32:00.000Z', text: 'hello first', title: 'first' },
-  //     { date: '2021-01-06T14:33:00.000Z', text: 'hello second', title: 'second' },
-  //     { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
-  //   ]
-  //   for (const content of toAdd) {
-  //     await execute({
-  //       schema,
-  //       contextValue,
-  //       document,
-  //       variableValues: { input: { id, content } },
-  //     })
-  //   }
-
-  //   await expect(
-  //     execute({
-  //       schema,
-  //       contextValue,
-  //       document: parse(`
-  //         query TestReadNotes($id: ID!) {
-  //           node(id: $id) {
-  //             ...on Notes {
-  //               all(first: 3) {
-  //                 edges {
-  //                   node {
-  //                     date
-  //                     text
-  //                     title
-  //                   }
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //       `),
-  //       variableValues: { id },
-  //     })
-  //   ).resolves.toMatchSnapshot()
-  // })
 })
