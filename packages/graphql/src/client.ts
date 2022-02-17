@@ -7,8 +7,8 @@ import {
   type DocumentNode,
   type ExecutionResult,
   type GraphQLError,
-  type GraphQLSchema,
   type Source,
+  GraphQLSchema,
   execute,
   parse,
   validate,
@@ -20,9 +20,9 @@ import { createGraphQLSchema } from './schema.js'
 export type GraphQLClientConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   cache?: TileCache | boolean
   ceramic: CeramicApi
-  dataModel: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
-  graphqlModel: GraphQLModel
   loader?: TileLoader
+  model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
+  schema: GraphQLSchema | GraphQLModel
 }
 
 export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
@@ -30,9 +30,9 @@ export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliase
   #schema: GraphQLSchema
 
   constructor(config: GraphQLClientConfig<ModelTypes>) {
-    const { dataModel, graphqlModel, ...contextConfig } = config
-    this.#context = new Context({ ...contextConfig, model: dataModel })
-    this.#schema = createGraphQLSchema({ model: graphqlModel })
+    const { schema, ...contextConfig } = config
+    this.#context = new Context(contextConfig)
+    this.#schema = schema instanceof GraphQLSchema ? schema : createGraphQLSchema({ model: schema })
   }
 
   get context(): Context<ModelTypes> {

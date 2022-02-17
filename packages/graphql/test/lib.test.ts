@@ -100,7 +100,7 @@ describe('lib', () => {
       manager.deploy(),
       createGraphQLModel(manager),
     ])
-    client = new GraphQLClient({ ceramic, loader, dataModel, graphqlModel })
+    client = new GraphQLClient({ ceramic, loader, model: dataModel, schema: graphqlModel })
     graphModel = graphqlModel
   })
 

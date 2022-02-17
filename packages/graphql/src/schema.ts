@@ -1,6 +1,6 @@
 import type { StreamMetadata } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { GraphQLModel } from '@glazed/graphql-types'
+import type { FieldReference, GraphQLModel, ObjectFields, TileEntry } from '@glazed/graphql-types'
 import { pascalCase } from 'change-case'
 import {
   GraphQLBoolean,
@@ -39,6 +39,36 @@ const SCALARS = {
   string: GraphQLString,
 }
 const SCALAR_FIELDS = Object.keys(SCALARS)
+
+type CeramicTypes = {
+  storeObject: GraphQLObjectType<unknown, Context>
+  didObject: GraphQLObjectType<string, Context>
+  metadataObject: GraphQLObjectType<TileDocument, Context>
+  streamInterface: GraphQLInterfaceType
+}
+
+type NodeType = { interfaces: Array<GraphQLInterfaceType>; schema: string }
+
+type BuildObjectParams = {
+  name: string
+  node: NodeType
+  fields: ObjectFields
+  ceramic: CeramicTypes
+}
+
+type BuildReferenceListParams = {
+  listName: string
+  refItem: FieldReference
+  ceramic: CeramicTypes
+}
+
+type BuildConnectionMutationsCommonParams = {
+  listName: string
+  listField: string
+  objectName: string
+  objectSchema: string
+  ceramic: CeramicTypes
+}
 
 type StoreMutationOptions = {
   merge?: boolean
@@ -187,148 +217,116 @@ export type CreateSchemaParams = {
   viewerID?: string
 }
 
-export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
-  const { model } = params
-  const enableMutation = params.enableMutation !== false
-  const fallbackViewerID = params.viewerID ?? null
+class SchemaBuilder {
+  // Source model
+  #model: GraphQLModel
+  // Schema options
+  #enableMutation: boolean
+  #fallbackViewerID: string | null
+  // Internal records
+  #inputObjects: Record<string, GraphQLInputObjectType> = {}
+  #mutations: Record<string, GraphQLFieldConfig<any, Context>> = {}
+  #types: Record<string, GraphQLObjectType> = {}
+  #nodes: Record<string, NodeType> = {}
+  #nodeField: GraphQLFieldConfig<any, Context>
+  #ceramicTypes: CeramicTypes | null = null
 
-  const inputObjects: Record<string, GraphQLInputObjectType> = {}
-  const mutations: Record<string, GraphQLFieldConfig<any, any>> = {}
-  const types: Record<string, GraphQLObjectType> = {}
+  constructor(params: CreateSchemaParams) {
+    this.#model = params.model
+    this.#enableMutation = params.enableMutation !== false
+    this.#fallbackViewerID = params.viewerID ?? null
 
-  const { nodeInterface, nodeField } = nodeDefinitions(
-    async (globalId: string, ctx: Context) => {
-      const { id } = fromGlobalId(globalId)
-      return await ctx.loadDoc(id)
-    },
-    (doc: TileDocument) => {
-      return doc.metadata.schema == null ? undefined : model.referenced[doc.metadata.schema]?.name
+    const { nodeInterface, nodeField } = nodeDefinitions(
+      async (globalId: string, ctx: Context) => {
+        const { id } = fromGlobalId(globalId)
+        return await ctx.loadDoc(id)
+      },
+      (doc: TileDocument) => {
+        return doc.metadata.schema == null
+          ? undefined
+          : this.#model.referenced[doc.metadata.schema]?.name
+      }
+    )
+    this.#nodeField = nodeField
+
+    for (const [schema, { name, type }] of Object.entries(this.#model.referenced)) {
+      if (type === 'object') {
+        this.#nodes[name] = { interfaces: [nodeInterface], schema }
+      }
     }
-  )
+  }
 
-  const nodes = Object.entries(model.referenced).reduce((acc, [schema, { name, type }]) => {
-    if (type === 'object') {
-      acc[name] = { interfaces: [nodeInterface], schema }
-    }
-    return acc
-  }, {} as Record<string, { interfaces: Array<GraphQLInterfaceType>; schema: string }>)
+  // TODO: should options be here? Would allow multiple build with different options
+  // Need to make sure processed computations are cached
+  build(): GraphQLSchema {
+    const indexEntries = Object.entries(sortedObject(this.#model.index))
+    const ceramic = this.#ceramicTypes ?? this._createCeramicTypes({ indexEntries })
+    this._buildObjects({ ceramic })
+    this._buildReferenceLists({ ceramic })
+    const schema = this._createSchema({ ceramic, indexEntries })
+    assertValidSchema(schema)
+    return schema
+  }
 
-  const indexEntries = Object.entries(sortedObject(model.index))
-
-  // DataStore object is model-specific and needed to generate object using it
-  const dataStore = new GraphQLObjectType({
-    name: 'DataStore',
-    fields: () => {
-      return indexEntries.reduce((acc, [key, definition]) => {
-        const { name } = model.referenced[definition.schema]
-        acc[key] = {
-          type: types[name],
-          resolve: async (
-            did,
-            _,
-            ctx
-          ): Promise<TileDocument<Record<string, any> | null | undefined> | null> => {
-            return await ctx.dataStore.getRecordDocument(definition.id, did)
-          },
-        }
-        return acc
-      }, {} as GraphQLFieldConfigMap<string, Context>)
-    },
-  })
-  const didObject = createDIDObject(dataStore)
-  const ceramicMetadata = createCeramicMetadataObject(didObject)
-  const ceramicStreamInterface = createCeramicStreamInterface(ceramicMetadata)
-
-  for (const [name, { fields }] of Object.entries(sortedObject(model.objects))) {
-    const node = nodes[name]
-
-    inputObjects[name] = new GraphQLInputObjectType({
-      name: `${name}Input`,
-      fields: (): GraphQLInputFieldConfigMap => {
-        return Object.entries(fields).reduce((acc, [key, field]) => {
-          let type
-          if (field.type === 'reference') {
-            const ref = model.referenced[field.schemas[0]]
-            if (ref.type === 'object') {
-              type = GraphQLID
-            }
-          } else if (field.type === 'object') {
-            type = inputObjects[field.name]
-          } else if (field.type === 'list') {
-            const listItem = model.lists[field.name]
-            if (listItem.type === 'object') {
-              type = new GraphQLList(inputObjects[listItem.name])
-            } else if (listItem.type === 'reference') {
-              type = new GraphQLList(GraphQLID)
-            } else if (listItem.type === 'did') {
-              type = new GraphQLList(GraphQLID)
-            } else if (SCALAR_FIELDS.includes(listItem.type)) {
-              type = new GraphQLList(SCALARS[listItem.type])
-            }
-          } else if (field.type === 'did') {
-            type = GraphQLID
-          } else if (SCALAR_FIELDS.includes(field.type)) {
-            type = SCALARS[field.type]
-          } else {
-            throw new Error(`Unsupported field type ${field.type}`)
-          }
-          if (type != null) {
-            acc[key] = { type: field.required ? new GraphQLNonNull(type) : type }
+  _createCeramicTypes({
+    indexEntries,
+  }: {
+    indexEntries: Array<[string, TileEntry]>
+  }): CeramicTypes {
+    // DataStore object is model-specific and needed to generate object using it
+    const storeObject = new GraphQLObjectType({
+      name: 'DataStore',
+      fields: () => {
+        return indexEntries.reduce((acc, [key, definition]) => {
+          const { name } = this.#model.referenced[definition.schema]
+          acc[key] = {
+            type: this.#types[name],
+            resolve: async (
+              did,
+              _,
+              ctx
+            ): Promise<TileDocument<Record<string, any> | null | undefined> | null> => {
+              return await ctx.dataStore.getRecordDocument(definition.id, did)
+            },
           }
           return acc
-        }, {} as GraphQLInputFieldConfigMap)
+        }, {} as GraphQLFieldConfigMap<string, Context>)
       },
     })
+    const didObject = createDIDObject(storeObject)
+    const metadataObject = createCeramicMetadataObject(didObject)
+    const streamInterface = createCeramicStreamInterface(metadataObject)
 
-    types[name] = new GraphQLObjectType<TileDocument>({
+    const types = { storeObject, didObject, metadataObject, streamInterface }
+    this.#ceramicTypes = types
+    return types
+  }
+
+  _buildObjects({ ceramic }: { ceramic: CeramicTypes }) {
+    for (const [name, { fields }] of Object.entries(sortedObject(this.#model.objects))) {
+      const params: BuildObjectParams = { ceramic, name, fields, node: this.#nodes[name] }
+      this._buildObjectType(params)
+      if (this.#enableMutation) {
+        this._buildInputObjectType(params)
+        if (params.node != null) {
+          this._buildNodeMutations(params)
+        }
+      }
+    }
+  }
+
+  _buildObjectType({ name, node, fields, ceramic }: BuildObjectParams) {
+    this.#types[name] = new GraphQLObjectType<TileDocument>({
       name,
-      interfaces: createObjectInterfaces(ceramicStreamInterface, node?.interfaces),
+      interfaces: createObjectInterfaces(ceramic.streamInterface, node?.interfaces),
       fields: (): GraphQLFieldConfigMap<TileDocument, Context> => {
         return Object.entries(fields).reduce((acc, [key, field]) => {
           if (field.type === 'reference') {
-            const ref = model.referenced[field.schemas[0]]
-            // if (ref.type === 'collection') {
-            //   const { item } = model.collections[ref.name]
-            //   let nodeType
-            //   if (item.type === 'object') {
-            //     nodeType = types[item.name]
-            //   } else if (item.type === 'reference') {
-            //     const nodeRef = model.referenced[item.schemas[0]]
-            //     nodeType = types[nodeRef.name]
-            //   } else if (SCALAR_FIELDS.includes(item.type)) {
-            //     nodeType = SCALARS[item.type]
-            //   }
-            //   if (nodeType == null) {
-            //     throw new Error(`Missing node type for collection: ${name}`)
-            //   }
-            //   const connectionType = types[`${nodeType.name}Connection`]
-            //   if (connectionType == null) {
-            //     throw new Error(`No connection defined for node: ${nodeType.name}`)
-            //   }
-            //   acc[key] = {
-            //     type: field.required ? new GraphQLNonNull(connectionType) : connectionType,
-            //     args: connectionArgs,
-            //     resolve: async (
-            //       doc,
-            //       args: ConnectionArguments,
-            //       ctx
-            //     ): Promise<Connection<any> | null> => {
-            //       const id = doc.content[key] as string | undefined
-            //       if (id == null) {
-            //         return null
-            //       }
-            //       const handler =
-            //         item.type === 'reference'
-            //           ? await ctx.getReferenceConnection(id, item.schemas[0])
-            //           : await ctx.getItemConnection(id)
-            //       return await handler.load(args)
-            //     },
-            //   }
-            // } else
+            const ref = this.#model.referenced[field.schemas[0]]
             if (ref.type === 'object') {
               // TODO: support union type when multiple schemas
               const typeName = ref.name
-              const type = types[typeName]
+              const type = this.#types[typeName]
               acc[key] = {
                 type: field.required ? new GraphQLNonNull(type) : type,
                 resolve: async (doc, _args, ctx): Promise<TileDocument | null> => {
@@ -351,18 +349,18 @@ export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
           } else {
             let type
             if (field.type === 'object') {
-              type = types[field.name]
+              type = this.#types[field.name]
             } else if (field.type === 'list') {
-              const listItem = model.lists[field.name]
+              const listItem = this.#model.lists[field.name]
               if (listItem.type === 'object') {
-                type = new GraphQLList(types[listItem.name])
+                type = new GraphQLList(this.#types[listItem.name])
               } else if (listItem.type === 'reference') {
-                const nodeRef = model.referenced[listItem.schemas[0]]
-                const nodeType = types[nodeRef.name]
+                const nodeRef = this.#model.referenced[listItem.schemas[0]]
+                const nodeType = this.#types[nodeRef.name]
                 if (nodeType == null) {
                   throw new Error(`Missing node type for reference: ${field.name}`)
                 }
-                const connectionType = types[`${nodeType.name}Connection`]
+                const connectionType = this.#types[`${nodeType.name}Connection`]
                 if (connectionType == null) {
                   throw new Error(`No connection defined for node: ${nodeType.name}`)
                 }
@@ -389,14 +387,14 @@ export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
                 }
                 type = new GraphQLList(GraphQLString)
               } else if (listItem.type === 'did') {
-                type = new GraphQLList(didObject)
+                type = new GraphQLList(ceramic.didObject)
               } else if (SCALAR_FIELDS.includes(listItem.type)) {
                 type = new GraphQLList(SCALARS[listItem.type])
               } else {
                 throw new Error(`Unsupported list item type ${listItem.type}`)
               }
             } else if (field.type === 'did') {
-              type = didObject
+              type = ceramic.didObject
             } else if (SCALAR_FIELDS.includes(field.type)) {
               type = SCALARS[field.type]
             } else {
@@ -412,175 +410,277 @@ export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
             }
           }
           return acc
-        }, createObjectCommonFields(ceramicMetadata, node ? name : undefined))
+        }, createObjectCommonFields(ceramic.metadataObject, node ? name : undefined))
+      },
+    })
+  }
+
+  _buildInputObjectType({ name, fields }: BuildObjectParams) {
+    this.#inputObjects[name] = new GraphQLInputObjectType({
+      name: `${name}Input`,
+      fields: (): GraphQLInputFieldConfigMap => {
+        return Object.entries(fields).reduce((acc, [key, field]) => {
+          let type
+          if (field.type === 'reference') {
+            const ref = this.#model.referenced[field.schemas[0]]
+            if (ref.type === 'object') {
+              type = GraphQLID
+            }
+          } else if (field.type === 'object') {
+            type = this.#inputObjects[field.name]
+          } else if (field.type === 'list') {
+            const listItem = this.#model.lists[field.name]
+            if (listItem.type === 'object') {
+              type = new GraphQLList(this.#inputObjects[listItem.name])
+            } else if (listItem.type === 'reference') {
+              type = new GraphQLList(GraphQLID)
+            } else if (listItem.type === 'did') {
+              type = new GraphQLList(GraphQLID)
+            } else if (SCALAR_FIELDS.includes(listItem.type)) {
+              type = new GraphQLList(SCALARS[listItem.type])
+            }
+          } else if (field.type === 'did') {
+            type = GraphQLID
+          } else if (SCALAR_FIELDS.includes(field.type)) {
+            type = SCALARS[field.type]
+          } else {
+            throw new Error(`Unsupported field type ${field.type}`)
+          }
+          if (type != null) {
+            acc[key] = { type: field.required ? new GraphQLNonNull(type) : type }
+          }
+          return acc
+        }, {} as GraphQLInputFieldConfigMap)
+      },
+    })
+  }
+
+  _buildNodeMutations({ name, node }: BuildObjectParams) {
+    this.#mutations[`create${name}`] = mutationWithClientMutationId({
+      name: `Create${name}`,
+      inputFields: () => ({
+        content: { type: new GraphQLNonNull(this.#inputObjects[name]) },
+      }),
+      outputFields: () => ({
+        node: { type: new GraphQLNonNull(this.#types[name]) },
+      }),
+      mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
+        if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
+          throw new Error('Ceramic instance is not authenticated')
+        }
+        return { node: await ctx.createDoc(node.schema, input.content) }
       },
     })
 
-    if (enableMutation && node != null) {
-      mutations[`create${name}`] = mutationWithClientMutationId({
-        name: `Create${name}`,
-        inputFields: () => ({
-          content: { type: new GraphQLNonNull(inputObjects[name]) },
-        }),
-        outputFields: () => ({
-          node: { type: new GraphQLNonNull(types[name]) },
-        }),
-        mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
-          if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
-            throw new Error('Ceramic instance is not authenticated')
-          }
-          return { node: await ctx.createDoc(node.schema, input.content) }
-        },
-      })
+    this.#mutations[`update${name}`] = mutationWithClientMutationId({
+      name: `Update${name}`,
+      inputFields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        content: { type: new GraphQLNonNull(this.#inputObjects[name]) },
+      }),
+      outputFields: () => ({
+        node: { type: new GraphQLNonNull(this.#types[name]) },
+      }),
+      mutateAndGetPayload: async (
+        input: { id: string; content: Record<string, any> },
+        ctx: Context
+      ) => {
+        const { id } = fromGlobalId(input.id)
+        return { node: await ctx.updateDoc(id, input.content) }
+      },
+    })
+  }
 
-      mutations[`update${name}`] = mutationWithClientMutationId({
-        name: `Update${name}`,
-        inputFields: () => ({
-          id: { type: new GraphQLNonNull(GraphQLID) },
-          content: { type: new GraphQLNonNull(inputObjects[name]) },
-        }),
-        outputFields: () => ({
-          node: { type: new GraphQLNonNull(types[name]) },
-        }),
-        mutateAndGetPayload: async (
-          input: { id: string; content: Record<string, any> },
-          ctx: Context
-        ) => {
-          const { id } = fromGlobalId(input.id)
-          return { node: await ctx.updateDoc(id, input.content) }
-        },
-      })
+  _buildReferenceLists({ ceramic }: { ceramic: CeramicTypes }) {
+    for (const [listName, refItem] of Object.entries(sortedObject(this.#model.lists))) {
+      if (refItem.type === 'reference') {
+        this._buildReferenceList({ ceramic, listName, refItem })
+      }
     }
   }
 
-  for (const [listName, item] of Object.entries(sortedObject(model.lists))) {
-    if (item.type !== 'reference') {
-      continue
-    }
-
+  _buildReferenceList({ listName, refItem, ceramic }: BuildReferenceListParams) {
     // Find matching node type for reference
-    const refSchema = item.schemas[0]
-    const ref = model.referenced[refSchema]
-    const nodeType = types[ref.name]
+    const objectSchema = refItem.schemas[0]
+    const ref = this.#model.referenced[objectSchema]
+    const nodeType = this.#types[ref.name]
     if (nodeType == null) {
       throw new Error(`Missing node type for list reference: ${listName}`)
     }
 
     // Find list field in object owning it
-    const owningObject = model.objects[item.owner]
-    const field = Object.keys(owningObject.fields).find((key) => {
-      const data = owningObject.fields[key]
+    const ownerName = refItem.owner
+    const ownerObject = this.#model.objects[ownerName]
+    const listField = Object.keys(ownerObject.fields).find((key) => {
+      const data = ownerObject.fields[key]
       return data.type === 'list' && data.name === listName
     })
-    if (field == null) {
+    if (listField == null) {
       throw new Error(`Reference field not found for ${listName}`)
     }
 
-    const name = nodeType.name
+    // TODO: extract to own method, might be already existing if multiple connections
+    const objectName = nodeType.name
     const { connectionType, edgeType } = connectionDefinitions({ nodeType })
-    types[`${name}Connection`] = connectionType
-    types[`${name}Edge`] = edgeType
+    this.#types[`${objectName}Connection`] = connectionType
+    this.#types[`${objectName}Edge`] = edgeType
 
-    if (enableMutation) {
-      mutations[`add${listName}Edge`] = mutationWithClientMutationId({
-        name: `Add${listName}Edge`,
-        inputFields: () => ({
-          id: { type: new GraphQLNonNull(GraphQLID) },
-          content: { type: new GraphQLNonNull(inputObjects[name]) },
-        }),
-        outputFields: () => ({
-          node: { type: new GraphQLNonNull(types[item.owner]) },
-          edge: { type: new GraphQLNonNull(edgeType) },
-        }),
-        mutateAndGetPayload: async (
-          input: { id: string; content: Record<string, any> },
-          ctx: Context
-        ) => {
-          const { id } = fromGlobalId(input.id)
-          const { edges, node } = await ctx.addListConnectionEdges(id, field, refSchema, [
-            input.content,
-          ])
-          return { edge: edges[0], node }
-        },
+    if (this.#enableMutation) {
+      this._buildListConnectionMutations({
+        ceramic,
+        objectName,
+        objectSchema,
+        listName,
+        listField,
+        ownerName: refItem.owner,
       })
-
-      const indexKey = Object.keys(model.index).find((key) => {
-        const data = model.index[key]
-        const indexRef = model.referenced[data.schema]
-        return indexRef?.name === item.owner
-      })
-      if (indexKey != null) {
-        const indexName = pascalCase(`${indexKey}${listName}`)
-        mutations[`add${indexName}Edge`] = mutationWithClientMutationId({
-          name: `Add${indexName}Edge`,
-          inputFields: () => ({
-            content: { type: new GraphQLNonNull(inputObjects[name]) },
-          }),
-          outputFields: () => ({
-            viewer: {
-              type: new GraphQLNonNull(didObject),
-              resolve: (_self, _args, ctx: Context): string => ctx.viewerID as string,
-            },
-            edge: { type: new GraphQLNonNull(edgeType) },
-          }),
-          mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
-            const ownerID = await ctx.getRecordID(indexKey)
-            const { edges } = await ctx.addListConnectionEdges(ownerID, field, refSchema, [
-              input.content,
-            ])
-            return { edge: edges[0] }
-          },
-        })
-      }
     }
   }
 
-  const query = new GraphQLObjectType({
-    name: 'Query',
-    fields: Object.entries(sortedObject(model.roots)).reduce(
-      (acc, [key, { id, schema }]) => {
-        const { name } = model.referenced[schema]
-        acc[key] = {
-          type: new GraphQLNonNull(types[name]),
-          resolve: async (_self, _args, ctx): Promise<any> => {
-            return await ctx.loadDoc(id)
-          },
-        }
-        return acc
+  _buildListConnectionMutations({
+    ownerName,
+    listName,
+    listField,
+    objectName,
+    objectSchema,
+    ceramic,
+  }: BuildConnectionMutationsCommonParams & { ownerName: string }) {
+    this.#mutations[`add${listName}Edge`] = mutationWithClientMutationId({
+      name: `Add${listName}Edge`,
+      inputFields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        content: { type: new GraphQLNonNull(this.#inputObjects[objectName]) },
+      }),
+      outputFields: () => ({
+        node: { type: new GraphQLNonNull(this.#types[ownerName]) },
+        edge: { type: new GraphQLNonNull(this.#types[`${objectName}Edge`]) },
+      }),
+      mutateAndGetPayload: async (
+        input: { id: string; content: Record<string, any> },
+        ctx: Context
+      ) => {
+        const { id } = fromGlobalId(input.id)
+        const { edges, node } = await ctx.addListConnectionEdges(id, listField, objectSchema, [
+          input.content,
+        ])
+        return { edge: edges[0], node }
       },
-      {
-        node: nodeField,
-        account: {
-          type: new GraphQLNonNull(didObject),
-          args: {
-            id: { type: new GraphQLNonNull(GraphQLID) },
-          },
-          resolve: (_, args: { id: string }): string => args.id,
-        },
+    })
+
+    const definitionName = Object.keys(this.#model.index).find((key) => {
+      const data = this.#model.index[key]
+      const indexRef = this.#model.referenced[data.schema]
+      return indexRef?.name === ownerName
+    })
+    if (definitionName != null) {
+      this._buildIndexListConnectionMutations({
+        definitionName,
+        listName,
+        listField,
+        objectName,
+        objectSchema,
+        ceramic,
+      })
+    }
+  }
+
+  _buildIndexListConnectionMutations({
+    definitionName,
+    listName,
+    listField,
+    objectName,
+    objectSchema,
+    ceramic,
+  }: BuildConnectionMutationsCommonParams & { definitionName: string }) {
+    const indexName = pascalCase(`${definitionName}${listName}`)
+    this.#mutations[`add${indexName}Edge`] = mutationWithClientMutationId({
+      name: `Add${indexName}Edge`,
+      inputFields: () => ({
+        content: { type: new GraphQLNonNull(this.#inputObjects[objectName]) },
+      }),
+      outputFields: () => ({
         viewer: {
-          type: didObject,
-          resolve: (_self, _args, ctx): string | null => ctx.viewerID ?? fallbackViewerID,
+          type: new GraphQLNonNull(ceramic.didObject),
+          resolve: (_self, _args, ctx: Context): string => ctx.viewerID as string,
         },
-      } as GraphQLFieldConfigMap<any, Context>
-    ),
-  })
+        edge: { type: new GraphQLNonNull(this.#types[`${objectName}Edge`]) },
+      }),
+      mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
+        const ownerID = await ctx.getRecordID(definitionName)
+        const { edges } = await ctx.addListConnectionEdges(ownerID, listField, objectSchema, [
+          input.content,
+        ])
+        return { edge: edges[0] }
+      },
+    })
+  }
 
-  const schemaFields: Record<string, GraphQLObjectType> = { query }
+  _createSchema({
+    ceramic,
+    indexEntries,
+  }: {
+    ceramic: CeramicTypes
+    indexEntries: Array<[string, TileEntry]>
+  }) {
+    const query = new GraphQLObjectType({
+      name: 'Query',
+      fields: Object.entries(sortedObject(this.#model.roots)).reduce(
+        (acc, [key, { id, schema }]) => {
+          const { name } = this.#model.referenced[schema]
+          acc[key] = {
+            type: new GraphQLNonNull(this.#types[name]),
+            resolve: async (_self, _args, ctx): Promise<any> => {
+              return await ctx.loadDoc(id)
+            },
+          }
+          return acc
+        },
+        {
+          node: this.#nodeField,
+          account: {
+            type: new GraphQLNonNull(ceramic.didObject),
+            args: {
+              id: { type: new GraphQLNonNull(GraphQLID) },
+            },
+            resolve: (_, args: { id: string }): string => args.id,
+          },
+          viewer: {
+            type: ceramic.didObject,
+            resolve: (_self, _args, ctx): string | null => ctx.viewerID ?? this.#fallbackViewerID,
+          },
+        } as GraphQLFieldConfigMap<any, Context>
+      ),
+    })
 
-  if (enableMutation) {
+    const schemaFields: Record<string, GraphQLObjectType> = { query }
+
+    if (this.#enableMutation) {
+      schemaFields.mutation = this._createMutation({ ceramic, indexEntries })
+    }
+
+    return new GraphQLSchema(schemaFields)
+  }
+
+  _createMutation({
+    ceramic,
+    indexEntries,
+  }: {
+    ceramic: CeramicTypes
+    indexEntries: Array<[string, TileEntry]>
+  }): GraphQLObjectType<any, Context> {
     for (const [key, definition] of indexEntries) {
-      const { name } = model.referenced[definition.schema]
+      const { name } = this.#model.referenced[definition.schema]
       const definitionKey = pascalCase(key)
 
-      mutations[`set${definitionKey}`] = mutationWithClientMutationId({
+      this.#mutations[`set${definitionKey}`] = mutationWithClientMutationId({
         name: `Set${definitionKey}`,
         inputFields: () => ({
-          content: { type: new GraphQLNonNull(inputObjects[name]) },
+          content: { type: new GraphQLNonNull(this.#inputObjects[name]) },
           options: { type: storeMutationOptions },
         }),
         outputFields: () => ({
           viewer: {
-            type: new GraphQLNonNull(didObject),
+            type: new GraphQLNonNull(ceramic.didObject),
             resolve: (_self, _args, ctx: Context): string => ctx.viewerID as string,
           },
         }),
@@ -595,10 +695,11 @@ export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
         },
       })
     }
-    schemaFields.mutation = new GraphQLObjectType({ name: 'Mutation', fields: mutations })
-  }
 
-  const schema = new GraphQLSchema(schemaFields)
-  assertValidSchema(schema)
-  return schema
+    return new GraphQLObjectType({ name: 'Mutation', fields: this.#mutations })
+  }
+}
+
+export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
+  return new SchemaBuilder(params).build()
 }
