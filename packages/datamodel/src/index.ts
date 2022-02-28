@@ -89,10 +89,12 @@
  */
 
 import type { CeramicApi, CreateOpts } from '@ceramicnetwork/common'
-import type { TileDocument } from '@ceramicnetwork/stream-tile'
+import type { TileDocument, TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 import { TileLoader } from '@glazed/tile-loader'
 import type { TileCache } from '@glazed/tile-loader'
 import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
+
+export type CreateOptions = CreateOpts & { controller?: string }
 
 export type DataModelParams<Aliases> = {
   /**
@@ -180,13 +182,19 @@ export class DataModel<
   >(
     schemaAlias: Alias,
     content: ContentType,
-    options?: CreateOpts
+    options: CreateOptions = {}
   ): Promise<TileDocument<ContentType>> {
     const schema = this.getSchemaURL(schemaAlias)
     if (schema == null) {
       throw new Error(`Schema alias "${schemaAlias as string}" is not defined`)
     }
 
-    return await this.#loader.create<ContentType>(content, { schema }, options)
+    const { controller, ...opts } = options
+    const metadata: TileMetadataArgs = { schema }
+    if (controller != null) {
+      metadata.controllers = [controller]
+    }
+
+    return await this.#loader.create<ContentType>(content, metadata, opts)
   }
 }
