@@ -5,9 +5,9 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 // import { publishCollectionSchemas } from '@glazed/append-collection'
-import { ModelManager, createGraphQLModel } from '@glazed/devtools'
-import type { GraphQLModel } from '@glazed/graphql-types'
+import { ModelManager, deployGraph } from '@glazed/devtools'
 import { TileLoader } from '@glazed/tile-loader'
+import type { GraphModel } from '@glazed/types'
 import { jest } from '@jest/globals'
 
 import { GraphQLClient, printGraphQLSchema } from '../src'
@@ -20,7 +20,7 @@ describe('lib', () => {
   jest.setTimeout(20000)
 
   let client: GraphQLClient
-  let graphModel: GraphQLModel
+  let graphModel: GraphModel
 
   beforeAll(async () => {
     const loader = new TileLoader({ ceramic, cache: true })
@@ -96,12 +96,9 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-    const [dataModel, graphqlModel] = await Promise.all([
-      manager.deploy(),
-      createGraphQLModel(manager),
-    ])
-    client = new GraphQLClient({ ceramic, loader, model: dataModel, schema: graphqlModel })
-    graphModel = graphqlModel
+
+    graphModel = await deployGraph(manager)
+    client = GraphQLClient.fromGraph({ ceramic, graph: graphModel })
   })
 
   test('schema creation', () => {
@@ -444,8 +441,8 @@ describe('lib', () => {
       }
     )
 
-    // Test `merge` option by adding the ID to the `favorites` list
-    // This should keep the `all` list unchanged
+    // By default the set mutations should merge the contents.
+    // This should keep the `all` list unchanged.
     await client.execute(
       `
         mutation SetMyFavoriteNote($input: SetNotePadInput!) {
@@ -456,7 +453,6 @@ describe('lib', () => {
       {
         input: {
           content: { favorites: [id] },
-          options: { merge: true },
         },
       }
     )
@@ -477,5 +473,39 @@ describe('lib', () => {
     const { notePad } = read.data!.viewer.store
     expect(notePad.all).toEqual([id])
     expect(notePad.favorites).toEqual([id])
+
+    // Using the `replace` option should discard any content not explicitly set.
+    // This should remove the `favories` list.
+    await client.execute(
+      `
+        mutation SetMyFavoriteNote($input: SetNotePadInput!) {
+          setNotePad(input: $input) {
+            clientMutationId
+          }
+        }`,
+      {
+        input: {
+          content: { all: [id] },
+          options: { replace: true },
+        },
+      }
+    )
+
+    const replaced = await client.execute(`
+      query TestReadNotes {
+        viewer {
+          id
+          store {
+            notePad {
+              all
+              favorites
+            }
+          }
+        }
+      }
+    `)
+    const { notePad: replacedNotePad } = replaced.data!.viewer.store
+    expect(replacedNotePad.all).toEqual([id])
+    expect(replacedNotePad.favorites).toBeNull()
   })
 })

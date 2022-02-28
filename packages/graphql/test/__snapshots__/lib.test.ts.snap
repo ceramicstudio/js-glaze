@@ -356,6 +356,6 @@ input SetNotePadInput {
 }
 
 input DataStoreMutationOptions {
-  merge: Boolean
+  replace: Boolean
 }"
 `;

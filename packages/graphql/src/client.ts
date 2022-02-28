@@ -1,8 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { DataModel } from '@glazed/datamodel'
-import type { GraphQLModel } from '@glazed/graphql-types'
 import type { TileCache, TileLoader } from '@glazed/tile-loader'
-import type { ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
+import type { GraphModel, ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
 import {
   type DocumentNode,
   type ExecutionResult,
@@ -16,23 +15,40 @@ import {
 
 import { Context } from './context.js'
 import { createGraphQLSchema } from './schema.js'
+import { graphModelToAliases } from './utils.js'
 
-export type GraphQLClientConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
+export type FromGraphParams = {
+  ceramic: CeramicApi
+  graph: GraphModel
+}
+
+export type GraphQLClientParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   cache?: TileCache | boolean
   ceramic: CeramicApi
   loader?: TileLoader
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
-  schema: GraphQLSchema | GraphQLModel
+  schema: GraphQLSchema
 }
 
 export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   #context: Context<ModelTypes>
   #schema: GraphQLSchema
 
-  constructor(config: GraphQLClientConfig<ModelTypes>) {
-    const { schema, ...contextConfig } = config
-    this.#context = new Context(contextConfig)
-    this.#schema = schema instanceof GraphQLSchema ? schema : createGraphQLSchema({ model: schema })
+  static fromGraph<ModelTypes extends ModelTypeAliases = ModelTypeAliases>({
+    ceramic,
+    graph,
+  }: FromGraphParams): GraphQLClient<ModelTypes> {
+    return new GraphQLClient<ModelTypes>({
+      ceramic,
+      model: graphModelToAliases<ModelTypes>(graph),
+      schema: createGraphQLSchema({ model: graph }),
+    })
+  }
+
+  constructor(params: GraphQLClientParams<ModelTypes>) {
+    const { schema, ...contextParams } = params
+    this.#context = new Context(contextParams)
+    this.#schema = schema
   }
 
   get context(): Context<ModelTypes> {

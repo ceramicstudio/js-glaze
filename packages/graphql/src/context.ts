@@ -18,7 +18,7 @@ import {
 
 const SLICE_DEFAULT_SIZE = 20
 
-export type ContextConfig<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
+export type ContextParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
   cache?: TileCache | boolean
   ceramic: CeramicApi
   loader?: TileLoader
@@ -32,8 +32,8 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
   // #itemConnections: Record<string, Promise<ItemConnectionHandler<unknown>>> = {}
   // #referenceConnections: Record<string, Promise<ReferenceConnectionHandler<unknown>>> = {}
 
-  constructor(config: ContextConfig<ModelTypes>) {
-    const { cache, ceramic, loader, model } = config
+  constructor(params: ContextParams<ModelTypes>) {
+    const { cache, ceramic, loader, model } = params
     this.#ceramic = ceramic
     this.#loader = loader ?? new TileLoader({ ceramic, cache })
     this.#dataStore = new DIDDataStore<ModelTypes>({
@@ -188,7 +188,7 @@ export class Context<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
     const edgeIDs: Array<string> = []
     const edges: Array<Edge<TileDocument<T>>> = []
     edgeDocs.forEach((doc, i) => {
-      edgeIDs.push(doc.id.toString())
+      edgeIDs.push(doc.id.toUrl())
       edges.push({ cursor: offsetToCursor(existing.length + i), node: doc })
     })
     await ownerDoc.update({ ...content, [listKey]: [...existing, ...edgeIDs] })

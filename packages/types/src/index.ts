@@ -76,3 +76,78 @@ export type ManagedModel<CommitType = DagJWSResult> = {
 }
 
 export type EncodedManagedModel = ManagedModel<EncodedDagJWSResult>
+
+export type GraphFieldCommon = {
+  title?: string
+}
+
+export type GraphFieldBoolean = GraphFieldCommon & {
+  type: 'boolean'
+}
+export type GraphFieldInteger = GraphFieldCommon & {
+  type: 'integer'
+}
+export type GraphFieldFloat = GraphFieldCommon & {
+  type: 'float'
+}
+export type GraphFieldString = GraphFieldCommon & {
+  type: 'string'
+  format?: 'date-time' | 'date' | 'duration' | 'time'
+  maxLength?: number
+}
+export type GraphFieldDIDString = GraphFieldCommon & {
+  type: 'did'
+  maxLength?: number
+}
+
+export type GraphReferenceEntry = {
+  owner: string
+  schemas: Array<string>
+}
+
+export type GraphFieldList = GraphFieldCommon & {
+  type: 'list'
+  name: string
+}
+export type GraphFieldObject = GraphFieldCommon & {
+  type: 'object'
+  name: string
+}
+export type GraphFieldReference = GraphFieldCommon &
+  GraphReferenceEntry & {
+    type: 'reference'
+  }
+
+export type GraphItemField =
+  | GraphFieldBoolean
+  | GraphFieldInteger
+  | GraphFieldFloat
+  | GraphFieldString
+  | GraphFieldDIDString
+  | GraphFieldObject
+  | GraphFieldReference
+
+export type GraphObjectField = (GraphFieldList | GraphItemField) & { required?: boolean }
+export type GraphObjectFields = Record<string, GraphObjectField>
+export type GraphObjectEntry = {
+  fields: GraphObjectFields
+  parents?: Array<string> | null
+}
+
+export type GraphReferencedEntry = {
+  type: 'collection' | 'object'
+  name: string
+}
+export type GraphTileEntry = {
+  id: string
+  schema: string
+}
+
+export type GraphModel = {
+  index: Record<string, GraphTileEntry> // alias to tile entry
+  lists: Record<string, GraphItemField> // list alias to item type
+  objects: Record<string, GraphObjectEntry> // alias to entry
+  roots: Record<string, GraphTileEntry> // alias to tile entry
+  referenced: Record<string, GraphReferencedEntry> // schema URL to referenced type
+  references: Record<string, GraphReferenceEntry> // alias to reference entry
+}

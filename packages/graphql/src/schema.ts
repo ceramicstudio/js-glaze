@@ -1,6 +1,11 @@
 import type { StreamMetadata } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { FieldReference, GraphQLModel, ObjectFields, TileEntry } from '@glazed/graphql-types'
+import type {
+  GraphFieldReference,
+  GraphModel,
+  GraphObjectFields,
+  GraphTileEntry,
+} from '@glazed/types'
 import { pascalCase } from 'change-case'
 import {
   GraphQLBoolean,
@@ -41,7 +46,7 @@ const SCALARS = {
 const SCALAR_FIELDS = Object.keys(SCALARS)
 
 type CeramicTypes = {
-  storeObject: GraphQLObjectType<unknown, Context>
+  storeObject: GraphQLObjectType<string, Context>
   didObject: GraphQLObjectType<string, Context>
   metadataObject: GraphQLObjectType<TileDocument, Context>
   streamInterface: GraphQLInterfaceType
@@ -52,13 +57,13 @@ type NodeType = { interfaces: Array<GraphQLInterfaceType>; schema: string }
 type BuildObjectParams = {
   name: string
   node: NodeType
-  fields: ObjectFields
+  fields: GraphObjectFields
   ceramic: CeramicTypes
 }
 
 type BuildReferenceListParams = {
   listName: string
-  refItem: FieldReference
+  refItem: GraphFieldReference
   ceramic: CeramicTypes
 }
 
@@ -71,13 +76,13 @@ type BuildConnectionMutationsCommonParams = {
 }
 
 type StoreMutationOptions = {
-  merge?: boolean
+  replace?: boolean
 }
 
 const storeMutationOptions = new GraphQLInputObjectType({
   name: 'DataStoreMutationOptions',
   fields: {
-    merge: {
+    replace: {
       type: GraphQLBoolean,
     },
   },
@@ -212,14 +217,14 @@ function createObjectCommonFields(
 }
 
 export type CreateSchemaParams = {
-  model: GraphQLModel
+  model: GraphModel
   enableMutation?: boolean
   viewerID?: string
 }
 
 class SchemaBuilder {
   // Source model
-  #model: GraphQLModel
+  #model: GraphModel
   // Schema options
   #enableMutation: boolean
   #fallbackViewerID: string | null
@@ -271,7 +276,7 @@ class SchemaBuilder {
   _createCeramicTypes({
     indexEntries,
   }: {
-    indexEntries: Array<[string, TileEntry]>
+    indexEntries: Array<[string, GraphTileEntry]>
   }): CeramicTypes {
     // DataStore object is model-specific and needed to generate object using it
     const storeObject = new GraphQLObjectType({
@@ -620,7 +625,7 @@ class SchemaBuilder {
     indexEntries,
   }: {
     ceramic: CeramicTypes
-    indexEntries: Array<[string, TileEntry]>
+    indexEntries: Array<[string, GraphTileEntry]>
   }) {
     const query = new GraphQLObjectType({
       name: 'Query',
@@ -666,7 +671,7 @@ class SchemaBuilder {
     indexEntries,
   }: {
     ceramic: CeramicTypes
-    indexEntries: Array<[string, TileEntry]>
+    indexEntries: Array<[string, GraphTileEntry]>
   }): GraphQLObjectType<any, Context> {
     for (const [key, definition] of indexEntries) {
       const { name } = this.#model.referenced[definition.schema]
@@ -688,9 +693,9 @@ class SchemaBuilder {
           input: { content: Record<string, any>; options?: StoreMutationOptions },
           ctx: Context
         ) => {
-          input.options?.merge
-            ? await ctx.dataStore.merge(definition.id, input.content)
-            : await ctx.dataStore.set(definition.id, input.content)
+          input.options?.replace
+            ? await ctx.dataStore.set(definition.id, input.content)
+            : await ctx.dataStore.merge(definition.id, input.content)
           return {}
         },
       })

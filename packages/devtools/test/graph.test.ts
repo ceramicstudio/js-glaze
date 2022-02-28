@@ -7,7 +7,7 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { jest } from '@jest/globals'
 
-import { ModelManager, createGraphQLModel } from '../src'
+import { ModelManager, createGraphModel } from '../src'
 
 declare global {
   const ceramic: CeramicApi
@@ -89,8 +89,7 @@ describe('graphql', () => {
       { schema: noteSchemaURL }
     )
 
-    await expect(createGraphQLModel(manager)).resolves.toEqual({
-      collections: {},
+    await expect(createGraphModel(manager)).resolves.toEqual({
       index: {
         myNotes: {
           id: notesDefinitionID.toString(),

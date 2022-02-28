@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-import { CIP88_APPEND_COLLECTION_PREFIX, CIP88_DID } from '@glazed/constants'
+import { CIP88_DID } from '@glazed/constants'
 import type { Definition } from '@glazed/did-datastore-model'
-import type { GraphQLModel, ItemField, ObjectField } from '@glazed/graphql-types'
-import type { Schema } from '@glazed/types'
+import type { GraphModel, GraphItemField, GraphObjectField, Schema } from '@glazed/types'
 import { camelCase, pascalCase } from 'change-case'
 
 import type { ModelManager } from './datamodel.js'
@@ -17,11 +16,11 @@ function getName(base: string, prefix = ''): string {
 
 /** @internal */
 export function getItemField(
-  model: GraphQLModel,
+  model: GraphModel,
   schema: Schema,
   parent: string,
   owner: string
-): ItemField {
+): GraphItemField {
   const name = schema.title ?? ''
   if (schema.type === 'array') {
     throw new Error('Unsupported item field of type array')
@@ -40,7 +39,7 @@ export function getItemField(
   if (schema.type === 'object') {
     return { type: 'object', name: addModelSchema(model, schema, { name, parent, owner }) }
   }
-  return schema as ItemField
+  return schema as GraphItemField
 }
 
 export type AddModelSchemaOptions = {
@@ -55,7 +54,7 @@ export type AddModelSchemaOptions = {
  * @internal
  * */
 export function addModelSchema(
-  model: GraphQLModel,
+  model: GraphModel,
   schema: Schema,
   options: AddModelSchemaOptions = {}
 ): string {
@@ -106,11 +105,11 @@ export function addModelSchema(
         } else if (value.type === 'object') {
           acc[prop] = { required, type: 'object', name: addModelSchema(model, value, opts) }
         } else {
-          acc[prop] = { ...value, required } as ObjectField
+          acc[prop] = { ...value, required } as GraphObjectField
         }
         return acc
       },
-      {} as Record<string, ObjectField>
+      {} as Record<string, GraphObjectField>
     )
     model.objects[name] = { fields, parents: options.parent ? [options.parent] : null }
   }
@@ -119,13 +118,12 @@ export function addModelSchema(
 }
 
 /** @internal */
-export async function createGraphQLModel(manager: ModelManager): Promise<GraphQLModel> {
+export async function createGraphModel(manager: ModelManager): Promise<GraphModel> {
   // TODO: throw error on using reserved names:
   // - "node" and "index" roots
   // - "id" field in object if node
 
-  const model: GraphQLModel = {
-    collections: {},
+  const model: GraphModel = {
     index: {},
     lists: {},
     objects: {},
@@ -143,25 +141,24 @@ export async function createGraphQLModel(manager: ModelManager): Promise<GraphQL
     }
 
     const schemaURL = stream.commitId.toUrl()
-    if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
-      const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
-      await manager.loadSchema(sliceSchemaID)
-      const sliceSchemaDoc = await manager.loadStream(sliceSchemaID)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
-      if (itemSchema == null) {
-        throw new Error(`Could not extract item schema ${name}`)
-      }
-      model.collections[name] = {
-        schema: schemaURL,
-        item: getItemField(model, itemSchema, name, name),
-      }
-      model.referenced[schemaURL] = { type: 'collection', name }
-    } else {
-      model.referenced[schemaURL] = {
-        type: 'object',
-        name: addModelSchema(model, schema),
-      }
+    // if (schema.$comment?.startsWith(CIP88_APPEND_COLLECTION_PREFIX)) {
+    //   const sliceSchemaID = schema.$comment.substr(CIP88_APPEND_COLLECTION_PREFIX.length)
+    //   await manager.loadSchema(sliceSchemaID)
+    //   const sliceSchemaDoc = await manager.loadStream(sliceSchemaID)
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    //   const itemSchema = sliceSchemaDoc.content?.properties?.contents?.items?.oneOf?.[0]
+    //   if (itemSchema == null) {
+    //     throw new Error(`Could not extract item schema ${name}`)
+    //   }
+    //   model.collections[name] = {
+    //     schema: schemaURL,
+    //     item: getItemField(model, itemSchema, name, name),
+    //   }
+    //   model.referenced[schemaURL] = { type: 'collection', name }
+    // } else {
+    model.referenced[schemaURL] = {
+      type: 'object',
+      name: addModelSchema(model, schema),
     }
   })
 
@@ -188,4 +185,9 @@ export async function createGraphQLModel(manager: ModelManager): Promise<GraphQL
   await Promise.all([...handleSchemas, ...handleDefinitions, ...handleTiles])
 
   return model
+}
+
+export async function deployGraph(manager: ModelManager): Promise<GraphModel> {
+  await manager.deploy()
+  return await createGraphModel(manager)
 }
