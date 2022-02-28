@@ -92,6 +92,12 @@ async function createTileWithMySchema(content) {
 
 ## Type aliases
 
+### CreateOptions
+
+Ƭ **CreateOptions**: `CreateOpts` & { `controller?`: `string`  }
+
+___
+
 ### DataModelParams
 
 Ƭ **DataModelParams**<`Aliases`\>: `Object`

@@ -73,7 +73,7 @@ Create a TileDocument using a schema identified by the given `schemaAlias`.
 | :------ | :------ |
 | `schemaAlias` | `Alias` |
 | `content` | `ContentType` |
-| `options?` | `CreateOpts` |
+| `options` | [`CreateOptions`](../modules/datamodel.md#createoptions) |
 
 #### Returns
 

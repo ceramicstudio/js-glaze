@@ -126,6 +126,24 @@ describe('DataModel', () => {
           { pin: false }
         )
       })
+
+      test('with custom controller', async () => {
+        const stream = { id: streamID }
+        const create = jest.fn(() => Promise.resolve(stream))
+        const model = new DataModel({
+          ceramic: {},
+          loader: { create },
+          aliases,
+        } as unknown as Params)
+
+        const content = { test: true }
+        await model.createTile('Foo', content, { controller: 'did:test:123' })
+        expect(create).toHaveBeenCalledWith(
+          content,
+          { schema: aliases.schemas.Foo, controllers: ['did:test:123'] },
+          {}
+        )
+      })
     })
   })
 })
