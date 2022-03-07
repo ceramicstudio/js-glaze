@@ -205,6 +205,7 @@ function createObjectCommonFields(
   const fields: GraphQLFieldConfigMap<TileDocument, Context> = {
     _ceramic: {
       type: new GraphQLNonNull(ceramicMetadata),
+      resolve: (doc) => doc,
     },
   }
   if (typeName != null) {
