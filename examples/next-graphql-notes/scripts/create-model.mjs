@@ -1,7 +1,6 @@
-import { writeFile } from 'node:fs/promises'
 import { CeramicClient } from '@ceramicnetwork/http-client'
-import { ModelManager, createGraphModel } from '@glazed/devtools'
-import { printGraphQLSchema } from '@glazed/graphql'
+import { ModelManager } from '@glazed/devtools'
+import { writeEncodedModel, writeGraphQLSchema } from '@glazed/devtools-node'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { getResolver } from 'key-did-resolver'
@@ -86,9 +85,8 @@ await manager.createTile(
 )
 
 // Write model to JSON file
-await writeFile(new URL('../data/model.json', import.meta.url), JSON.stringify(manager.toJSON()))
+await writeEncodedModel(manager, new URL('../data/model.json', import.meta.url))
 console.log('Encoded model written to data/model.json file')
 
-const model = await createGraphModel(manager)
-await writeFile(new URL('../data/schema.graphql', import.meta.url), printGraphQLSchema(model))
+await writeGraphQLSchema(manager, new URL('../data/schema.graphql', import.meta.url))
 console.log('GraphQL schema written to data/schema.graphql file')

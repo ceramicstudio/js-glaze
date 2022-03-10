@@ -1,6 +1,6 @@
-import { writeFile } from 'node:fs/promises'
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
+import { writeEncodedModel } from '@glazed/devtools-node'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import { getResolver } from 'key-did-resolver'
@@ -89,5 +89,5 @@ await manager.createTile(
 )
 
 // Write model to JSON file
-await writeFile(new URL('model.json', import.meta.url), JSON.stringify(manager.toJSON()))
+await writeEncodedModel(manager, new URL('model.json', import.meta.url))
 console.log('Encoded model written to scripts/model.json file')

@@ -31,7 +31,8 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@glazed/devtools": "^0.2.0-alpha.5",
+    "@glazed/devtools": "^0.2.0-alpha.0",
+    "@glazed/devtools-node": "^0.1.0",
     "@types/node": "^17.0.21",
     "@types/react": "^17.0.39",
     "@types/react-relay": "^13.0.1",
