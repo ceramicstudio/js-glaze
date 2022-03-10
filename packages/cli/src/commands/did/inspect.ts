@@ -64,6 +64,13 @@ export default class InspectDID extends Command<Flags> {
                 },
               },
               {
+                title: 'Check record...',
+                task: (_ctx, task) => {
+                  const recordID = index[key]
+                  task.title = `Record: ${recordID ? chalk.magenta(recordID) : chalk.red('(none)')}`
+                },
+              },
+              {
                 title: 'Check schema...',
                 task: async (_ctx, task) => {
                   const def = await getDef
