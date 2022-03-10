@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^2.0.0-alpha.0",
-    "@ceramicnetwork/streamid": "^2.0.0-alpha.0",
     "@ceramicnetwork/stream-tile": "^2.0.0-alpha.0",
+    "@ceramicnetwork/streamid": "^2.0.0-alpha.0",
     "@glazed/types": "^0.2.0-alpha.0"
   },
   "jest": {
