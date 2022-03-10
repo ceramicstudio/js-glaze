@@ -239,6 +239,22 @@ ___
 
 ___
 
+### deployGraph
+
+▸ **deployGraph**(`manager`): `Promise`<`GraphModel`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `manager` | [`ModelManager`](../classes/devtools.ModelManager.md) |
+
+#### Returns
+
+`Promise`<`GraphModel`\>
+
+___
+
 ### deployModel
 
 ▸ **deployModel**(`ceramic`, `model`, `createOpts?`, `commitOpts?`): `Promise`<`ModelAliases`\>

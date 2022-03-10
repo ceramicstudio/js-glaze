@@ -1,0 +1,207 @@
+type Query {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  account(id: ID!): DID!
+  viewer: DID
+  placeholderNote: Note!
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+type DID {
+  id: ID!
+  isViewer: Boolean!
+  store: DataStore
+}
+
+type DataStore {
+  notePad: NotesList
+}
+
+type NotesList implements CeramicStream & Node {
+  _ceramic: CeramicMetadata!
+  id: ID!
+  notesConnection(
+    """Returns the items in the list that come after the specified cursor."""
+    after: String
+
+    """Returns the first n items from the list."""
+    first: Int
+
+    """Returns the items in the list that come before the specified cursor."""
+    before: String
+
+    """Returns the last n items from the list."""
+    last: Int
+  ): NoteConnection
+  notesNodeIDs: [ID]
+  notes: [String]
+}
+
+interface CeramicStream {
+  _ceramic: CeramicMetadata!
+}
+
+type CeramicMetadata {
+  streamID: ID!
+  commitID: ID!
+  streamMetadata: StreamMetadata!
+  controllers: [DID!]!
+  viewerIsController: Boolean!
+  schema: CeramicMetadata
+}
+
+type StreamMetadata {
+  controllers: [ID!]!
+  schema: String
+  family: String
+  tags: [String]
+}
+
+"""A connection to a list of items."""
+type NoteConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [NoteEdge]
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""An edge in a connection."""
+type NoteEdge {
+  """The item at the end of the edge"""
+  node: Note
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type Note implements CeramicStream & Node {
+  _ceramic: CeramicMetadata!
+  id: ID!
+  date: String
+  text: String
+  title: String
+}
+
+type Mutation {
+  createNote(input: CreateNoteInput!): CreateNotePayload
+  updateNote(input: UpdateNoteInput!): UpdateNotePayload
+  createNotesList(input: CreateNotesListInput!): CreateNotesListPayload
+  updateNotesList(input: UpdateNotesListInput!): UpdateNotesListPayload
+  addNotesListNotesEdge(input: AddNotesListNotesEdgeInput!): AddNotesListNotesEdgePayload
+  addNotePadNotesListNotesEdge(input: AddNotePadNotesListNotesEdgeInput!): AddNotePadNotesListNotesEdgePayload
+  setNotePad(input: SetNotePadInput!): SetNotePadPayload
+}
+
+type CreateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input CreateNoteInput {
+  content: NoteInput!
+  clientMutationId: String
+}
+
+input NoteInput {
+  date: String
+  text: String
+  title: String
+}
+
+type UpdateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input UpdateNoteInput {
+  id: ID!
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type CreateNotesListPayload {
+  node: NotesList!
+  clientMutationId: String
+}
+
+input CreateNotesListInput {
+  content: NotesListInput!
+  clientMutationId: String
+}
+
+input NotesListInput {
+  notes: [ID]
+}
+
+type UpdateNotesListPayload {
+  node: NotesList!
+  clientMutationId: String
+}
+
+input UpdateNotesListInput {
+  id: ID!
+  content: NotesListInput!
+  clientMutationId: String
+}
+
+type AddNotesListNotesEdgePayload {
+  node: NotesList!
+  edge: NoteEdge!
+  clientMutationId: String
+}
+
+input AddNotesListNotesEdgeInput {
+  id: ID!
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type AddNotePadNotesListNotesEdgePayload {
+  viewer: DID!
+  edge: NoteEdge!
+  clientMutationId: String
+}
+
+input AddNotePadNotesListNotesEdgeInput {
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type SetNotePadPayload {
+  viewer: DID!
+  clientMutationId: String
+}
+
+input SetNotePadInput {
+  content: NotesListInput!
+  options: DataStoreMutationOptions
+  clientMutationId: String
+}
+
+input DataStoreMutationOptions {
+  merge: Boolean
+}
