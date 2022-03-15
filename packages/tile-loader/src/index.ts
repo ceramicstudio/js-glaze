@@ -153,7 +153,9 @@ import DataLoader from 'dataloader'
 import type { BatchLoadFn } from 'dataloader'
 
 /**
- * Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
+ * Omit `path` and `atTime` from
+ * {@link https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html MultiQuery}
+ * as the cache needs to be deterministic based on the ID.
  */
 export type TileQuery = Omit<MultiQuery, 'paths' | 'atTime'>
 
@@ -162,19 +164,19 @@ export type TileKey = CommitID | StreamID | TileQuery | string
 // Implements CacheMap from dataloader, copied here to generate docs
 export type TileCache = {
   /**
-   * get a Promise of a TileDocument by its stream ID
+   * Get a Promise of a TileDocument by its stream ID
    */
   get(id: string): Promise<TileDocument> | void
   /**
-   * set a Promise of a TileDocument by its stream ID
+   * Set a Promise of a TileDocument by its stream ID
    */
   set(id: string, value: Promise<TileDocument>): any
   /**
-   * remove a specific entry from the cache
+   * Remove a specific entry from the cache
    */
   delete(id: string): any
   /**
-   * remove all entries from the cache
+   * Remove all entries from the cache
    */
   clear(): any
 }
@@ -185,7 +187,8 @@ export type TileLoaderParams = {
    */
   ceramic: CeramicApi
   /**
-   * A supported cache implementation, `true` to use the default implementation or `false` to disable the cache (default)
+   * A supported cache implementation, `true` to use the default implementation or `false` to
+   * disable the cache (default)
    */
   cache?: TileCache | boolean
   /**
@@ -228,7 +231,14 @@ export async function getDeterministicQuery(metadata: TileMetadataArgs): Promise
 const tempBatchLoadFn: BatchLoadFn<TileKey, TileDocument> = () => Promise.resolve([])
 
 /**
- * A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
+ * A TileLoader extends {@link https://github.com/graphql/dataloader DataLoader} to provide
+ * batching and caching functionalities for loading TileDocument streams.
+ *
+ * It is exported by the {@linkcode tile-loader} module.
+ *
+ * ```sh
+ * import { TileLoader } from '@glazed/tile-loader'
+ * ```
  */
 export class TileLoader extends DataLoader<TileKey, TileDocument> {
   #ceramic: CeramicApi
@@ -265,7 +275,7 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
   }
 
   /**
-   * Add a TileDocument to the local cache if enabled.
+   * Add a TileDocument to the local cache, if enabled.
    */
   cache(stream: TileDocument): boolean {
     if (!this.#useCache) {
@@ -278,7 +288,7 @@ export class TileLoader extends DataLoader<TileKey, TileDocument> {
   }
 
   /**
-   * Create a new TileDocument and add it to the cache if enabled.
+   * Create a new TileDocument and add it to the cache, if enabled.
    */
   async create<T extends Record<string, any> = Record<string, any>>(
     content: T,

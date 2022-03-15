@@ -112,7 +112,7 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `aliases` | `Aliases` | The runtime model aliases to use |
+| `aliases` | `Aliases` | The runtime [`model aliases`](types.md#modelaliases) to use |
 | `cache?` | `TileCache` \| `boolean` | [`TileLoader`](../classes/tile_loader.TileLoader.md) cache parameter, only used if `loader` is not provided |
 | `ceramic?` | `CeramicApi` | A Ceramic client instance, only used if `loader` is not provided |
 | `loader?` | `TileLoader` | A [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use, must be provided if `ceramic` is not provided |

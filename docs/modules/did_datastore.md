@@ -195,7 +195,7 @@ ___
 | `ceramic` | `CeramicApi` | A Ceramic client instance |
 | `id?` | `string` | Fallback DID to use when not explicitly set in method calls |
 | `loader?` | `TileLoader` | An optional [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use |
-| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or runtime model aliases to use |
+| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or [`runtime model aliases`](types.md#modelaliases) to use |
 
 ___
 

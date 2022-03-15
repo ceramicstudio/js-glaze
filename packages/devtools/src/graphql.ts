@@ -43,6 +43,7 @@ export function getItemField(
   return schema as ItemField
 }
 
+/** @internal */
 export type AddModelSchemaOptions = {
   name?: string
   parent?: string
@@ -50,10 +51,10 @@ export type AddModelSchemaOptions = {
 }
 
 /**
- * Add a JSON schema to the provided records based on its type
+ * Add a JSON schema to the provided records based on its type.
  *
  * @internal
- * */
+ */
 export function addModelSchema(
   model: GraphQLModel,
   schema: Schema,

@@ -98,7 +98,7 @@ export type CreateOptions = CreateOpts & { controller?: string }
 
 export type DataModelParams<Aliases> = {
   /**
-   * The runtime model aliases to use
+   * The runtime {@linkcode types.ModelAliases model aliases} to use
    */
   aliases: Aliases
   /**
@@ -116,6 +116,12 @@ export type DataModelParams<Aliases> = {
 }
 
 /**
+ * The DataModel runtime provides APIs for interacting with datamodel aliases in applications and
+ * libraries. The {@linkcode devtools.ModelManager ModelManager} provides complementary APIs for
+ * managing datamodels during development.
+ *
+ * It is exported by the {@linkcode datamodel} module.
+ *
  * ```sh
  * import { DataModel } from '@glazed/datamodel'
  * ```
@@ -139,22 +145,37 @@ export class DataModel<
     }
   }
 
+  /**
+   * {@linkcode types.ModelAliases Model aliases} provided in constructor.
+   */
   get aliases(): ModelAliases {
     return this.#aliases
   }
 
+  /**
+   * {@linkcode TileLoader} instance used internally.
+   */
   get loader(): TileLoader {
     return this.#loader
   }
 
+  /**
+   * Returns the definition stream ID for a given alias, if present in local model aliases.
+   */
   getDefinitionID<Alias extends keyof ModelAliases['definitions']>(alias: Alias): string | null {
     return this.#aliases.definitions[alias] ?? null
   }
 
+  /**
+   * Returns the schema stream URL for a given alias, if present in local model aliases.
+   */
   getSchemaURL<Alias extends keyof ModelAliases['schemas']>(alias: Alias): string | null {
     return this.#aliases.schemas[alias] ?? null
   }
 
+  /**
+   * Returns the tile stream ID for a given alias, if present in local model aliases.
+   */
   getTileID<Alias extends keyof ModelAliases['tiles']>(alias: Alias): string | null {
     return this.#aliases.tiles[alias] ?? null
   }

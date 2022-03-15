@@ -2,7 +2,14 @@
 
 [tile-loader](../modules/tile_loader.md).TileLoader
 
-A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide batching and caching functionalities for loading TileDocument streams.
+A TileLoader extends [DataLoader](https://github.com/graphql/dataloader) to provide
+batching and caching functionalities for loading TileDocument streams.
+
+It is exported by the [`tile-loader`](../modules/tile_loader.md) module.
+
+```sh
+import { TileLoader } from '@glazed/tile-loader'
+```
 
 ## Hierarchy
 
@@ -32,7 +39,7 @@ DataLoader&lt;TileKey, TileDocument\&gt;.constructor
 
 ▸ **cache**(`stream`): `boolean`
 
-Add a TileDocument to the local cache if enabled.
+Add a TileDocument to the local cache, if enabled.
 
 #### Parameters
 
@@ -50,7 +57,7 @@ ___
 
 ▸ **create**<`T`\>(`content`, `metadata?`, `options?`): `Promise`<`TileDocument`<`T`\>\>
 
-Create a new TileDocument and add it to the cache if enabled.
+Create a new TileDocument and add it to the cache, if enabled.
 
 #### Type parameters
 

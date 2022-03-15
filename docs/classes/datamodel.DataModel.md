@@ -2,6 +2,12 @@
 
 [datamodel](../modules/datamodel.md).DataModel
 
+The DataModel runtime provides APIs for interacting with datamodel aliases in applications and
+libraries. The [`ModelManager`](devtools.ModelManager.md) provides complementary APIs for
+managing datamodels during development.
+
+It is exported by the [`datamodel`](../modules/datamodel.md) module.
+
 ```sh
 import { DataModel } from '@glazed/datamodel'
 ```
@@ -38,6 +44,8 @@ import { DataModel } from '@glazed/datamodel'
 
 • `get` **aliases**(): `ModelAliases`
 
+[`Model aliases`](../modules/types.md#modelaliases) provided in constructor.
+
 #### Returns
 
 `ModelAliases`
@@ -47,6 +55,8 @@ ___
 ### loader
 
 • `get` **loader**(): `TileLoader`
+
+[`TileLoader`](tile_loader.TileLoader.md) instance used internally.
 
 #### Returns
 
@@ -85,6 +95,8 @@ ___
 
 ▸ **getDefinitionID**<`Alias`\>(`alias`): ``null`` \| `string`
 
+Returns the definition stream ID for a given alias, if present in local model aliases.
+
 #### Type parameters
 
 | Name | Type |
@@ -107,6 +119,8 @@ ___
 
 ▸ **getSchemaURL**<`Alias`\>(`alias`): ``null`` \| `string`
 
+Returns the schema stream URL for a given alias, if present in local model aliases.
+
 #### Type parameters
 
 | Name | Type |
@@ -128,6 +142,8 @@ ___
 ### getTileID
 
 ▸ **getTileID**<`Alias`\>(`alias`): ``null`` \| `string`
+
+Returns the tile stream ID for a given alias, if present in local model aliases.
 
 #### Type parameters
 

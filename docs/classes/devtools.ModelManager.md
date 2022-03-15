@@ -2,6 +2,11 @@
 
 [devtools](../modules/devtools.md).ModelManager
 
+The ModelManager class provides APIs for managing a data model so it can be used at runtime
+using the [`DataModel`](datamodel.DataModel.md) runtime.
+
+The ModelManager class is exported by the [`devtools`](../modules/devtools.md) module.
+
 ```sh
 import { ModelManager } from '@glazed/devtools'
 ```
@@ -24,6 +29,8 @@ import { ModelManager } from '@glazed/devtools'
 
 • `get` **definitions**(): `string`[]
 
+Stream IDs of definitions included in the model.
+
 #### Returns
 
 `string`[]
@@ -33,6 +40,8 @@ ___
 ### model
 
 • `get` **model**(): `ManagedModel`<`DagJWSResult`\>
+
+[`Managed model`](../modules/types.md#managedmodel) used internally.
 
 #### Returns
 
@@ -44,6 +53,8 @@ ___
 
 • `get` **schemas**(): `string`[]
 
+Stream IDs of schemas included in the model.
+
 #### Returns
 
 `string`[]
@@ -54,39 +65,20 @@ ___
 
 • `get` **tiles**(): `string`[]
 
+Stream IDs of tiles included in the model.
+
 #### Returns
 
 `string`[]
 
 ## Methods
 
-### \_createDoc
-
-▸ **_createDoc**<`T`\>(`content`, `metadata?`, `opts?`): `Promise`<`TileDocument`<`T`\>\>
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | `Record`<`string`, `any`\> |
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `content` | `T` |
-| `metadata` | `Partial`<`StreamMetadata`\> |
-| `opts` | `CreateOpts` |
-
-#### Returns
-
-`Promise`<`TileDocument`<`T`\>\>
-
-___
-
 ### addJSONModel
 
 ▸ **addJSONModel**(`encoded`): `void`
+
+Add a [`JSON-encoded managed model`](../modules/types.md#encodedmanagedmodel) to the internal model
+used by the instance.
 
 #### Parameters
 
@@ -104,6 +96,8 @@ ___
 
 ▸ **addModel**(`model`): `void`
 
+Add a [`managed model`](../modules/types.md#managedmodel) to the internal model used by the instance.
+
 #### Parameters
 
 | Name | Type |
@@ -119,6 +113,8 @@ ___
 ### create
 
 ▸ **create**<`T`, `Content`\>(`type`, `alias`, `content`, `meta?`): `Promise`<`string`\>
+
+Create a new stream of the given type and add it to the managed model.
 
 #### Type parameters
 
@@ -146,6 +142,8 @@ ___
 
 ▸ **createDefinition**(`alias`, `definition`): `Promise`<`string`\>
 
+Create a new definition stream and add it to the managed model.
+
 #### Parameters
 
 | Name | Type |
@@ -163,6 +161,8 @@ ___
 
 ▸ **createSchema**(`alias`, `schema`): `Promise`<`string`\>
 
+Create a new schema stream and add it to the managed model.
+
 #### Parameters
 
 | Name | Type |
@@ -179,6 +179,8 @@ ___
 ### createTile
 
 ▸ **createTile**<`T`\>(`alias`, `contents`, `meta?`): `Promise`<`string`\>
+
+Create a new tile stream and add it to the managed model.
 
 #### Type parameters
 
@@ -204,6 +206,9 @@ ___
 
 ▸ **deploy**(): `Promise`<`ModelData`<`string`\>\>
 
+Deploy the managed model to the Ceramic node and return the [`types.ModelAliases`](../modules/types.md#modelaliases) to
+be used by the [`DataModel`](datamodel.DataModel.md) runtime.
+
 #### Returns
 
 `Promise`<`ModelData`<`string`\>\>
@@ -213,6 +218,8 @@ ___
 ### getDefinition
 
 ▸ **getDefinition**(`id`): ``null`` \| `ManagedEntry`<`DagJWSResult`\>
+
+Get the definition [`managed entry`](../modules/types.md#managedentry) for a given ID.
 
 #### Parameters
 
@@ -230,6 +237,8 @@ ___
 
 ▸ **getDefinitionID**(`alias`): ``null`` \| `string`
 
+Get the ID of given definition alias, if present in the model.
+
 #### Parameters
 
 | Name | Type |
@@ -245,6 +254,8 @@ ___
 ### getSchema
 
 ▸ **getSchema**(`id`): ``null`` \| `ManagedSchema`<`DagJWSResult`\>
+
+Get the [`managed schema`](../modules/types.md#managedschema) for a given ID.
 
 #### Parameters
 
@@ -262,6 +273,8 @@ ___
 
 ▸ **getSchemaByAlias**(`alias`): ``null`` \| `ManagedSchema`<`DagJWSResult`\>
 
+Get the [`managed schema`](../modules/types.md#managedschema) for a given alias.
+
 #### Parameters
 
 | Name | Type |
@@ -277,6 +290,8 @@ ___
 ### getSchemaID
 
 ▸ **getSchemaID**(`alias`): ``null`` \| `string`
+
+Get the ID of given schema alias, if present in the model.
 
 #### Parameters
 
@@ -294,6 +309,8 @@ ___
 
 ▸ **getSchemaURL**(`id`): ``null`` \| `string`
 
+Get the schema commit URL for a given ID.
+
 #### Parameters
 
 | Name | Type |
@@ -310,6 +327,8 @@ ___
 
 ▸ **getTile**(`id`): ``null`` \| `ManagedEntry`<`DagJWSResult`\>
 
+Get the tile [`managed entry`](../modules/types.md#managedentry) for a given ID.
+
 #### Parameters
 
 | Name | Type |
@@ -325,6 +344,8 @@ ___
 ### getTileID
 
 ▸ **getTileID**(`alias`): ``null`` \| `string`
+
+Get the ID of given tile alias, if present in the model.
 
 #### Parameters
 
@@ -390,6 +411,8 @@ ___
 
 ▸ **loadCommits**(`id`): `Promise`<`DagJWSResult`[]\>
 
+Load a stream commits.
+
 #### Parameters
 
 | Name | Type |
@@ -405,6 +428,8 @@ ___
 ### loadSchema
 
 ▸ **loadSchema**(`id`, `alias?`): `Promise`<`string`\>
+
+Load a schema stream and other schemas it depends on.
 
 #### Parameters
 
@@ -423,6 +448,8 @@ ___
 
 ▸ **loadSchemaDependencies**(`schema`): `Promise`<`Record`<`string`, `string`[]\>\>
 
+Extract and load a schema's dependencies.
+
 #### Parameters
 
 | Name | Type |
@@ -438,6 +465,8 @@ ___
 ### loadStream
 
 ▸ **loadStream**(`streamID`): `Promise`<`TileDocument`<`Record`<`string`, `any`\>\>\>
+
+Load a stream, ensuring it can be used in a data model.
 
 #### Parameters
 
@@ -455,6 +484,9 @@ ___
 
 ▸ **toJSON**(): `EncodedManagedModel`
 
+Returns the [`JSON-encoded managed model`](../modules/types.md#encodedmanagedmodel) so it can be
+easily stored, shared and reused with the [`fromJSON`](devtools.ModelManager.md#fromjson) static method.
+
 #### Returns
 
 `EncodedManagedModel`
@@ -464,6 +496,9 @@ ___
 ### useDeployed
 
 ▸ **useDeployed**<`T`, `ID`\>(`type`, `alias`, `id`): `Promise`<`string`\>
+
+Load an already deployed stream of the given type from the Ceramic node and add it to the
+managed model.
 
 #### Type parameters
 
@@ -490,6 +525,9 @@ ___
 
 ▸ **useDeployedDefinition**(`alias`, `id`): `Promise`<`string`\>
 
+Load an already deployed definition stream from the Ceramic node and add it to the managed
+model.
+
 #### Parameters
 
 | Name | Type |
@@ -506,6 +544,8 @@ ___
 ### useDeployedSchema
 
 ▸ **useDeployedSchema**(`alias`, `id`): `Promise`<`string`\>
+
+Load an already deployed schema stream from the Ceramic node and add it to the managed model.
 
 #### Parameters
 
@@ -524,6 +564,8 @@ ___
 
 ▸ **useDeployedTile**(`alias`, `id`): `Promise`<`string`\>
 
+Load an already deployed tile stream from the Ceramic node and add it to the managed model.
+
 #### Parameters
 
 | Name | Type |
@@ -540,6 +582,9 @@ ___
 ### fromJSON
 
 ▸ `Static` **fromJSON**(`params`): [`ModelManager`](devtools.ModelManager.md)
+
+Create a ModelManager instance from a
+[`JSON-encoded managed model`](../modules/types.md#encodedmanagedmodel).
 
 #### Parameters
 
