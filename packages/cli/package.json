@@ -30,7 +30,7 @@
     "oclif.manifest.json"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {

@@ -1,6 +1,6 @@
 {
   "name": "@glazed/constants",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -23,7 +23,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
