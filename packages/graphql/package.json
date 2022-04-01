@@ -33,7 +33,6 @@
     "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src test --fix",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
-    "test:ci": "yarn test --ci --coverage",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
   },
