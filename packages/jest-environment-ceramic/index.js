@@ -14,10 +14,9 @@ export default class CeramicEnvironment extends NodeEnvironment {
         Addresses: {
           Swarm: [],
         },
-        Bootstrap: [],
-        Discovery: {
-          MDNS: { Enabled: false },
-          webRTCStar: { Enabled: false },
+        Pubsub: {
+          // default "gossipsub" uses CJS and fails to import
+          Router: 'floodsub',
         },
       },
       profiles: ['test'],

@@ -7,3 +7,4 @@
 /yarn.lock
 /oclif.manifest.json
 node_modules
+/test/statestore

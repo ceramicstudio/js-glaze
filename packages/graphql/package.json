@@ -38,19 +38,19 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^2.0.0-alpha.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0-rc.0",
     "@glazed/append-collection": "^0.1.0",
-    "@glazed/did-datastore": "^0.3.0-alpha.0",
-    "@glazed/graphql-types": "^0.2.0-alpha.0",
+    "@glazed/did-datastore": "^0.3.0-rc.0",
+    "@glazed/graphql-types": "^0.2.0-rc.0",
     "change-case": "^4.1.2",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0-alpha.0",
-    "@ceramicnetwork/streamid": "^2.0.0-alpha.0",
-    "@glazed/devtools": "^0.2.0-alpha.0",
-    "jest-environment-glaze": "^0.2.0-alpha.0"
+    "@ceramicnetwork/common": "^2.0.0-rc.0",
+    "@ceramicnetwork/streamid": "^2.0.0-rc.0",
+    "@glazed/devtools": "^0.2.0-rc.0",
+    "jest-environment-glaze": "^0.2.0-rc.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [
