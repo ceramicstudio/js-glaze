@@ -18,7 +18,7 @@ declare global {
 }
 
 describe('lib', () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(60000)
 
   let contextValue: Context
   let schema: GraphQLSchema
@@ -227,8 +227,6 @@ describe('lib', () => {
   })
 
   test('add and read notes from a connection', async () => {
-    jest.setTimeout(30000)
-
     const created = await execute({
       schema,
       contextValue,
