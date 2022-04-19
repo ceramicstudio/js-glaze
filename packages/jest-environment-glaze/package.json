@@ -1,6 +1,6 @@
 {
   "name": "jest-environment-glaze",
-  "version": "0.2.0-rc.1",
+  "version": "0.2.0",
   "description": "Glaze environment for Jest",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
@@ -22,10 +22,10 @@
     "lint": "eslint index.js --fix"
   },
   "dependencies": {
-    "dids": "^3.0.0-rc.0",
-    "jest-environment-ceramic": "^0.15.0-rc.0",
-    "key-did-provider-ed25519": "^2.0.0-rc.0",
-    "key-did-resolver": "^2.0.0-rc.0",
+    "dids": "^3.0.0",
+    "jest-environment-ceramic": "^0.15.0",
+    "key-did-provider-ed25519": "^2.0.0",
+    "key-did-resolver": "^2.0.0",
     "uint8arrays": "^3.0.0"
   }
 }
