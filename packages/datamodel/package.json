@@ -1,6 +1,6 @@
 {
   "name": "@glazed/datamodel",
-  "version": "0.3.0-rc.0",
+  "version": "0.3.0-rc.1",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -38,13 +38,13 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@glazed/tile-loader": "^0.2.0-rc.0"
+    "@glazed/tile-loader": "^0.2.0-rc.1"
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^2.0.0-rc.0",
     "@ceramicnetwork/stream-tile": "^2.0.0-rc.0",
     "@ceramicnetwork/streamid": "^2.0.0-rc.0",
-    "@glazed/types": "^0.2.0-rc.0"
+    "@glazed/types": "^0.2.0-rc.1"
   },
   "jest": {
     "extensionsToTreatAsEsm": [

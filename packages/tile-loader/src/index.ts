@@ -136,8 +136,6 @@
  * @module tile-loader
  */
 
-// Polyfill setImmediate for browsers not supporting it - see https://github.com/graphql/dataloader/issues/249
-import 'setimmediate'
 import type {
   CeramicApi,
   CeramicSigner,
