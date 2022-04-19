@@ -1,2 +1,2 @@
-export * from './context'
-export * from './schema'
+export * from './context.js'
+export * from './schema.js'

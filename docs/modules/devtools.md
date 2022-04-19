@@ -8,7 +8,7 @@ The `devtools` library provides APIs to help support common use-cases when build
 on top of Ceramic, notably as a complement to the runtime Glaze libraries. It is meant to be
 used by developers in scripts or other tools such as the CLI, not as a runtime library.
 
-The [`ModelManager`](../classes/devtools.ModelManager.md) class notably allows developers to create, update and publish data
+The [`ModelManager`](../classes/devtools.ModelManager.md) class notably allows developers to create, update and deploy data
 models to be used with the [`DataModel`](../classes/datamodel.DataModel.md) runtime.
 
 ## Installation
@@ -22,22 +22,22 @@ npm install --dev @glazed/devtools
 ### Add an existing schema to a model
 
 An existing schema can be added using the
-[`usePublishedSchema`](../classes/devtools.ModelManager.md#usepublishedschema) method, as shown below.
+[`useDeployedSchema`](../classes/devtools.ModelManager.md#usedeployedschema) method, as shown below.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Set the alias (human-readable name) and stream reference (stream or commit ID or URL) of the
 // schema to add to the model. The schema must be already present on the Ceramic node.
-await manager.usePublishedSchema('MySchema', 'ceramic://k2...ab')
+await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 ```
 
-The [`usePublishedDefinition`](../classes/devtools.ModelManager.md#usepublisheddefinition) and
-[`usePublishedTile`](../classes/devtools.ModelManager.md#usepublishedtile) methods can be used similarly to add
+The [`useDeployedDefinition`](../classes/devtools.ModelManager.md#usedeployeddefinition) and
+[`useDeployedTile`](../classes/devtools.ModelManager.md#usedeployedtile) methods can be used similarly to add
 definitions and tiles to the model.
 
 ### Create and add a schema to a model
@@ -51,7 +51,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Set the alias (human-readable name) and JSON schema contents
 await manager.createSchema('MySchema', {
@@ -78,9 +78,9 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
-await manager.usePublishedSchema('MySchema', 'ceramic://k2...ab')
+await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
 ```
 
@@ -94,21 +94,21 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager } from '@glazed/devtools'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
-await manager.usePublishedSchema('MySchema', 'ceramic://k2...ab')
+await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
 
 // The `clonedManager` instance will contain the same model as the `manager` instance
 const clonedManager = ModelManager.fromJSON(ceramic, encodedModel)
 ```
 
-### Publish a model to Ceramic
+### Deploy a model to Ceramic
 
 In order to use a model at runtime in an application, it is important to ensure all the streams
 used by the model are present in the Ceramic network. This can be achieved by calling the
-[`toPublished`](../classes/devtools.ModelManager.md#topublished) method, which returns a published model object
-that can be used at runtime by a [`DataModel`](../classes/datamodel.DataModel.md) instance.
+[`deploy`](../classes/devtools.ModelManager.md#deploy) method, which returns the aliases of the model that can
+be used at runtime by a [`DataModel`](../classes/datamodel.DataModel.md) instance.
 
 ```ts
 import { readFile, writeFile } from 'node:fs/promises'
@@ -122,9 +122,9 @@ const encodedModel = JSON.parse(bytes.toString())
 const ceramic = new CeramicClient()
 const manager = ModelManager.fromJSON(ceramic, encodedModel)
 
-// The published model could then itself be exported to be used at runtime
-const publishedModel = await manager.toPublished()
-await writeFile(new URL('published-model.json', import.meta.url), JSON.stringify(publishedModel))
+// The deployed model aliases could then be exported to be used at runtime
+const aliases = await manager.deploy()
+await writeFile(new URL('model-aliases.json', import.meta.url), JSON.stringify(aliases))
 ```
 
 ### Use existing models
@@ -147,15 +147,15 @@ import { model as cryptoAccountsModel } from '@datamodels/identity-accounts-cryp
 import { model as webAccountsModel } from '@datamodels/identity-accounts-web'
 
 const ceramic = new CeramicClient()
-const manager = new ModelManager(ceramic)
+const manager = new ModelManager({ ceramic })
 
 // Add the imported models to the manager
 manager.addJSONModel(basicProfileModel)
 manager.addJSONModel(cryptoAccountsModel)
 manager.addJSONModel(webAccountsModel)
 
-// Once published, the streams are available on the Ceramic node
-await manager.toPublished()
+// Once deployed, the streams are available on the Ceramic node
+await manager.deploy()
 ```
 
 ## Classes
@@ -164,19 +164,72 @@ await manager.toPublished()
 
 ## Type aliases
 
-### AddModelSchemaOptions
+### FromJSONParams
 
-Ƭ **AddModelSchemaOptions**: `Object`
+Ƭ **FromJSONParams**: `Object`
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `name?` | `string` |
-| `owner?` | `string` |
-| `parent?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `ceramic` | `CeramicApi` | Ceramic client instance |
+| `model` | `EncodedManagedModel` | [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to use |
+
+___
+
+### ModelManagerConfig
+
+Ƭ **ModelManagerConfig**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `ceramic` | `CeramicApi` | Ceramic client instance |
+| `model?` | `ManagedModel` | Optional [`managed model`](types.md#managedmodel) to use |
 
 ## Functions
+
+### deployEncodedModel
+
+▸ **deployEncodedModel**(`ceramic`, `model`): `Promise`<`ModelAliases`\>
+
+Deploy a [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to the given Ceramic
+node.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `model` | `EncodedManagedModel` |
+
+#### Returns
+
+`Promise`<`ModelAliases`\>
+
+___
+
+### deployModel
+
+▸ **deployModel**(`ceramic`, `model`, `createOpts?`, `commitOpts?`): `Promise`<`ModelAliases`\>
+
+Deploy a managed model to the given Ceramic node.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `model` | `ManagedModel`<`DagJWSResult`\> |
+| `createOpts?` | `CreateOpts` |
+| `commitOpts?` | `UpdateOpts` |
+
+#### Returns
+
+`Promise`<`ModelAliases`\>
+
+___
 
 ### isSecureSchema
 
@@ -197,37 +250,3 @@ await manager.toPublished()
 #### Returns
 
 `boolean`
-
-___
-
-### publishEncodedModel
-
-▸ **publishEncodedModel**(`ceramic`, `model`): `Promise`<`PublishedModel`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model` | `EncodedManagedModel` |
-
-#### Returns
-
-`Promise`<`PublishedModel`\>
-
-___
-
-### publishModel
-
-▸ **publishModel**(`ceramic`, `model`): `Promise`<`PublishedModel`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model` | `ManagedModel`<`DagJWSResult`\> |
-
-#### Returns
-
-`Promise`<`PublishedModel`\>

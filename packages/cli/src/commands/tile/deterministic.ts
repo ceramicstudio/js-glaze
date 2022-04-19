@@ -1,8 +1,6 @@
-import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
+import { TileDocument, type TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class DeterministicTile extends Command<
   CommandFlags,

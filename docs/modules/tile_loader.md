@@ -179,7 +179,9 @@ ___
 
 Ƭ **TileQuery**: `Omit`<`MultiQuery`, ``"paths"`` \| ``"atTime"``\>
 
-Omit `path` and `atTime` from [MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html) as the cache needs to be deterministic based on the ID.
+Omit `path` and `atTime` from
+[MultiQuery](https://developers.ceramic.network/reference/typescript/interfaces/_ceramicnetwork_common.multiquery-1.html)
+as the cache needs to be deterministic based on the ID.
 
 ## Functions
 

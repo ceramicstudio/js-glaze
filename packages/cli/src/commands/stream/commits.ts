@@ -1,5 +1,4 @@
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class Commits extends Command<CommandFlags, { streamId: string }> {
   static description = 'list commits contained within a stream'

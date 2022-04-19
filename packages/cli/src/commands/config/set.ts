@@ -1,9 +1,7 @@
 import chalk from 'chalk'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { USER_CONFIG, config } from '../../config'
-import type { UserConfig, UserConfigKey as Key } from '../../config'
+import { Command, type CommandFlags } from '../../command.js'
+import { USER_CONFIG, type UserConfig, type UserConfigKey as Key, config } from '../../config.js'
 
 type Args = { key: Key; value: UserConfig[Key] }
 

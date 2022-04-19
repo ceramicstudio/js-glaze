@@ -1,7 +1,6 @@
-import { flags } from '@oclif/command'
+import { Flags } from '@oclif/core'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 type Flags = CommandFlags & {
   did?: string
@@ -12,7 +11,7 @@ export default class GetDID extends Command<Flags, { model: string; alias: strin
 
   static flags = {
     ...Command.flags,
-    did: flags.string({ description: 'DID', exclusive: ['key'] }),
+    did: Flags.string({ description: 'DID', exclusive: ['key'] }),
   }
 
   static args = [

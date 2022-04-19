@@ -2,6 +2,10 @@
 
 [did-datastore](../modules/did_datastore.md).DIDDataStore
 
+The DIDDataStore class provides simple APIs to interact with data records associated to a DID.
+
+It is exported by the [`did-datastore`](../modules/did_datastore.md) module.
+
 ```sh
 import { DIDDataStore } from '@glazed/did-datastore'
 ```
@@ -38,6 +42,9 @@ import { DIDDataStore } from '@glazed/did-datastore'
 
 • `get` **authenticated**(): `boolean`
 
+Returns whether a DID instance is attached to the Ceramic client instance used internally or
+not.
+
 #### Returns
 
 `boolean`
@@ -47,6 +54,8 @@ ___
 ### ceramic
 
 • `get` **ceramic**(): `CeramicApi`
+
+Ceramic client instance used internally.
 
 #### Returns
 
@@ -58,6 +67,9 @@ ___
 
 • `get` **id**(): `string`
 
+Returns the DID string currently authenticated on the Ceramic instance used internally, or
+throws an error if not authenticated.
+
 #### Returns
 
 `string`
@@ -68,6 +80,8 @@ ___
 
 • `get` **loader**(): `TileLoader`
 
+[`TileLoader`](tile_loader.TileLoader.md) instance used internally.
+
 #### Returns
 
 `TileLoader`
@@ -77,6 +91,8 @@ ___
 ### model
 
 • `get` **model**(): `DataModel`<`ModelTypes`, `ModelTypesToAliases`<`ModelTypes`\>\>
+
+[`DataModel`](datamodel.DataModel.md) runtime instance used internally.
 
 #### Returns
 
@@ -344,7 +360,8 @@ ___
 
 Set the record contents.
 
-**Warning**: calling this method replaces any existing contents in the record, use [`merge`](did_datastore.DIDDataStore.md#merge) if you want to only change some fields.
+**Warning**: calling this method replaces any existing contents in the record, use
+[`merge`](did_datastore.DIDDataStore.md#merge) if you want to only change some fields.
 
 #### Type parameters
 

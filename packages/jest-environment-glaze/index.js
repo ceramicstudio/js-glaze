@@ -1,10 +1,10 @@
-const CeramicEnvironment = require('jest-environment-ceramic')
-const { Ed25519Provider } = require('key-did-provider-ed25519')
-const { DID } = require('dids')
-const KeyResolver = require('key-did-resolver').default
-const fromString = require('uint8arrays/from-string')
+import CeramicEnvironment from 'jest-environment-ceramic'
+import { Ed25519Provider } from 'key-did-provider-ed25519'
+import { DID } from 'dids'
+import { getResolver } from 'key-did-resolver'
+import { fromString } from 'uint8arrays/from-string'
 
-module.exports = class GlazeEnvironment extends CeramicEnvironment {
+export default class GlazeEnvironment extends CeramicEnvironment {
   constructor(config, context) {
     super(config, context)
     this.seed = config.seed ? fromString(config.seed) : new Uint8Array(32)
@@ -13,7 +13,7 @@ module.exports = class GlazeEnvironment extends CeramicEnvironment {
   async setup() {
     await super.setup()
     const did = new DID({
-      resolver: KeyResolver.getResolver(),
+      resolver: getResolver(),
       provider: new Ed25519Provider(this.seed),
     })
     await did.authenticate()

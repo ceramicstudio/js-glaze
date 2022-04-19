@@ -1,7 +1,6 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class ShowTile extends Command<CommandFlags, { streamId: string }> {
   static description = 'show the contents of a Tile stream'

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
-import type { CeramicApi, StreamMetadata } from '@ceramicnetwork/common'
+import type { CeramicApi, CreateOpts, StreamMetadata, UpdateOpts } from '@ceramicnetwork/common'
 import { CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { CIP11_DEFINITION_SCHEMA_URL } from '@glazed/constants'
@@ -12,15 +12,15 @@ import type {
   ManagedID,
   ManagedModel,
   ManagedSchema,
+  ModelAliases,
   ModelData,
-  PublishedModel,
   Schema,
 } from '@glazed/types'
 import type { DagJWSResult } from 'dids'
 
-import { decodeModel, encodeModel } from './encoding'
-import { createModelDoc, publishCommits } from './publishing'
-import { extractSchemaReferences } from './schema'
+import { decodeModel, encodeModel } from './encoding.js'
+import { publishCommits } from './publishing.js'
+import { extractSchemaReferences } from './schema.js'
 
 type ManagedReferenced = {
   definitions: Set<ManagedID>
@@ -34,7 +34,7 @@ type CreateContentType = {
   tile: Record<string, unknown>
 }
 
-type UsePublishedIDType = {
+type UseDeployedIDType = {
   definition: StreamID | string
   schema: StreamRef | string
   tile: StreamID | string
@@ -60,38 +60,44 @@ function docHasSupportedDID(doc: TileDocument<any>): boolean {
 
 const dataStoreModel = decodeModel(encodedDataStoreModel)
 /** @internal */
-export async function publishDataStoreSchemas(ceramic: CeramicApi): Promise<void> {
+export async function deployDataStoreSchemas(
+  ceramic: CeramicApi,
+  createOpts?: CreateOpts,
+  commitOpts?: UpdateOpts
+): Promise<void> {
   await Promise.all(
     Object.values(dataStoreModel.schemas).map(async (schema) => {
-      return await publishCommits(ceramic, schema.commits)
+      return await publishCommits(ceramic, schema.commits, createOpts, commitOpts)
     })
   )
 }
 
-// Publish a managed model to the given Ceramic node
-export async function publishModel(
+/** Deploy a managed model to the given Ceramic node. */
+export async function deployModel(
   ceramic: CeramicApi,
-  model: ManagedModel
-): Promise<PublishedModel> {
+  model: ManagedModel,
+  createOpts?: CreateOpts,
+  commitOpts?: UpdateOpts
+): Promise<ModelAliases> {
   const [schemas] = await Promise.all([
     Promise.all(
       Object.values(model.schemas).map(async (schema) => {
-        const stream = await publishCommits(ceramic, schema.commits)
+        const stream = await publishCommits(ceramic, schema.commits, createOpts, commitOpts)
         return [schema.alias, stream.commitId.toUrl()]
       })
     ),
-    publishDataStoreSchemas(ceramic),
+    deployDataStoreSchemas(ceramic),
   ])
   const [definitions, tiles] = await Promise.all([
     await Promise.all(
       Object.values(model.definitions).map(async (entry) => {
-        const stream = await publishCommits(ceramic, entry.commits)
+        const stream = await publishCommits(ceramic, entry.commits, createOpts, commitOpts)
         return [entry.alias, stream.id.toString()]
       })
     ),
     await Promise.all(
       Object.values(model.tiles).map(async (entry) => {
-        const stream = await publishCommits(ceramic, entry.commits)
+        const stream = await publishCommits(ceramic, entry.commits, createOpts, commitOpts)
         return [entry.alias, stream.id.toString()]
       })
     ),
@@ -103,22 +109,48 @@ export async function publishModel(
   }
 }
 
-// Publish a JSON-encoded managed model to the given Ceramic node
-export async function publishEncodedModel(
+/**
+ * Deploy a {@linkcode types.EncodedManagedModel JSON-encoded managed model} to the given Ceramic
+ * node.
+ */
+export async function deployEncodedModel(
   ceramic: CeramicApi,
   model: EncodedManagedModel
-): Promise<PublishedModel> {
-  return await publishModel(ceramic, decodeModel(model))
+): Promise<ModelAliases> {
+  return await deployModel(ceramic, decodeModel(model))
+}
+
+export type ModelManagerConfig = {
+  /** Ceramic client instance */
+  ceramic: CeramicApi
+  /** Optional {@linkcode types.ManagedModel managed model} to use */
+  model?: ManagedModel
+}
+
+export type FromJSONParams = {
+  /** Ceramic client instance */
+  ceramic: CeramicApi
+  /** {@linkcode types.EncodedManagedModel JSON-encoded managed model} to use */
+  model: EncodedManagedModel
 }
 
 /**
+ * The ModelManager class provides APIs for managing a data model so it can be used at runtime
+ * using the {@linkcode datamodel.DataModel DataModel} runtime.
+ *
+ * The ModelManager class is exported by the {@linkcode devtools} module.
+ *
  * ```sh
  * import { ModelManager } from '@glazed/devtools'
  * ```
  */
 export class ModelManager {
-  public static fromJSON(ceramic: CeramicApi, encoded: EncodedManagedModel): ModelManager {
-    return new ModelManager(ceramic, decodeModel(encoded))
+  /**
+   * Create a ModelManager instance from a
+   * {@linkcode types.EncodedManagedModel JSON-encoded managed model}.
+   */
+  public static fromJSON(params: FromJSONParams): ModelManager {
+    return new ModelManager({ ceramic: params.ceramic, model: decodeModel(params.model) })
   }
 
   #aliases: ModelData<string> = {
@@ -135,33 +167,51 @@ export class ModelManager {
   #referenced: Record<ManagedID, ManagedReferenced> = {}
   #streams: Record<ManagedID, Promise<TileDocument>> = {}
 
-  constructor(ceramic: CeramicApi, model?: ManagedModel) {
-    this.#ceramic = ceramic
-    if (model != null) {
-      this.addModel(model)
+  constructor(config: ModelManagerConfig) {
+    this.#ceramic = config.ceramic
+    if (config.model != null) {
+      this.addModel(config.model)
     }
   }
 
   // Getters
 
+  /** {@linkcode types.ManagedModel Managed model} used internally. */
   get model(): ManagedModel {
     return this.#model
   }
 
+  /** Stream IDs of schemas included in the model. */
   get schemas(): Array<string> {
     return Object.keys(this.#aliases.schemas).sort()
   }
 
+  /** Stream IDs of definitions included in the model. */
   get definitions(): Array<string> {
     return Object.keys(this.#aliases.definitions).sort()
   }
 
+  /** Stream IDs of tiles included in the model. */
   get tiles(): Array<string> {
     return Object.keys(this.#aliases.tiles).sort()
   }
 
+  // Internal
+
+  /** @internal */
+  async _createDoc<T = Record<string, any>>(
+    content: T,
+    metadata: Partial<StreamMetadata> = {},
+    opts: CreateOpts = { anchor: false, pin: true }
+  ): Promise<TileDocument<T>> {
+    return await TileDocument.create<T>(this.#ceramic, content, metadata, opts)
+  }
+
   // Imports
 
+  /**
+   * Add a {@linkcode types.ManagedModel managed model} to the internal model used by the instance.
+   */
   addModel(model: ManagedModel): void {
     Object.assign(this.#model.definitions, model.definitions)
     Object.assign(this.#model.schemas, model.schemas)
@@ -206,12 +256,17 @@ export class ModelManager {
     }
   }
 
+  /**
+   * Add a {@linkcode types.EncodedManagedModel JSON-encoded managed model} to the internal model
+   * used by the instance.
+   */
   addJSONModel(encoded: EncodedManagedModel): void {
     this.addModel(decodeModel(encoded))
   }
 
   // Loaders
 
+  /** Load a stream, ensuring it can be used in a data model. */
   async loadStream(streamID: StreamRef | string): Promise<TileDocument> {
     const id = typeof streamID === 'string' ? streamID : streamID.baseID.toString()
     if (this.#streams[id] == null) {
@@ -245,11 +300,13 @@ export class ModelManager {
     return stream
   }
 
+  /** Load a stream commits. */
   async loadCommits(id: ManagedID): Promise<Array<DagJWSResult>> {
     const commits = await this.#ceramic.loadStreamCommits(id)
     return commits.map((r) => r.value as DagJWSResult)
   }
 
+  /** Load a schema stream and other schemas it depends on. */
   async loadSchema(id: StreamRef | string, alias?: string): Promise<ManagedID> {
     const [managedID, commitID] = getManagedIDAndVersion(id)
     if (commitID === null) {
@@ -284,6 +341,7 @@ export class ModelManager {
     return managedID
   }
 
+  /** Extract and load a schema's dependencies. */
   async loadSchemaDependencies(schema: Schema): Promise<Record<string, Array<string>>> {
     const references = extractSchemaReferences(schema)
 
@@ -306,6 +364,7 @@ export class ModelManager {
 
   // High-level
 
+  /** Create a new stream of the given type and add it to the managed model. */
   async create<T extends keyof CreateContentType, Content = CreateContentType[T]>(
     type: T,
     alias: string,
@@ -324,18 +383,22 @@ export class ModelManager {
     }
   }
 
-  async usePublished<T extends keyof UsePublishedIDType, ID = UsePublishedIDType[T]>(
+  /**
+   * Load an already deployed stream of the given type from the Ceramic node and add it to the
+   * managed model.
+   */
+  async useDeployed<T extends keyof UseDeployedIDType, ID = UseDeployedIDType[T]>(
     type: T,
     alias: string,
     id: ID
   ): Promise<ManagedID> {
     switch (type) {
       case 'schema':
-        return await this.usePublishedSchema(alias, id as any)
+        return await this.useDeployedSchema(alias, id as any)
       case 'definition':
-        return await this.usePublishedDefinition(alias, id as any)
+        return await this.useDeployedDefinition(alias, id as any)
       case 'tile':
-        return await this.usePublishedTile(alias, id as any)
+        return await this.useDeployedTile(alias, id as any)
       default:
         throw new Error(`Unsupported type: ${type as string}`)
     }
@@ -343,6 +406,7 @@ export class ModelManager {
 
   // Schemas
 
+  /** Get the ID of given schema alias, if present in the model. */
   getSchemaID(alias: string): ManagedID | null {
     return this.#aliases.schemas[alias] ?? null
   }
@@ -351,20 +415,24 @@ export class ModelManager {
     return this.getSchemaID(alias) != null
   }
 
+  /** Get the {@linkcode types.ManagedSchema managed schema} for a given ID. */
   getSchema(id: ManagedID): ManagedSchema | null {
     return this.#model.schemas[id] ?? null
   }
 
+  /** Get the schema commit URL for a given ID. */
   getSchemaURL(id: ManagedID): string | null {
     const schema = this.#model.schemas[id]
     return schema ? CommitID.fromString(schema.version).toUrl() : null
   }
 
+  /** Get the {@linkcode types.ManagedSchema managed schema} for a given alias. */
   getSchemaByAlias(alias: string): ManagedSchema | null {
     const id = this.getSchemaID(alias)
     return id ? this.getSchema(id) : null
   }
 
+  /** Create a new schema stream and add it to the managed model. */
   async createSchema(alias: string, schema: Schema): Promise<ManagedID> {
     if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
@@ -381,7 +449,7 @@ export class ModelManager {
     }
 
     const [stream, dependencies] = await Promise.all([
-      createModelDoc(this.#ceramic, schema),
+      this._createDoc(schema),
       this.loadSchemaDependencies(schema),
     ])
 
@@ -397,7 +465,10 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedSchema(alias: string, id: StreamRef | string): Promise<ManagedID> {
+  /**
+   * Load an already deployed schema stream from the Ceramic node and add it to the managed model.
+   */
+  async useDeployedSchema(alias: string, id: StreamRef | string): Promise<ManagedID> {
     if (alias == null) {
       throw new Error('Schema alias must be provided')
     }
@@ -406,6 +477,7 @@ export class ModelManager {
 
   // Definitions
 
+  /** Get the ID of given definition alias, if present in the model. */
   getDefinitionID(alias: string): ManagedID | null {
     return this.#aliases.definitions[alias] ?? null
   }
@@ -414,10 +486,12 @@ export class ModelManager {
     return this.getDefinitionID(alias) != null
   }
 
+  /** Get the definition {@linkcode types.ManagedEntry managed entry} for a given ID. */
   getDefinition(id: ManagedID): ManagedEntry | null {
     return this.#model.definitions[id] ?? null
   }
 
+  /** Create a new definition stream and add it to the managed model. */
   async createDefinition(alias: string, definition: Definition): Promise<ManagedID> {
     if (this.#ceramic.did == null || !this.#ceramic.did.authenticated) {
       throw new Error('Ceramic instance must be authenticated')
@@ -433,9 +507,9 @@ export class ModelManager {
       throw new Error(`Definition ${alias} already exists`)
     }
 
-    await publishDataStoreSchemas(this.#ceramic)
+    await deployDataStoreSchemas(this.#ceramic)
     const [stream, schemaID] = await Promise.all([
-      createModelDoc(this.#ceramic, definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
+      this._createDoc(definition, { schema: CIP11_DEFINITION_SCHEMA_URL }),
       this.loadSchema(definition.schema),
     ])
 
@@ -451,7 +525,11 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedDefinition(alias: string, id: StreamID | string): Promise<ManagedID> {
+  /**
+   * Load an already deployed definition stream from the Ceramic node and add it to the managed
+   * model.
+   */
+  async useDeployedDefinition(alias: string, id: StreamID | string): Promise<ManagedID> {
     if (this.hasDefinitionAlias(alias)) {
       throw new Error(`Definition ${alias} already exists`)
     }
@@ -475,6 +553,7 @@ export class ModelManager {
 
   // Tiles
 
+  /** Get the ID of given tile alias, if present in the model. */
   getTileID(alias: string): ManagedID | null {
     return this.#aliases.tiles[alias] ?? null
   }
@@ -483,10 +562,12 @@ export class ModelManager {
     return this.getTileID(alias) != null
   }
 
+  /** Get the tile {@linkcode types.ManagedEntry managed entry} for a given ID. */
   getTile(id: ManagedID): ManagedEntry | null {
     return this.#model.tiles[id] ?? null
   }
 
+  /** Create a new tile stream and add it to the managed model. */
   async createTile<T extends Record<string, unknown>>(
     alias: string,
     contents: T,
@@ -506,7 +587,7 @@ export class ModelManager {
     }
 
     const [stream, schemaID] = await Promise.all([
-      createModelDoc(this.#ceramic, contents, meta),
+      this._createDoc(contents, meta),
       this.loadSchema(meta.schema),
     ])
 
@@ -522,7 +603,10 @@ export class ModelManager {
     return id
   }
 
-  async usePublishedTile(alias: string, id: StreamID | string): Promise<ManagedID> {
+  /**
+   * Load an already deployed tile stream from the Ceramic node and add it to the managed model.
+   */
+  async useDeployedTile(alias: string, id: StreamID | string): Promise<ManagedID> {
     if (this.hasTileAlias(alias)) {
       throw new Error(`Tile ${alias} already exists`)
     }
@@ -546,10 +630,18 @@ export class ModelManager {
 
   // Exports
 
-  async toPublished(): Promise<PublishedModel> {
-    return await publishModel(this.#ceramic, this.#model)
+  /**
+   * Deploy the managed model to the Ceramic node and return the {@linkcode types.ModelAliases} to
+   * be used by the {@linkcode datamodel.DataModel DataModel} runtime.
+   */
+  async deploy(): Promise<ModelAliases> {
+    return await deployModel(this.#ceramic, this.#model)
   }
 
+  /**
+   * Returns the {@linkcode types.EncodedManagedModel JSON-encoded managed model} so it can be
+   * easily stored, shared and reused with the {@linkcode fromJSON} static method.
+   */
   toJSON(): EncodedManagedModel {
     return encodeModel(this.#model)
   }

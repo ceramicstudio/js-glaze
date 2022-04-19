@@ -1,3 +1,50 @@
+## 2022-04-19
+
+### `@glazed/cli` v0.2.0
+
+- ESM support.
+- Ceramic v2 support.
+
+### `@glazed/constants` v0.2.0
+
+ESM support.
+
+### `@glazed/datamodel` v0.3.0
+
+- ESM support.
+- Ceramic v2 support.
+
+### `@glazed/devtools` v0.2.0
+
+- ESM support.
+- Ceramic v2 support.
+
+### `@glazed/did-datastore` v0.3.0
+
+- ESM support.
+- Ceramic v2 support.
+
+### `@glazed/did-datastore-model` v0.2.0
+
+ESM support.
+
+### `@glazed/tile-loader` v0.2.0
+
+- ESM support.
+- Ceramic v2 support.
+
+### `@glazed/types` v0.3.0
+
+Ceramic v2 support.
+
+### `jest-environment-ceramic` v0.15.0
+
+Ceramic v2 support.
+
+### `jest-environment-glaze` v0.2.0
+
+Ceramic v2 support.
+
 ## 2021-10-29
 
 ### `@glazed/datamodel` v0.2.0

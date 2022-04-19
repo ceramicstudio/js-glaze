@@ -1,9 +1,7 @@
-import { flags } from '@oclif/command'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
-import type { TileMetadataArgs } from '@ceramicnetwork/stream-tile'
+import { TileDocument, type TileMetadataArgs } from '@ceramicnetwork/stream-tile'
+import { Flags } from '@oclif/core'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 type Flags = CommandFlags & {
   metadata?: TileMetadataArgs
@@ -15,12 +13,12 @@ export default class CreateTile extends Command<Flags, { content: string }> {
 
   static flags = {
     ...Command.flags,
-    metadata: flags.string({
+    metadata: Flags.string({
       char: 'm',
       description: 'stream metadata',
       parse: JSON.parse,
     }),
-    content: flags.string({
+    content: Flags.string({
       description: 'stream contents (JSON encoded as string)',
       parse: JSON.parse,
     }),

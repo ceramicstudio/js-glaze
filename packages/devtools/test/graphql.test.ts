@@ -5,6 +5,7 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
+import { jest } from '@jest/globals'
 
 import { ModelManager, createGraphQLModel } from '../src'
 
@@ -16,7 +17,7 @@ describe('graphql', () => {
   jest.setTimeout(20000)
 
   test('creation flow with associated schema', async () => {
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
 
     const NoteSchema = {
       $schema: 'http://json-schema.org/draft-07/schema#',

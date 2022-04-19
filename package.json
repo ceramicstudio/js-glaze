@@ -1,46 +1,43 @@
 {
   "name": "glaze",
   "private": true,
+  "packageManager": "yarn@1.18.0",
   "workspaces": {
     "packages": [
+      "examples/*",
       "packages/*"
     ],
     "nohoist": [
-      "ajv"
+      "ajv",
+      "execa"
     ]
   },
   "scripts": {
-    "lerna": "lerna",
     "docs": "typedoc --tsconfig tsconfig.docs.json",
-    "test": "jest",
-    "lint": "lerna run lint --parallel",
-    "build": "lerna run build",
-    "prepare": "lerna run prepare"
+    "test": "yarn turbo run test",
+    "test:ci": "yarn turbo run test:ci",
+    "lint": "yarn turbo run lint",
+    "build": "lerna run build:types && yarn turbo run build:js",
+    "prepare": "yarn build"
   },
   "devDependencies": {
     "@skypack/package-check": "^0.2.2",
-    "@types/jest": "^27.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.5.0",
-    "@typescript-eslint/parser": "^5.5.0",
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.165",
+    "@swc/jest": "^0.2.20",
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.19.0",
+    "@typescript-eslint/parser": "^5.19.0",
     "del-cli": "^4.0.1",
-    "esbuild": "^0.14.1",
-    "eslint": "^8.3.0",
+    "eslint": "^8.13.0",
     "eslint-config-3box": "^0.4.0",
-    "eslint-plugin-jest": "^25.3.0",
-    "jest": "^27.4.2",
+    "eslint-plugin-jest": "^26.1.4",
+    "jest": "^27.5.1",
     "lerna": "^4.0.0",
-    "prettier": "^2.5.0",
-    "rollup": "^2.60.2",
-    "rollup-plugin-esbuild": "^4.7.2",
-    "ts-jest": "^27.0.7",
-    "typedoc": "^0.22.10",
-    "typedoc-plugin-markdown": "^3.11.7",
-    "typescript": "^4.5.2"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "projects": [
-      "<rootDir>/packages/*"
-    ]
+    "prettier": "^2.6.2",
+    "turbo": "^1.2.2",
+    "typedoc": "0.22.15",
+    "typedoc-plugin-markdown": "^3.12.0",
+    "typescript": "^4.5.5"
   }
 }

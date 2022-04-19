@@ -6,7 +6,8 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { TileDocument } from '@ceramicnetwork/stream-tile'
 import { ModelManager } from '@glazed/devtools'
-import type { ModelTypeAliases, PublishedModel } from '@glazed/types'
+import type { ModelAliases, ModelTypeAliases } from '@glazed/types'
+import { jest } from '@jest/globals'
 
 // Note: we're using the dist lib here to make sure it behaves as expected
 import { DIDDataStore } from '..'
@@ -23,9 +24,9 @@ type ModelTypes = ModelTypeAliases<
 describe('integration', () => {
   jest.setTimeout(20000)
 
-  let model: PublishedModel<ModelTypes>
+  let model: ModelAliases<ModelTypes>
   beforeAll(async () => {
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
     const schemaID = await manager.createSchema('Profile', {
       $schema: 'http://json-schema.org/draft-07/schema#',
       title: 'Profile',
@@ -46,7 +47,7 @@ describe('integration', () => {
       manager.createDefinition('profile1', definition),
       manager.createDefinition('profile2', definition),
     ])
-    model = await manager.toPublished()
+    model = await manager.deploy()
   })
 
   test('get and set a record', async () => {
@@ -55,7 +56,7 @@ describe('integration', () => {
     await writer.set('profile1', { name: 'Alice' })
 
     const reader = new DIDDataStore<ModelTypes>({ ceramic, model })
-    // The definition StreamID can also be used to identify a known resource
+    // Read from another client using the known writer DID
     const doc = await reader.get('profile1', writer.id)
     expect(doc).toEqual({ name: 'Alice' })
   })

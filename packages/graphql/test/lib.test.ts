@@ -7,6 +7,7 @@ import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { publishCollectionSchemas } from '@glazed/append-collection'
 import { ModelManager, createGraphQLModel } from '@glazed/devtools'
+import { jest } from '@jest/globals'
 import { execute, parse, printSchema } from 'graphql'
 import type { GraphQLSchema } from 'graphql'
 
@@ -17,9 +18,9 @@ declare global {
 }
 
 describe('lib', () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(60000)
 
-  let context: Context
+  let contextValue: Context
   let schema: GraphQLSchema
 
   beforeAll(async () => {
@@ -77,7 +78,7 @@ describe('lib', () => {
     const notesSchema = await TileDocument.create(ceramic, NotesSchema)
     const notesSchemaURL = notesSchema.commitId.toUrl()
 
-    const manager = new ModelManager(ceramic)
+    const manager = new ModelManager({ ceramic })
     await Promise.all([
       manager.createDefinition('myNotes', {
         name: 'notes',
@@ -90,11 +91,8 @@ describe('lib', () => {
         { schema: noteSchemaURL }
       ),
     ])
-    const [graphModel, model] = await Promise.all([
-      createGraphQLModel(manager),
-      manager.toPublished(),
-    ])
-    context = new Context({ ceramic, model })
+    const [graphModel, model] = await Promise.all([createGraphQLModel(manager), manager.deploy()])
+    contextValue = new Context({ ceramic, model })
     schema = createGraphQLSchema(graphModel)
   })
 
@@ -103,46 +101,58 @@ describe('lib', () => {
   })
 
   test('read existing note', async () => {
-    const readRoot = parse(`
-       query TestReadNote {
-         exampleNote {
-           id
-         }
-       }
-     `)
-    const readNode = parse(`
-       query TestReadNote($id: ID!) {
-         node(id: $id) {
-           ...on Note {
-             date
-             text
-             title
-           }
-         }
-       }
-     `)
-
-    const resRoot = await execute(schema, readRoot, {}, context)
-    const resNode = await execute(schema, readNode, {}, context, {
-      id: resRoot.data!.exampleNote.id,
+    const resRoot = await execute({
+      schema,
+      document: parse(`
+        query TestReadNote {
+          exampleNote {
+            id
+          }
+        }
+      `),
+      contextValue,
+    })
+    const resNode = await execute({
+      schema,
+      contextValue,
+      document: parse(`
+        query TestReadNote($id: ID!) {
+          node(id: $id) {
+            ...on Note {
+              date
+              text
+              title
+            }
+          }
+        }
+      `),
+      variableValues: {
+        id: resRoot.data!.exampleNote.id,
+      },
     })
     expect(resNode).toMatchSnapshot()
   })
 
   test('create a note', async () => {
-    const mutation = parse(`
-       mutation TestCreateNote($input: CreateNoteInput!) {
-         createNote(input: $input) {
-           node {
-             date
-             text
-             title
-           }
-         }
-       }
-     `)
-    const res = await execute(schema, mutation, {}, context, {
-      input: { content: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' } },
+    const res = await execute({
+      schema,
+      contextValue,
+      document: parse(`
+        mutation TestCreateNote($input: CreateNoteInput!) {
+          createNote(input: $input) {
+            node {
+              date
+              text
+              title
+            }
+          }
+        }
+      `),
+      variableValues: {
+        input: {
+          content: { date: '2021-01-06T14:28:00.000Z', text: 'hello test!', title: 'test' },
+        },
+      },
     })
     expect(res).toMatchSnapshot()
   })
@@ -150,51 +160,65 @@ describe('lib', () => {
   test('create, update and read a note', async () => {
     jest.setTimeout(30000)
 
-    const create = parse(`
-       mutation TestCreateNote($input: CreateNoteInput!) {
-         createNote(input: $input) {
-           node {
-             id
-           }
-         }
-       }
-     `)
-    const created = await execute(schema, create, {}, context, {
-      input: { content: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' } },
+    const created = await execute({
+      schema,
+      contextValue,
+      document: parse(`
+        mutation TestCreateNote($input: CreateNoteInput!) {
+          createNote(input: $input) {
+            node {
+              id
+            }
+          }
+        }
+      `),
+      variableValues: {
+        input: {
+          content: { date: '2021-01-06T14:28:00.000Z', text: 'hello first', title: 'first' },
+        },
+      },
     })
     const { id } = created.data!.createNote.node
 
-    const update = parse(`
-       mutation TestUpdateNote($input: UpdateNoteInput!) {
-         updateNote(input: $input) {
-           node {
-             id
-             date
-             text
-             title
-           }
-         }
-       }
-     `)
-    await execute(schema, update, {}, context, {
-      input: {
-        id,
-        content: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
+    await execute({
+      schema,
+      contextValue,
+      document: parse(`
+        mutation TestUpdateNote($input: UpdateNoteInput!) {
+          updateNote(input: $input) {
+            node {
+              id
+              date
+              text
+              title
+            }
+          }
+        }
+      `),
+      variableValues: {
+        input: {
+          id,
+          content: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
+        },
       },
     })
 
-    const read = parse(`
-       query TestReadNote($id: ID!) {
-         node(id: $id) {
-           ...on Note {
-             date
-             text
-             title
-           }
-         }
-       }
-     `)
-    const res = await execute(schema, read, {}, context, { id })
+    const res = await execute({
+      schema,
+      document: parse(`
+        query TestReadNote($id: ID!) {
+          node(id: $id) {
+            ...on Note {
+              date
+              text
+              title
+            }
+          }
+        }
+      `),
+      contextValue,
+      variableValues: { id },
+    })
     expect(res).toEqual({
       data: {
         node: { date: '2021-01-06T14:32:00.000Z', text: 'hello second', title: 'second' },
@@ -203,23 +227,25 @@ describe('lib', () => {
   })
 
   test('add and read notes from a connection', async () => {
-    jest.setTimeout(30000)
-
-    const create = parse(`
-       mutation TestCreateNotes($input: CreateNotesInput!) {
-         createNotes(input: $input) {
-           node {
-             id
-           }
-         }
-       }
-     `)
-    const created = await execute(schema, create, {}, context, {
-      input: { content: {} },
+    const created = await execute({
+      schema,
+      contextValue,
+      document: parse(`
+        mutation TestCreateNotes($input: CreateNotesInput!) {
+          createNotes(input: $input) {
+            node {
+              id
+            }
+          }
+        }
+      `),
+      variableValues: {
+        input: { content: {} },
+      },
     })
     const { id } = created.data!.createNotes.node
 
-    const add = parse(`
+    const document = parse(`
       mutation TestAddNoteEdge($input: AddNotesAllEdgeInput!) {
         addNotesAllEdge(input: $input) {
           edge {
@@ -234,26 +260,37 @@ describe('lib', () => {
       { date: '2021-01-06T14:34:00.000Z', text: 'hello third', title: 'third' },
     ]
     for (const content of toAdd) {
-      await execute(schema, add, {}, context, { input: { id, content } })
+      await execute({
+        schema,
+        contextValue,
+        document,
+        variableValues: { input: { id, content } },
+      })
     }
 
-    const read = parse(`
-       query TestReadNotes($id: ID!) {
-         node(id: $id) {
-           ...on Notes {
-             all(first: 3) {
-               edges {
-                node {
-                  date
-                  text
-                  title
+    await expect(
+      execute({
+        schema,
+        contextValue,
+        document: parse(`
+          query TestReadNotes($id: ID!) {
+            node(id: $id) {
+              ...on Notes {
+                all(first: 3) {
+                  edges {
+                  node {
+                    date
+                    text
+                    title
+                  }
+                  }
                 }
-               }
-             }
-           }
-         }
-       }
-     `)
-    await expect(execute(schema, read, {}, context, { id })).resolves.toMatchSnapshot()
+              }
+            }
+          }
+        `),
+        variableValues: { id },
+      })
+    ).resolves.toMatchSnapshot()
   })
 })

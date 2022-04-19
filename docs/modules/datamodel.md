@@ -22,7 +22,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -31,7 +31,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const model = new DataModel({ ceramic, model: publishedModel })
+const model = new DataModel({ ceramic, aliases })
 
 function getMySchemaURL() {
   return model.getSchemaURL('MySchema') // 'ceramic://k2...ab'
@@ -49,7 +49,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -58,7 +58,7 @@ const publishedModel = {
     myTile: 'k2...cd',
   },
 }
-const model = new DataModel({ ceramic, model: publishedModel })
+const model = new DataModel({ ceramic, aliases })
 
 async function loadMyTile() {
   return await model.loadTile('myTile')
@@ -72,14 +72,14 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DataModel } from '@glazed/datamodel'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
   definitions: {},
   tiles: {},
 }
-const model = new DataModel({ ceramic, model: publishedModel })
+const model = new DataModel({ ceramic, aliases })
 
 async function createTileWithMySchema(content) {
   return await model.createTile('MySchema', content)
@@ -94,32 +94,25 @@ async function createTileWithMySchema(content) {
 
 ### CreateOptions
 
-Ƭ **CreateOptions**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `pin?` | `boolean` | Pin the created stream (default) |
+Ƭ **CreateOptions**: `CreateOpts` & { `controller?`: `string`  }
 
 ___
 
 ### DataModelParams
 
-Ƭ **DataModelParams**<`Model`\>: `Object`
+Ƭ **DataModelParams**<`Aliases`\>: `Object`
 
 #### Type parameters
 
 | Name |
 | :------ |
-| `Model` |
+| `Aliases` |
 
 #### Type declaration
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `autopin?` | `boolean` | Pin all created streams (default) |
+| `aliases` | `Aliases` | The runtime [`model aliases`](types.md#modelaliases) to use |
 | `cache?` | `TileCache` \| `boolean` | [`TileLoader`](../classes/tile_loader.TileLoader.md) cache parameter, only used if `loader` is not provided |
 | `ceramic?` | `CeramicApi` | A Ceramic client instance, only used if `loader` is not provided |
 | `loader?` | `TileLoader` | A [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use, must be provided if `ceramic` is not provided |
-| `model` | `Model` | The runtime model aliases to use |

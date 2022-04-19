@@ -13,41 +13,54 @@
     "url": "https://github.com/ceramicstudio/js-glaze",
     "directory": "packages/append-collection"
   },
-  "main": "dist/lib.cjs",
-  "module": "dist/lib.mjs",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/lib.mjs",
-    "require": "./dist/lib.cjs",
-    "default": "./dist/lib.cjs"
+    ".": "./dist/index.js"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
-    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && rollup -c ../../rollup.config.js",
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src test --fix",
-    "test": "jest",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^1.5.0",
-    "@ceramicnetwork/streamid": "^1.3.4",
-    "@glazed/constants": "^0.1.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "@glazed/constants": "^0.2.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^1.8.0",
-    "@glazed/types": "^0.1.0",
-    "jest-environment-glaze": "^0.1.1"
+    "@ceramicnetwork/common": "^2.0.0",
+    "@glazed/types": "^0.2.0",
+    "jest-environment-glaze": "^0.2.0"
   },
   "jest": {
-    "preset": "ts-jest"
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
+    }
   }
 }

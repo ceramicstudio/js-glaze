@@ -34,6 +34,10 @@ This monorepo uses Yarn workspaces, make sure to install it first if you don't a
 | [`jest-environment-ceramic`](./packages/jest-environment-ceramic) | Ceramic environment for Jest tests                                                                        | ![npm version](https://img.shields.io/npm/v/jest-environment-ceramic.svg)    |
 | [`jest-environment-glaze`](./packages/jest-environment-glaze)     | Glaze environment for Jest tests                                                                          | ![npm version](https://img.shields.io/npm/v/jest-environment-glaze.svg)      |
 
+## Example
+
+An example notes taking app using Glaze libraries and tools with a webpack setup is available in the [`examples/webpack-notes`](examples/webpack-notes) folder.
+
 ## Maintainers
 
 - Paul Le Cam ([@paullecam](http://github.com/paullecam))

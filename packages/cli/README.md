@@ -31,11 +31,11 @@ glaze COMMAND
 - [`glaze model:add NAME TYPE ALIAS STREAM`](#glaze-modeladd-name-type-alias-stream)
 - [`glaze model:create NAME`](#glaze-modelcreate-name)
 - [`glaze model:delete NAME`](#glaze-modeldelete-name)
+- [`glaze model:deploy NAME [OUTPUT]`](#glaze-modeldeploy-name-output)
 - [`glaze model:export NAME [OUTPUT]`](#glaze-modelexport-name-output)
 - [`glaze model:import LOCALNAME IMPORTNAME`](#glaze-modelimport-localname-importname)
 - [`glaze model:inspect NAME`](#glaze-modelinspect-name)
 - [`glaze model:list`](#glaze-modellist)
-- [`glaze model:publish NAME [OUTPUT]`](#glaze-modelpublish-name-output)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -266,6 +266,22 @@ OPTIONS
   -f, --force            bypass confirmation prompt
 ```
 
+### `glaze model:deploy NAME [OUTPUT]`
+
+deploy a model
+
+```
+USAGE
+  $ glaze model:deploy NAME [OUTPUT]
+
+ARGUMENTS
+  NAME    local model name or package
+  OUTPUT  JSON file to output the deployed model aliases
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
 ### `glaze model:export NAME [OUTPUT]`
 
 export a model
@@ -316,22 +332,6 @@ list local models
 ```
 USAGE
   $ glaze model:list
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model:publish NAME [OUTPUT]`
-
-publish a model
-
-```
-USAGE
-  $ glaze model:publish NAME [OUTPUT]
-
-ARGUMENTS
-  NAME    local model name or package
-  OUTPUT  JSON file to output the published aliases
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
@@ -475,7 +475,6 @@ OPTIONS
   -k, --key=key            DID Private Key
   -m, --metadata=metadata  Optional metadata for the stream
 ```
-
 
 <!-- commandsstop -->
 

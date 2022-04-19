@@ -1,6 +1,6 @@
 {
   "name": "@glazed/devtools",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -13,57 +13,66 @@
     "url": "https://github.com/ceramicstudio/js-glaze",
     "directory": "packages/devtools"
   },
-  "main": "dist/lib.cjs",
-  "module": "dist/lib.mjs",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "import": "./dist/lib.mjs",
-    "require": "./dist/lib.cjs",
-    "default": "./dist/lib.cjs"
+    ".": "./dist/index.js"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
     "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
-    "build": "del dist && tsc --emitDeclarationOnly --skipLibCheck && rollup -c ../../rollup.config.js",
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src test --fix",
-    "test": "jest",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "test:ci": "yarn test --ci --coverage",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/common": "^1.8.0",
-    "@ceramicnetwork/stream-tile": "^1.5.0",
-    "@ceramicnetwork/streamid": "^1.3.4",
-    "@glazed/constants": "^0.1.1",
-    "@glazed/did-datastore-model": "^0.1.1",
-    "ajv": "^8.8.2",
+    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "@glazed/constants": "^0.2.0",
+    "@glazed/did-datastore-model": "^0.2.0",
+    "ajv": "^8.10.0",
     "ajv-formats": "^2.1.1",
     "change-case": "^4.1.2",
-    "cids": "^1.1.9",
     "fast-deep-equal": "^3.1.3",
+    "multiformats": "^9.6.3",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/http-client": "^1.5.0",
-    "@glazed/graphql-types": "^0.1.0",
-    "@glazed/types": "^0.1.3",
-    "@types/jest": "^27.0.3",
-    "dids": "^2.4.3",
-    "fs-extra": "^10.0.0",
-    "jest-environment-glaze": "^0.1.1"
+    "@ceramicnetwork/http-client": "^2.0.0",
+    "@glazed/graphql-types": "^0.2.0",
+    "@glazed/types": "^0.2.0",
+    "@types/jest": "^27.4.1",
+    "dids": "^3.0.0",
+    "fs-extra": "^10.0.1",
+    "jest-environment-glaze": "^0.2.0"
   },
   "jest": {
-    "preset": "ts-jest",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
     }
   }
 }

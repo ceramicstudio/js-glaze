@@ -2,6 +2,12 @@
 
 [datamodel](../modules/datamodel.md).DataModel
 
+The DataModel runtime provides APIs for interacting with datamodel aliases in applications and
+libraries. The [`ModelManager`](devtools.ModelManager.md) provides complementary APIs for
+managing datamodels during development.
+
+It is exported by the [`datamodel`](../modules/datamodel.md) module.
+
 ```sh
 import { DataModel } from '@glazed/datamodel'
 ```
@@ -34,9 +40,23 @@ import { DataModel } from '@glazed/datamodel'
 
 ## Accessors
 
+### aliases
+
+• `get` **aliases**(): `ModelAliases`
+
+[`Model aliases`](../modules/types.md#modelaliases) provided in constructor.
+
+#### Returns
+
+`ModelAliases`
+
+___
+
 ### loader
 
 • `get` **loader**(): `TileLoader`
+
+[`TileLoader`](tile_loader.TileLoader.md) instance used internally.
 
 #### Returns
 
@@ -46,7 +66,7 @@ import { DataModel } from '@glazed/datamodel'
 
 ### createTile
 
-▸ **createTile**<`Alias`, `ContentType`\>(`schemaAlias`, `content`, `__namedParameters?`): `Promise`<`TileDocument`<`ContentType`\>\>
+▸ **createTile**<`Alias`, `ContentType`\>(`schemaAlias`, `content`, `options?`): `Promise`<`TileDocument`<`ContentType`\>\>
 
 Create a TileDocument using a schema identified by the given `schemaAlias`.
 
@@ -63,7 +83,7 @@ Create a TileDocument using a schema identified by the given `schemaAlias`.
 | :------ | :------ |
 | `schemaAlias` | `Alias` |
 | `content` | `ContentType` |
-| `__namedParameters` | [`CreateOptions`](../modules/datamodel.md#createoptions) |
+| `options` | [`CreateOptions`](../modules/datamodel.md#createoptions) |
 
 #### Returns
 
@@ -74,6 +94,8 @@ ___
 ### getDefinitionID
 
 ▸ **getDefinitionID**<`Alias`\>(`alias`): ``null`` \| `string`
+
+Returns the definition stream ID for a given alias, if present in local model aliases.
 
 #### Type parameters
 
@@ -97,6 +119,8 @@ ___
 
 ▸ **getSchemaURL**<`Alias`\>(`alias`): ``null`` \| `string`
 
+Returns the schema stream URL for a given alias, if present in local model aliases.
+
 #### Type parameters
 
 | Name | Type |
@@ -118,6 +142,8 @@ ___
 ### getTileID
 
 ▸ **getTileID**<`Alias`\>(`alias`): ``null`` \| `string`
+
+Returns the tile stream ID for a given alias, if present in local model aliases.
 
 #### Type parameters
 

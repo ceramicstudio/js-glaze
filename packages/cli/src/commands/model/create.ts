@@ -1,10 +1,9 @@
 import chalk from 'chalk'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
-import { MODEL_NAME_PATTERN, config, getLocalModelPath } from '../../config'
-import { write } from '../../fs'
-import { EMPTY_MODEL } from '../../model'
+import { Command, type CommandFlags } from '../../command.js'
+import { MODEL_NAME_PATTERN, config, getLocalModelPath } from '../../config.js'
+import { write } from '../../fs.js'
+import { EMPTY_MODEL } from '../../model.js'
 
 const NAME_REGEXP = new RegExp(MODEL_NAME_PATTERN)
 

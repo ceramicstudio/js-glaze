@@ -4,6 +4,7 @@
 
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { CommitID } from '@ceramicnetwork/streamid'
+import { jest } from '@jest/globals'
 
 import { AppendCollection, Cursor, publishCollectionSchemas } from '../src'
 
@@ -23,7 +24,7 @@ function cursorsToString<T = any>(res: Record<string, any>): Record<string, any>
 }
 
 describe('append-collection', () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(60000)
 
   let collectionSchemaID: CommitID
 

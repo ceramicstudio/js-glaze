@@ -27,7 +27,7 @@ import { DataModel } from '@glazed/datamodel'
 import { DIDDataStore } from '@glazed/did-datastore'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -36,7 +36,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const model = new DataModel({ ceramic, model: publishedModel })
+const model = new DataModel({ ceramic, aliases })
 const dataStore = new DIDDataStore({ ceramic, model })
 
 async function getMyDefinitionRecord(did) {
@@ -44,17 +44,17 @@ async function getMyDefinitionRecord(did) {
 }
 ```
 
-### Use a published model object
+### Use a deployed model aliases object
 
 Instead of using a [`DataModel`](../classes/datamodel.DataModel.md) instance, it is possible to provide
-a published model object directly.
+a deployed model aliases object directly.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DIDDataStore } from '@glazed/did-datastore'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -63,7 +63,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+const dataStore = new DIDDataStore({ ceramic, model: aliases })
 
 async function getMyDefinitionRecord(did) {
   return await dataStore.get('myDefinition', did)
@@ -83,7 +83,7 @@ import { TileLoader } from '@glazed/tile-loader'
 
 const ceramic = new CeramicClient()
 const loader = new TileLoader({ ceramic })
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -92,7 +92,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const dataStore = new DIDDataStore({ ceramic, loader, model: publishedModel })
+const dataStore = new DIDDataStore({ ceramic, loader, model: aliases })
 
 async function getMyDefinitionRecord(did) {
   return await dataStore.get('myDefinition', did)
@@ -109,7 +109,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DIDDataStore } from '@glazed/did-datastore'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -118,7 +118,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+const dataStore = new DIDDataStore({ ceramic, model: aliases })
 
 async function setMyDefinitionRecord(content) {
   // This will throw an error if the Ceramic instance is not authenticated
@@ -140,7 +140,7 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { DIDDataStore } from '@glazed/did-datastore'
 
 const ceramic = new CeramicClient()
-const publishedModel = {
+const aliases = {
  schemas: {
     MySchema: 'ceramic://k2...ab',
   },
@@ -149,7 +149,7 @@ const publishedModel = {
   },
   tiles: {},
 }
-const dataStore = new DIDDataStore({ ceramic, model: publishedModel })
+const dataStore = new DIDDataStore({ ceramic, model: aliases })
 
 async function setMyDefinitionRecord(content) {
   // This will only replace the fields present in the input `content` object, other fields
@@ -191,12 +191,11 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `autopin?` | `boolean` | Pin all created records streams (default) |
 | `cache?` | `TileCache` \| `boolean` | [`TileLoader`](../classes/tile_loader.TileLoader.md) cache parameter, only used if `loader` is not provided |
 | `ceramic` | `CeramicApi` | A Ceramic client instance |
 | `id?` | `string` | Fallback DID to use when not explicitly set in method calls |
 | `loader?` | `TileLoader` | An optional [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use |
-| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or runtime model aliases to use |
+| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or [`runtime model aliases`](types.md#modelaliases) to use |
 
 ___
 

@@ -26,4 +26,4 @@ jobs:
         run: yarn lint
 
       - name: Test
-        run: yarn test --ci --coverage
+        run: yarn test:ci

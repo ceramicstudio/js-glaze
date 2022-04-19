@@ -1,7 +1,6 @@
 import { StreamID } from '@ceramicnetwork/streamid'
 
-import { Command } from '../../command'
-import type { CommandFlags } from '../../command'
+import { Command, type CommandFlags } from '../../command.js'
 
 export default class List extends Command<CommandFlags, { streamId?: string }> {
   static description = 'list pinned streams'
