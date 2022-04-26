@@ -60,6 +60,7 @@ const SCHEMA: Schema<ConfigData> = {
 }
 
 export const config = new Conf<ConfigData>({
+  projectName: 'ceramic-glaze',
   defaults: {
     models: {},
     user: {
