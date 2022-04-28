@@ -57,7 +57,7 @@
     "@types/jest": "^27.4.1",
     "dids": "^3.0.0",
     "fs-extra": "^10.0.1",
-    "jest-environment-glaze": "^0.2.0"
+    "jest-environment-glaze": "^0.3.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [

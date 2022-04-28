@@ -264,8 +264,10 @@ describe('tile-loader', () => {
 
     test('update() method removes the stream from the cache before loading and updating', async () => {
       const cacheMap = new Map<string, Promise<TileDocument>>()
-      const cacheDelete = jest.fn((key) => cacheMap.delete(key))
-      const cacheSet = jest.fn((key, value) => cacheMap.set(key, value))
+      const cacheDelete = jest.fn((key: string) => cacheMap.delete(key))
+      const cacheSet = jest.fn((key: string, value: Promise<TileDocument<Record<string, any>>>) => {
+        return cacheMap.set(key, value)
+      })
       const cache: TileCache = {
         clear: () => cacheMap.clear(),
         get: (key) => cacheMap.get(key),

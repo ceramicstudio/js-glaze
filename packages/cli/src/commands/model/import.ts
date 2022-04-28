@@ -31,7 +31,7 @@ export default class ImportModel extends Command<CommandFlags, Args> {
       }
 
       const model = await read<EncodedManagedModel>(models[localName].path)
-      const manager = ModelManager.fromJSON(this.ceramic, model)
+      const manager = ModelManager.fromJSON({ ceramic: this.ceramic, model })
 
       const toImport = await loadManagedModel(importName)
       manager.addJSONModel(toImport)
