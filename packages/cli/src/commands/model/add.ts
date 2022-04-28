@@ -47,7 +47,7 @@ export default class AddModel extends Command<Flags, Args> {
       }
 
       const model = await read<EncodedManagedModel>(models[name].path)
-      const manager = ModelManager.fromJSON(this.ceramic, model)
+      const manager = ModelManager.fromJSON({ ceramic: this.ceramic, model })
 
       try {
         const id = StreamRef.from(stream)

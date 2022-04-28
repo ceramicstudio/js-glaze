@@ -1,6 +1,6 @@
 {
   "name": "jest-environment-glaze",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Glaze environment for Jest",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "dids": "^3.0.0",
-    "jest-environment-ceramic": "^0.15.0",
+    "jest-environment-ceramic": "^0.16.0",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.0",
     "uint8arrays": "^3.0.0"

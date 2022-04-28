@@ -100,7 +100,7 @@ await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
 
 // The `clonedManager` instance will contain the same model as the `manager` instance
-const clonedManager = ModelManager.fromJSON(ceramic, encodedModel)
+const clonedManager = ModelManager.fromJSON({ ceramic, model: encodedModel })
 ```
 
 ### Deploy a model to Ceramic
@@ -120,7 +120,7 @@ const bytes = await readFile(new URL('encoded-model.json', import.meta.url))
 const encodedModel = JSON.parse(bytes.toString())
 
 const ceramic = new CeramicClient()
-const manager = ModelManager.fromJSON(ceramic, encodedModel)
+const manager = ModelManager.fromJSON({ ceramic, model: encodedModel })
 
 // The deployed model aliases could then be exported to be used at runtime
 const aliases = await manager.deploy()

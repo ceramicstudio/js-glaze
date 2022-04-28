@@ -45,7 +45,7 @@
   "devDependencies": {
     "@ceramicnetwork/common": "^2.0.0",
     "@glazed/types": "^0.2.0",
-    "jest-environment-glaze": "^0.2.0"
+    "jest-environment-glaze": "^0.3.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [
