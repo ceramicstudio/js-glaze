@@ -1,9 +1,10 @@
 import path from 'path'
 import { Ceramic } from '@ceramicnetwork/core'
 import { create } from 'ipfs-core'
-import NodeEnvironment from 'jest-environment-node'
+import NodeEnv from 'jest-environment-node'
 import { dir } from 'tmp-promise'
 
+const NodeEnvironment = NodeEnv.default ?? NodeEnv
 export default class CeramicEnvironment extends NodeEnvironment {
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
@@ -14,10 +15,9 @@ export default class CeramicEnvironment extends NodeEnvironment {
         Addresses: {
           Swarm: [],
         },
-        Bootstrap: [],
-        Discovery: {
-          MDNS: { Enabled: false },
-          webRTCStar: { Enabled: false },
+        Pubsub: {
+          // default "gossipsub" uses CJS and fails to import
+          Router: 'floodsub',
         },
       },
       profiles: ['test'],

@@ -5,7 +5,7 @@
  *
  * The `did-datastore` module exports a `DIDDataStore` class allowing to associate Ceramic tiles to
  * a DID in a deterministic way by implementing the Identity Index (IDX) protocol described in the
- * [CIP-11 specification](https://github.com/ceramicnetwork/CIP/blob/main/CIPs/CIP-11/CIP-11.md).
+ * {@link https://github.com/ceramicnetwork/CIP/blob/main/CIPs/CIP-11/CIP-11.md CIP-11 specification}.
  *
  * ## Installation
  *
@@ -43,10 +43,10 @@
  * }
  * ```
  *
- * ### Use a published model object
+ * ### Use a deployed model aliases object
  *
  * Instead of using a {@linkcode datamodel.DataModel DataModel} instance, it is possible to provide
- * a published model aliases object directly.
+ * a deployed model aliases object directly.
  *
  * ```ts
  * import { CeramicClient } from '@ceramicnetwork/http-client'
@@ -234,12 +234,16 @@ export type DIDDataStoreParams<ModelTypes extends ModelTypeAliases = ModelTypeAl
    */
   loader?: TileLoader
   /**
-   * A {@linkcode DataModel} instance or runtime model aliases to use
+   * A {@linkcode DataModel} instance or {@linkcode types.ModelAliases runtime model aliases} to use
    */
   model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
 }
 
 /**
+ * The DIDDataStore class provides simple APIs to interact with data records associated to a DID.
+ *
+ * It is exported by the {@linkcode did-datastore} module.
+ *
  * ```sh
  * import { DIDDataStore } from '@glazed/did-datastore'
  * ```
@@ -265,14 +269,25 @@ export class DIDDataStore<
         : new DataModel<ModelTypes>({ loader: this.#loader, aliases: model })
   }
 
+  /**
+   * Returns whether a DID instance is attached to the Ceramic client instance used internally or
+   * not.
+   */
   get authenticated(): boolean {
     return this.#ceramic.did != null
   }
 
+  /**
+   * Ceramic client instance used internally.
+   */
   get ceramic(): CeramicApi {
     return this.#ceramic
   }
 
+  /**
+   * Returns the DID string currently authenticated on the Ceramic instance used internally, or
+   * throws an error if not authenticated.
+   */
   get id(): string {
     if (this.#id != null) {
       return this.#id
@@ -283,10 +298,16 @@ export class DIDDataStore<
     return this.#ceramic.did.id
   }
 
+  /**
+   * {@linkcode TileLoader} instance used internally.
+   */
   get loader(): TileLoader {
     return this.#loader
   }
 
+  /**
+   * {@linkcode DataModel} runtime instance used internally.
+   */
   get model(): DataModel<ModelTypes> {
     return this.#model
   }
@@ -344,7 +365,8 @@ export class DIDDataStore<
   /**
    * Set the record contents.
    *
-   * **Warning**: calling this method replaces any existing contents in the record, use {@linkcode merge} if you want to only change some fields.
+   * **Warning**: calling this method replaces any existing contents in the record, use
+   * {@linkcode merge} if you want to only change some fields.
    */
   async set<Key extends Alias, ContentType = DefinitionContentType<ModelTypes, Key>>(
     key: Key,

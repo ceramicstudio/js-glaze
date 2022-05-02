@@ -36,8 +36,9 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/http-client": "^2.0.0-alpha.0",
-    "@glazed/devtools": "^0.2.0-alpha.0",
+    "@ceramicnetwork/http-client": "^2.0.0",
+    "@glazed/devtools": "^0.2.0",
+    "@glazed/graphql": "^0.1.0",
     "fs-extra": "^10.0.1"
   },
   "devDependencies": {},

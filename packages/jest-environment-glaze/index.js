@@ -7,7 +7,8 @@ import { fromString } from 'uint8arrays/from-string'
 export default class GlazeEnvironment extends CeramicEnvironment {
   constructor(config, context) {
     super(config, context)
-    this.seed = config.seed ? fromString(config.seed) : new Uint8Array(32)
+    const seed = config.projectConfig?.seed
+    this.seed = seed ? fromString(seed) : new Uint8Array(32)
   }
 
   async setup() {

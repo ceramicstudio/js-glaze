@@ -44,10 +44,10 @@ async function getMyDefinitionRecord(did) {
 }
 ```
 
-### Use a published model object
+### Use a deployed model aliases object
 
 Instead of using a [`DataModel`](../classes/datamodel.DataModel.md) instance, it is possible to provide
-a published model aliases object directly.
+a deployed model aliases object directly.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
@@ -195,7 +195,7 @@ ___
 | `ceramic` | `CeramicApi` | A Ceramic client instance |
 | `id?` | `string` | Fallback DID to use when not explicitly set in method calls |
 | `loader?` | `TileLoader` | An optional [`TileLoader`](../classes/tile_loader.TileLoader.md) instance to use |
-| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or runtime model aliases to use |
+| `model` | `DataModel`<`ModelTypes`\> \| `ModelTypesToAliases`<`ModelTypes`\> | A [`DataModel`](../classes/datamodel.DataModel.md) instance or [`runtime model aliases`](types.md#modelaliases) to use |
 
 ___
 

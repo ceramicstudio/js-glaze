@@ -1,6 +1,7 @@
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { ModelManager, createGraphModel, deployGraph } from '@glazed/devtools'
 import { printGraphQLSchema } from '@glazed/graphql'
+import type { EncodedManagedModel } from '@glazed/types'
 import fs from 'fs-extra'
 import { resolve } from 'path'
 import { cwd } from 'process'
@@ -17,7 +18,8 @@ export async function readEncodedModel(
 ): Promise<ModelManager> {
   const client = ceramic instanceof CeramicClient ? ceramic : new CeramicClient(ceramic)
   const file = getFilePath(path)
-  return ModelManager.fromJSON({ ceramic: client, model: await readJSON(file) })
+  const model = (await readJSON(file)) as EncodedManagedModel
+  return ModelManager.fromJSON({ ceramic: client, model })
 }
 
 export async function writeEncodedModel(

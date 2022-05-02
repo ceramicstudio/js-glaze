@@ -100,7 +100,7 @@ await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 const encodedModel = await manager.toJSON()
 
 // The `clonedManager` instance will contain the same model as the `manager` instance
-const clonedManager = ModelManager.fromJSON(ceramic, encodedModel)
+const clonedManager = ModelManager.fromJSON({ ceramic, model: encodedModel })
 ```
 
 ### Deploy a model to Ceramic
@@ -120,7 +120,7 @@ const bytes = await readFile(new URL('encoded-model.json', import.meta.url))
 const encodedModel = JSON.parse(bytes.toString())
 
 const ceramic = new CeramicClient()
-const manager = ModelManager.fromJSON(ceramic, encodedModel)
+const manager = ModelManager.fromJSON({ ceramic, model: encodedModel })
 
 // The deployed model aliases could then be exported to be used at runtime
 const aliases = await manager.deploy()
@@ -164,30 +164,16 @@ await manager.deploy()
 
 ## Type aliases
 
-### AddModelSchemaOptions
-
-Ƭ **AddModelSchemaOptions**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `name?` | `string` |
-| `owner?` | `string` |
-| `parent?` | `string` |
-
-___
-
 ### FromJSONParams
 
 Ƭ **FromJSONParams**: `Object`
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model` | `EncodedManagedModel` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `ceramic` | `CeramicApi` | Ceramic client instance |
+| `model` | `EncodedManagedModel` | [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to use |
 
 ___
 
@@ -197,34 +183,19 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model?` | `ManagedModel` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `ceramic` | `CeramicApi` | Ceramic client instance |
+| `model?` | `ManagedModel` | Optional [`managed model`](types.md#managedmodel) to use |
 
 ## Functions
-
-### deployDataStoreSchemas
-
-▸ **deployDataStoreSchemas**(`ceramic`, `createOpts?`, `commitOpts?`): `Promise`<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `createOpts?` | `CreateOpts` |
-| `commitOpts?` | `UpdateOpts` |
-
-#### Returns
-
-`Promise`<`void`\>
-
-___
 
 ### deployEncodedModel
 
 ▸ **deployEncodedModel**(`ceramic`, `model`): `Promise`<`ModelAliases`\>
+
+Deploy a [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to the given Ceramic
+node.
 
 #### Parameters
 
@@ -239,25 +210,11 @@ ___
 
 ___
 
-### deployGraph
-
-▸ **deployGraph**(`manager`): `Promise`<`GraphModel`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `manager` | [`ModelManager`](../classes/devtools.ModelManager.md) |
-
-#### Returns
-
-`Promise`<`GraphModel`\>
-
-___
-
 ### deployModel
 
 ▸ **deployModel**(`ceramic`, `model`, `createOpts?`, `commitOpts?`): `Promise`<`ModelAliases`\>
+
+Deploy a managed model to the given Ceramic node.
 
 #### Parameters
 

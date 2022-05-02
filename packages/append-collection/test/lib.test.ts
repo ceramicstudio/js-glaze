@@ -25,7 +25,7 @@ function cursorsToString<T = any>(res: Record<string, any>): Record<string, any>
 }
 
 describe('append-collection', () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(40000)
 
   const loader = new TileLoader({ ceramic })
   let collectionSchemaID: CommitID

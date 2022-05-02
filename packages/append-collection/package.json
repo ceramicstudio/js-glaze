@@ -23,7 +23,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
@@ -33,20 +33,19 @@
     "build": "yarn build:clean && yarn build:types && yarn build:js",
     "lint": "eslint src test --fix",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
-    "test:ci": "yarn test --ci --coverage",
     "prepare": "yarn build",
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^2.0.0-alpha.0",
-    "@ceramicnetwork/streamid": "^2.0.0-alpha.0",
-    "@glazed/constants": "^0.2.0-alpha.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "@glazed/constants": "^0.2.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0-alpha.0",
-    "@glazed/types": "^0.2.0-alpha.0",
-    "jest-environment-glaze": "^0.2.0-alpha.0"
+    "@ceramicnetwork/common": "^2.0.0",
+    "@glazed/types": "^0.2.0",
+    "jest-environment-glaze": "^0.3.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [

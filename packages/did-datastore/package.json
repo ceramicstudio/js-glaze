@@ -1,6 +1,6 @@
 {
   "name": "@glazed/did-datastore",
-  "version": "0.3.0-alpha.3",
+  "version": "0.3.0",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -23,7 +23,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14.14"
   },
   "sideEffects": false,
   "scripts": {
@@ -37,20 +37,20 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/streamid": "^2.0.0-alpha.0",
-    "@glazed/constants": "^0.2.0-alpha.0",
-    "@glazed/datamodel": "^0.3.0-alpha.0",
-    "@glazed/tile-loader": "^0.2.0-alpha.0"
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "@glazed/constants": "^0.2.0",
+    "@glazed/datamodel": "^0.3.0",
+    "@glazed/tile-loader": "^0.2.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/blockchain-utils-linking": "^2.0.0-alpha.0",
-    "@ceramicnetwork/common": "^2.0.0-alpha.0",
-    "@ceramicnetwork/stream-tile": "^2.0.0-alpha.0",
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.0",
+    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0",
     "@ethersproject/wallet": "^5.5.0",
-    "@glazed/devtools": "^0.2.0-alpha.0",
-    "@glazed/did-datastore-model": "^0.2.0-alpha.0",
-    "@glazed/types": "^0.2.0-alpha.0",
-    "jest-environment-glaze": "^0.2.0-alpha.0"
+    "@glazed/devtools": "^0.2.0",
+    "@glazed/did-datastore-model": "^0.2.0",
+    "@glazed/types": "^0.2.0",
+    "jest-environment-glaze": "^0.3.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [

@@ -12,7 +12,7 @@ describe('pins', () => {
       tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
     ])
     expect(pin.stderr.toString().includes('Stream pinned.')).toBe(true)
-  }, 25000)
+  }, 60000)
 
   test('stream removed', async () => {
     const key = await execa('glaze', ['did:create'])
@@ -26,7 +26,7 @@ describe('pins', () => {
       tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
     ])
     expect(remove.stderr.toString().includes('Stream unpinned')).toBe(true)
-  }, 25000)
+  }, 60000)
 
   test('list pins', async () => {
     const key = await execa('glaze', ['did:create'])
@@ -40,5 +40,5 @@ describe('pins', () => {
       tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
     ])
     expect(list.stderr.toString().includes('Loaded pins list.')).toBe(true)
-  }, 35000)
+  }, 60000)
 })

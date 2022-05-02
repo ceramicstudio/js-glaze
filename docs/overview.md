@@ -7,3 +7,4 @@
 - [did-datastore](modules/did_datastore.md)
 - [graphql/src](modules/graphql_src.md)
 - [tile-loader](modules/tile_loader.md)
+- [types](modules/types.md)
