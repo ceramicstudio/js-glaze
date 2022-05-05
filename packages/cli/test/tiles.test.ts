@@ -42,6 +42,52 @@ describe('tiles', () => {
     }, 60000)
   })
 
+  describe('tile:show', () => {
+    test('displays tile content with syncing option argument', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const content = await execa('glaze', [
+        `tile:show`,
+        tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
+        `--syncOption=never-sync`
+      ])
+      const lines = stripAnsi(content.stderr.toString())
+      expect(lines.includes('Retrieved details of stream')).toBe(true)
+    }, 60000)
+
+    test('displays tile content without syncing option argument', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const content = await execa('glaze', [
+        `tile:show`,
+        tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
+      ])
+      const lines = stripAnsi(content.stderr.toString())
+      expect(lines.includes('Retrieved details of stream')).toBe(true)
+      expect(lines.includes('Syncing option chosen')).toBe(false)
+    }, 60000)
+
+    test('fails when unsupported syncing option is passed', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      await expect(
+        execa('glaze', [
+          `tile:show`,
+          tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
+          `--syncOption=unsupportedArgument`
+        ])
+      )
+      .rejects
+      .toThrow('Expected --syncOption=unsupportedArgument to be one of:')
+    }, 60000)
+  })
+
   describe('tile:update', () => {
     test('successfully updates tile', async () => {
       const key = await execa('glaze', ['did:create'])
