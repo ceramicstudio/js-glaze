@@ -35,6 +35,30 @@ export interface CommandFlags {
   [key: string]: unknown
 }
 
+export const STREAM_ID_ARG = {
+  name: 'streamId',
+  required: true,
+  description: 'ID of the stream',
+}
+
+async function parseSyncOption(input: string): Promise<SyncOptions> {
+  return new Promise((resolve, reject) => {
+    const syncOption = SYNC_OPTIONS_MAP[input]
+    if (syncOption) {
+      resolve(syncOption)
+    } else {
+      reject()
+    }
+  })
+}
+
+export const SYNC_OPTION_FLAG = Flags.integer({
+  char: 's',
+  options: Object.keys(SYNC_OPTIONS_MAP),
+  description: `Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.`,
+  parse: parseSyncOption
+})
+
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
   Args extends StringRecord = StringRecord
