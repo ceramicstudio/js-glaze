@@ -4,6 +4,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { 
   Command, 
   type CommandFlags,
+  STREAM_ID_ARG,
   SYNC_OPTION_FLAG
 } from '../../command.js'
 
@@ -15,11 +16,7 @@ export default class ShowTile extends Command<Flags, { streamId: string }> {
   static description = 'show the contents of a Tile stream'
 
   static args = [
-    {
-      name: 'streamId',
-      required: true,
-      description: 'ID of the stream',
-    },
+    STREAM_ID_ARG,
   ]
 
   static flags = {
