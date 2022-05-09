@@ -45,7 +45,7 @@ glaze COMMAND
 - [`glaze tile:deterministic METADATA`](#glaze-tiledeterministic-metadata)
 - [`glaze tile:content STREAMID`](#glaze-tileshow-streamid)
 - [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
-- [`glaze tile:watch STREAMID`](#glaze-tilewatch-streamid)
+- [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
 
 ### `glaze config:get KEY`
 
@@ -393,8 +393,10 @@ USAGE
 ARGUMENTS
   STREAMID  ID of the stream
 
+
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+  -s, --syncOption  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze stream:state STREAMID`
@@ -410,6 +412,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+  -s, --syncOption  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:create`
@@ -441,6 +444,7 @@ ARGUMENTS
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -k, --key=key          DID Private Key
+  -s, --syncOption  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:content STREAMID`
@@ -456,6 +460,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+  -s, --syncOption  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:update STREAMID`
@@ -474,6 +479,22 @@ OPTIONS
   -c, --ceramic=ceramic    Ceramic API URL
   -k, --key=key            DID Private Key
   -m, --metadata=metadata  Optional metadata for the stream
+```
+
+### `glaze tile:show STREAMID`
+
+show the contents of a Tile stream
+
+```
+USAGE
+  $ glaze tile:show STREAMID
+
+ARGUMENTS
+  STREAMID  ID of the stream
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -s, --syncOption  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 <!-- commandsstop -->
