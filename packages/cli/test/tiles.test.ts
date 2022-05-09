@@ -144,7 +144,11 @@ describe('tiles', () => {
       const key = await execa('glaze', ['did:create'])
       const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
 
-      const tile = await execa('glaze', ['tile:deterministic', '{}', `--key=${seed}`])
+      const tile = await execa('glaze', [
+        'tile:deterministic',
+        '{}',
+        `--key=${seed}`
+      ])
       expect(
         tile.stderr
           .toString()
@@ -152,7 +156,25 @@ describe('tiles', () => {
       ).toBe(true)
     }, 60000)
 
-    test('creates deterministic tile', async () => {
+    test('creates deterministic tile with syncing option argument', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
+
+      const tile = await execa('glaze', [
+        'tile:deterministic',
+        JSON.stringify({
+          controllers: [did],
+          tags: ['foo', 'bar'],
+          family: ['test'],
+        }),
+        `--key=${seed}`,
+        `--syncOption=never-sync`
+      ])
+      const stdOut = tile.stderr.toString()
+      expect(stdOut.includes('Loaded tile')).toBe(true)
+    }, 60000)
+
+    test('creates deterministic tile without syncing option argument', async () => {
       const key = await execa('glaze', ['did:create'])
       const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
 
@@ -165,7 +187,29 @@ describe('tiles', () => {
         }),
         `--key=${seed}`,
       ])
-      expect(tile.stderr.toString().includes('Loaded tile')).toBe(true)
+      const stdOut = tile.stderr.toString()
+      expect(stdOut.includes('Loaded tile')).toBe(true)
+      expect(stdOut.includes('Syncing option chosen:')).toBe(false)
+    }, 60000)
+
+    test('fails when unsupported syncing option is passed', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
+
+      await expect(
+        execa('glaze', [
+          'tile:deterministic',
+          JSON.stringify({
+            controllers: [did],
+            tags: ['foo', 'bar'],
+            family: ['test'],
+          }),
+          `--key=${seed}`,
+          `--syncOption=unsupportedArgument`
+        ])
+      )
+      .rejects
+      .toThrow('Expected --syncOption=unsupportedArgument to be one of:')
     }, 60000)
   })
 })
