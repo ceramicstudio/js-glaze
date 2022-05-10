@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
 import type { CeramicApi } from '@ceramicnetwork/common'
-// import { publishCollectionSchemas } from '@glazed/append-collection'
 import { ModelManager, deployGraph } from '@glazed/devtools'
 import { TileLoader } from '@glazed/tile-loader'
 import type { GraphModel } from '@glazed/types'

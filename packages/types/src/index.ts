@@ -4,8 +4,11 @@
  * @module types
  */
 
-import type { JSONSchemaType } from 'ajv'
+import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { DagJWSResult, JWSSignature } from 'dids'
+import type { JSONSchema } from 'json-schema-typed/draft-07'
+
+export type { JSONSchema } from 'json-schema-typed/draft-07'
 
 /** JSON-encoded DAG-JWS. */
 export type EncodedDagJWS = {
@@ -20,170 +23,184 @@ export type EncodedDagJWSResult = {
   linkedBlock: string // base64
 }
 
-/** JSON schema declaration, used for validating Ceramic streams. */
-export type Schema<T = Record<string, any>> = JSONSchemaType<T> & {
-  $comment?: string
-  title?: string
+export type StreamCommits = Array<DagJWSResult>
+export type EncodedStreamCommits = Array<EncodedDagJWSResult>
+
+export type ModelAccountRelation =
+  | 'list' // Multiple documents, ordered by insertion time in the local node's database
+  | 'set' // Multiple documents, but only one per reference (streamID or DID). Which field gets the set semantics is configured in 'relations'
+  | 'link' // Single document
+  | 'none' // No indexing
+
+export type ModelRelationDefinition =
+  | { type: 'account' }
+  | { type: 'document'; models: Array<string> }
+  | { type: 'setIndex' }
+
+export type ModelRelationsDefinition = Record<string, ModelRelationDefinition>
+
+export type ModelViewDefinition =
+  | { type: 'documentAccount' }
+  | { type: 'documentVersion' }
+  | { type: 'referencedBy'; property: string }
+
+export type ModelViewsDefinition = Record<string, ModelViewDefinition>
+
+export type ModelDefinition = {
+  name: string
+  description?: string
+  schema: JSONSchema.Object
+  accountRelation: ModelAccountRelation
+  relations?: ModelRelationsDefinition
+  views?: ModelViewsDefinition
 }
 
-/** Generic structure for storing model data. */
-export type ModelData<T> = {
-  definitions: Record<string, T>
-  schemas: Record<string, T>
-  tiles: Record<string, T>
+export interface Model {
+  id: StreamID
+  content: ModelDefinition
 }
 
-/** Utility type for mapping a model structure of a given type to another. */
-export type MapModelTypes<Model extends ModelData<any>, ToType> = {
-  schemas: Record<keyof Model['schemas'], ToType>
-  definitions: Record<keyof Model['definitions'], ToType>
-  tiles: Record<keyof Model['tiles'], ToType>
+export type ReferencedFromViewDefinition = {
+  type: 'ReferencedFrom'
+  model: string
+  property: string
+  collection: boolean // TODO: use enum?
 }
 
-/** Utility type for mapping a model structure to a given type. */
-export type CastModelTo<Model extends ModelData<any> | void, ToType> = Model extends ModelData<any>
-  ? MapModelTypes<Model, ToType>
-  : ModelData<ToType>
+export type ReferencedFromViewDefinitions = Record<string, ReferencedFromViewDefinition>
 
-/**
- * Data model aliases created by {@linkcode devtools.ModelManager.deploy deploying a managed model}
- * and used at runtime by the {@linkcode datamodel.DataModel DataModel} class.
- */
-export type ModelAliases<Model extends ModelData<any> | void = void> = CastModelTo<Model, string>
-
-/** Model aliases relations between schemas and the definitions and tiles using them. */
-export type ModelTypeAliases<
-  // Schema alias to content type
-  Schemas extends Record<string, any> = Record<string, any>,
-  // Definition alias to schema alias
-  Definitions extends Record<string, keyof Schemas> = Record<string, string>,
-  // Tile alias to schema alias
-  Tiles extends Record<string, keyof Schemas> = Record<string, string>
-> = {
-  schemas: Schemas
-  definitions: Definitions
-  tiles: Tiles
+export type CompositeViewsDefinition = {
+  // TODO: Account-based views
+  account: any
+  // TODO: Query-level views
+  root: any
+  models: Record<string, ReferencedFromViewDefinitions>
 }
 
-/** Utility type to cast {@linkcode ModelTypeAliases} to {@linkcode ModelAliases}. */
-export type ModelTypesToAliases<TypeAliases extends ModelTypeAliases> = MapModelTypes<
-  TypeAliases,
-  string
->
-
-/** ID of a stream used in a {@linkcode ManagedModel}. */
-export type ManagedID = string // StreamID
-
-/** Shared structure for representing streams used in a {@linkcode ManagedModel}. */
-export type ManagedDoc<CommitType = DagJWSResult> = {
-  alias: string
-  commits: Array<CommitType>
-  version: string // CommitID
+export type CompositeDefinitionType<T> = {
+  version: string
+  models: Record<string, T>
+  aliases?: Record<string, string>
+  views?: CompositeViewsDefinition
 }
 
-/**
- * Structure for representing streams having a schema dependency, used in a
- * {@linkcode ManagedModel}.
- */
-export type ManagedEntry<CommitType = DagJWSResult> = ManagedDoc<CommitType> & {
-  schema: ManagedID
+export type CompositeDefinition = CompositeDefinitionType<ModelDefinition>
+export type EncodedCompositeDefinition = CompositeDefinitionType<EncodedStreamCommits>
+
+export type DocumentMetadata = {
+  controller: string
+  model: string
 }
 
-/**
- * Structure for representing schema streams and their dependencies, used in a
- * {@linkcode ManagedModel}.
- */
-export type ManagedSchema<CommitType = DagJWSResult> = ManagedDoc<CommitType> & {
-  dependencies: Record<string, Array<ManagedID>> // path to schemas ManagedID
+export interface ModelInstanceDocument<T = Record<string, unknown>> {
+  get id(): StreamID
+  get commitId(): CommitID
+  get metadata(): DocumentMetadata
+  get content(): T
 }
 
-/**
- * Structure used internally by the {@linkcode devtools.ModelManager ModelManager} to represent a
- * data model.
- */
-export type ManagedModel<CommitType = DagJWSResult> = {
-  schemas: Record<ManagedID, ManagedSchema<CommitType>>
-  definitions: Record<ManagedID, ManagedEntry<CommitType>>
-  tiles: Record<ManagedID, ManagedEntry<CommitType>>
+// Response payload for collection pattern queries
+export type CollectionResponse<T = Record<string, unknown>> = {
+  results: Array<ModelInstanceDocument<T>>
+  total: number
 }
 
-/**
- * JSON-encoded version of the {@linkcode ManagedModel}, used by the
- * {@linkcode devtools.ModelManager ModelManager}.
- */
-export type EncodedManagedModel = ManagedModel<EncodedDagJWSResult>
-
-export type GraphFieldCommon = {
-  title?: string
+// Pagination parameters for collection requests
+export type PaginationParams = {
+  skip?: number
+  sort?: 'asc' | 'desc'
+  limit: number
+}
+// Collection request parameters, including pagination options
+export type CollectionRequest = PaginationParams & {
+  account?: string // DID
+  model: string // StreamID
 }
 
-export type GraphFieldBoolean = GraphFieldCommon & {
+// Response payload for a single link request
+export type LinkResponse<T = Record<string, unknown>> = {
+  result: ModelInstanceDocument<T> | null
+}
+
+// Single link request parameters
+export type LinkRequest = {
+  account: string // DID
+  model: string // StreamID
+}
+
+// Response payload for a multi-links request
+export type MultiLinkResponse<T = Record<string, unknown>> = {
+  results: Record<string, ModelInstanceDocument<T> | null>
+}
+
+// Multi-links request parameters
+export type MultiLinkRequest = {
+  accounts: Array<string> // DID
+  model: string // StreamID
+}
+
+export interface QueryAPIs {
+  getLink(request: LinkRequest): Promise<LinkResponse>
+  getCollection(request: CollectionRequest): Promise<CollectionResponse>
+}
+
+export type RuntimeScalarCommon = {
+  required: boolean
+}
+export type RuntimeBooleanScalar = RuntimeScalarCommon & {
   type: 'boolean'
 }
-export type GraphFieldInteger = GraphFieldCommon & {
+export type RuntimeIntegerScalar = RuntimeScalarCommon & {
   type: 'integer'
 }
-export type GraphFieldFloat = GraphFieldCommon & {
+export type RuntimeFloatScalar = RuntimeScalarCommon & {
   type: 'float'
 }
-export type GraphFieldString = GraphFieldCommon & {
+export type RuntimeStringScalar = RuntimeScalarCommon & {
   type: 'string'
   format?: 'date-time' | 'date' | 'duration' | 'time'
   maxLength?: number
 }
-export type GraphFieldDIDString = GraphFieldCommon & {
+export type RuntimeDIDStringScalar = RuntimeScalarCommon & {
   type: 'did'
   maxLength?: number
 }
+export type RuntimeScalar =
+  | RuntimeBooleanScalar
+  | RuntimeIntegerScalar
+  | RuntimeFloatScalar
+  | RuntimeStringScalar
+  | RuntimeDIDStringScalar
 
-export type GraphReferenceEntry = {
-  owner: string
-  schemas: Array<string>
-}
-
-export type GraphFieldList = GraphFieldCommon & {
-  type: 'list'
-  name: string
-}
-export type GraphFieldObject = GraphFieldCommon & {
-  type: 'object'
-  name: string
-}
-export type GraphFieldReference = GraphFieldCommon &
-  GraphReferenceEntry & {
+export type RuntimeReferenceType =
+  | 'connection' // to many documents relation
+  | 'node' // to single document relation
+  | 'object' // embedded object in document
+// | 'union'
+export type RuntimeReference<T extends RuntimeReferenceType = RuntimeReferenceType> =
+  RuntimeScalarCommon & {
     type: 'reference'
+    refType: T
+    refName: string
   }
 
-export type GraphItemField =
-  | GraphFieldBoolean
-  | GraphFieldInteger
-  | GraphFieldFloat
-  | GraphFieldString
-  | GraphFieldDIDString
-  | GraphFieldObject
-  | GraphFieldReference
-
-export type GraphObjectField = (GraphFieldList | GraphItemField) & { required?: boolean }
-export type GraphObjectFields = Record<string, GraphObjectField>
-export type GraphObjectEntry = {
-  fields: GraphObjectFields
-  parents?: Array<string> | null
+export type RuntimeList = RuntimeScalarCommon & {
+  type: 'list'
+  item: RuntimeScalar | RuntimeReference<'object'>
 }
 
-export type GraphReferencedEntry = {
-  type: 'collection' | 'object'
-  name: string
-}
-export type GraphTileEntry = {
-  id: string
-  schema: string
-}
+export type RuntimeViewType = 'documentAccount' | 'documentVersion'
+export type RuntimeViewField = { type: 'view'; viewType: RuntimeViewType }
 
-export type GraphModel = {
-  index: Record<string, GraphTileEntry> // alias to tile entry
-  lists: Record<string, GraphItemField> // list alias to item type
-  objects: Record<string, GraphObjectEntry> // alias to entry
-  roots: Record<string, GraphTileEntry> // alias to tile entry
-  referenced: Record<string, GraphReferencedEntry> // schema URL to referenced type
-  references: Record<string, GraphReferenceEntry> // alias to reference entry
+export type RuntimeObjectField = RuntimeScalar | RuntimeList | RuntimeReference | RuntimeViewField
+export type RuntimeObjectFields = Record<string, RuntimeObjectField>
+
+export type RuntimeViewReferenceType = 'collection' | 'model'
+export type RuntimeViewReference = { type: RuntimeViewReferenceType; name: string }
+
+export type RuntimeCompositeDefinition = {
+  models: Record<string, string> // Name key, streamID value
+  objects: Record<string, RuntimeObjectFields> // Name key
+  accountStore: Record<string, RuntimeViewReference>
+  query?: Record<string, RuntimeViewReference>
 }

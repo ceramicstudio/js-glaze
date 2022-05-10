@@ -36,7 +36,8 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "ajv": "^8.10.0",
-    "dids": "^3.0.0"
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "dids": "^3.0.0",
+    "json-schema-typed": "^8.0.1"
   }
 }

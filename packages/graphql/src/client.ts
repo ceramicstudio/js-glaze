@@ -1,7 +1,5 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
-import type { DataModel } from '@glazed/datamodel'
-import type { TileCache, TileLoader } from '@glazed/tile-loader'
-import type { GraphModel, ModelTypeAliases, ModelTypesToAliases } from '@glazed/types'
+import type { RuntimeCompositeDefinition } from '@glazed/types'
 import {
   type DocumentNode,
   type ExecutionResult,
@@ -14,44 +12,36 @@ import {
 } from 'graphql'
 
 import { Context } from './context.js'
+import type { DocumentCache, DocumentLoader } from './loader.js'
 import { createGraphQLSchema } from './schema.js'
-import { graphModelToAliases } from './utils.js'
 
-export type FromGraphParams = {
+export type FromDefinitionParams = {
   ceramic: CeramicApi
-  graph: GraphModel
+  definition: RuntimeCompositeDefinition
 }
 
-export type GraphQLClientParams<ModelTypes extends ModelTypeAliases = ModelTypeAliases> = {
-  cache?: TileCache | boolean
+export type GraphQLClientParams = {
+  cache?: DocumentCache | boolean
   ceramic: CeramicApi
-  loader?: TileLoader
-  model: DataModel<ModelTypes> | ModelTypesToAliases<ModelTypes>
+  loader?: DocumentLoader
   schema: GraphQLSchema
 }
 
-export class GraphQLClient<ModelTypes extends ModelTypeAliases = ModelTypeAliases> {
-  #context: Context<ModelTypes>
+export class GraphQLClient {
+  #context: Context
   #schema: GraphQLSchema
 
-  static fromGraph<ModelTypes extends ModelTypeAliases = ModelTypeAliases>({
-    ceramic,
-    graph,
-  }: FromGraphParams): GraphQLClient<ModelTypes> {
-    return new GraphQLClient<ModelTypes>({
-      ceramic,
-      model: graphModelToAliases<ModelTypes>(graph),
-      schema: createGraphQLSchema({ model: graph }),
-    })
+  static fromDefinition({ ceramic, definition }: FromDefinitionParams): GraphQLClient {
+    return new GraphQLClient({ ceramic, schema: createGraphQLSchema({ definition }) })
   }
 
-  constructor(params: GraphQLClientParams<ModelTypes>) {
+  constructor(params: GraphQLClientParams) {
     const { schema, ...contextParams } = params
     this.#context = new Context(contextParams)
     this.#schema = schema
   }
 
-  get context(): Context<ModelTypes> {
+  get context(): Context {
     return this.#context
   }
 

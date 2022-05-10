@@ -1,13 +1,6 @@
 {
   "extends": "./tsconfig.build.json",
-  "include": [
-    "./packages/datamodel/src",
-    "./packages/devtools/src",
-    "./packages/did-datastore/src",
-    "./packages/graphql/src",
-    "./packages/tile-loader/src",
-    "./packages/types/src"
-  ],
+  "include": ["./packages/devtools/src", "./packages/graphql/src", "./packages/types/src"],
   "compilerOptions": {
     "jsx": "preserve",
     "lib": ["DOM", "ES2020"],
@@ -18,11 +11,8 @@
     "readme": "none",
     "entryDocument": "overview.md",
     "entryPoints": [
-      "./packages/datamodel/src/index.ts",
       "./packages/devtools/src/index.ts",
-      "./packages/did-datastore/src/index.ts",
       "./packages/graphql/src/index.ts",
-      "./packages/tile-loader/src/index.ts",
       "./packages/types/src/index.ts"
     ],
     "disableSources": true,

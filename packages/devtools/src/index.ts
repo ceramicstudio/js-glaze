@@ -160,10 +160,7 @@
  * @module devtools
  */
 
-export * from './datamodel.js'
-export * from './encoding.js'
-export * from './graph.js'
-export * from './publishing.js'
-export * from './schema.js'
+export * from './composite.js'
+export * from './encoding/json.js'
+export * from './encoding/runtime.js'
 export * from './utils.js'
-export * from './validation.js'

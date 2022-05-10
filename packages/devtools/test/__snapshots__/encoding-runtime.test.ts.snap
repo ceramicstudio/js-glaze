@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Runtime encoding Profile - single model with local references 1`] = `
+Object {
+  "accountStore": Object {
+    "profile": Object {
+      "name": "Profile",
+      "type": "model",
+    },
+  },
+  "models": Object {
+    "Profile": "profileID",
+  },
+  "objects": Object {
+    "Profile": Object {
+      "affiliations": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "background": Object {
+        "refName": "ProfileImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "birthDate": Object {
+        "required": false,
+        "type": "string",
+      },
+      "description": Object {
+        "required": false,
+        "type": "string",
+      },
+      "emoji": Object {
+        "required": false,
+        "type": "string",
+      },
+      "gender": Object {
+        "required": false,
+        "type": "string",
+      },
+      "homeLocation": Object {
+        "required": false,
+        "type": "string",
+      },
+      "image": Object {
+        "refName": "ProfileImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "name": Object {
+        "required": false,
+        "type": "string",
+      },
+      "nationalities": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "residenceCountry": Object {
+        "required": false,
+        "type": "string",
+      },
+      "url": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+    "ProfileImageMetadata": Object {
+      "height": Object {
+        "required": true,
+        "type": "integer",
+      },
+      "mimeType": Object {
+        "required": true,
+        "type": "string",
+      },
+      "size": Object {
+        "required": false,
+        "type": "integer",
+      },
+      "src": Object {
+        "required": true,
+        "type": "string",
+      },
+      "width": Object {
+        "required": true,
+        "type": "integer",
+      },
+    },
+    "ProfileImageSources": Object {
+      "alternatives": Object {
+        "item": Object {
+          "refName": "ProfileImageMetadata",
+          "refType": "object",
+          "required": false,
+          "type": "reference",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "original": Object {
+        "refName": "ProfileImageMetadata",
+        "refType": "object",
+        "required": true,
+        "type": "reference",
+      },
+    },
+  },
+}
+`;

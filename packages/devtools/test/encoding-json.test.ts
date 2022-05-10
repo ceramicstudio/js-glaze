@@ -11,7 +11,7 @@ import {
   encodeSignedMap,
 } from '../src'
 
-describe('encoding', () => {
+describe('JSON encoding', () => {
   const cid = CID.parse('bafybeig6xv5nwphfmvcnektpnojts33jqcuam7bmye2pb54adnrtccjlsu')
   const dagJWS = {
     payload: 'payload',

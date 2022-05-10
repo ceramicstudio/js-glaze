@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schema printGraphQLSchema() 1`] = `
+"type Query {
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  account(id: ID!): DID!
+  viewer: DID
+}
+
+\\"\\"\\"An object with an ID\\"\\"\\"
+interface Node {
+  \\"\\"\\"The id of the object.\\"\\"\\"
+  id: ID!
+}
+
+type DID {
+  id: ID!
+  isViewer: Boolean!
+  store: DataStore
+}
+
+type DataStore {
+  profile: Profile
+}
+
+type Profile implements Node {
+  id: ID!
+  name: String
+  image: ProfileImageSources
+  description: String
+  emoji: String
+  background: ProfileImageSources
+  birthDate: String
+  url: String
+  gender: String
+  homeLocation: String
+  residenceCountry: String
+  nationalities: [String]
+  affiliations: [String]
+}
+
+type ProfileImageSources {
+  original: ProfileImageMetadata!
+  alternatives: [ProfileImageMetadata]
+}
+
+type ProfileImageMetadata {
+  src: String!
+  mimeType: String!
+  width: Int!
+  height: Int!
+  size: Int
+}
+
+type Mutation {
+  createProfile(input: CreateProfileInput!): CreateProfilePayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+}
+
+type CreateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input CreateProfileInput {
+  content: ProfileInput!
+  clientMutationId: String
+}
+
+input ProfileInput {
+  name: String
+  image: ProfileImageSourcesInput
+  description: String
+  emoji: String
+  background: ProfileImageSourcesInput
+  birthDate: String
+  url: String
+  gender: String
+  homeLocation: String
+  residenceCountry: String
+  nationalities: [String]
+  affiliations: [String]
+}
+
+input ProfileImageSourcesInput {
+  original: ProfileImageMetadataInput!
+  alternatives: [ProfileImageMetadataInput]
+}
+
+input ProfileImageMetadataInput {
+  src: String!
+  mimeType: String!
+  width: Int!
+  height: Int!
+  size: Int
+}
+
+type UpdateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input UpdateProfileInput {
+  id: ID!
+  content: ProfileInput!
+  clientMutationId: String
+}"
+`;
