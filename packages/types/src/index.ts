@@ -82,6 +82,7 @@ export type CompositeDefinitionType<T> = {
   models: Record<string, T>
   aliases?: Record<string, string>
   views?: CompositeViewsDefinition
+  commonShapes?: Array<string>
 }
 
 export type CompositeDefinition = CompositeDefinitionType<ModelDefinition>

@@ -1,6 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type {
   CompositeDefinition,
+  CompositeViewsDefinition,
   EncodedCompositeDefinition,
   Model,
   ModelDefinition,
@@ -8,9 +9,22 @@ import type {
   StreamCommits,
 } from '@glazed/types'
 import type { GraphQLSchema } from 'graphql'
+import cloneDeep from 'lodash-es/cloneDeep'
+import merge from 'lodash-es/merge'
 
-import { decodeSignedMap, encodeSignedMap } from './encoding/json.js'
-import { createRuntimeDefinition } from './encoding/runtime.js'
+import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
+import { createRuntimeDefinition } from './formats/runtime.js'
+
+type StrictCompositeDefinition = Required<CompositeDefinition>
+
+function toStrictDefinition(definition: CompositeDefinition): StrictCompositeDefinition {
+  return {
+    aliases: {},
+    commonShapes: [],
+    views: { account: {}, root: {}, models: {} },
+    ...definition,
+  }
+}
 
 function isSupportedVersion(supported: string, check: string): boolean {
   const [supportedMajor] = supported.split('.')
@@ -74,8 +88,20 @@ export type FromSchemaParams = {
   schema: string | GraphQLSchema
 }
 
+export type ComposeInput = Composite | CompositeParams
+export type ComposeOptions = {
+  aliases?: Record<string, string>
+}
+
 export class Composite {
   static VERSION = '1.0'
+
+  static compose(composites: Array<ComposeInput>, options?: ComposeOptions): Composite {
+    const [first, ...rest] = composites
+    const composite = first instanceof Composite ? first.clone() : new Composite(first)
+    composite.composeWith(rest, options)
+    return composite
+  }
 
   static async fromJSON(params: FromJSONParams): Promise<Composite> {
     const { models, ...definition } = params.definition
@@ -104,8 +130,43 @@ export class Composite {
     this.#definition = params.definition
   }
 
-  get definition(): Readonly<CompositeDefinition> {
-    return Object.freeze(this.#definition)
+  clone(): Composite {
+    return new Composite(this.toParams())
+  }
+
+  composeWith(other: ComposeInput | Array<ComposeInput>, options?: ComposeOptions) {
+    const commonShapes = new Set<string>()
+
+    for (const composite of Array.isArray(other) ? other : [other]) {
+      const { commits, definition } =
+        composite instanceof Composite ? composite.toParams() : composite
+      assertSupportedVersion(this.#definition.version, definition.version)
+      assertModelsHaveCommits(definition.models, commits)
+
+      const def = toStrictDefinition(definition)
+      Object.assign(this.#commits, commits)
+      Object.assign(this.#definition.models, definition.models)
+      Object.assign(this.#definition.aliases ?? {}, def.aliases)
+      merge(this.#definition.views ?? {}, def.views)
+      for (const shape of def.commonShapes) {
+        commonShapes.add(shape)
+      }
+    }
+
+    this.#definition.commonShapes = Array.from(commonShapes)
+    if (options?.aliases != null) {
+      Object.assign(this.#definition.aliases ?? {}, options.aliases)
+    }
+  }
+
+  setAliases(aliases: Record<string, string>, replace = false) {
+    const existing = replace ? {} : this.#definition.aliases ?? {}
+    this.#definition.aliases = { ...existing, ...aliases }
+  }
+
+  setViews(views: CompositeViewsDefinition, replace = false) {
+    const existing = replace ? {} : this.#definition.views ?? {}
+    this.#definition.views = merge(existing, views)
   }
 
   toJSON(): EncodedCompositeDefinition {
@@ -114,6 +175,13 @@ export class Composite {
       models: encodeSignedMap(this.#commits),
       aliases: this.#definition.aliases,
       views: this.#definition.views,
+    }
+  }
+
+  toParams(): CompositeParams {
+    return {
+      commits: cloneDeep(this.#commits),
+      definition: cloneDeep(this.#definition),
     }
   }
 

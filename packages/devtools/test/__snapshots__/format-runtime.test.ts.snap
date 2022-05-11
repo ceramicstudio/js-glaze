@@ -1,18 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Runtime encoding Profile - single model with local references 1`] = `
+exports[`Runtime format Profile - multiples models with common local references 1`] = `
 Object {
   "accountStore": Object {
-    "profile": Object {
-      "name": "Profile",
+    "genericProfile": Object {
+      "name": "GenericProfile",
+      "type": "model",
+    },
+    "personProfile": Object {
+      "name": "PersonProfile",
+      "type": "model",
+    },
+    "socialProfile": Object {
+      "name": "SocialProfile",
       "type": "model",
     },
   },
   "models": Object {
-    "Profile": "profileID",
+    "GenericProfile": "genericProfileID",
+    "PersonProfile": "personProfileID",
+    "SocialProfile": "socialProfileID",
   },
   "objects": Object {
-    "Profile": Object {
+    "GenericProfile": Object {
       "affiliations": Object {
         "item": Object {
           "required": false,
@@ -22,7 +32,7 @@ Object {
         "type": "list",
       },
       "background": Object {
-        "refName": "ProfileImageSources",
+        "refName": "ImageSources",
         "refType": "object",
         "required": false,
         "type": "reference",
@@ -48,7 +58,7 @@ Object {
         "type": "string",
       },
       "image": Object {
-        "refName": "ProfileImageSources",
+        "refName": "ImageSources",
         "refType": "object",
         "required": false,
         "type": "reference",
@@ -74,7 +84,7 @@ Object {
         "type": "string",
       },
     },
-    "ProfileImageMetadata": Object {
+    "ImageMetadata": Object {
       "height": Object {
         "required": true,
         "type": "integer",
@@ -96,10 +106,10 @@ Object {
         "type": "integer",
       },
     },
-    "ProfileImageSources": Object {
+    "ImageSources": Object {
       "alternatives": Object {
         "item": Object {
-          "refName": "ProfileImageMetadata",
+          "refName": "ImageMetadata",
           "refType": "object",
           "required": false,
           "type": "reference",
@@ -108,10 +118,64 @@ Object {
         "type": "list",
       },
       "original": Object {
-        "refName": "ProfileImageMetadata",
+        "refName": "ImageMetadata",
         "refType": "object",
         "required": true,
         "type": "reference",
+      },
+    },
+    "PersonProfile": Object {
+      "affiliations": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "birthDate": Object {
+        "required": false,
+        "type": "string",
+      },
+      "gender": Object {
+        "required": false,
+        "type": "string",
+      },
+      "homeLocation": Object {
+        "required": false,
+        "type": "string",
+      },
+      "nationalities": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "residenceCountry": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+    "SocialProfile": Object {
+      "background": Object {
+        "refName": "ImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "description": Object {
+        "required": false,
+        "type": "string",
+      },
+      "emoji": Object {
+        "required": false,
+        "type": "string",
+      },
+      "url": Object {
+        "required": false,
+        "type": "string",
       },
     },
   },
