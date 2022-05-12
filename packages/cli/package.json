@@ -101,7 +101,7 @@
   "devDependencies": {
     "@ceramicnetwork/cli": "^2.0.2",
     "@ceramicnetwork/common": "^2.0.0",
-    "@ceramicnetwork/core": "^2.1.1",
+    "@ceramicnetwork/core": "^2.2.0-rc.1",
     "@glazed/types": "^0.2.0",
     "@swc-node/register": "^1.5.1",
     "@types/fs-extra": "^9.0.13",
