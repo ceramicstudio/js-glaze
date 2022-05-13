@@ -54,6 +54,7 @@
     "dids": "^3.0.0",
     "fs-extra": "^10.0.1",
     "graphql": "^16.5.0",
+    "graphql-tools": "^8.2.9",
     "jest-environment-glaze": "^0.3.0"
   },
   "jest": {
