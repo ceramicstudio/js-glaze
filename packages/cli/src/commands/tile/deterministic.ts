@@ -1,18 +1,13 @@
-import { SyncOptions } from '@ceramicnetwork/common'
 import { TileDocument, type TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 
 import { 
   Command,
-  type CommandFlags,
+  type QueryCommandFlags,
   SYNC_OPTION_FLAG
 } from '../../command.js'
 
-type Flags = CommandFlags & {
-  sync?: SyncOptions
-}
-
 export default class DeterministicTile extends Command<
-  Flags,
+  QueryCommandFlags,
   { metadata: TileMetadataArgs }
 > {
   static description = 'load a deterministic Tile stream'

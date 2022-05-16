@@ -1,16 +1,11 @@
-import { SyncOptions } from '@ceramicnetwork/common'
 import { 
   Command, 
   STREAM_ID_ARG,
   SYNC_OPTION_FLAG,
-  type CommandFlags
+  type QueryCommandFlags
 } from '../../command.js'
 
-type Flags = CommandFlags & {
-  sync?: SyncOptions
-}
-
-export default class Commits extends Command<Flags, { streamId: string }> {
+export default class Commits extends Command<QueryCommandFlags, { streamId: string }> {
   static description = 'list commits contained within a stream'
 
   static args = [

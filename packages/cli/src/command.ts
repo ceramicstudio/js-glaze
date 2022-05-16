@@ -35,6 +35,10 @@ export interface CommandFlags {
   [key: string]: unknown
 }
 
+export type QueryCommandFlags = CommandFlags & {
+  sync?: SyncOptions
+}
+
 export const STREAM_ID_ARG = {
   name: 'streamId',
   required: true,

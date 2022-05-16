@@ -1,18 +1,13 @@
-import { SyncOptions } from '@ceramicnetwork/common/lib/streamopts'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
 import { 
   Command, 
-  type CommandFlags,
+  type QueryCommandFlags,
   SYNC_OPTION_FLAG,
   STREAM_ID_ARG
 } from '../../command.js'
 
-type Flags = CommandFlags & {
-  sync?: SyncOptions
-}
-
-export default class ShowTile extends Command<Flags, { streamId: string }> {
+export default class ShowTile extends Command<QueryCommandFlags, { streamId: string }> {
   static description = 'show the contents of a Tile stream'
 
   static args = [
