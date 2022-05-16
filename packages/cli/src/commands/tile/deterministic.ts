@@ -8,7 +8,7 @@ import {
 } from '../../command.js'
 
 type Flags = CommandFlags & {
-  syncOption?: SyncOptions
+  sync?: SyncOptions
 }
 
 export default class DeterministicTile extends Command<
@@ -28,7 +28,7 @@ export default class DeterministicTile extends Command<
 
   static flags = {
     ...Command.flags,
-    syncOption: SYNC_OPTION_FLAG,
+    sync: SYNC_OPTION_FLAG,
   }
   async run(): Promise<void> {
     this.spinner.start('Loading stream...')
@@ -37,7 +37,7 @@ export default class DeterministicTile extends Command<
       const tile = await TileDocument.deterministic(
         this.ceramic,
         this.args.metadata,
-        { sync: this.flags.syncOption }
+        { sync: this.flags.sync }
       )
       this.spinner.succeed(`
         Loaded tile ${tile.id.toString()}.`)

@@ -36,7 +36,7 @@ describe('tiles', () => {
       const content = await execa('glaze', [
         `tile:content`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-        `--syncOption=sync-always`
+        `--sync=sync-always`
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -65,11 +65,11 @@ describe('tiles', () => {
         execa('glaze', [
           `tile:content`,
           tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-          `--syncOption=unsupportedArgument`
+          `--sync=unsupportedArgument`
         ])
       )
       .rejects
-      .toThrow('Expected --syncOption=unsupportedArgument to be one of:')
+      .toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)
   })
 
@@ -82,7 +82,7 @@ describe('tiles', () => {
       const content = await execa('glaze', [
         `tile:show`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-        `--syncOption=never-sync`
+        `--sync=never-sync`
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -111,11 +111,11 @@ describe('tiles', () => {
         execa('glaze', [
           `tile:show`,
           tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-          `--syncOption=unsupportedArgument`
+          `--sync=unsupportedArgument`
         ])
       )
       .rejects
-      .toThrow('Expected --syncOption=unsupportedArgument to be one of:')
+      .toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)
   })
 
@@ -168,7 +168,7 @@ describe('tiles', () => {
           family: ['test'],
         }),
         `--key=${seed}`,
-        `--syncOption=never-sync`
+        `--sync=never-sync`
       ])
       const stdOut = tile.stderr.toString()
       expect(stdOut.includes('Loaded tile')).toBe(true)
@@ -205,11 +205,11 @@ describe('tiles', () => {
             family: ['test'],
           }),
           `--key=${seed}`,
-          `--syncOption=unsupportedArgument`
+          `--sync=unsupportedArgument`
         ])
       )
       .rejects
-      .toThrow('Expected --syncOption=unsupportedArgument to be one of:')
+      .toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)
   })
 })

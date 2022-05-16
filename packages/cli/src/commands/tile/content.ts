@@ -9,7 +9,7 @@ import {
 } from '../../command.js'
 
 type Flags = CommandFlags & {
-  syncOption?: SyncOptions
+  sync?: SyncOptions
 }
 
 export default class ShowTile extends Command<Flags, { streamId: string }> {
@@ -21,7 +21,7 @@ export default class ShowTile extends Command<Flags, { streamId: string }> {
 
   static flags = {
     ...Command.flags,
-    syncOption: SYNC_OPTION_FLAG,
+    sync: SYNC_OPTION_FLAG,
   }
 
   async run(): Promise<void> {
@@ -30,7 +30,7 @@ export default class ShowTile extends Command<Flags, { streamId: string }> {
       const stream = await TileDocument.load(
         this.ceramic, 
         this.args.streamId,
-        { sync: this.flags.syncOption }
+        { sync: this.flags.sync }
       )
       this.spinner.succeed(`Retrieved details of stream ${this.args.streamId}.`)
       this.logJSON(stream.content)

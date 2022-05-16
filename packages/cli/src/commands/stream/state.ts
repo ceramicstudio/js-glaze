@@ -7,7 +7,7 @@ import {
 } from '../../command.js'
 
 type Flags = CommandFlags & {
-  syncOption?: SyncOptions
+  sync?: SyncOptions
 }
 
 export default class State extends Command<Flags, { streamId: string }> {
@@ -19,7 +19,7 @@ export default class State extends Command<Flags, { streamId: string }> {
 
   static flags = {
     ...Command.flags,
-    syncOption: SYNC_OPTION_FLAG,
+    sync: SYNC_OPTION_FLAG,
   }
 
   async run(): Promise<void> {
@@ -28,7 +28,7 @@ export default class State extends Command<Flags, { streamId: string }> {
     try {
       const stream = await this.ceramic.loadStream(
         this.args.streamId,
-        { sync: this.flags.syncOption }
+        { sync: this.flags.sync }
       )
       this.spinner.succeed(`Successfully queried stream ${this.args.streamId}.`)
       this.logJSON(stream.state)
