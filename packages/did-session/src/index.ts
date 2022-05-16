@@ -37,7 +37,7 @@ import { Ed25519Provider } from 'key-did-provider-ed25519'
 import KeyDidResolver from 'key-did-resolver'
 import { randomBytes } from '@stablelib/random'
 import { DID } from 'dids'
-import type { EthereumAuthProvider } from '@ceramicnetwork/blockchain-utils-linking'
+import type { EthereumAuthProvider, CapabilityOpts } from '@ceramicnetwork/blockchain-utils-linking'
 
 export type SessionParams = {
   /**
@@ -68,15 +68,7 @@ export class DIDSession {
   #did?: DID
 
   constructor(params: SessionParams) {
-    // this.#ceramic = params.ceramic
     this.#authProvider = params.authProvider
-  }
-
-  /**
-   * Create a DID session instance
-   */
-  static create(params: SessionParams): DIDSession {
-    return new DIDSession(params)
   }
 
   /**
@@ -89,15 +81,11 @@ export class DIDSession {
   /**
    * Request authorization for session
    */
-  async authorize(resources?: Array<string>): Promise<DID> {
+  async authorize(capabilityOpts: CapabilityOpts = {}): Promise<DID> {
     const didKey = await createDIDKey()
-    const _resources = resources || [`ceramic://*`]
-    console.log(didKey.id)
     // Pass through opts resources instead, resource arg does not support anything but streamids at moment
-    const cacao = await this.#authProvider.requestCapability(didKey.id, [], {
-      domain: 'myapp',
-      resources: _resources,
-    })
+    const opts = Object.assign({ resources: [`ceramic://*`] }, capabilityOpts)
+    const cacao = await this.#authProvider.requestCapability(didKey.id, [], opts)
     const didWithCap = didKey.withCapability(cacao)
     await didWithCap.authenticate()
     this.#did = didWithCap
@@ -109,8 +97,16 @@ export class DIDSession {
    */
   getDID(): DID {
     if (!this.#did) {
-      throw new Error('DID not availale, has not authorized')
+      throw new Error('DID not available, has not authorized')
     }
     return this.#did
+  }
+
+  /** DID string associated to the session instance. session.id == session.getDID().parent */
+  get id(): string {
+    if (!this.#did) {
+      throw new Error('ID not available, has not authorized')
+    }
+    return this.#did.parent
   }
 }

@@ -4,7 +4,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { EventEmitter } from 'events'
-import { EthereumAuthProvider, AuthProvider  } from '@ceramicnetwork/blockchain-utils-linking'
+import { EthereumAuthProvider } from '@ceramicnetwork/blockchain-utils-linking'
 import { Wallet as EthereumWallet } from '@ethersproject/wallet'
 import { fromString, toString } from 'uint8arrays'
 import { DIDSession } from '../src'
@@ -47,47 +47,47 @@ declare global {
 }
 
 describe('did-session', () => {
-  let authProvider: AuthProvider
+  let authProvider: EthereumAuthProvider
   jest.setTimeout(20000)
+  const opts = { domain: 'myApp' }
 
   beforeAll(async () => {
     authProvider = await createEthereumAuthProvider()
   })
 
   test('creates did-session', () => {
-    const session = DIDSession.create({ authProvider })
+    const session = new DIDSession({ authProvider })
     expect(session.authProvider).toBe(authProvider)
   })
 
   test('did getter throws error when not authorized', () => {
-    const session = DIDSession.create({ authProvider })
-    expect(() => session.getDID()).toThrow('DID not availale, has not authorized')
+    const session = new DIDSession({ authProvider })
+    expect(() => session.getDID()).toThrow('DID not available, has not authorized')
   })
 
   test('did getter returns when authorized', async () => {
-    const session = DIDSession.create({ authProvider })
-    const did = await session.authorize()
+    const session = new DIDSession({ authProvider })
+    const did = await session.authorize(opts)
     expect(did).toBeTruthy()
     expect(session.getDID()).toBeTruthy()
   })
 
   test('authorize, default wildcard', async () => {
-    const session = DIDSession.create({ authProvider })
-    const did = await session.authorize()
+    const session = new DIDSession({ authProvider })
+    const did = await session.authorize(opts)
     expect(did.capability.p.resources.includes(`ceramic://*`)).toBe(true)
   })
 
   test('authorize, with streamid resources', async () => {
-    const session = DIDSession.create({ authProvider })
+    const session = new DIDSession({ authProvider })
     const streamId = `ceramic://z6MkhZCWzHtPFmpNupVPuHA6svtpKKY9RUpgf9uohnhFMNvj`
-    const did = await session.authorize([streamId])
-    console.log(did.capability.p.resources)
+    const did = await session.authorize({ resources: [streamId], domain: 'myApp' })
     expect(did.capability.p.resources.includes(streamId)).toBe(true)
   })
 
   test('authorize and create/update streams', async () => {
-    const session = DIDSession.create({ authProvider })
-    const did = await session.authorize()
+    const session = new DIDSession({ authProvider })
+    const did = await session.authorize(opts)
     ceramic.did = did
     const doc = await TileDocument.create(
       ceramic,
