@@ -1,23 +1,34 @@
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 
-import { Command, type CommandFlags } from '../../command.js'
+import { 
+  Command, 
+  type QueryCommandFlags,
+  SYNC_OPTION_FLAG,
+  STREAM_ID_ARG
+} from '../../command.js'
 
-export default class ShowTile extends Command<CommandFlags, { streamId: string }> {
+export default class ShowTile extends Command<QueryCommandFlags, { streamId: string }> {
   static description = 'show the contents of a Tile stream'
 
   static args = [
-    {
-      name: 'streamId',
-      required: true,
-      description: 'ID of the stream',
-    },
+    STREAM_ID_ARG,
   ]
+
+  static flags = {
+    ...Command.flags,
+    sync: SYNC_OPTION_FLAG,
+  }
 
   async run(): Promise<void> {
     this.spinner.start(`Loading stream ${this.args.streamId}`)
     try {
-      const stream = await TileDocument.load(this.ceramic, this.args.streamId)
-      this.spinner.succeed(`Retrieved details of stream ${this.args.streamId}`)
+      const stream = await TileDocument.load(
+        this.ceramic, 
+        this.args.streamId,
+        { sync: this.flags.sync }
+      )
+      
+      this.spinner.succeed(`Retrieved details of stream ${this.args.streamId}.`)
       this.logJSON(stream.content)
     } catch (e) {
       this.spinner.fail((e as Error).message)

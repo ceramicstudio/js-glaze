@@ -1,9 +1,13 @@
 import { TileDocument, type TileMetadataArgs } from '@ceramicnetwork/stream-tile'
 
-import { Command, type CommandFlags } from '../../command.js'
+import { 
+  Command,
+  type QueryCommandFlags,
+  SYNC_OPTION_FLAG
+} from '../../command.js'
 
 export default class DeterministicTile extends Command<
-  CommandFlags,
+  QueryCommandFlags,
   { metadata: TileMetadataArgs }
 > {
   static description = 'load a deterministic Tile stream'
@@ -19,13 +23,19 @@ export default class DeterministicTile extends Command<
 
   static flags = {
     ...Command.flags,
+    sync: SYNC_OPTION_FLAG,
   }
   async run(): Promise<void> {
     this.spinner.start('Loading stream...')
 
     try {
-      const tile = await TileDocument.deterministic(this.ceramic, this.args.metadata)
-      this.spinner.succeed(`Loaded tile ${tile.id.toString()}.`)
+      const tile = await TileDocument.deterministic(
+        this.ceramic,
+        this.args.metadata,
+        { sync: this.flags.sync }
+      )
+      this.spinner.succeed(`
+        Loaded tile ${tile.id.toString()}.`)
       this.logJSON({
         streamID: tile.id.toString(),
         content: tile.content,

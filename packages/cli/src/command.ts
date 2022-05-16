@@ -18,14 +18,40 @@ import { fromString } from 'uint8arrays'
 
 import { config } from './config.js'
 import { createDataModel, loadManagedModel } from './model.js'
+import { SyncOptions } from '@ceramicnetwork/common'
 
 type StringRecord = Record<string, unknown>
+
+// TODO: SYNC_OPTIONS_MAP is also used in js-ceramic/packages/cli. Move this const to '@ceramicnetwork/common'
+export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
+  'prefer-cache': SyncOptions.PREFER_CACHE,
+  'sync-always': SyncOptions.SYNC_ALWAYS,
+  'never-sync': SyncOptions.NEVER_SYNC,
+}
 
 export interface CommandFlags {
   ceramic?: string
   key?: string
   [key: string]: unknown
 }
+
+export type QueryCommandFlags = CommandFlags & {
+  sync?: SyncOptions
+}
+
+export const STREAM_ID_ARG = {
+  name: 'streamId',
+  required: true,
+  description: 'ID of the stream',
+}
+
+export const SYNC_OPTION_FLAG = Flags.integer({
+  char: 's',
+  required: false,
+  options: Object.keys(SYNC_OPTIONS_MAP),
+  description: `Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.`,
+  parse: (input: string) => { return Promise.resolve(SYNC_OPTIONS_MAP[input] ?? SyncOptions.PREFER_CACHE) }
+})
 
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
