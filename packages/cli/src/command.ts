@@ -2,10 +2,6 @@ import { inspect } from 'util'
 
 import { getResolver as get3IDResolver } from '@ceramicnetwork/3id-did-resolver'
 import { CeramicClient } from '@ceramicnetwork/http-client'
-import { DataModel } from '@glazed/datamodel'
-import { ModelManager } from '@glazed/devtools'
-import { DIDDataStore } from '@glazed/did-datastore'
-import type { ModelAliases } from '@glazed/types'
 import { Command as CoreCommand, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { DID } from 'dids'
@@ -17,7 +13,6 @@ import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
 
 import { config } from './config.js'
-import { createDataModel, loadManagedModel } from './model.js'
 
 type StringRecord = Record<string, unknown>
 
@@ -103,21 +98,6 @@ export abstract class Command<
     did.setProvider(this.getProvider(seed))
     await did.authenticate()
     return did
-  }
-
-  async getDataModel(name: string): Promise<DataModel<ModelAliases>> {
-    return await createDataModel(this.ceramic, name)
-  }
-
-  getDataStore<ModelTypes extends ModelAliases = ModelAliases>(
-    model: DataModel<ModelTypes>
-  ): DIDDataStore<ModelTypes> {
-    return new DIDDataStore({ ceramic: this.ceramic, model })
-  }
-
-  async getModelManager(name: string): Promise<ModelManager> {
-    const model = await loadManagedModel(name)
-    return ModelManager.fromJSON({ ceramic: this.ceramic, model })
   }
 
   logJSON(data: unknown): void {

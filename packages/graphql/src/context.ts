@@ -111,14 +111,14 @@ export class Context {
     return await this.#loader.load<Content>(id)
   }
 
-  async createDoc<Content = Record<string, any>>(
+  createDoc<Content = Record<string, any>>(
     _model: string,
     _content: Content
   ): Promise<ModelInstanceDocument<Content>> {
     throw new Error('Not implemented')
   }
 
-  async updateDoc<Content = Record<string, any>>(
+  updateDoc<Content = Record<string, any>>(
     _id: string | StreamID,
     _content: Content
   ): Promise<ModelInstanceDocument<Content | null | undefined>> {

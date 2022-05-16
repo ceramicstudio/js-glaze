@@ -5,6 +5,7 @@ import type {
   RuntimeObjectFields,
   RuntimeReference,
   RuntimeScalar,
+  RuntimeScalarType,
   RuntimeViewField,
 } from '@glazed/types'
 import {
@@ -20,6 +21,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
+  type GraphQLScalarType,
   GraphQLSchema,
   GraphQLString,
   assertValidSchema,
@@ -32,13 +34,17 @@ import {
   mutationWithClientMutationId,
   nodeDefinitions,
 } from 'graphql-relay'
+import { GraphQLDID } from 'graphql-scalars'
 
 import type { Context } from './context.js'
+import { CeramicStreamReference } from './scalars.js'
 
-const SCALARS = {
+const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   boolean: GraphQLBoolean,
+  did: GraphQLDID,
   float: GraphQLFloat,
   integer: GraphQLInt,
+  streamref: CeramicStreamReference,
   string: GraphQLString,
 }
 const SCALAR_FIELDS = Object.keys(SCALARS)
@@ -50,7 +56,7 @@ type GraphQLNodeDefinitions = {
 }
 type SharedDefinitions = GraphQLNodeDefinitions & {
   storeObject: GraphQLObjectType<string, Context>
-  didObject: GraphQLObjectType<string, Context>
+  accountObject: GraphQLObjectType<string, Context>
 }
 
 type BuildObjectParams = {
@@ -59,12 +65,14 @@ type BuildObjectParams = {
   definitions: SharedDefinitions
 }
 
-function createDIDObject(dataStore: GraphQLObjectType): GraphQLObjectType<string, Context> {
+function createCeramicAccountObject(
+  dataStore: GraphQLObjectType
+): GraphQLObjectType<string, Context> {
   return new GraphQLObjectType<string, Context>({
-    name: 'DID',
+    name: 'CeramicAccount',
     fields: {
       id: {
-        type: new GraphQLNonNull(GraphQLID),
+        type: new GraphQLNonNull(GraphQLDID),
         resolve: (did) => did,
       },
       isViewer: {
@@ -142,7 +150,7 @@ class SchemaBuilder {
             config[alias] = {
               type: this.#types[reference.name],
               args: connectionArgs,
-              resolve: async (
+              resolve: (
                 _account,
                 _args: ConnectionArguments,
                 _ctx
@@ -151,6 +159,7 @@ class SchemaBuilder {
               },
             }
           } else {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             throw new Error(`Unsupported reference type: ${reference.type}`)
           }
         }
@@ -158,7 +167,7 @@ class SchemaBuilder {
       },
     })
 
-    return { ...nodeDefs, storeObject, didObject: createDIDObject(storeObject) }
+    return { ...nodeDefs, storeObject, accountObject: createCeramicAccountObject(storeObject) }
   }
 
   _buildObjects(definitions: SharedDefinitions): Set<string> {
@@ -245,11 +254,7 @@ class SchemaBuilder {
         return {
           type,
           args: connectionArgs,
-          resolve: async (
-            _doc,
-            _args: ConnectionArguments,
-            _ctx
-          ): Promise<Connection<any> | null> => {
+          resolve: (_doc, _args: ConnectionArguments, _ctx): Promise<Connection<any> | null> => {
             throw new Error('Not implemented')
           },
         }
@@ -264,6 +269,7 @@ class SchemaBuilder {
       case 'object':
         return { type, resolve: (doc) => doc.content[key] }
       default:
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unsupported reference type: ${field.refType}`)
     }
   }
@@ -280,7 +286,7 @@ class SchemaBuilder {
         throw new Error(`Missing referenced object type: ${field.item.refName}`)
       }
     } else if (field.item.type === 'did') {
-      itemType = definitions.didObject
+      itemType = definitions.accountObject
     } else if (SCALAR_FIELDS.includes(field.item.type)) {
       itemType = SCALARS[field.item.type]
     } else {
@@ -304,7 +310,7 @@ class SchemaBuilder {
   ): GraphQLFieldConfig<ModelInstanceDocument, Context> {
     if (field.viewType === 'documentAccount') {
       return {
-        type: new GraphQLNonNull(definitions.didObject),
+        type: new GraphQLNonNull(definitions.accountObject),
         resolve: (doc): string => doc.metadata.controller,
       }
     }
@@ -315,6 +321,7 @@ class SchemaBuilder {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new Error(`Unsupported view type: ${field.viewType}`)
   }
 
@@ -325,7 +332,7 @@ class SchemaBuilder {
   ): GraphQLFieldConfig<ModelInstanceDocument, Context> {
     let type
     if (field.type === 'did') {
-      type = definitions.didObject
+      type = definitions.accountObject
     } else if (SCALAR_FIELDS.includes(field.type)) {
       type = SCALARS[field.type]
     } else {
@@ -372,9 +379,6 @@ class SchemaBuilder {
                 if (itemType == null) {
                   throw new Error(`Missing referenced input type: ${field.item.refName}`)
                 }
-              } else if (field.item.type === 'did') {
-                // TODO: DID scalar
-                itemType = GraphQLString
               } else if (SCALAR_FIELDS.includes(field.item.type)) {
                 itemType = SCALARS[field.item.type]
               } else {
@@ -383,10 +387,6 @@ class SchemaBuilder {
               type = new GraphQLList(itemType)
               break
             }
-            case 'did':
-              // TODO: DID scalar
-              type = GraphQLString
-              break
             default:
               if (SCALAR_FIELDS.includes(field.type)) {
                 type = SCALARS[field.type]
@@ -443,14 +443,14 @@ class SchemaBuilder {
     const queryFields: GraphQLFieldConfigMap<any, Context> = {
       node: definitions.nodeField,
       account: {
-        type: new GraphQLNonNull(definitions.didObject),
+        type: new GraphQLNonNull(definitions.accountObject),
         args: {
           id: { type: new GraphQLNonNull(GraphQLID) },
         },
         resolve: (_, args: { id: string }): string => args.id,
       },
       viewer: {
-        type: definitions.didObject,
+        type: definitions.accountObject,
         resolve: (_self, _args, ctx): string | null => ctx.viewerID,
       },
     }
@@ -465,7 +465,7 @@ class SchemaBuilder {
         queryFields[alias] = {
           type: this.#types[reference.name],
           args: connectionArgs,
-          resolve: async (_, _args: ConnectionArguments, _ctx): Promise<Connection<any> | null> => {
+          resolve: (_, _args: ConnectionArguments, _ctx): Promise<Connection<any> | null> => {
             throw new Error('Not implemented')
           },
         }

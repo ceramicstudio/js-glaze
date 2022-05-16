@@ -7,8 +7,8 @@ exports[`schema printGraphQLSchema() 1`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: ID!): DID!
-  viewer: DID
+  account(id: ID!): CeramicAccount!
+  viewer: CeramicAccount
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -17,11 +17,16 @@ interface Node {
   id: ID!
 }
 
-type DID {
-  id: ID!
+type CeramicAccount {
+  id: DID!
   isViewer: Boolean!
   store: DataStore
 }
+
+\\"\\"\\"
+A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
+\\"\\"\\"
+scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
 
 type DataStore {
   profile: Profile

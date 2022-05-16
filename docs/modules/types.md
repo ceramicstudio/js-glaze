@@ -2,20 +2,91 @@
 
 Common types used by Glaze packages.
 
+## Interfaces
+
+- [Model](../interfaces/types.Model.md)
+- [ModelInstanceDocument](../interfaces/types.ModelInstanceDocument.md)
+- [QueryAPIs](../interfaces/types.QueryAPIs.md)
+
 ## Type aliases
 
-### CastModelTo
+### CollectionRequest
 
-Ƭ **CastModelTo**<`Model`, `ToType`\>: `Model` extends [`ModelData`](types.md#modeldata)<`any`\> ? [`MapModelTypes`](types.md#mapmodeltypes)<`Model`, `ToType`\> : [`ModelData`](types.md#modeldata)<`ToType`\>
+Ƭ **CollectionRequest**: [`PaginationParams`](types.md#paginationparams) & { `account?`: `string` ; `model`: `string`  }
 
-Utility type for mapping a model structure to a given type.
+___
+
+### CollectionResponse
+
+Ƭ **CollectionResponse**<`T`\>: `Object`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `Model` | extends [`ModelData`](types.md#modeldata)<`any`\> \| `void` |
-| `ToType` | `ToType` |
+| `T` | `Record`<`string`, `unknown`\> |
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `results` | [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\>[] |
+| `total` | `number` |
+
+___
+
+### CompositeDefinitionType
+
+Ƭ **CompositeDefinitionType**<`T`\>: `Object`
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `aliases?` | `Record`<`string`, `string`\> |
+| `commonEmbeds?` | `string`[] |
+| `models` | `Record`<`string`, `T`\> |
+| `version` | `string` |
+| `views?` | [`CompositeViewsDefinition`](types.md#compositeviewsdefinition) |
+
+___
+
+### CompositeViewsDefinition
+
+Ƭ **CompositeViewsDefinition**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `account` | `any` |
+| `models` | `Record`<`string`, [`ReferencedFromViewDefinitions`](types.md#referencedfromviewdefinitions)\> |
+| `root` | `any` |
+
+___
+
+### DocumentMetadata
+
+Ƭ **DocumentMetadata**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `controller` | `string` |
+| `model` | `string` |
+
+___
+
+### EncodedCompositeDefinition
+
+Ƭ **EncodedCompositeDefinition**: [`CompositeDefinitionType`](types.md#compositedefinitiontype)<[`EncodedStreamCommits`](types.md#encodedstreamcommits)\>
 
 ___
 
@@ -50,204 +121,311 @@ JSON-encoded DAG-JWS result representing a Ceramic stream commit.
 
 ___
 
-### EncodedManagedModel
+### EncodedStreamCommits
 
-Ƭ **EncodedManagedModel**: [`ManagedModel`](types.md#managedmodel)<[`EncodedDagJWSResult`](types.md#encodeddagjwsresult)\>
-
-JSON-encoded version of the [`ManagedModel`](types.md#managedmodel), used by the
-[`ModelManager`](../classes/devtools.ModelManager.md).
+Ƭ **EncodedStreamCommits**: [`EncodedDagJWSResult`](types.md#encodeddagjwsresult)[]
 
 ___
 
-### ManagedDoc
+### InternalCompositeDefinition
 
-Ƭ **ManagedDoc**<`CommitType`\>: `Object`
+Ƭ **InternalCompositeDefinition**: [`CompositeDefinitionType`](types.md#compositedefinitiontype)<[`ModelDefinition`](types.md#modeldefinition)\>
 
-Shared structure for representing streams used in a [`ManagedModel`](types.md#managedmodel).
+___
 
-#### Type parameters
+### LinkRequest
 
-| Name | Type |
-| :------ | :------ |
-| `CommitType` | `DagJWSResult` |
+Ƭ **LinkRequest**: `Object`
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `alias` | `string` |
-| `commits` | `CommitType`[] |
-| `version` | `string` |
+| `account` | `string` |
+| `model` | `string` |
 
 ___
 
-### ManagedEntry
+### LinkResponse
 
-Ƭ **ManagedEntry**<`CommitType`\>: [`ManagedDoc`](types.md#manageddoc)<`CommitType`\> & { `schema`: [`ManagedID`](types.md#managedid)  }
-
-Structure for representing streams having a schema dependency, used in a
-[`ManagedModel`](types.md#managedmodel).
+Ƭ **LinkResponse**<`T`\>: `Object`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `CommitType` | `DagJWSResult` |
-
-___
-
-### ManagedID
-
-Ƭ **ManagedID**: `string`
-
-ID of a stream used in a [`ManagedModel`](types.md#managedmodel).
-
-___
-
-### ManagedModel
-
-Ƭ **ManagedModel**<`CommitType`\>: `Object`
-
-Structure used internally by the [`ModelManager`](../classes/devtools.ModelManager.md) to represent a
-data model.
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `CommitType` | `DagJWSResult` |
+| `T` | `Record`<`string`, `unknown`\> |
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `definitions` | `Record`<[`ManagedID`](types.md#managedid), [`ManagedEntry`](types.md#managedentry)<`CommitType`\>\> |
-| `schemas` | `Record`<[`ManagedID`](types.md#managedid), [`ManagedSchema`](types.md#managedschema)<`CommitType`\>\> |
-| `tiles` | `Record`<[`ManagedID`](types.md#managedid), [`ManagedEntry`](types.md#managedentry)<`CommitType`\>\> |
+| `result` | [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\> \| ``null`` |
 
 ___
 
-### ManagedSchema
+### ModelAccountRelation
 
-Ƭ **ManagedSchema**<`CommitType`\>: [`ManagedDoc`](types.md#manageddoc)<`CommitType`\> & { `dependencies`: `Record`<`string`, [`ManagedID`](types.md#managedid)[]\>  }
-
-Structure for representing schema streams and their dependencies, used in a
-[`ManagedModel`](types.md#managedmodel).
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `CommitType` | `DagJWSResult` |
+Ƭ **ModelAccountRelation**: ``"list"`` \| ``"set"`` \| ``"link"`` \| ``"none"``
 
 ___
 
-### MapModelTypes
+### ModelDefinition
 
-Ƭ **MapModelTypes**<`Model`, `ToType`\>: `Object`
-
-Utility type for mapping a model structure of a given type to another.
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `Model` | extends [`ModelData`](types.md#modeldata)<`any`\> |
-| `ToType` | `ToType` |
+Ƭ **ModelDefinition**: `Object`
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `definitions` | `Record`<keyof `Model`[``"definitions"``], `ToType`\> |
-| `schemas` | `Record`<keyof `Model`[``"schemas"``], `ToType`\> |
-| `tiles` | `Record`<keyof `Model`[``"tiles"``], `ToType`\> |
+| `accountRelation` | [`ModelAccountRelation`](types.md#modelaccountrelation) |
+| `description?` | `string` |
+| `name` | `string` |
+| `relations?` | [`ModelRelationsDefinition`](types.md#modelrelationsdefinition) |
+| `schema` | `JSONSchema.Object` |
+| `views?` | [`ModelViewsDefinition`](types.md#modelviewsdefinition) |
 
 ___
 
-### ModelAliases
+### ModelRelationDefinition
 
-Ƭ **ModelAliases**<`Model`\>: [`CastModelTo`](types.md#castmodelto)<`Model`, `string`\>
-
-Data model aliases created by [`deploying a managed model`](../classes/devtools.ModelManager.md#deploy)
-and used at runtime by the [`DataModel`](../classes/datamodel.DataModel.md) class.
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `Model` | extends [`ModelData`](types.md#modeldata)<`any`\> \| `void` = `void` |
+Ƭ **ModelRelationDefinition**: { `type`: ``"account"``  } \| { `models`: `string`[] ; `type`: ``"document"``  } \| { `type`: ``"setIndex"``  }
 
 ___
 
-### ModelData
+### ModelRelationsDefinition
 
-Ƭ **ModelData**<`T`\>: `Object`
+Ƭ **ModelRelationsDefinition**: `Record`<`string`, [`ModelRelationDefinition`](types.md#modelrelationdefinition)\>
 
-Generic structure for storing model data.
+___
 
-#### Type parameters
+### ModelViewDefinition
 
-| Name |
-| :------ |
-| `T` |
+Ƭ **ModelViewDefinition**: { `type`: ``"documentAccount"``  } \| { `type`: ``"documentVersion"``  } \| { `property`: `string` ; `type`: ``"referencedBy"``  }
+
+___
+
+### ModelViewsDefinition
+
+Ƭ **ModelViewsDefinition**: `Record`<`string`, [`ModelViewDefinition`](types.md#modelviewdefinition)\>
+
+___
+
+### MultiLinkRequest
+
+Ƭ **MultiLinkRequest**: `Object`
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `definitions` | `Record`<`string`, `T`\> |
-| `schemas` | `Record`<`string`, `T`\> |
-| `tiles` | `Record`<`string`, `T`\> |
+| `accounts` | `string`[] |
+| `model` | `string` |
 
 ___
 
-### ModelTypeAliases
+### MultiLinkResponse
 
-Ƭ **ModelTypeAliases**<`Schemas`, `Definitions`, `Tiles`\>: `Object`
-
-Model aliases relations between schemas and the definitions and tiles using them.
+Ƭ **MultiLinkResponse**<`T`\>: `Object`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `Schemas` | extends `Record`<`string`, `any`\> = `Record`<`string`, `any`\> |
-| `Definitions` | extends `Record`<`string`, keyof `Schemas`\> = `Record`<`string`, `string`\> |
-| `Tiles` | extends `Record`<`string`, keyof `Schemas`\> = `Record`<`string`, `string`\> |
+| `T` | `Record`<`string`, `unknown`\> |
 
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `definitions` | `Definitions` |
-| `schemas` | `Schemas` |
-| `tiles` | `Tiles` |
+| `results` | `Record`<`string`, [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\> \| ``null``\> |
 
 ___
 
-### ModelTypesToAliases
+### PaginationParams
 
-Ƭ **ModelTypesToAliases**<`TypeAliases`\>: [`MapModelTypes`](types.md#mapmodeltypes)<`TypeAliases`, `string`\>
+Ƭ **PaginationParams**: `Object`
 
-Utility type to cast [`ModelTypeAliases`](types.md#modeltypealiases) to [`ModelAliases`](types.md#modelaliases).
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `limit` | `number` |
+| `skip?` | `number` |
+| `sort?` | ``"asc"`` \| ``"desc"`` |
+
+___
+
+### ReferencedFromViewDefinition
+
+Ƭ **ReferencedFromViewDefinition**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `collection` | `boolean` |
+| `model` | `string` |
+| `property` | `string` |
+| `type` | ``"ReferencedFrom"`` |
+
+___
+
+### ReferencedFromViewDefinitions
+
+Ƭ **ReferencedFromViewDefinitions**: `Record`<`string`, [`ReferencedFromViewDefinition`](types.md#referencedfromviewdefinition)\>
+
+___
+
+### RuntimeBooleanScalar
+
+Ƭ **RuntimeBooleanScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"boolean"``  }
+
+___
+
+### RuntimeCompositeDefinition
+
+Ƭ **RuntimeCompositeDefinition**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `accountStore` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> |
+| `models` | `Record`<`string`, `string`\> |
+| `objects` | `Record`<`string`, [`RuntimeObjectFields`](types.md#runtimeobjectfields)\> |
+| `query?` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> |
+
+___
+
+### RuntimeDIDStringScalar
+
+Ƭ **RuntimeDIDStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"did"``  }
+
+___
+
+### RuntimeFloatScalar
+
+Ƭ **RuntimeFloatScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"float"``  }
+
+___
+
+### RuntimeIntegerScalar
+
+Ƭ **RuntimeIntegerScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"integer"``  }
+
+___
+
+### RuntimeList
+
+Ƭ **RuntimeList**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `item`: [`RuntimeScalar`](types.md#runtimescalar) \| [`RuntimeReference`](types.md#runtimereference)<``"object"``\> ; `type`: ``"list"``  }
+
+___
+
+### RuntimeObjectField
+
+Ƭ **RuntimeObjectField**: [`RuntimeScalar`](types.md#runtimescalar) \| [`RuntimeList`](types.md#runtimelist) \| [`RuntimeReference`](types.md#runtimereference) \| [`RuntimeViewField`](types.md#runtimeviewfield)
+
+___
+
+### RuntimeObjectFields
+
+Ƭ **RuntimeObjectFields**: `Record`<`string`, [`RuntimeObjectField`](types.md#runtimeobjectfield)\>
+
+___
+
+### RuntimeReference
+
+Ƭ **RuntimeReference**<`T`\>: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `refName`: `string` ; `refType`: `T` ; `type`: ``"reference"``  }
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `TypeAliases` | extends [`ModelTypeAliases`](types.md#modeltypealiases) |
+| `T` | extends [`RuntimeReferenceType`](types.md#runtimereferencetype) = [`RuntimeReferenceType`](types.md#runtimereferencetype) |
 
 ___
 
-### Schema
+### RuntimeReferenceType
 
-Ƭ **Schema**<`T`\>: `JSONSchemaType`<`T`\> & { `$comment?`: `string` ; `title?`: `string`  }
+Ƭ **RuntimeReferenceType**: ``"connection"`` \| ``"node"`` \| ``"object"``
 
-JSON schema declaration, used for validating Ceramic streams.
+___
 
-#### Type parameters
+### RuntimeScalar
+
+Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| [`RuntimeDIDStringScalar`](types.md#runtimedidstringscalar) \| [`RuntimeStreamRefStringScalar`](types.md#runtimestreamrefstringscalar)
+
+___
+
+### RuntimeScalarCommon
+
+Ƭ **RuntimeScalarCommon**: `Object`
+
+#### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `T` | `Record`<`string`, `any`\> |
+| `required` | `boolean` |
+
+___
+
+### RuntimeScalarType
+
+Ƭ **RuntimeScalarType**: [`RuntimeScalar`](types.md#runtimescalar)[``"type"``]
+
+___
+
+### RuntimeStreamRefStringScalar
+
+Ƭ **RuntimeStreamRefStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"streamref"``  }
+
+___
+
+### RuntimeStringScalar
+
+Ƭ **RuntimeStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"string"``  }
+
+___
+
+### RuntimeViewField
+
+Ƭ **RuntimeViewField**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `type` | ``"view"`` |
+| `viewType` | [`RuntimeViewType`](types.md#runtimeviewtype) |
+
+___
+
+### RuntimeViewReference
+
+Ƭ **RuntimeViewReference**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `name` | `string` |
+| `type` | [`RuntimeViewReferenceType`](types.md#runtimeviewreferencetype) |
+
+___
+
+### RuntimeViewReferenceType
+
+Ƭ **RuntimeViewReferenceType**: ``"collection"`` \| ``"model"``
+
+___
+
+### RuntimeViewType
+
+Ƭ **RuntimeViewType**: ``"documentAccount"`` \| ``"documentVersion"``
+
+___
+
+### StreamCommits
+
+Ƭ **StreamCommits**: `DagJWSResult`[]

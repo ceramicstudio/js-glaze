@@ -63,7 +63,7 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore internal method
-    this._batchLoadFn = async (keys: ReadonlyArray<TileKey>) => {
+    this._batchLoadFn = async (keys: ReadonlyArray<DocID>) => {
       if (!params.cache) {
         // Disable cache but keep batching behavior - from https://github.com/graphql/dataloader#disabling-cache
         this.clearAll()

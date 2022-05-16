@@ -6,7 +6,7 @@ describe('Runtime format', () => {
   test('Profile - multiples models with common local references', () => {
     const runtime = createRuntimeDefinition({
       version: '1.0',
-      commonShapes: ['ImageMetadata', 'ImageSources'],
+      commonEmbeds: ['ImageMetadata', 'ImageSources'],
       models: {
         genericProfileID: {
           name: 'GenericProfile',
@@ -22,58 +22,9 @@ describe('Runtime format', () => {
               image: {
                 $ref: '#/definitions/imageSources',
               },
-              description: {
-                type: 'string',
-                maxLength: 420,
-              },
-              emoji: {
-                type: 'string',
-                maxLength: 2,
-              },
-              background: {
-                $ref: '#/definitions/imageSources',
-              },
-              birthDate: {
-                type: 'string',
-                format: 'date',
-                maxLength: 10,
-              },
-              url: {
-                type: 'string',
-                maxLength: 240,
-              },
-              gender: {
-                type: 'string',
-                maxLength: 42,
-              },
-              homeLocation: {
-                type: 'string',
-                maxLength: 140,
-              },
-              residenceCountry: {
-                type: 'string',
-                pattern: '^[A-Z]{2}$',
-                maxLength: 2,
-              },
-              nationalities: {
-                type: 'array',
-                minItems: 1,
-                items: {
-                  type: 'string',
-                  pattern: '^[A-Z]{2}$',
-                  maxItems: 5,
-                },
-              },
-              affiliations: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  maxLength: 140,
-                },
-              },
             },
             definitions: {
-              IPFSUrl: {
+              IPFSURL: {
                 type: 'string',
                 pattern: '^ipfs://.+',
                 maxLength: 150,
@@ -87,7 +38,7 @@ describe('Runtime format', () => {
                 title: 'ImageMetadata',
                 properties: {
                   src: {
-                    $ref: '#/definitions/IPFSUrl',
+                    $ref: '#/definitions/IPFSURL',
                   },
                   mimeType: {
                     type: 'string',
@@ -148,7 +99,7 @@ describe('Runtime format', () => {
               },
             },
             definitions: {
-              IPFSUrl: {
+              IPFSURL: {
                 type: 'string',
                 pattern: '^ipfs://.+',
                 maxLength: 150,
@@ -162,7 +113,7 @@ describe('Runtime format', () => {
                 title: 'ImageMetadata',
                 properties: {
                   src: {
-                    $ref: '#/definitions/IPFSUrl',
+                    $ref: '#/definitions/IPFSURL',
                   },
                   mimeType: {
                     type: 'string',

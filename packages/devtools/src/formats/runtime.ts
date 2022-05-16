@@ -1,9 +1,10 @@
 import type {
-  CompositeDefinition,
+  InternalCompositeDefinition,
   JSONSchema,
   ModelDefinition,
   ModelViewsDefinition,
   RuntimeCompositeDefinition,
+  RuntimeList,
   RuntimeObjectField,
   RuntimeObjectFields,
   RuntimeScalar,
@@ -18,18 +19,20 @@ export function getName(base: string, prefix = ''): string {
   return withCase.startsWith(prefix) ? withCase : prefix + withCase
 }
 
-type SubSchema =
-  | JSONSchema.Array
-  | JSONSchema.Boolean
-  | JSONSchema.Integer
-  | JSONSchema.Number
-  | JSONSchema.Object
-  | JSONSchema.String
+type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number | JSONSchema.String
+
+type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
+
+const CUSTOM_SCALARS_TITLES: Record<string, RuntimeScalar['type']> = {
+  CeramicStreamReference: 'streamref',
+  GraphQLDID: 'did',
+}
+type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
 export type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
-  commonShapes?: Array<string>
+  commonEmbeds?: Array<string>
 }
 
 export type ExtractSchemaParams = {
@@ -40,123 +43,163 @@ export type ExtractSchemaParams = {
 }
 
 export class RuntimeModelBuilder {
-  #commonShapes: Array<string>
+  #commonEmbeds: Array<string>
   #modelName: string
   #modelSchema: JSONSchema.Object
   #modelViews: ModelViewsDefinition
   #objects: Record<string, RuntimeObjectFields> = {}
 
   constructor(params: RuntimeModelBuilderParams) {
-    this.#commonShapes = params.commonShapes ?? []
+    this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
     this.#modelViews = params.definition.views ?? {}
   }
 
   build(): Record<string, RuntimeObjectFields> {
-    this._buildSchema(this.#modelSchema)
-    const modelObject = this.#objects[this.#modelName]
-    if (modelObject == null) {
-      throw new Error(`Object for model ${this.#modelName} has not been created`)
-    }
+    const modelObject = this._buildObject(this.#modelSchema)
+    this.#objects[this.#modelName] = modelObject
     // TODO: build relations
     this._buildViews(modelObject, this.#modelViews)
     return this.#objects
   }
 
-  _buildSchema(
-    schema: SubSchema,
-    { parentName, ...params }: ExtractSchemaParams = {}
-  ): RuntimeObjectField {
-    const required = params.required ?? false
-    const ownName =
-      params.localRef && typeof schema.title === 'string'
-        ? this.#commonShapes.includes(schema.title)
-          ? schema.title
-          : getName(schema.title, this.#modelName)
-        : params.ownName ?? this.#modelName
+  _getName(schema: AnySchema, params: ExtractSchemaParams, isReference = false): string {
+    return isReference && typeof schema.title === 'string'
+      ? this.#commonEmbeds.includes(schema.title)
+        ? schema.title
+        : getName(schema.title, this.#modelName)
+      : params.ownName ?? this.#modelName
+  }
 
-    if (typeof schema.$ref === 'string') {
-      const ref = new JsonReference(schema.$ref)
-      const deref = ref.resolve(this.#modelSchema)
-      if (deref == null) {
-        throw new Error(`Missing reference: ${schema.$ref}`)
-      }
-      return this._buildSchema(deref as SubSchema, {
-        ownName,
-        parentName,
-        required,
-        localRef: true,
+  _getReferenceSchema<T extends AnySchema = AnySchema>(reference: string): T {
+    const ref = new JsonReference(reference)
+    const schema = ref.resolve(this.#modelSchema)
+    if (schema == null) {
+      throw new Error(`Missing reference: ${reference}`)
+    }
+    return schema as T
+  }
+
+  _buildObject(schema: JSONSchema.Object, params: ExtractSchemaParams = {}): RuntimeObjectFields {
+    const ownName = this._getName(schema, params)
+    const requiredProps = schema.required ?? []
+
+    const fields: RuntimeObjectFields = {}
+    for (const [propKey, propSchema] of Object.entries(schema.properties ?? {})) {
+      fields[propKey] = this._buildObjectField(propSchema as AnySchema, {
+        ownName: propKey,
+        parentName: ownName,
+        required: requiredProps.includes(propKey),
       })
     }
+    return fields
+  }
+
+  _buildObjectField(schema: AnySchema, params: ExtractSchemaParams = {}): RuntimeObjectField {
+    if (schema.$ref != null) {
+      return this._buildReferenceSchema(schema.$ref, params)
+    }
+    switch (schema.type) {
+      case 'array':
+        return this._buildList(schema, params)
+      case 'object':
+        return this._buildObjectReferenceField(schema, params)
+      default:
+        return this._buildScalar(schema as ScalarSchema, params)
+    }
+  }
+
+  _buildList(schema: JSONSchema.Array, params: ExtractSchemaParams = {}): RuntimeList {
+    if (typeof schema.items !== 'object' || Array.isArray(schema.items)) {
+      throw new Error('Unsupported items schema in array')
+    }
+
+    const required = params.required ?? false
+    const items = schema.items as AnySchema
+
+    if (items.$ref != null) {
+      return { type: 'list', required, item: this._buildListReference(items.$ref, params) }
+    }
+    if (items.type == null) {
+      throw new Error('Missing schema $ref or type for array items')
+    }
+
+    let item: RuntimeScalar | RuntimeReference<'object'>
+    switch (items.type) {
+      case 'array':
+        throw new Error('Unsupported array in array')
+      case 'object':
+        item = this._buildObjectReferenceField(items, params)
+        break
+      default:
+        item = this._buildScalar(items as ScalarSchema, params)
+        break
+    }
+    return { type: 'list', required, item }
+  }
+
+  _buildListReference(
+    reference: string,
+    params: ExtractSchemaParams = {}
+  ): RuntimeScalar | RuntimeReference<'object'> {
+    const schema = this._getReferenceSchema(reference)
+    switch (schema.type) {
+      case 'array':
+        throw new Error('Unsupported array in array reference')
+      case 'object':
+        return this._buildObjectReferenceField(schema, params)
+      default:
+        return this._buildScalar(schema as ScalarSchema, params)
+    }
+  }
+
+  _buildObjectReferenceField(
+    schema: JSONSchema.Object,
+    params: ExtractSchemaParams = {}
+  ): RuntimeReference<'object'> {
+    const ownName = this._getName(schema, params, true)
+    if (this.#objects[ownName] == null) {
+      this.#objects[ownName] = this._buildObject(schema, { ...params, ownName })
+    }
+    return {
+      type: 'reference',
+      refType: 'object',
+      refName: ownName,
+      required: params.required ?? false,
+    }
+  }
+
+  _buildReferenceSchema(reference: string, params: ExtractSchemaParams = {}): RuntimeObjectField {
+    const schema = this._getReferenceSchema(reference)
+    switch (schema.type) {
+      case 'array':
+        return this._buildList(schema, params)
+      case 'object':
+        return this._buildObjectReferenceField(schema, params)
+      default:
+        return this._buildScalar(schema as ScalarSchema, params)
+    }
+  }
+
+  _buildScalar(schema: ScalarSchema, params: ExtractSchemaParams = {}): RuntimeScalar {
+    if (schema.type == null) {
+      throw new Error('Missing scalar type')
+    }
+
+    const required = params.required ?? false
 
     switch (schema.type) {
-      // TODO: DID/StreamID support
       case 'boolean':
       case 'integer':
-      case 'string':
         return { type: schema.type, required }
       case 'number':
         return { type: 'float', required }
-      case 'array': {
-        if (typeof schema.items !== 'object') {
-          throw new Error('Unsupported schema items')
+      case 'string':
+        return {
+          type: CUSTOM_SCALARS_TITLES[schema.title as CustomScalarTitle] ?? 'string',
+          required,
         }
-
-        const itemSchema = schema.items as SubSchema
-        let item: RuntimeScalar | RuntimeReference<'object'>
-
-        if (typeof itemSchema.$ref === 'string') {
-          const ref = new JsonReference(itemSchema.$ref)
-          const deref = ref.resolve(this.#modelSchema)
-          if (deref == null) {
-            throw new Error(`Missing item reference: ${itemSchema.$ref}`)
-          }
-          item = this._buildSchema(deref as SubSchema, {
-            ownName: getName(ownName, parentName),
-            parentName,
-            required,
-            localRef: true,
-          }) as RuntimeScalar | RuntimeReference<'object'>
-        } else {
-          switch (itemSchema.type) {
-            case 'array':
-              throw new Error('Unsupported list in list')
-            // TODO: DID/StreamID support
-            case 'boolean':
-            case 'integer':
-            case 'string':
-              // TODO: required support?
-              item = { type: itemSchema.type, required: false }
-              break
-            case 'object': {
-              const refName = getName(ownName, parentName)
-              this._buildSchema(schema.items as SubSchema, { ownName: refName })
-              item = { type: 'reference', refType: 'object', refName, required: false }
-              break
-            }
-            default:
-              throw new Error(`Unsupported schema item type: ${itemSchema.type}`)
-          }
-        }
-
-        return { type: 'list', required, item }
-      }
-      case 'object': {
-        const fields: RuntimeObjectFields = {}
-        const requiredProps = (schema.required as Array<string>) ?? []
-        for (const [propKey, propSchema] of Object.entries(schema.properties ?? {})) {
-          fields[propKey] = this._buildSchema(propSchema as SubSchema, {
-            ownName: propKey,
-            parentName: ownName,
-            required: requiredProps.includes(propKey),
-          })
-        }
-        this.#objects[ownName] = fields
-        return { type: 'reference', refType: 'object', refName: ownName, required }
-      }
-      default:
-        throw new Error(`Unsupported schema type: ${schema.type}`)
     }
   }
 
@@ -175,7 +218,7 @@ export class RuntimeModelBuilder {
 }
 
 export function createRuntimeDefinition(
-  definition: CompositeDefinition
+  definition: InternalCompositeDefinition
 ): RuntimeCompositeDefinition {
   const runtime: RuntimeCompositeDefinition = {
     models: {},
@@ -189,14 +232,14 @@ export function createRuntimeDefinition(
     runtime.models[modelName] = modelID
     // Extract objects from model schema, relations and views
     const modelBuilder = new RuntimeModelBuilder({
-      commonShapes: definition.commonShapes,
+      commonEmbeds: definition.commonEmbeds,
       name: modelName,
       definition: modelDefinition,
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type
     if (modelDefinition.accountRelation !== 'none') {
-      let key = camelCase(modelName)
+      const key = camelCase(modelName)
       if (modelDefinition.accountRelation === 'link') {
         runtime.accountStore[key] = { type: 'model', name: modelName }
       } else {

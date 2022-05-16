@@ -8,8 +8,8 @@ The `devtools` library provides APIs to help support common use-cases when build
 on top of Ceramic, notably as a complement to the runtime Glaze libraries. It is meant to be
 used by developers in scripts or other tools such as the CLI, not as a runtime library.
 
-The [`ModelManager`](../classes/devtools.ModelManager.md) class notably allows developers to create, update and deploy data
-models to be used with the [`DataModel`](../classes/datamodel.DataModel.md) runtime.
+The {@linkcode ModelManager} class notably allows developers to create, update and deploy data
+models to be used with the {@linkcode datamodel.DataModel DataModel} runtime.
 
 ## Installation
 
@@ -22,7 +22,7 @@ npm install --dev @glazed/devtools
 ### Add an existing schema to a model
 
 An existing schema can be added using the
-[`useDeployedSchema`](../classes/devtools.ModelManager.md#usedeployedschema) method, as shown below.
+{@linkcode ModelManager.useDeployedSchema useDeployedSchema} method, as shown below.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
@@ -36,13 +36,13 @@ const manager = new ModelManager({ ceramic })
 await manager.useDeployedSchema('MySchema', 'ceramic://k2...ab')
 ```
 
-The [`useDeployedDefinition`](../classes/devtools.ModelManager.md#usedeployeddefinition) and
-[`useDeployedTile`](../classes/devtools.ModelManager.md#usedeployedtile) methods can be used similarly to add
+The {@linkcode ModelManager.useDeployedDefinition useDeployedDefinition} and
+{@linkcode ModelManager.useDeployedTile useDeployedTile} methods can be used similarly to add
 definitions and tiles to the model.
 
 ### Create and add a schema to a model
 
-Using the [`createSchema`](../classes/devtools.ModelManager.md#createschema) method allows to create the schema
+Using the {@linkcode ModelManager.createSchema createSchema} method allows to create the schema
 on the Ceramic node and add it to the model. Note that using this method creates a new schema
 every time it is called, therefore generating different stream IDs.
 
@@ -64,14 +64,14 @@ await manager.createSchema('MySchema', {
 })
 ```
 
-The [`createDefinition`](../classes/devtools.ModelManager.md#createdefinition) and
-[`createTile`](../classes/devtools.ModelManager.md#createtile) methods can be used similarly to add definitions
+The {@linkcode ModelManager.createDefinition createDefinition} and
+{@linkcode ModelManager.createTile createTile} methods can be used similarly to add definitions
 and tiles to the model.
 
 ### Export a model to JSON
 
 A managed model can be serialized to JSON, making it portable and reusable, with the
-[`toJSON`](../classes/devtools.ModelManager.md#tojson) method.
+{@linkcode ModelManager.toJSON toJSON} method.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
@@ -86,8 +86,8 @@ const encodedModel = await manager.toJSON()
 
 ### Import a model from JSON
 
-A managed model serialized using the [`toJSON`](../classes/devtools.ModelManager.md#tojson) method can be
-deserialized with the [`fromJSON`](../classes/devtools.ModelManager.md#fromjson) static method.
+A managed model serialized using the {@linkcode ModelManager.toJSON toJSON} method can be
+deserialized with the {@linkcode ModelManager.fromJSON fromJSON} static method.
 
 ```ts
 import { CeramicClient } from '@ceramicnetwork/http-client'
@@ -107,8 +107,8 @@ const clonedManager = ModelManager.fromJSON({ ceramic, model: encodedModel })
 
 In order to use a model at runtime in an application, it is important to ensure all the streams
 used by the model are present in the Ceramic network. This can be achieved by calling the
-[`deploy`](../classes/devtools.ModelManager.md#deploy) method, which returns the aliases of the model that can
-be used at runtime by a [`DataModel`](../classes/datamodel.DataModel.md) instance.
+{@linkcode ModelManager.deploy deploy} method, which returns the aliases of the model that can
+be used at runtime by a {@linkcode datamodel.DataModel DataModel} instance.
 
 ```ts
 import { readFile, writeFile } from 'node:fs/promises'
@@ -160,9 +160,58 @@ await manager.deploy()
 
 ## Classes
 
-- [ModelManager](../classes/devtools.ModelManager.md)
+- [Composite](../classes/devtools.Composite.md)
+- [RuntimeModelBuilder](../classes/devtools.RuntimeModelBuilder.md)
 
 ## Type aliases
+
+### ComposeInput
+
+Ƭ **ComposeInput**: [`Composite`](../classes/devtools.Composite.md) \| [`CompositeParams`](devtools.md#compositeparams)
+
+___
+
+### ComposeOptions
+
+Ƭ **ComposeOptions**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `aliases?` | `Record`<`string`, `string`\> |
+| `commonEmbeds?` | ``"all"`` \| ``"none"`` \| `string`[] |
+| `views?` | `CompositeViewsDefinition` |
+
+___
+
+### CompositeParams
+
+Ƭ **CompositeParams**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `commits` | `Record`<`string`, `StreamCommits`\> |
+| `definition` | `InternalCompositeDefinition` |
+
+___
+
+### ExtractSchemaParams
+
+Ƭ **ExtractSchemaParams**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `localRef?` | `boolean` |
+| `ownName?` | `string` |
+| `parentName?` | `string` |
+| `required?` | `boolean` |
+
+___
 
 ### FromJSONParams
 
@@ -170,83 +219,50 @@ await manager.deploy()
 
 #### Type declaration
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `ceramic` | `CeramicApi` | Ceramic client instance |
-| `model` | `EncodedManagedModel` | [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to use |
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `definition` | `EncodedCompositeDefinition` |
 
 ___
 
-### ModelManagerConfig
+### FromSchemaParams
 
-Ƭ **ModelManagerConfig**: `Object`
+Ƭ **FromSchemaParams**: `Object`
 
 #### Type declaration
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `ceramic` | `CeramicApi` | Ceramic client instance |
-| `model?` | `ManagedModel` | Optional [`managed model`](types.md#managedmodel) to use |
+| Name | Type |
+| :------ | :------ |
+| `ceramic` | `CeramicApi` |
+| `schema` | `string` \| `GraphQLSchema` |
+
+___
+
+### RuntimeModelBuilderParams
+
+Ƭ **RuntimeModelBuilderParams**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `commonEmbeds?` | `string`[] |
+| `definition` | `ModelDefinition` |
+| `name` | `string` |
 
 ## Functions
 
-### deployEncodedModel
+### createRuntimeDefinition
 
-▸ **deployEncodedModel**(`ceramic`, `model`): `Promise`<`ModelAliases`\>
-
-Deploy a [`JSON-encoded managed model`](types.md#encodedmanagedmodel) to the given Ceramic
-node.
+▸ **createRuntimeDefinition**(`definition`): `RuntimeCompositeDefinition`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model` | `EncodedManagedModel` |
+| `definition` | `InternalCompositeDefinition` |
 
 #### Returns
 
-`Promise`<`ModelAliases`\>
-
-___
-
-### deployModel
-
-▸ **deployModel**(`ceramic`, `model`, `createOpts?`, `commitOpts?`): `Promise`<`ModelAliases`\>
-
-Deploy a managed model to the given Ceramic node.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ceramic` | `CeramicApi` |
-| `model` | `ManagedModel`<`DagJWSResult`\> |
-| `createOpts?` | `CreateOpts` |
-| `commitOpts?` | `UpdateOpts` |
-
-#### Returns
-
-`Promise`<`ModelAliases`\>
-
-___
-
-### isSecureSchema
-
-▸ **isSecureSchema**<`T`\>(`schema`): `boolean`
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | `Record`<`string`, `any`\> |
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `schema` | `UncheckedJSONSchemaType`<`T`, ``false``\> |
-
-#### Returns
-
-`boolean`
+`RuntimeCompositeDefinition`

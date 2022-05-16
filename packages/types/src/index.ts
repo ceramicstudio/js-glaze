@@ -82,10 +82,10 @@ export type CompositeDefinitionType<T> = {
   models: Record<string, T>
   aliases?: Record<string, string>
   views?: CompositeViewsDefinition
-  commonShapes?: Array<string>
+  commonEmbeds?: Array<string>
 }
 
-export type CompositeDefinition = CompositeDefinitionType<ModelDefinition>
+export type InternalCompositeDefinition = CompositeDefinitionType<ModelDefinition>
 export type EncodedCompositeDefinition = CompositeDefinitionType<EncodedStreamCommits>
 
 export type DocumentMetadata = {
@@ -159,19 +159,25 @@ export type RuntimeFloatScalar = RuntimeScalarCommon & {
 }
 export type RuntimeStringScalar = RuntimeScalarCommon & {
   type: 'string'
-  format?: 'date-time' | 'date' | 'duration' | 'time'
   maxLength?: number
 }
 export type RuntimeDIDStringScalar = RuntimeScalarCommon & {
   type: 'did'
   maxLength?: number
 }
+export type RuntimeStreamRefStringScalar = RuntimeScalarCommon & {
+  type: 'streamref'
+  maxLength?: number
+}
+
 export type RuntimeScalar =
   | RuntimeBooleanScalar
   | RuntimeIntegerScalar
   | RuntimeFloatScalar
   | RuntimeStringScalar
   | RuntimeDIDStringScalar
+  | RuntimeStreamRefStringScalar
+export type RuntimeScalarType = RuntimeScalar['type']
 
 export type RuntimeReferenceType =
   | 'connection' // to many documents relation
