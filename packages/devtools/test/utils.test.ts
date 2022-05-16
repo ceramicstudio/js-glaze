@@ -13,6 +13,14 @@ describe('utils', () => {
     expect(res).toEqual({ one: 2, two: 4 })
   })
 
+  it('compositeDefinitionFromSchema throws when there\'s no top-level model object', () => {
+    expect(compositeDefinitionFromSchema(`
+    type Profile {
+      profilePicture: String @ipfs @length(max: 150, min: 40)
+    }
+    `)).toThrow()
+  })
+
   it('compositeDefinitionFromSchema supports @model, @length and @ips', () => {
     const compositeDefinition = compositeDefinitionFromSchema(`
     type Profile @model(index: LINK) {
@@ -72,7 +80,7 @@ describe('utils', () => {
               }
             }
           }
-        }
+      }
     )
   })
 })
