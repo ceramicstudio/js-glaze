@@ -39,17 +39,33 @@ function fieldConfigMapperFactory(
   function fieldConfigMapper(
     fieldConfig: GraphQLFieldConfig<any, any, any>
   ) : GraphQLFieldConfig<any, any, any> {
+    let ceramicExtensions: Record<string, any> = {}
     const lengthDirective = getDirective(schema, fieldConfig, 'length')?.[0];
       if (lengthDirective) {
+        ceramicExtensions = {
+          ...ceramicExtensions,
+          length: {
+            ceramicDirectiveName: "length",
+            min: lengthDirective.min,
+            max: lengthDirective.max,
+          }
+        }
+      }
+      const ipfsDirective = getDirective(schema, fieldConfig, 'ipfs')?.[0];
+      if (ipfsDirective) {
+        ceramicExtensions = {
+          ...ceramicExtensions,
+          ipfs: {
+            ceramicDirectiveName: "ipfs",
+            pattern: "^ipfs://.+",
+            max: 150,
+          }
+        }
+      }
+      if (Object.keys(ceramicExtensions).length > 0) {
         fieldConfig.extensions = {
           ...fieldConfig.extensions,
-          ceramicExtensions: {
-            length: {
-              ceramicDirectiveName: "length",
-              min: lengthDirective.min,
-              max: lengthDirective.max,
-            }
-          }
+          ceramicExtensions: ceramicExtensions
         }
       }
       return fieldConfig;

@@ -113,12 +113,30 @@ export function buildCompositeSchema(sdl: string): GraphQLSchema {
 
 function fieldSchemaFromFieldDefinition(
   fieldDefinition: Record<string, any>
-  ): Record<string, any> {
-  return {
-    type: 'string',
-    title: fieldDefinition.name,
-    maxLength: fieldDefinition.extensions?.ceramicExtensions?.length.max,
-    minLength: fieldDefinition.extensions?.ceramicExtensions?.length.min,
+  ): Record<string, any> | undefined {
+  const ceramicExtensions = fieldDefinition.extensions?.ceramicExtensions
+  if (ceramicExtensions) {
+    let result: Record<string, any> = {}
+    if (ceramicExtensions?.length !== undefined) {
+      result = {
+        ...result, 
+        type: 'string',
+        title: fieldDefinition.name,
+        maxLength: ceramicExtensions.length.max,
+        minLength: ceramicExtensions.length.min,
+      }
+    }
+    if (ceramicExtensions?.ipfs !== undefined) {
+      return {
+        ...result, 
+        type: 'string',
+        title: fieldDefinition.name,
+        pattern: ceramicExtensions.ipfs.pattern,
+      }
+    }
+    return result
+  } else {
+    return undefined
   }
 }
 
