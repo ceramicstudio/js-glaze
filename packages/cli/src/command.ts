@@ -23,7 +23,7 @@ import { SyncOptions } from '@ceramicnetwork/common'
 type StringRecord = Record<string, unknown>
 
 // TODO: SYNC_OPTIONS_MAP is also used in js-ceramic/packages/cli. Move this const to '@ceramicnetwork/common'
-export const SYNC_OPTIONS_MAP: { [option: string]: SyncOptions | undefined } = {
+export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
   'prefer-cache': SyncOptions.PREFER_CACHE,
   'sync-always': SyncOptions.SYNC_ALWAYS,
   'never-sync': SyncOptions.NEVER_SYNC,
