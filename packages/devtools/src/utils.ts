@@ -6,7 +6,7 @@ import {
   getDirective,
   MapperKind 
 } from '@graphql-tools/utils';
-import { CompositeDefinition, ModelDefinition } from '@glazed/types';
+import { InternalCompositeDefinition, JSONSchema, ModelDefinition } from '@glazed/types';
 import { Composite } from './composite';
 import { compositeDirectivesTransformer } from './graphQlDirectives/compositeDirectivesTransformer';
 
@@ -126,8 +126,16 @@ function fieldSchemaFromFieldDefinition(
         minLength: ceramicExtensions.length.min,
       }
     }
+    if (fieldDefinition.type.name === "URL") {
+      result = {
+        ...result, 
+        type: 'string',
+        title: fieldDefinition.name,
+        pattern: "^[http|https]://.+",
+      }
+    }
     if (ceramicExtensions?.ipfs !== undefined) {
-      return {
+      result = {
         ...result, 
         type: 'string',
         title: fieldDefinition.name,
@@ -136,41 +144,63 @@ function fieldSchemaFromFieldDefinition(
     }
     return result
   } else {
-    return undefined
+    return {
+      type: fieldDefinition.type.toString(),
+      title: fieldDefinition.name,
+    }
   }
 }
 
 /** @internal */
-export function compositeDefinitionFromSchema(schema: string | GraphQLSchema): CompositeDefinition {
+export function compositeDefinitionFromSchema(schema: string | GraphQLSchema): InternalCompositeDefinition {
   if (typeof schema === 'string') {
     schema = buildCompositeSchema(schema)
   }
 
   let models: Record<string, ModelDefinition> = {}
+  let definitions : Record<string, JSONSchema.Object> = {}
 
   mapSchema(schema, {
     [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
+      const modelSchema:Record<string, any> = {}
+      for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
+        modelSchema[fieldName] = fieldSchemaFromFieldDefinition(fieldDefinition)
+      }
+
       const modelDirective = getDirective(schema as GraphQLSchema, objectConfig, 'model')?.[0];
       if (modelDirective) {
-        const modelSchema:Record<string, any> = {}
-        for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
-          if (fieldDefinition.extensions?.ceramicExtensions) {
-            modelSchema[fieldName] = fieldSchemaFromFieldDefinition(fieldDefinition)
-          }
-        }
         models[objectConfig.name] = {
           name: objectConfig.name, 
           accountRelation: modelDirective.index.toLowerCase(), // TODO: Should we validate here that the value is an ModelAccountRelation?
           description: modelDirective.description,
           schema: modelSchema
         }
+      } else {
+        definitions[objectConfig.name] = modelSchema
       }
       return objectConfig;
     },
   })
 
-  return {
+  console.log("models", models)
+  console.log("definitions", definitions)
+
+  if (Object.keys(models).length === 0) {
+    throw new Error("No models found in Composite Definition Schema")
+  }
+
+  const result = {
     version: Composite.VERSION,
     models: models
   }
+
+  if (Object.keys(definitions).length > 0) {
+    // @ts-ignore
+    result["#definitions"] = definitions
+  }
+
+  const util = require('util')
+  console.log("result", util.inspect(result, false, null, true /* enable colors */))
+
+  return result
 }
