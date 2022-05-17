@@ -295,7 +295,7 @@ export class DIDDataStore<
     if (this.#ceramic.did == null) {
       throw new Error('Ceramic instance is not authenticated')
     }
-    return this.#ceramic.did.id
+    return this.#ceramic.did.hasParent ? this.#ceramic.did.parent : this.#ceramic.did.id
   }
 
   /**
