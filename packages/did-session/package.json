@@ -1,0 +1,67 @@
+{
+  "name": "@glazed/did-session",
+  "version": "0.0.1-rc.0",
+  "author": "3Box Labs",
+  "license": "(Apache-2.0 OR MIT)",
+  "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
+  "keywords": [
+    "ceramic",
+    "glaze",
+    "did"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-glaze",
+    "directory": "packages/did-session"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=14.14"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
+    "lint": "eslint src test --fix",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "test:ci": "yarn test --ci --coverage",
+    "prepare": "yarn build",
+    "prepublishOnly": "package-check"
+  },
+  "dependencies": {
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.0.0"
+  },
+  "devDependencies": {
+    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/streamid": "^2.0.0",
+    "@types/create-hash": "^1.2.2",
+    "@types/secp256k1": "^4.0.3"
+  },
+  "jest": {
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
+    }
+  }
+}
