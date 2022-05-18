@@ -49,6 +49,36 @@ describe('utils', () => {
     expect(validator.validateSchema(PersonProfileID.schema, true)).toBe(true)
   })
 
+  it('DID scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithDIDProp @model(index: LINK) {
+        didValue: DID
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithDIDPropID: {
+          name: "ModelWithDIDProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              didValue: {
+                type: 'string',
+                title: 'DID',
+                pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
+                maxLength: 80
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`

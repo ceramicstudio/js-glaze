@@ -327,6 +327,19 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (
+    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "DID".toLowerCase() ||
+    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "DID".toLowerCase()
+  ) {
+    result = {
+      ...result, 
+      type: 'string',
+      title: 'DID',
+      pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
+      maxLength: 80
+    }
+  }
+
+  if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "PositiveInt".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "PositiveInt".toLowerCase()
   ) {
