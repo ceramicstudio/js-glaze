@@ -40,35 +40,50 @@ function fieldConfigMapperFactory(
     fieldConfig: GraphQLFieldConfig<any, any, any>
   ) : GraphQLFieldConfig<any, any, any> {
     let ceramicExtensions: Record<string, any> = {}
+    // TODO: Add valication to check, if custom directive are applied to the right field types?
+    // E.g. @itemLength should only work for arrays, etc.
+    const itemLengthDirective = getDirective(schema, fieldConfig, 'itemLength')?.[0];
+    if (itemLengthDirective) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        itemLength: {
+          ceramicDirectiveName: "itemLength",
+          min: itemLengthDirective.min || undefined,
+          max: itemLengthDirective.max || undefined,
+        }
+      }
+    }
     const lengthDirective = getDirective(schema, fieldConfig, 'length')?.[0];
-      if (lengthDirective) {
-        ceramicExtensions = {
-          ...ceramicExtensions,
-          length: {
-            ceramicDirectiveName: "length",
-            min: lengthDirective.min || undefined,
-            max: lengthDirective.max || undefined,
-          }
+    if (lengthDirective) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        length: {
+          ceramicDirectiveName: "length",
+          min: lengthDirective.min || undefined,
+          max: lengthDirective.max || undefined,
         }
       }
-      const ipfsDirective = getDirective(schema, fieldConfig, 'ipfs')?.[0];
-      if (ipfsDirective) {
-        ceramicExtensions = {
-          ...ceramicExtensions,
-          ipfs: {
-            ceramicDirectiveName: "ipfs",
-            pattern: "^ipfs://.+",
-            max: 150,
-          }
+    }
+
+    const ipfsDirective = getDirective(schema, fieldConfig, 'ipfs')?.[0];
+    if (ipfsDirective) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        ipfs: {
+          ceramicDirectiveName: "ipfs",
+          pattern: "^ipfs://.+",
+          max: 150,
         }
       }
-      if (Object.keys(ceramicExtensions).length > 0) {
-        fieldConfig.extensions = {
-          ...fieldConfig.extensions,
-          ceramicExtensions: ceramicExtensions
-        }
+    }
+
+    if (Object.keys(ceramicExtensions).length > 0) {
+      fieldConfig.extensions = {
+        ...fieldConfig.extensions,
+        ceramicExtensions: ceramicExtensions
       }
-      return fieldConfig;
+    }
+    return fieldConfig;
   }
   return fieldConfigMapper
 }

@@ -16,7 +16,8 @@ scalar StreamID
 # Field validation directives
 
 directive @ipfs on FIELD_DEFINITION # Must be an IPFS URL
-directive @length(max: Int!, min: Int = 0) on FIELD_DEFINITION
+directive @length(max: Int!, min: Int = 0) on FIELD_DEFINITION # Applicable to strings
+directive @itemLength(max: Int, min: Int = 0) on FIELD_DEFINITION # Applicable to arrays of strings
 
 # Metadata access directives
 

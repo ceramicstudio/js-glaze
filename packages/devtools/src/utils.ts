@@ -1,4 +1,5 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
+import 'util'
 import { 
   GraphQLList,
   GraphQLNonNull,
@@ -61,6 +62,7 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   const definitions = embeddedObjectsDefinitionsFromGraphQLSchema(compositeSchema)
   const models = modelsFromGraphQLSchema(compositeSchema, definitions)
   const commonEmbeds = commonEmbedNamesFromModels(models)
+  fixArrayItemsConstraints(models)
 
   const result = {
     version: Composite.VERSION,
@@ -71,7 +73,39 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   return result
 }
 
-/** @internak */
+/** @internal */
+function fixArrayItemsConstraints(models: Record<string, ModelDefinition>) {
+  function rewriteArrayRecord(arrayRecord: Record<string, any>) {
+    if (arrayRecord.minItemLength !== undefined) {
+      arrayRecord.items.minLength = arrayRecord.minItemLength
+      delete arrayRecord.minItemLength
+    }
+    if (arrayRecord.maxItemLength !== undefined) {
+      arrayRecord.items.maxLength = arrayRecord.maxItemLength
+      delete arrayRecord.maxItemLength
+    }
+  }
+
+  Object.values(models).forEach((model: ModelDefinition) => {
+    Object.values(model.schema.properties!).forEach((modelProperty) => {
+      const propertyRecord = modelProperty as Record<string, any>
+      if (propertyRecord.type === 'array') {
+        rewriteArrayRecord(propertyRecord)
+      }
+    })
+
+    if (model.schema.definitions) {
+      Object.values(model.schema.definitions).forEach((definition) => {
+        const definitionRecord = definition as Record<string, any>
+        if (definitionRecord.type === 'array') {
+          rewriteArrayRecord(definitionRecord)
+        }
+      })
+    }
+  })
+}
+
+/** @internal */
 function commonEmbedNamesFromModels(
   models: Record<string, ModelDefinition>
 ): string[] {
@@ -219,8 +253,6 @@ function fieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType,
   ceramicExtensions?: Record<string, any>
 ): Record<string, any> {
-  // console.log("FIELD DEFINITION", fieldName, fieldType.toString(), fieldType)
-
   if (fieldType instanceof GraphQLObjectType) {
     return {
       $ref: `#/definitions/${fieldType.name}`
@@ -239,12 +271,22 @@ function fieldSchemaFromFieldDefinition(
       items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType)
     }
 
-    if (ceramicExtensions && ceramicExtensions?.length !== undefined) {
-      if (ceramicExtensions.length.min) {
-        result.minItems = ceramicExtensions.length.min
+    if (ceramicExtensions) {
+      if (ceramicExtensions.length !== undefined) {
+        if (ceramicExtensions.length.min) {
+          result.minItems = ceramicExtensions.length.min
+        }
+        if (ceramicExtensions.length.max) {
+          result.maxItems = ceramicExtensions.length.max
+        }
       }
-      if (ceramicExtensions.length.max) {
-        result.maxItems = ceramicExtensions.length.max
+      if (ceramicExtensions.itemLength !== undefined) {
+        if (ceramicExtensions.itemLength.min) {
+          result.minItemLength = ceramicExtensions.itemLength.min
+        }
+        if (ceramicExtensions.itemLength.max) {
+          result.maxItemLength = ceramicExtensions.itemLength.max
+        }
       }
     } 
     return result
