@@ -46,8 +46,8 @@ function fieldConfigMapperFactory(
           ...ceramicExtensions,
           length: {
             ceramicDirectiveName: "length",
-            min: lengthDirective.min,
-            max: lengthDirective.max,
+            min: lengthDirective.min || undefined,
+            max: lengthDirective.max || undefined,
           }
         }
       }
