@@ -49,6 +49,34 @@ describe('utils', () => {
     expect(validator.validateSchema(PersonProfileID.schema, true)).toBe(true)
   })
 
+  it('@ipfs directive is supported for strings and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithIPFSURLProp @model(index: LINK) {
+        ipfsURLValue: String @ipfs
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithIPFSURLPropID: {
+          name: "ModelWithIPFSURLProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              ipfsURLValue: {
+                type: 'string',
+                pattern: "^ipfs://.+",
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
