@@ -20,7 +20,7 @@ interface Node {
 type CeramicAccount {
   id: DID!
   isViewer: Boolean!
-  store: DataStore
+  store: DataStore!
 }
 
 \\"\\"\\"
@@ -29,74 +29,78 @@ A field whose value conforms to the standard DID format as specified in did-core
 scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
 
 type DataStore {
-  profile: Profile
+  genericProfile: GenericProfile
+  socialProfile: SocialProfile
+  personProfile: PersonProfile
 }
 
-type Profile implements Node {
+type GenericProfile implements Node {
   id: ID!
   name: String
-  image: ProfileImageSources
-  description: String
-  emoji: String
-  background: ProfileImageSources
-  birthDate: String
-  url: String
-  gender: String
-  homeLocation: String
-  residenceCountry: String
-  nationalities: [String]
-  affiliations: [String]
+  image: ImageSources
 }
 
-type ProfileImageSources {
-  original: ProfileImageMetadata!
-  alternatives: [ProfileImageMetadata]
+type ImageSources {
+  original: ImageMetadata!
+  alternatives: [ImageMetadata]
 }
 
-type ProfileImageMetadata {
+type ImageMetadata {
   src: String!
   mimeType: String!
   width: Int!
   height: Int!
   size: Int
+}
+
+type SocialProfile implements Node {
+  id: ID!
+  description: String
+  emoji: String
+  background: ImageSources
+  url: String
+}
+
+type PersonProfile implements Node {
+  id: ID!
+  birthDate: String
+  gender: String
+  homeLocation: String
+  residenceCountry: String
+  nationalities: [String]
+  affiliations: [String]
 }
 
 type Mutation {
-  createProfile(input: CreateProfileInput!): CreateProfilePayload
-  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  createGenericProfile(input: CreateGenericProfileInput!): CreateGenericProfilePayload
+  updateGenericProfile(input: UpdateGenericProfileInput!): UpdateGenericProfilePayload
+  createSocialProfile(input: CreateSocialProfileInput!): CreateSocialProfilePayload
+  updateSocialProfile(input: UpdateSocialProfileInput!): UpdateSocialProfilePayload
+  createPersonProfile(input: CreatePersonProfileInput!): CreatePersonProfilePayload
+  updatePersonProfile(input: UpdatePersonProfileInput!): UpdatePersonProfilePayload
 }
 
-type CreateProfilePayload {
-  node: Profile!
+type CreateGenericProfilePayload {
+  node: GenericProfile!
   clientMutationId: String
 }
 
-input CreateProfileInput {
-  content: ProfileInput!
+input CreateGenericProfileInput {
+  content: GenericProfileInput!
   clientMutationId: String
 }
 
-input ProfileInput {
+input GenericProfileInput {
   name: String
-  image: ProfileImageSourcesInput
-  description: String
-  emoji: String
-  background: ProfileImageSourcesInput
-  birthDate: String
-  url: String
-  gender: String
-  homeLocation: String
-  residenceCountry: String
-  nationalities: [String]
-  affiliations: [String]
+  image: ImageSourcesInput
 }
 
-input ProfileImageSourcesInput {
-  original: ProfileImageMetadataInput!
-  alternatives: [ProfileImageMetadataInput]
+input ImageSourcesInput {
+  original: ImageMetadataInput!
+  alternatives: [ImageMetadataInput]
 }
 
-input ProfileImageMetadataInput {
+input ImageMetadataInput {
   src: String!
   mimeType: String!
   width: Int!
@@ -104,14 +108,72 @@ input ProfileImageMetadataInput {
   size: Int
 }
 
-type UpdateProfilePayload {
-  node: Profile!
+type UpdateGenericProfilePayload {
+  node: GenericProfile!
   clientMutationId: String
 }
 
-input UpdateProfileInput {
+input UpdateGenericProfileInput {
   id: ID!
-  content: ProfileInput!
+  content: GenericProfileInput!
+  clientMutationId: String
+}
+
+type CreateSocialProfilePayload {
+  node: SocialProfile!
+  clientMutationId: String
+}
+
+input CreateSocialProfileInput {
+  content: SocialProfileInput!
+  clientMutationId: String
+}
+
+input SocialProfileInput {
+  description: String
+  emoji: String
+  background: ImageSourcesInput
+  url: String
+}
+
+type UpdateSocialProfilePayload {
+  node: SocialProfile!
+  clientMutationId: String
+}
+
+input UpdateSocialProfileInput {
+  id: ID!
+  content: SocialProfileInput!
+  clientMutationId: String
+}
+
+type CreatePersonProfilePayload {
+  node: PersonProfile!
+  clientMutationId: String
+}
+
+input CreatePersonProfileInput {
+  content: PersonProfileInput!
+  clientMutationId: String
+}
+
+input PersonProfileInput {
+  birthDate: String
+  gender: String
+  homeLocation: String
+  residenceCountry: String
+  nationalities: [String]
+  affiliations: [String]
+}
+
+type UpdatePersonProfilePayload {
+  node: PersonProfile!
+  clientMutationId: String
+}
+
+input UpdatePersonProfileInput {
+  id: ID!
+  content: PersonProfileInput!
   clientMutationId: String
 }"
 `;

@@ -1,8 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { createRuntimeDefinition } from '../src'
+import { createRuntimeDefinition, getName } from '../src'
 
 describe('Runtime format', () => {
+  describe('getName()', () => {
+    test('converts input to pascal case', () => {
+      expect(getName('Foo bar')).toBe('FooBar')
+      expect(getName('foo_bar')).toBe('FooBar')
+      expect(getName('Foo-bar')).toBe('FooBar')
+    })
+
+    test('adds the prefix', () => {
+      expect(getName('bar', 'Foo')).toBe('FooBar')
+      expect(getName('foo_bar', 'Bar')).toBe('BarFooBar')
+    })
+
+    test('ignores the prefix if already included', () => {
+      expect(getName('foo_bar', 'Foo')).toBe('FooBar')
+    })
+  })
+
   test('Profile - multiples models with common local references', () => {
     const runtime = createRuntimeDefinition({
       version: '1.0',

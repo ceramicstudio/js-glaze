@@ -80,7 +80,7 @@ function createCeramicAccountObject(
         resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
       },
       store: {
-        type: dataStore,
+        type: new GraphQLNonNull(dataStore),
         resolve: (did) => did,
       },
     },
