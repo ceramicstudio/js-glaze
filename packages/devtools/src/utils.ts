@@ -234,10 +234,20 @@ function fieldSchemaFromFieldDefinition(
   }
 
   if (fieldType instanceof GraphQLList) {
-    return {
+    let result: Record<string, any> = {
       type: 'array',
       items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType)
     }
+
+    if (ceramicExtensions && ceramicExtensions?.length !== undefined) {
+      if (ceramicExtensions.length.min) {
+        result.minItems = ceramicExtensions.length.min
+      }
+      if (ceramicExtensions.length.max) {
+        result.maxItems = ceramicExtensions.length.max
+      }
+    } 
+    return result
   }
 
   let result: Record<string, any> = {

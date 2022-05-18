@@ -164,10 +164,10 @@ export const personProfileDefinition: ModelDefinition = {
       nationalities: {
         type: 'array',
         minItems: 1,
+        maxItems: 5,
         items: {
           type: 'string',
           pattern: '^[A-Z]{2}$',
-          maxItems: 5,
         },
       },
       affiliations: {

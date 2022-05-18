@@ -29,7 +29,7 @@ type PersonProfile @model(index: LINK) {
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
   residenceCountry: CountryCode
-  nationalities: [CountryCode] # need a way to indicate the max item cound in an array
+  nationalities: [CountryCode] @length(min:1, max: 5)
   affiliations: [String] #need a way to indicate the max lenghts for each item in an array
 }
 `
