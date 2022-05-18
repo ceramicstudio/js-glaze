@@ -10,14 +10,19 @@ scalar Time
 scalar URL
 
 # Custom Ceramic scalars
-
-scalar StreamID
+scalar StreamReference
 
 # Field validation directives
 
+# For strings
 directive @ipfs on FIELD_DEFINITION # Must be an IPFS URL
-directive @length(max: Int!, min: Int = 0) on FIELD_DEFINITION # Applicable to strings
-directive @itemLength(max: Int, min: Int = 0) on FIELD_DEFINITION # Applicable to arrays of strings
+# For string and arrays
+directive @length(max: Int!, min: Int = 0) on FIELD_DEFINITION
+# For arrays of strings
+directive @itemLength(max: Int, min: Int = 0) on FIELD_DEFINITION 
+# For integers and floats
+directive @intValue(min: Int, max: Int) on FIELD_DEFINITION
+directive @floatValue(min: Float, max: Float) on FIELD_DEFINITION
 
 # Metadata access directives
 
@@ -35,7 +40,6 @@ enum ModelIndexType {
 directive @model(
   index: ModelIndexType = LIST
   description: String
-  url: String
 ) on OBJECT
 # When a model has index = SET, at least one field must have the @index directive
 directive @index on FIELD_DEFINITION
@@ -47,7 +51,6 @@ enum AccountLinkTarget {
   OTHER
   BOTH
 }
-
 directive @accountLink(
   property: String!
   target: AccountLinkTarget!

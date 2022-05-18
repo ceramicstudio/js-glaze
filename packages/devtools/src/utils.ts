@@ -64,10 +64,13 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   const commonEmbeds = commonEmbedNamesFromModels(models)
   fixArrayItemsConstraints(models)
 
-  const result = {
+  const result: InternalCompositeDefinition = {
     version: Composite.VERSION,
-    commonEmbeds: commonEmbeds,
     models: models
+  }
+
+  if (commonEmbeds.length > 0) {
+    result.commonEmbeds = commonEmbeds
   }
 
   return result
@@ -236,7 +239,7 @@ function modelFromObjectConfig(
   modelSchema.properties = modelSchemaProperties
   modelSchema.definitions = {...requiredDefinitions, ...nestedRequiredDefinitions}
   if (Object.keys(modelSchema.definitions).length === 0) {
-    modelSchema.definitions = undefined
+    delete modelSchema.definitions
   }
   modelSchema.required = requiredProperties.length > 0 ? requiredProperties : undefined
 
@@ -371,6 +374,24 @@ function defaultFieldSchemaFromFieldDefinition(
         ...result, 
         type: 'string',
         pattern: ceramicExtensions.ipfs.pattern,
+      }
+    }
+
+    if (ceramicExtensions?.intValue !== undefined) {
+      result = {
+        ...result, 
+        type: 'integer',
+        max: ceramicExtensions.intValue.max,
+        min: ceramicExtensions.intValue.min,
+      }
+    }
+
+    if (ceramicExtensions?.floatValue !== undefined) {
+      result = {
+        ...result, 
+        type: 'float',
+        max: ceramicExtensions.floatValue.max,
+        min: ceramicExtensions.floatValue.min,
       }
     }
   } 

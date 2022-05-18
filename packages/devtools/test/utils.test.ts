@@ -48,4 +48,62 @@ describe('utils', () => {
     expect(validator.validateSchema(SocialProfileID.schema, true)).toBe(true)
     expect(validator.validateSchema(PersonProfileID.schema, true)).toBe(true)
   })
+
+  it('@intValue(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithIntProp @model(index: LINK) {
+        intValue: Int @intValue(min: 5, max: 10)
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithIntPropID: {
+          name: "ModelWithIntProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              intValue: {
+                type: 'integer',
+                min: 5,
+                max: 10,
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
+  it('@floatValue(min: Float, max: Float) directive is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithFloatProp @model(index: LINK) {
+        floatValue: Float @floatValue(min: 5.0, max: 10.0)
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithFloatPropID: {
+          name: "ModelWithFloatProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              floatValue: {
+                type: 'float',
+                min: 5.0,
+                max: 10.0,
+              },
+            },
+          }
+        }
+      }
+    })
+  })
 })

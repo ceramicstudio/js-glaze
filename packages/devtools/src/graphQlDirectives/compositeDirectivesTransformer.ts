@@ -42,35 +42,52 @@ function fieldConfigMapperFactory(
     let ceramicExtensions: Record<string, any> = {}
     // TODO: Add valication to check, if custom directive are applied to the right field types?
     // E.g. @itemLength should only work for arrays, etc.
-    const itemLengthDirective = getDirective(schema, fieldConfig, 'itemLength')?.[0];
+    const itemLengthDirectiveName = "itemLength"
+    const itemLengthDirective = getDirective(schema, fieldConfig, itemLengthDirectiveName)?.[0];
     if (itemLengthDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        itemLength: {
-          ceramicDirectiveName: "itemLength",
+        [itemLengthDirectiveName]: {
+          ceramicDirectiveName: itemLengthDirectiveName,
           min: itemLengthDirective.min || undefined,
           max: itemLengthDirective.max || undefined,
         }
       }
     }
-    const lengthDirective = getDirective(schema, fieldConfig, 'length')?.[0];
+    const lengthDirectiveName = "length"
+    const lengthDirective = getDirective(schema, fieldConfig, lengthDirectiveName)?.[0];
     if (lengthDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        length: {
-          ceramicDirectiveName: "length",
+        [lengthDirectiveName]: {
+          ceramicDirectiveName: lengthDirectiveName,
           min: lengthDirective.min || undefined,
           max: lengthDirective.max || undefined,
         }
       }
     }
 
-    const ipfsDirective = getDirective(schema, fieldConfig, 'ipfs')?.[0];
+    ["intValue", "floatValue"].forEach(valueDirectiveName => {
+      const valueDirective = getDirective(schema, fieldConfig, valueDirectiveName)?.[0];
+    if (valueDirective) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        [valueDirectiveName]: {
+          ceramicDirectiveName: valueDirectiveName,
+          min: valueDirective.min || undefined,
+          max: valueDirective.max || undefined,
+        }
+      }
+    }
+    })
+
+    const ipfsDirectiveName = "ipfs"
+    const ipfsDirective = getDirective(schema, fieldConfig, ipfsDirectiveName)?.[0];
     if (ipfsDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        ipfs: {
-          ceramicDirectiveName: "ipfs",
+        [ipfsDirectiveName]: {
+          ceramicDirectiveName: ipfsDirectiveName,
           pattern: "^ipfs://.+",
           max: 150,
         }
