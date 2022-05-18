@@ -52,15 +52,15 @@ describe('utils', () => {
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelStringProp @model(index: LINK) {
+      type ModelWithStringProp @model(index: LINK) {
         stringValue: String @length(min: 1, max: 140)
       }
       `)
     ).toMatchObject({
       version: "1.0",
       models: {
-        ModelStringPropID: {
-          name: "ModelStringProp",
+        ModelWithStringPropID: {
+          name: "ModelWithStringProp",
           accountRelation: 'link',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
@@ -70,6 +70,38 @@ describe('utils', () => {
                 type: 'string',
                 minLength: 1,
                 maxLength: 140,
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
+  it('@length(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithArrayProp @model(index: LINK) {
+        arrayValue: [String] @length(min: 10, max: 15)
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithArrayPropID: {
+          name: "ModelWithArrayProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              arrayValue: {
+                type: 'array',
+                minItems: 10,
+                maxItems: 15,
+                items: {
+                  type: 'string'
+                }
               },
             },
           }
