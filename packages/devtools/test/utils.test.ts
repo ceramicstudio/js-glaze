@@ -110,6 +110,38 @@ describe('utils', () => {
     })
   })
 
+  it('@itemLength(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithArrayProp @model(index: LINK) {
+        arrayValue: [String] @itemLength(min: 4, max: 440)
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithArrayPropID: {
+          name: "ModelWithArrayProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              arrayValue: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  minLength: 4,
+                  maxLength: 440,
+                }
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@intValue(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
