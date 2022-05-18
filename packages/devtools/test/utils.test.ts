@@ -4,7 +4,6 @@ import { applyMap, promiseMap, internalCompositeDefinitionFromGraphQLSchema } fr
 import { compositeDefinitionWithProfiles } from './exampleCompositeDefinitions/compositeDefinitionWithProfiles'
 import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
-import jsonSchema07Draft from 'ajv/lib/refs/json-schema-draft-07.json'
 import ajv from 'ajv'
 
 describe('utils', () => {

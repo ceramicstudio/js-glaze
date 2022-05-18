@@ -109,7 +109,7 @@ function fixArrayItemsConstraints(models: Record<string, ModelDefinition>) {
 function commonEmbedNamesFromModels(
   models: Record<string, ModelDefinition>
 ): string[] {
-  const definitionOccurences: { [embedName: string]:number } = {}
+  const definitionOccurences: { [embedName: string]: number } = {}
   Object.values(models).forEach((modelDefinition: ModelDefinition) => {
     Object.keys(modelDefinition.schema.definitions || {}).forEach((embedName: string) => {
       if(definitionOccurences[embedName] === undefined) {
@@ -254,44 +254,70 @@ function fieldSchemaFromFieldDefinition(
   ceramicExtensions?: Record<string, any>
 ): Record<string, any> {
   if (fieldType instanceof GraphQLObjectType) {
-    return {
-      $ref: `#/definitions/${fieldType.name}`
-    }
+    return referenceFieldSchemaFromFieldDefinition(fieldType) || {}
   }
-
   if (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLObjectType) {
-    return {
-      $ref: `#/definitions/${fieldType.ofType.name}`
-    }
+    return referenceFieldSchemaFromFieldDefinition(fieldType.ofType) || {}
   }
-
   if (fieldType instanceof GraphQLList) {
-    let result: Record<string, any> = {
-      type: 'array',
-      items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType)
-    }
+    return arrayFieldSchemaFromFieldDefinition(fieldName, fieldType, ceramicExtensions) || {}
+  }
+  return defaultFieldSchemaFromFieldDefinition(fieldType, ceramicExtensions)
+}
 
-    if (ceramicExtensions) {
-      if (ceramicExtensions.length !== undefined) {
-        if (ceramicExtensions.length.min) {
-          result.minItems = ceramicExtensions.length.min
-        }
-        if (ceramicExtensions.length.max) {
-          result.maxItems = ceramicExtensions.length.max
-        }
-      }
-      if (ceramicExtensions.itemLength !== undefined) {
-        if (ceramicExtensions.itemLength.min) {
-          result.minItemLength = ceramicExtensions.itemLength.min
-        }
-        if (ceramicExtensions.itemLength.max) {
-          result.maxItemLength = ceramicExtensions.itemLength.max
-        }
-      }
-    } 
-    return result
+/** @internal */
+function referenceFieldSchemaFromFieldDefinition(
+  fieldType: GraphQLOutputType,
+): Record<string, any> | undefined {
+  if (!(fieldType instanceof GraphQLObjectType)) {
+    return 
+  }
+  return {
+    $ref: `#/definitions/${fieldType.name}`
+  }
+}
+
+/** @internal */
+function arrayFieldSchemaFromFieldDefinition(
+  fieldName: string,
+  fieldType: GraphQLOutputType,
+  ceramicExtensions?: Record<string, any>
+): Record<string, any> | undefined {
+  if (!(fieldType instanceof GraphQLList)) {
+    return 
   }
 
+  let result: Record<string, any> = {
+    type: 'array',
+    items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType)
+  }
+
+  if (ceramicExtensions) {
+    if (ceramicExtensions.length !== undefined) {
+      if (ceramicExtensions.length.min) {
+        result.minItems = ceramicExtensions.length.min
+      }
+      if (ceramicExtensions.length.max) {
+        result.maxItems = ceramicExtensions.length.max
+      }
+    }
+    if (ceramicExtensions.itemLength !== undefined) {
+      if (ceramicExtensions.itemLength.min) {
+        result.minItemLength = ceramicExtensions.itemLength.min
+      }
+      if (ceramicExtensions.itemLength.max) {
+        result.maxItemLength = ceramicExtensions.itemLength.max
+      }
+    }
+  } 
+  return result
+}
+
+/** @internal */
+function defaultFieldSchemaFromFieldDefinition(
+  fieldType: GraphQLOutputType,
+  ceramicExtensions?: Record<string, any>
+): Record<string, any> {
   let result: Record<string, any> = {
     type: fieldType.toString().toLowerCase(),
   }
