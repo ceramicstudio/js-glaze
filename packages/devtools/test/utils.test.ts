@@ -49,6 +49,35 @@ describe('utils', () => {
     expect(validator.validateSchema(PersonProfileID.schema, true)).toBe(true)
   })
 
+  it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelStringProp @model(index: LINK) {
+        stringValue: String @length(min: 1, max: 140)
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelStringPropID: {
+          name: "ModelStringProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              stringValue: {
+                type: 'string',
+                minLength: 1,
+                maxLength: 140,
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@intValue(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
