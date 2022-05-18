@@ -66,6 +66,7 @@ export const genericProfileDefinition: ModelDefinition = {
 
 export const socialProfileDefinition: ModelDefinition = {
   name: 'SocialProfile',
+  description: 'A social profile model',
   accountRelation: 'link',
   schema: {
     $schema: 'http://json-schema.org/draft-07/schema#',

@@ -243,6 +243,7 @@ function modelFromObjectConfig(
   return {
     name: objectConfig.name,
     accountRelation: modelDirective.index.toLowerCase(),
+    description: modelDirective.description,
     schema: modelSchema
   }
 }

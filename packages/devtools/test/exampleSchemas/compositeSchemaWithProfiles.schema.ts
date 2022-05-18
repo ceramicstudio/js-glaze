@@ -17,7 +17,7 @@ type GenericProfile @model(index: LINK) {
   image: ImageSources
 }
  
-type SocialProfile @model(index: LINK) {
+type SocialProfile @model(index: LINK, description: "A social profile model") {
   description: String @length(max: 420)
   emoji: String @length(max: 2)
   background: ImageSources
