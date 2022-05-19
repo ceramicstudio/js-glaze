@@ -340,6 +340,19 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (
+    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "StreamReference".toLowerCase() ||
+    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "StreamReference".toLowerCase()
+  ) {
+    result = {
+      ...result, 
+      type: "string",
+      title: "StreamReference",
+      pattern: "<TBD>", //FIXME: define the pattern for StreamReference strings
+      maxLength: 80
+    }
+  }
+
+  if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "PositiveInt".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "PositiveInt".toLowerCase()
   ) {

@@ -79,6 +79,36 @@ describe('utils', () => {
     })
   })
 
+  it('StreamReference scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithStreamReferenceProp @model(index: LINK) {
+        streamReferenceValue: StreamReference
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithStreamReferencePropID: {
+          name: "ModelWithStreamReferenceProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              streamReferenceValue: {
+                type: "string",
+                title: "StreamReference",
+                pattern: "<TBD>",
+                maxLength: 80
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
