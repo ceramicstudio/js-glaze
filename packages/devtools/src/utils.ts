@@ -1,6 +1,7 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import 'util'
 import { 
+  GraphQLBoolean,
   GraphQLFloat,
   GraphQLID,
   GraphQLInt,
@@ -10,6 +11,7 @@ import {
   GraphQLOutputType,
   GraphQLScalarType,
   GraphQLSchema,
+  GraphQLString,
   GraphQLType
 } from 'graphql';
 import {
@@ -411,6 +413,20 @@ function defaultFieldSchemaFromFieldDefinition(
       type: 'string',
       pattern: '^[A-Z]{2}$',
       maxLength: 2,
+    }
+  }
+
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLBoolean)) {
+    result = {
+      ...result, 
+      type: 'boolean',
+    }
+  }
+
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLString)) {
+    result = {
+      ...result, 
+      type: 'string',
     }
   }
 

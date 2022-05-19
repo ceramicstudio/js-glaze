@@ -54,6 +54,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithDIDProp @model(index: LINK) {
         didValue: DID
+        requiredDidValue: DID!
       }
       `)
     ).toMatchObject({
@@ -72,7 +73,14 @@ describe('utils', () => {
                 pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
                 maxLength: 80
               },
+              requiredDidValue: {
+                type: 'string',
+                title: 'DID',
+                pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
+                maxLength: 80
+              },
             },
+            required: ['requiredDidValue']
           }
         }
       }
@@ -84,6 +92,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithStreamReferenceProp @model(index: LINK) {
         streamReferenceValue: StreamReference
+        requiredStreamReferenceValue: StreamReference!
       }
       `)
     ).toMatchObject({
@@ -102,7 +111,14 @@ describe('utils', () => {
                 pattern: "<TBD>",
                 maxLength: 80
               },
+              requiredStreamReferenceValue: {
+                type: "string",
+                title: "StreamReference",
+                pattern: "<TBD>",
+                maxLength: 80
+              },
             },
+            required: ['requiredStreamReferenceValue']
           }
         }
       }
@@ -114,6 +130,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithBooleanProp @model(index: LINK) {
         booleanValue: Boolean
+        requiredBooleanValue: Boolean!
       }
       `)
     ).toMatchObject({
@@ -129,7 +146,11 @@ describe('utils', () => {
               booleanValue: {
                 type: "boolean",
               },
+              requiredBooleanValue: {
+                type: "boolean",
+              },
             },
+            required: ['requiredBooleanValue']
           }
         }
       }
@@ -141,6 +162,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithIntProp @model(index: LINK) {
         intValue: Int
+        requiredIntValue: Int!
       }
       `)
     ).toMatchObject({
@@ -156,7 +178,11 @@ describe('utils', () => {
               intValue: {
                 type: "integer",
               },
+              requiredIntValue: {
+                type: "integer",
+              },
             },
+            required: ["requiredIntValue"]
           }
         }
       }
@@ -168,6 +194,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithFloatProp @model(index: LINK) {
         floatValue: Float
+        requiredFloatValue: Float!
       }
       `)
     ).toMatchObject({
@@ -183,7 +210,11 @@ describe('utils', () => {
               floatValue: {
                 type: "number",
               },
+              requiredFloatValue: {
+                type: "number",
+              },
             },
+            required: ["requiredFloatValue"]
           }
         }
       }
@@ -195,6 +226,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithStringProp @model(index: LINK) {
         stringValue: String
+        requiredStringValue: String!
       }
       `)
     ).toMatchObject({
@@ -210,7 +242,11 @@ describe('utils', () => {
               stringValue: {
                 type: "string",
               },
+              requiredStringValue: {
+                type: "string",
+              },
             },
+            required: ["requiredStringValue"]
           }
         }
       }
@@ -222,6 +258,7 @@ describe('utils', () => {
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithIDProp @model(index: LINK) {
         idValue: ID
+        requiredIdValue: ID!
       }
       `)
     ).toMatchObject({
@@ -238,7 +275,12 @@ describe('utils', () => {
                 type: 'string', 
                 title: 'GraphQLID'
               },
+              requiredIdValue: {
+                type: 'string', 
+                title: 'GraphQLID'
+              },
             },
+            required: ["requiredIdValue"]
           }
         }
       }
