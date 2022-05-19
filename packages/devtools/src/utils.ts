@@ -353,6 +353,17 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (
+    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "ID".toLowerCase() ||
+    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "ID".toLowerCase()
+  ) {
+    result = {
+      ...result, 
+      type: 'string',
+      title: 'GraphQLID'
+    }
+  }
+
+  if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "Int".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "Int".toLowerCase()
   ) {
