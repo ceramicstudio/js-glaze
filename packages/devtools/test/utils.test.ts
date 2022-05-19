@@ -109,6 +109,60 @@ describe('utils', () => {
     })
   })
 
+  it('Boolean scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithBooleanProp @model(index: LINK) {
+        booleanValue: Boolean
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithBooleanPropID: {
+          name: "ModelWithBooleanProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              booleanValue: {
+                type: "boolean",
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
+  it('Int scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithIntProp @model(index: LINK) {
+        intValue: Int
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithIntPropID: {
+          name: "ModelWithIntProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              intValue: {
+                type: "integer",
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
