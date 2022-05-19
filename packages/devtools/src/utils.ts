@@ -23,6 +23,7 @@ import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types';
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema';
 import { Composite } from './composite';
 import { GraphQLCountryCode, GraphQLDate, GraphQLDID, GraphQLPositiveInt } from 'graphql-scalars';
+import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar';
 
 /** @internal */
 export function streamIDToString(id: StreamRef | string): string {
@@ -60,7 +61,12 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   schema: string | GraphQLSchema
 ): InternalCompositeDefinition {
   if (typeof schema === 'string') {
-    schema =  makeExecutableSchema({typeDefs: [compositeDirectivesAndScalarsSchema, schema]})
+    schema =  makeExecutableSchema({
+      typeDefs: [compositeDirectivesAndScalarsSchema, schema],
+      resolvers: {
+        StreamReference: GraphQLStreamReference
+      }
+    })
   }
 
   const compositeSchema = compositeDirectivesTransformer(schema)
@@ -352,14 +358,7 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  /**
-   * FIXME: Create StreamReference GraphQLType and add custom resolver for it to composite schemas, to that we can use fieldTypeIsInstanceOf(...) here
-   * https://www.graphql-tools.com/docs/resolvers#addresolverstoschema-schema-resolvers-resolvervalidationoptions-inheritresolversfrominterfaces-
-  */
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "StreamReference".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "StreamReference".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
     result = {
       ...result, 
       type: "string",
