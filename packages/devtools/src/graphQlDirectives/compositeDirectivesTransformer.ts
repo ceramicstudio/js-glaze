@@ -67,7 +67,7 @@ function fieldConfigMapperFactory(
       }
     }
 
-    ["intValue", "floatValue"].forEach(valueDirectiveName => {
+    ["intRange", "floatRange"].forEach(valueDirectiveName => {
       const valueDirective = getDirective(schema, fieldConfig, valueDirectiveName)?.[0];
     if (valueDirective) {
       ceramicExtensions = {

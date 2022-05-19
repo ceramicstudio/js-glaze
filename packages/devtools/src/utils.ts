@@ -430,21 +430,21 @@ function defaultFieldSchemaFromFieldDefinition(
       }
     }
 
-    if (ceramicExtensions?.intValue !== undefined) {
+    if (ceramicExtensions?.intRange !== undefined) {
       result = {
         ...result, 
         type: 'integer',
-        max: ceramicExtensions.intValue.max,
-        min: ceramicExtensions.intValue.min,
+        max: ceramicExtensions.intRange.max,
+        min: ceramicExtensions.intRange.min,
       }
     }
 
-    if (ceramicExtensions?.floatValue !== undefined) {
+    if (ceramicExtensions?.floatRange !== undefined) {
       result = {
         ...result, 
         type: 'number',
-        max: ceramicExtensions.floatValue.max,
-        min: ceramicExtensions.floatValue.min,
+        max: ceramicExtensions.floatRange.max,
+        min: ceramicExtensions.floatRange.min,
       }
     }
   } 

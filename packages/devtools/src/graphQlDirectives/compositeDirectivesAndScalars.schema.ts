@@ -21,8 +21,8 @@ directive @length(max: Int!, min: Int = 0) on FIELD_DEFINITION
 # For arrays of strings
 directive @itemLength(max: Int, min: Int = 0) on FIELD_DEFINITION 
 # For integers and floats
-directive @intValue(min: Int, max: Int) on FIELD_DEFINITION
-directive @floatValue(min: Float, max: Float) on FIELD_DEFINITION
+directive @intRange(min: Int, max: Int) on FIELD_DEFINITION
+directive @floatRange(min: Float, max: Float) on FIELD_DEFINITION
 
 # Metadata access directives
 

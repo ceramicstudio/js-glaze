@@ -366,11 +366,11 @@ describe('utils', () => {
     })
   })
 
-  it('@intValue(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
+  it('@intRange(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithIntProp @model(index: LINK) {
-        intValue: Int @intValue(min: 5, max: 10)
+        intValue: Int @intRange(min: 5, max: 10)
       }
       `)
     ).toMatchObject({
@@ -395,11 +395,11 @@ describe('utils', () => {
     })
   })
 
-  it('@floatValue(min: Float, max: Float) directive is supported and properly converted to ICD', () => {
+  it('@floatRange(min: Float, max: Float) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
       type ModelWithFloatProp @model(index: LINK) {
-        floatValue: Float @floatValue(min: 5.0, max: 10.0)
+        floatValue: Float @floatRange(min: 5.0, max: 10.0)
       }
       `)
     ).toMatchObject({
