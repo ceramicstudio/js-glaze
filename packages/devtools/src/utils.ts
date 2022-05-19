@@ -352,7 +352,10 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  // FIXME: Create StreamReference GraphQLType and add custom resolver for it to composite schemas, to that we can use fieldTypeIsInstanceOf(...) here
+  /**
+   * FIXME: Create StreamReference GraphQLType and add custom resolver for it to composite schemas, to that we can use fieldTypeIsInstanceOf(...) here
+   * https://www.graphql-tools.com/docs/resolvers#addresolverstoschema-schema-resolvers-resolvervalidationoptions-inheritresolversfrominterfaces-
+  */
   if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "StreamReference".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "StreamReference".toLowerCase()
