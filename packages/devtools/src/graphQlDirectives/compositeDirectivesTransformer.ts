@@ -40,6 +40,16 @@ function fieldConfigMapperFactory(
     fieldConfig: GraphQLFieldConfig<any, any, any>
   ) : GraphQLFieldConfig<any, any, any> {
     let ceramicExtensions: Record<string, any> = {}
+
+    const indexDirectiveName = "index"
+    const indexDirective = getDirective(schema, fieldConfig, indexDirectiveName)?.[0];
+    if (indexDirective) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        [indexDirectiveName]: { ceramicDirectiveName: indexDirectiveName }
+      }
+    }
+
     // TODO: Add valication to check, if custom directive are applied to the right field types?
     // E.g. @itemLength should only work for arrays, etc.
     const itemLengthDirectiveName = "itemLength"

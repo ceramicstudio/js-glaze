@@ -415,7 +415,14 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (ceramicExtensions) {
-    if (ceramicExtensions?.length !== undefined) {
+    if (ceramicExtensions.index !== undefined) {
+      result = {
+        ...result, 
+        index: true,
+      }
+    }
+
+    if (ceramicExtensions.length !== undefined) {
       result = {
         ...result, 
         type: 'string',
@@ -424,7 +431,7 @@ function defaultFieldSchemaFromFieldDefinition(
       }
     }
     
-    if (ceramicExtensions?.ipfs !== undefined) {
+    if (ceramicExtensions.ipfs !== undefined) {
       result = {
         ...result, 
         type: 'string',
@@ -432,7 +439,7 @@ function defaultFieldSchemaFromFieldDefinition(
       }
     }
 
-    if (ceramicExtensions?.intRange !== undefined) {
+    if (ceramicExtensions.intRange !== undefined) {
       result = {
         ...result, 
         type: 'integer',
@@ -441,7 +448,7 @@ function defaultFieldSchemaFromFieldDefinition(
       }
     }
 
-    if (ceramicExtensions?.floatRange !== undefined) {
+    if (ceramicExtensions.floatRange !== undefined) {
       result = {
         ...result, 
         type: 'number',

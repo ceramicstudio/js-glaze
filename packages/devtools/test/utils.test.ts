@@ -245,6 +245,34 @@ describe('utils', () => {
     })
   })
 
+  it('@index directive is supported for strings and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithIndexedProp @model(index: SET) {
+        indexedProp: String @index
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithIndexedPropID: {
+          name: "ModelWithIndexedProp",
+          accountRelation: 'set',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              indexedProp: {
+                type: 'string',
+                index: true
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
