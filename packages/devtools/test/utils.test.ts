@@ -190,6 +190,33 @@ describe('utils', () => {
     })
   })
 
+  it('String scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithStringProp @model(index: LINK) {
+        stringValue: String
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithStringPropID: {
+          name: "ModelWithStringProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              stringValue: {
+                type: "string",
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
