@@ -163,6 +163,33 @@ describe('utils', () => {
     })
   })
 
+  it('Float scalar is supported and properly converted to ICD', () => {
+    expect(
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithFloatProp @model(index: LINK) {
+        floatValue: Float
+      }
+      `)
+    ).toMatchObject({
+      version: "1.0",
+      models: {
+        ModelWithFloatPropID: {
+          name: "ModelWithFloatProp",
+          accountRelation: 'link',
+          schema: {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            type: 'object',
+            properties: {
+              floatValue: {
+                type: "number",
+              },
+            },
+          }
+        }
+      }
+    })
+  })
+
   it('@ipfs directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
@@ -331,7 +358,7 @@ describe('utils', () => {
             type: 'object',
             properties: {
               floatValue: {
-                type: 'float',
+                type: 'number',
                 min: 5.0,
                 max: 10.0,
               },

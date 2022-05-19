@@ -363,6 +363,16 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (
+    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "Float".toLowerCase() ||
+    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "Float".toLowerCase()
+  ) {
+    result = {
+      ...result, 
+      type: 'number'
+    }
+  }
+
+  if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "PositiveInt".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "PositiveInt".toLowerCase()
   ) {
@@ -425,7 +435,7 @@ function defaultFieldSchemaFromFieldDefinition(
     if (ceramicExtensions?.floatValue !== undefined) {
       result = {
         ...result, 
-        type: 'float',
+        type: 'number',
         max: ceramicExtensions.floatValue.max,
         min: ceramicExtensions.floatValue.min,
       }
