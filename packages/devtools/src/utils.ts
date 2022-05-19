@@ -1,12 +1,16 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import 'util'
 import { 
+  GraphQLFloat,
+  GraphQLID,
+  GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLOutputType,
   GraphQLScalarType,
-  GraphQLSchema 
+  GraphQLSchema,
+  GraphQLType
 } from 'graphql';
 import {
   mapSchema,
@@ -18,6 +22,7 @@ import { compositeDirectivesTransformer } from './graphQlDirectives/compositeDir
 import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types';
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema';
 import { Composite } from './composite';
+import { GraphQLCountryCode, GraphQLDate, GraphQLDID, GraphQLPositiveInt } from 'graphql-scalars';
 
 /** @internal */
 export function streamIDToString(id: StreamRef | string): string {
@@ -318,6 +323,17 @@ function arrayFieldSchemaFromFieldDefinition(
 }
 
 /** @internal */
+function fieldTypeIsinstanceOfOrWraps(
+  fieldType: GraphQLOutputType, 
+  type: GraphQLType
+): fieldType is GraphQLScalarType {
+  return (
+    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === type.toString().toLowerCase() ||
+    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === type.toString().toLowerCase()
+  )
+}
+
+/** @internal */
 function defaultFieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType,
   ceramicExtensions?: Record<string, any>
@@ -326,19 +342,17 @@ function defaultFieldSchemaFromFieldDefinition(
     type: fieldType.toString().toLowerCase(),
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "DID".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "DID".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDID)) {
     result = {
       ...result, 
       type: 'string',
-      title: 'DID',
+      title: GraphQLDID.toString(),
       pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
       maxLength: 80
     }
   }
 
+  // FIXME: Create StreamReference GraphQLType and add custom resolver for it to composite schemas, to that we can use fieldTypeIsInstanceOf(...) here
   if (
     fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "StreamReference".toLowerCase() ||
     fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "StreamReference".toLowerCase()
@@ -352,41 +366,29 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "ID".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "ID".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLID)) {
     result = {
       ...result, 
       type: 'string',
-      title: 'GraphQLID'
+      title: "GraphQLID" // TODO: Should we just use GraphQLID.toString() here, which equals to "ID"?
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "Int".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "Int".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLInt)) {
     result = {
       ...result, 
       type: 'integer'
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "Float".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "Float".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLFloat)) {
     result = {
       ...result, 
       type: 'number'
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "PositiveInt".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "PositiveInt".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLPositiveInt)) {
     result = {
       ...result, 
       type: 'integer',
@@ -394,20 +396,14 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "Date".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "Date".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDate)) {
     result = {
       ...result, 
       format: "date"
     }
   }
 
-  if (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === "CountryCode".toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === "CountryCode".toLowerCase()
-  ) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLCountryCode)) {
     result = {
       ...result, 
       type: 'string',
