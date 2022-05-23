@@ -43,6 +43,7 @@ const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   boolean: GraphQLBoolean,
   did: GraphQLDID,
   float: GraphQLFloat,
+  id: GraphQLID,
   integer: GraphQLInt,
   streamref: CeramicStreamReference,
   string: GraphQLString,
@@ -55,8 +56,8 @@ type GraphQLNodeDefinitions = {
   nodesField: GraphQLFieldConfig<unknown, Context>
 }
 type SharedDefinitions = GraphQLNodeDefinitions & {
-  storeObject: GraphQLObjectType<string, Context>
   accountObject: GraphQLObjectType<string, Context>
+  accountDataObject: GraphQLObjectType<string, Context>
 }
 
 type BuildObjectParams = {
@@ -66,7 +67,7 @@ type BuildObjectParams = {
 }
 
 function createCeramicAccountObject(
-  dataStore: GraphQLObjectType
+  accountDataObject: GraphQLObjectType
 ): GraphQLObjectType<string, Context> {
   return new GraphQLObjectType<string, Context>({
     name: 'CeramicAccount',
@@ -79,8 +80,8 @@ function createCeramicAccountObject(
         type: new GraphQLNonNull(GraphQLBoolean),
         resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
       },
-      store: {
-        type: new GraphQLNonNull(dataStore),
+      data: {
+        type: new GraphQLNonNull(accountDataObject),
         resolve: (did) => did,
       },
     },
@@ -127,12 +128,12 @@ class SchemaBuilder {
       (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model]
     )
 
-    // DataStore object is model-specific and needed to generate object using it
-    const storeObject = new GraphQLObjectType({
-      name: 'DataStore',
+    // AccountData object is model-specific and needed to generate object using it
+    const accountDataObject = new GraphQLObjectType({
+      name: 'CeramicAccountData',
       fields: () => {
         const config: GraphQLFieldConfigMap<string, Context> = {}
-        for (const [alias, reference] of Object.entries(this.#def.accountStore ?? {})) {
+        for (const [alias, reference] of Object.entries(this.#def.accountData ?? {})) {
           const model = this.#def.models[reference.name]
           if (model == null) {
             throw new Error(`Missing model for reference name: ${reference.name}`)
@@ -167,7 +168,11 @@ class SchemaBuilder {
       },
     })
 
-    return { ...nodeDefs, storeObject, accountObject: createCeramicAccountObject(storeObject) }
+    return {
+      ...nodeDefs,
+      accountDataObject,
+      accountObject: createCeramicAccountObject(accountDataObject),
+    }
   }
 
   _buildObjects(definitions: SharedDefinitions): Set<string> {

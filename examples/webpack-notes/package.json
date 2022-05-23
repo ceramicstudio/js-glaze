@@ -18,7 +18,7 @@
     "@glazed/did-datastore": "^0.3.1",
     "@glazed/tile-loader": "^0.2.0",
     "@mui/icons-material": "^5.8.0",
-    "@mui/material": "^5.8.0",
+    "@mui/material": "^5.8.1",
     "@mui/styles": "^5.8.0",
     "@stablelib/random": "^1.0.0",
     "dids": "^3.0.0",

@@ -11,6 +11,7 @@ import type {
 import type { GraphQLSchema } from 'graphql'
 import cloneDeep from 'lodash-es/cloneDeep'
 import merge from 'lodash-es/merge'
+import createObjectHash from 'object-hash'
 
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
 import { createRuntimeDefinition } from './formats/runtime.js'
@@ -47,6 +48,36 @@ function assertModelsHaveCommits(
       throw new Error(`Missing commits for model ${id}`)
     }
   }
+}
+
+export function setDefinitionAliases(
+  definition: StrictCompositeDefinition,
+  aliases: Record<string, string>,
+  replace = false
+): StrictCompositeDefinition {
+  const existing = replace ? {} : definition.aliases
+  definition.aliases = { ...existing, ...aliases }
+  return definition
+}
+
+export function setDefinitionCommonEmbeds(
+  definition: StrictCompositeDefinition,
+  names: Array<string> | Set<string>,
+  replace = false
+): StrictCompositeDefinition {
+  const existing = replace ? [] : definition.commonEmbeds
+  definition.commonEmbeds = Array.from(new Set([...existing, ...names]))
+  return definition
+}
+
+export function setDefinitionViews(
+  definition: StrictCompositeDefinition,
+  views: CompositeViewsDefinition,
+  replace = false
+): StrictCompositeDefinition {
+  const existing = replace ? {} : definition.views
+  definition.views = merge(existing, views)
+  return definition
 }
 
 async function loadModelsFromCommits<Models = Record<string, StreamCommits>>(
@@ -99,10 +130,12 @@ export class Composite {
   static VERSION = '1.0'
 
   static compose(composites: Array<ComposeInput>, options?: ComposeOptions): Composite {
+    if (composites.length === 0) {
+      throw new Error('Missing composites to compose')
+    }
     const [first, ...rest] = composites
     const composite = first instanceof Composite ? first.clone() : new Composite(first)
-    composite.composeWith(rest, options)
-    return composite
+    return composite.merge(rest, options)
   }
 
   static async fromJSON(params: FromJSONParams): Promise<Composite> {
@@ -124,12 +157,20 @@ export class Composite {
 
   #commits: Record<string, StreamCommits>
   #definition: StrictCompositeDefinition
+  #hash: string | undefined
 
   constructor(params: CompositeParams) {
     assertSupportedVersion(Composite.VERSION, params.definition.version)
     assertModelsHaveCommits(params.definition.models, params.commits)
     this.#commits = cloneDeep(params.commits)
     this.#definition = toStrictDefinition(cloneDeep(params.definition))
+  }
+
+  get hash(): string {
+    if (this.#hash == null) {
+      this.#hash = createObjectHash(this.#definition)
+    }
+    return this.#hash
   }
 
   clone(): Composite {
@@ -188,51 +229,71 @@ export class Composite {
     })
   }
 
-  composeWith(other: ComposeInput | Array<ComposeInput>, options: ComposeOptions = {}) {
+  equals(other: ComposeInput): boolean {
+    const otherHash =
+      other instanceof Composite
+        ? other.hash
+        : createObjectHash(toStrictDefinition(other.definition))
+    return this.hash === otherHash
+  }
+
+  merge(other: ComposeInput | Array<ComposeInput>, options: ComposeOptions = {}): Composite {
+    const nextParams = this.toParams()
+    const nextDefinition = toStrictDefinition(nextParams.definition)
     const collectedEmbeds = new Set<string>()
+
     for (const composite of Array.isArray(other) ? other : [other]) {
       const { commits, definition } =
         composite instanceof Composite ? composite.toParams() : composite
-      assertSupportedVersion(this.#definition.version, definition.version)
+      assertSupportedVersion(nextDefinition.version, definition.version)
       assertModelsHaveCommits(definition.models, commits)
 
       const def = toStrictDefinition(definition)
-      Object.assign(this.#commits, commits)
-      Object.assign(this.#definition.models, definition.models)
-      Object.assign(this.#definition.aliases ?? {}, def.aliases)
-      merge(this.#definition.views ?? {}, def.views)
+      Object.assign(nextParams.commits, commits)
+      Object.assign(nextDefinition.models, definition.models)
+      Object.assign(nextDefinition.aliases, def.aliases)
+      merge(nextDefinition.views, def.views)
       for (const name of def.commonEmbeds) {
         collectedEmbeds.add(name)
       }
     }
 
     if (options.aliases != null) {
-      this.setAliases(options.aliases)
+      setDefinitionAliases(nextDefinition, options.aliases)
     }
     const commonEmbeds = options.commonEmbeds ?? 'none'
     if (commonEmbeds === 'all') {
-      this.setCommonEmbeds(collectedEmbeds)
+      setDefinitionCommonEmbeds(nextDefinition, collectedEmbeds)
     } else if (Array.isArray(commonEmbeds)) {
-      this.setCommonEmbeds(commonEmbeds, true)
+      setDefinitionCommonEmbeds(nextDefinition, commonEmbeds, true)
     }
     if (options.views != null) {
-      this.setViews(options.views)
+      setDefinitionViews(nextDefinition, options.views)
     }
+
+    return new Composite({ ...nextParams, definition: nextDefinition })
   }
 
-  setAliases(aliases: Record<string, string>, replace = false) {
-    const existing = replace ? {} : this.#definition.aliases
-    this.#definition.aliases = { ...existing, ...aliases }
+  setAliases(aliases: Record<string, string>, replace = false): Composite {
+    const params = this.toParams()
+    const definition = setDefinitionAliases(toStrictDefinition(params.definition), aliases, replace)
+    return new Composite({ ...params, definition })
   }
 
-  setCommonEmbeds(names: Array<string> | Set<string>, replace = false) {
-    const existing = replace ? [] : this.#definition.commonEmbeds
-    this.#definition.commonEmbeds = Array.from(new Set([...existing, ...names]))
+  setCommonEmbeds(names: Array<string> | Set<string>, replace = false): Composite {
+    const params = this.toParams()
+    const definition = setDefinitionCommonEmbeds(
+      toStrictDefinition(params.definition),
+      names,
+      replace
+    )
+    return new Composite({ ...params, definition })
   }
 
-  setViews(views: CompositeViewsDefinition, replace = false) {
-    const existing = replace ? {} : this.#definition.views
-    this.#definition.views = merge(existing, views)
+  setViews(views: CompositeViewsDefinition, replace = false): Composite {
+    const params = this.toParams()
+    const definition = setDefinitionViews(toStrictDefinition(params.definition), views, replace)
+    return new Composite({ ...params, definition })
   }
 
   toJSON(): EncodedCompositeDefinition {

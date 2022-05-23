@@ -6,9 +6,9 @@
 
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { DagJWSResult, JWSSignature } from 'dids'
-import type { JSONSchema } from 'json-schema-typed/draft-07'
+import type { JSONSchema } from 'json-schema-typed/draft-2020-12'
 
-export type { JSONSchema } from 'json-schema-typed/draft-07'
+export type { JSONSchema } from 'json-schema-typed/draft-2020-12'
 
 /** JSON-encoded DAG-JWS. */
 export type EncodedDagJWS = {
@@ -161,12 +161,10 @@ export type RuntimeStringScalar = RuntimeScalarCommon & {
   type: 'string'
   maxLength?: number
 }
-export type RuntimeDIDStringScalar = RuntimeScalarCommon & {
-  type: 'did'
-  maxLength?: number
-}
-export type RuntimeStreamRefStringScalar = RuntimeScalarCommon & {
-  type: 'streamref'
+
+export type CustomRuntimeScalarType = 'did' | 'id' | 'streamref'
+type RuntimeStringScalarType<Type extends CustomRuntimeScalarType> = RuntimeScalarCommon & {
+  type: Type
   maxLength?: number
 }
 
@@ -175,8 +173,9 @@ export type RuntimeScalar =
   | RuntimeIntegerScalar
   | RuntimeFloatScalar
   | RuntimeStringScalar
-  | RuntimeDIDStringScalar
-  | RuntimeStreamRefStringScalar
+  | RuntimeStringScalarType<'did'>
+  | RuntimeStringScalarType<'id'>
+  | RuntimeStringScalarType<'streamref'>
 export type RuntimeScalarType = RuntimeScalar['type']
 
 export type RuntimeReferenceType =
@@ -208,6 +207,6 @@ export type RuntimeViewReference = { type: RuntimeViewReferenceType; name: strin
 export type RuntimeCompositeDefinition = {
   models: Record<string, string> // Name key, streamID value
   objects: Record<string, RuntimeObjectFields> // Name key
-  accountStore: Record<string, RuntimeViewReference>
+  accountData: Record<string, RuntimeViewReference>
   query?: Record<string, RuntimeViewReference>
 }

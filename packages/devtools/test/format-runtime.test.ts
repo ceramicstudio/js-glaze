@@ -37,10 +37,10 @@ describe('Runtime format', () => {
                 maxLength: 150,
               },
               image: {
-                $ref: '#/definitions/imageSources',
+                $ref: '#/$defs/imageSources',
               },
             },
-            definitions: {
+            $defs: {
               IPFSURL: {
                 type: 'string',
                 pattern: '^ipfs://.+',
@@ -55,20 +55,20 @@ describe('Runtime format', () => {
                 title: 'ImageMetadata',
                 properties: {
                   src: {
-                    $ref: '#/definitions/IPFSURL',
+                    $ref: '#/$defs/IPFSURL',
                   },
                   mimeType: {
                     type: 'string',
                     maxLength: 50,
                   },
                   width: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                   height: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                   size: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                 },
                 required: ['src', 'mimeType', 'width', 'height'],
@@ -78,12 +78,12 @@ describe('Runtime format', () => {
                 title: 'ImageSources',
                 properties: {
                   original: {
-                    $ref: '#/definitions/imageMetadata',
+                    $ref: '#/$defs/imageMetadata',
                   },
                   alternatives: {
                     type: 'array',
                     items: {
-                      $ref: '#/definitions/imageMetadata',
+                      $ref: '#/$defs/imageMetadata',
                     },
                   },
                 },
@@ -108,14 +108,14 @@ describe('Runtime format', () => {
                 maxLength: 2,
               },
               background: {
-                $ref: '#/definitions/imageSources',
+                $ref: '#/$defs/imageSources',
               },
               url: {
                 type: 'string',
                 maxLength: 240,
               },
             },
-            definitions: {
+            $defs: {
               IPFSURL: {
                 type: 'string',
                 pattern: '^ipfs://.+',
@@ -130,20 +130,20 @@ describe('Runtime format', () => {
                 title: 'ImageMetadata',
                 properties: {
                   src: {
-                    $ref: '#/definitions/IPFSURL',
+                    $ref: '#/$defs/IPFSURL',
                   },
                   mimeType: {
                     type: 'string',
                     maxLength: 50,
                   },
                   width: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                   height: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                   size: {
-                    $ref: '#/definitions/positiveInteger',
+                    $ref: '#/$defs/positiveInteger',
                   },
                 },
                 required: ['src', 'mimeType', 'width', 'height'],
@@ -153,12 +153,12 @@ describe('Runtime format', () => {
                 title: 'ImageSources',
                 properties: {
                   original: {
-                    $ref: '#/definitions/imageMetadata',
+                    $ref: '#/$defs/imageMetadata',
                   },
                   alternatives: {
                     type: 'array',
                     items: {
-                      $ref: '#/definitions/imageMetadata',
+                      $ref: '#/$defs/imageMetadata',
                     },
                   },
                 },

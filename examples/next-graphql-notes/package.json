@@ -17,7 +17,7 @@
     "@emotion/styled": "^11.8.1",
     "@glazed/graphql": "^0.1.0",
     "@mui/icons-material": "^5.8.0",
-    "@mui/material": "^5.8.0",
+    "@mui/material": "^5.8.1",
     "@mui/styles": "^5.8.0",
     "dids": "^3.0.0",
     "jotai": "^1.6.7",

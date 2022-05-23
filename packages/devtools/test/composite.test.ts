@@ -27,6 +27,52 @@ describe('composite', () => {
       })
     })
 
+    test('hash() getter returns a stable hash', () => {
+      const source = new Composite({
+        commits: { fooID: [], barID: [] },
+        definition: {
+          version: '1.0',
+          models: {
+            fooID: { name: 'Foo', accountRelation: 'link', schema: {} },
+            barID: { name: 'Bar', accountRelation: 'link', schema: {} },
+          },
+          aliases: { fooID: 'Test', barID: 'Other' },
+        },
+      })
+      const hash = source.hash
+      const clone = source.clone()
+      expect(clone.hash).toBe(hash)
+      expect(source.hash).toBe(hash)
+    })
+
+    describe('equals()', () => {
+      const params: CompositeParams = {
+        commits: { fooID: [], barID: [] },
+        definition: {
+          version: '1.0',
+          models: {
+            fooID: { name: 'Foo', accountRelation: 'link', schema: {} },
+            barID: { name: 'Bar', accountRelation: 'link', schema: {} },
+          },
+          aliases: { fooID: 'Test', barID: 'Other' },
+        },
+      }
+      const source = new Composite(params)
+
+      test('with CompositeParams', () => {
+        expect(source.equals(params)).toBe(true)
+        expect(source.equals({ commits: {}, definition: { version: '1.0', models: {} } })).toBe(
+          false
+        )
+      })
+
+      test('with Composite instance', () => {
+        expect(source.equals(source.clone())).toBe(true)
+        expect(source.equals(source.setAliases({ fooID: 'Test' }))).toBe(true)
+        expect(source.equals(source.setAliases({ bazID: 'Baz' }))).toBe(false)
+      })
+    })
+
     test('toJSON() returns a JSON-encoded composite', () => {
       const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
       const encoded = composite.toJSON()
@@ -50,8 +96,6 @@ describe('composite', () => {
       const sourceParams = source.toParams()
       const clone = source.clone()
       expect(clone.toParams()).toEqual(sourceParams)
-      clone.setAliases({ fooID: 'foo' })
-      expect(clone.toParams()).not.toEqual(source.toParams())
     })
 
     describe('copy() creates a copy of the composite with only selected models', () => {
@@ -124,12 +168,13 @@ describe('composite', () => {
 
     describe('setAliases()', () => {
       test('merging with existing', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: {},
           definition: { version: '1.0', models: {}, aliases: { fooID: 'foo', barID: 'bar' } },
         })
-        composite.setAliases({ barID: 'test', bazID: 'baz' })
-        expect(composite.toParams().definition.aliases).toEqual({
+        const copy = source.setAliases({ barID: 'test', bazID: 'baz' })
+        expect(source.toParams().definition.aliases).toEqual({ fooID: 'foo', barID: 'bar' })
+        expect(copy.toParams().definition.aliases).toEqual({
           fooID: 'foo',
           barID: 'test',
           bazID: 'baz',
@@ -137,38 +182,41 @@ describe('composite', () => {
       })
 
       test('replacing existing', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: {},
           definition: { version: '1.0', models: {}, aliases: { fooID: 'foo', barID: 'bar' } },
         })
-        composite.setAliases({ barID: 'test', bazID: 'baz' }, true)
-        expect(composite.toParams().definition.aliases).toEqual({ barID: 'test', bazID: 'baz' })
+        const copy = source.setAliases({ barID: 'test', bazID: 'baz' }, true)
+        expect(source.toParams().definition.aliases).toEqual({ fooID: 'foo', barID: 'bar' })
+        expect(copy.toParams().definition.aliases).toEqual({ barID: 'test', bazID: 'baz' })
       })
     })
 
     describe('setCommonEmbeds()', () => {
       test('merging with existing', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: {},
           definition: { version: '1.0', models: {}, commonEmbeds: ['Foo', 'Bar'] },
         })
-        composite.setCommonEmbeds(['Bar', 'Baz'])
-        expect(composite.toParams().definition.commonEmbeds).toEqual(['Foo', 'Bar', 'Baz'])
+        const copy = source.setCommonEmbeds(['Bar', 'Baz'])
+        expect(source.toParams().definition.commonEmbeds).toEqual(['Foo', 'Bar'])
+        expect(copy.toParams().definition.commonEmbeds).toEqual(['Foo', 'Bar', 'Baz'])
       })
 
       test('replacing existing', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: {},
           definition: { version: '1.0', models: {}, commonEmbeds: ['Foo', 'Bar'] },
         })
-        composite.setCommonEmbeds(['Bar', 'Baz'], true)
-        expect(composite.toParams().definition.commonEmbeds).toEqual(['Bar', 'Baz'])
+        const copy = source.setCommonEmbeds(['Bar', 'Baz'], true)
+        expect(source.toParams().definition.commonEmbeds).toEqual(['Foo', 'Bar'])
+        expect(copy.toParams().definition.commonEmbeds).toEqual(['Bar', 'Baz'])
       })
     })
 
     describe('setViews()', () => {
       test('merging with existing', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: {},
           definition: {
             version: '1.0',
@@ -195,7 +243,7 @@ describe('composite', () => {
             },
           },
         })
-        composite.setViews({
+        const copy = source.setViews({
           account: {},
           models: {
             model: {
@@ -209,7 +257,27 @@ describe('composite', () => {
           },
           root: { foo: 'test', bar: 'test' },
         })
-        expect(composite.toParams().definition.views).toEqual({
+        expect(source.toParams().definition.views).toEqual({
+          account: { foo: {} },
+          models: {
+            model: {
+              foo: {
+                type: 'ReferencedFrom',
+                model: 'foo',
+                property: 'foo',
+                collection: false,
+              },
+              bar: {
+                type: 'ReferencedFrom',
+                model: 'bar',
+                property: 'bar',
+                collection: false,
+              },
+            },
+          },
+          root: { foo: {} },
+        })
+        expect(copy.toParams().definition.views).toEqual({
           account: { foo: {} },
           models: {
             model: {
@@ -232,9 +300,9 @@ describe('composite', () => {
       })
     })
 
-    describe('composeWith() merges composites into the instance', () => {
+    describe('merge() merges composites into the instance', () => {
       test('supports Composite instances and params inputs', () => {
-        const composite = new Composite({
+        const source = new Composite({
           commits: { fooID: [] },
           definition: {
             version: '1.0',
@@ -256,7 +324,7 @@ describe('composite', () => {
             aliases: { bazID: 'Test' },
           },
         }
-        composite.composeWith([otherInstance, otherParams])
+        const composite = source.merge([otherInstance, otherParams])
         expect(composite.toParams()).toEqual({
           commits: { fooID: [], barID: [], bazID: [] },
           definition: {
@@ -280,7 +348,7 @@ describe('composite', () => {
       test('throws if any input uses an unsupported version', () => {
         const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
         const other = { commits: {}, definition: { version: '2.0', models: {} } }
-        expect(() => composite.composeWith(other)).toThrow(
+        expect(() => composite.merge(other)).toThrow(
           'Unsupported Composite version 2.0, expected version 1.0'
         )
       })
@@ -294,12 +362,12 @@ describe('composite', () => {
             models: { fooID: { name: 'Foo', accountRelation: 'link', schema: {} } },
           },
         }
-        expect(() => composite.composeWith(other)).toThrow('Missing commits for model fooID')
+        expect(() => composite.merge(other)).toThrow('Missing commits for model fooID')
       })
 
       test('with aliases', () => {
-        const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-        composite.composeWith(
+        const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
+        const composite = source.merge(
           [
             {
               commits: {},
@@ -320,8 +388,8 @@ describe('composite', () => {
       })
 
       test('with no common embeds (default)', () => {
-        const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-        composite.composeWith([
+        const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
+        const composite = source.merge([
           {
             commits: {},
             definition: { version: '1.0', models: {}, commonEmbeds: ['Foo', 'Bar'] },
@@ -332,8 +400,8 @@ describe('composite', () => {
       })
 
       test('with all common embeds', () => {
-        const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-        composite.composeWith(
+        const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
+        const composite = source.merge(
           [
             {
               commits: {},
@@ -350,8 +418,8 @@ describe('composite', () => {
       })
 
       test('with specific common embeds', () => {
-        const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-        composite.composeWith(
+        const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
+        const composite = source.merge(
           [
             {
               commits: {},
@@ -368,8 +436,8 @@ describe('composite', () => {
       })
 
       test('with views', () => {
-        const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-        composite.composeWith(
+        const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
+        const composite = source.merge(
           [
             {
               commits: {},

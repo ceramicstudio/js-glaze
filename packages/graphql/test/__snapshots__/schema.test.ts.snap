@@ -20,7 +20,7 @@ interface Node {
 type CeramicAccount {
   id: DID!
   isViewer: Boolean!
-  store: DataStore!
+  data: CeramicAccountData!
 }
 
 \\"\\"\\"
@@ -28,7 +28,7 @@ A field whose value conforms to the standard DID format as specified in did-core
 \\"\\"\\"
 scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
 
-type DataStore {
+type CeramicAccountData {
   genericProfile: GenericProfile
   socialProfile: SocialProfile
   personProfile: PersonProfile

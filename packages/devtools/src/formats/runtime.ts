@@ -1,4 +1,5 @@
 import type {
+  CustomRuntimeScalarType,
   InternalCompositeDefinition,
   JSONSchema,
   ModelDefinition,
@@ -23,9 +24,10 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
-const CUSTOM_SCALARS_TITLES: Record<string, RuntimeScalar['type']> = {
+const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
   CeramicStreamReference: 'streamref',
   GraphQLDID: 'did',
+  GraphQLID: 'id',
 }
 type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
@@ -223,7 +225,7 @@ export function createRuntimeDefinition(
   const runtime: RuntimeCompositeDefinition = {
     models: {},
     objects: {},
-    accountStore: {},
+    accountData: {},
   }
 
   for (const [modelID, modelDefinition] of Object.entries(definition.models)) {
@@ -241,14 +243,14 @@ export function createRuntimeDefinition(
     if (modelDefinition.accountRelation !== 'none') {
       const key = camelCase(modelName)
       if (modelDefinition.accountRelation === 'link') {
-        runtime.accountStore[key] = { type: 'model', name: modelName }
+        runtime.accountData[key] = { type: 'model', name: modelName }
       } else {
-        runtime.accountStore[key + 'Collection'] = { type: 'collection', name: modelName }
+        runtime.accountData[key + 'Collection'] = { type: 'collection', name: modelName }
       }
     }
   }
 
-  // TODO: handle definition.views for additional models, accountStore and root view
+  // TODO: handle definition.views for additional models, accountData and root view
 
   return runtime
 }
