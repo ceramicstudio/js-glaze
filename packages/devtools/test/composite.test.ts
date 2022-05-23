@@ -54,6 +54,74 @@ describe('composite', () => {
       expect(clone.toParams()).not.toEqual(source.toParams())
     })
 
+    describe('copy() creates a copy of the composite with only selected models', () => {
+      const source = new Composite({
+        commits: { fooID: [], barID: [] },
+        definition: {
+          version: '1.0',
+          models: {
+            fooID: { name: 'Foo', accountRelation: 'link', schema: {} },
+            barID: { name: 'Bar', accountRelation: 'link', schema: {} },
+          },
+          aliases: { fooID: 'Test', barID: 'Other' },
+        },
+      })
+
+      test('throws an error if no model is set', () => {
+        expect(() => {
+          source.copy([])
+        }).toThrow('Missing models to copy')
+      })
+
+      test('throws an error if a model is not found', () => {
+        expect(() => {
+          source.copy(['unknown'])
+        }).toThrow('Model not found: unknown')
+      })
+
+      test('identifies models by ID', () => {
+        const copy = source.copy(['fooID'])
+        expect(copy.toParams()).toEqual({
+          commits: { fooID: [] },
+          definition: {
+            version: '1.0',
+            models: { fooID: { name: 'Foo', accountRelation: 'link', schema: {} } },
+            aliases: { fooID: 'Test' },
+            commonEmbeds: [],
+            views: { account: {}, models: {}, root: {} },
+          },
+        })
+      })
+
+      test('identifies models by name', () => {
+        const copy = source.copy(['Foo'])
+        expect(copy.toParams()).toEqual({
+          commits: { fooID: [] },
+          definition: {
+            version: '1.0',
+            models: { fooID: { name: 'Foo', accountRelation: 'link', schema: {} } },
+            aliases: { fooID: 'Test' },
+            commonEmbeds: [],
+            views: { account: {}, models: {}, root: {} },
+          },
+        })
+      })
+
+      test('identifies models by alias', () => {
+        const copy = source.copy(['Test'])
+        expect(copy.toParams()).toEqual({
+          commits: { fooID: [] },
+          definition: {
+            version: '1.0',
+            models: { fooID: { name: 'Foo', accountRelation: 'link', schema: {} } },
+            aliases: { fooID: 'Test' },
+            commonEmbeds: [],
+            views: { account: {}, models: {}, root: {} },
+          },
+        })
+      })
+    })
+
     describe('setAliases()', () => {
       test('merging with existing', () => {
         const composite = new Composite({

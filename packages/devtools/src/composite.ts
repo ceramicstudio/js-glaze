@@ -136,6 +136,58 @@ export class Composite {
     return new Composite(this.toParams())
   }
 
+  copy(models: Array<string>): Composite {
+    if (models.length === 0) {
+      throw new Error('Missing models to copy')
+    }
+
+    const { commits, definition } = this.toParams()
+    const def = toStrictDefinition(definition)
+
+    const nameIDs = Object.entries(def.models).reduce((acc, [id, model]) => {
+      acc[model.name] = id
+      return acc
+    }, {} as Record<string, string>)
+    const aliasIDs = Object.entries(def.aliases).reduce((acc, [id, alias]) => {
+      acc[alias] = id
+      return acc
+    }, {} as Record<string, string>)
+
+    const nextCommits: Record<string, StreamCommits> = {}
+    const nextModels: Record<string, ModelDefinition> = {}
+    const nextAliases: Record<string, string> = {}
+    const nextViews: CompositeViewsDefinition = { account: {}, root: {}, models: {} }
+
+    for (const model of models) {
+      const id = aliasIDs[model] ?? nameIDs[model] ?? model
+      if (def.models[id] == null) {
+        throw new Error(`Model not found: ${model}`)
+      }
+
+      nextCommits[id] = commits[id]
+      nextModels[id] = def.models[id]
+      if (def.aliases[id] != null) {
+        nextAliases[id] = def.aliases[id]
+      }
+      if (def.views.models[id] != null) {
+        // TODO: check relations to other models, ensure there's no missing model in the subset
+        nextViews.models[id] = def.views.models[id]
+      }
+      // TODO: account and root views
+    }
+
+    return new Composite({
+      commits: nextCommits,
+      definition: {
+        version: def.version,
+        commonEmbeds: def.commonEmbeds,
+        models: nextModels,
+        aliases: nextAliases,
+        views: nextViews,
+      },
+    })
+  }
+
   composeWith(other: ComposeInput | Array<ComposeInput>, options: ComposeOptions = {}) {
     const collectedEmbeds = new Set<string>()
     for (const composite of Array.isArray(other) ? other : [other]) {
