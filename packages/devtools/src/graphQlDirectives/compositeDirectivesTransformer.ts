@@ -113,6 +113,7 @@ function objectConfigMapperFactory(
   return objectConfigMapper
 }
 
+/** @internal */
 function parseLengthDirective(
   schema: GraphQLSchema,
   fieldConfig: GraphQLFieldConfig<any, any, any>,
@@ -145,6 +146,7 @@ function parseLengthDirective(
   return ceramicExtensions
 }
 
+/** @internal */
 function parseArrayLengthDirective(
   schema: GraphQLSchema,
   fieldConfig: GraphQLFieldConfig<any, any, any>,
@@ -172,6 +174,7 @@ function parseArrayLengthDirective(
   return ceramicExtensions
 }
 
+/** @internal */
 function parseIntRangeDirective(
   schema: GraphQLSchema,
   fieldConfig: GraphQLFieldConfig<any, any, any>,
@@ -204,6 +207,7 @@ function parseIntRangeDirective(
   return ceramicExtensions
 }
 
+/** @internal */
 function parseFloatRangeDirective(
   schema: GraphQLSchema,
   fieldConfig: GraphQLFieldConfig<any, any, any>,
@@ -236,6 +240,7 @@ function parseFloatRangeDirective(
   return ceramicExtensions
 }
 
+/** @internal */
 function fieldConfigMapperFactory(
   schema: GraphQLSchema
 ): (fieldConfig: GraphQLFieldConfig<any, any, any>) => GraphQLFieldConfig<any, any, any> {
@@ -263,6 +268,7 @@ function fieldConfigMapperFactory(
   return fieldConfigMapper
 }
 
+/** @internal */
 export function compositeDirectivesTransformer(schema: GraphQLSchema): GraphQLSchema {
   return mapSchema(schema, {
     [MapperKind.OBJECT_TYPE]: objectConfigMapperFactory(schema),

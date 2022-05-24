@@ -1,5 +1,4 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
-import 'util'
 
 /** @internal */
 export function streamIDToString(id: StreamRef | string): string {
