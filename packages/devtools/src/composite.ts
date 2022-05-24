@@ -62,7 +62,7 @@ export function setDefinitionAliases(
 
 export function setDefinitionCommonEmbeds(
   definition: StrictCompositeDefinition,
-  names: Array<string> | Set<string>,
+  names: Iterable<string>,
   replace = false
 ): StrictCompositeDefinition {
   const existing = replace ? [] : definition.commonEmbeds
@@ -109,31 +109,41 @@ export type CompositeParams = {
   definition: InternalCompositeDefinition
 }
 
+export type CompositeInput = Composite | CompositeParams
+export type CompositeOptions = {
+  aliases?: Record<string, string>
+  commonEmbeds?: 'all' | 'none' | Iterable<string>
+  views?: CompositeViewsDefinition
+}
+
+export type CreateParams = {
+  ceramic: CeramicApi
+  schema: string | GraphQLSchema
+}
+
 export type FromJSONParams = {
   ceramic: CeramicApi
   definition: EncodedCompositeDefinition
 }
 
-export type FromSchemaParams = {
+export type FromModelsParams = CompositeOptions & {
   ceramic: CeramicApi
-  schema: string | GraphQLSchema
-}
-
-export type ComposeInput = Composite | CompositeParams
-export type ComposeOptions = {
-  aliases?: Record<string, string>
-  commonEmbeds?: 'all' | 'none' | Array<string>
-  views?: CompositeViewsDefinition
+  models: Array<string>
 }
 
 export class Composite {
   static VERSION = '1.0'
 
-  static compose(composites: Array<ComposeInput>, options?: ComposeOptions): Composite {
-    if (composites.length === 0) {
+  static create(_params: CreateParams): Promise<Composite> {
+    // TODO: convert the schema to models, create the models on the Ceramice node, load their commits
+    throw new Error('Not implemented')
+  }
+
+  static from(composites: Iterable<CompositeInput>, options?: CompositeOptions): Composite {
+    const [first, ...rest] = composites
+    if (first == null) {
       throw new Error('Missing composites to compose')
     }
-    const [first, ...rest] = composites
     const composite = first instanceof Composite ? first.clone() : new Composite(first)
     return composite.merge(rest, options)
   }
@@ -150,8 +160,8 @@ export class Composite {
     })
   }
 
-  static fromSchema(_params: FromSchemaParams): Promise<Composite> {
-    // TODO: convert the schema to models, create the models on the Ceramice node, load their commits
+  static fromModels(_params: FromModelsParams): Promise<Composite> {
+    // TODO: load all models definitions and commits
     throw new Error('Not implemented')
   }
 
@@ -229,7 +239,7 @@ export class Composite {
     })
   }
 
-  equals(other: ComposeInput): boolean {
+  equals(other: CompositeInput): boolean {
     const otherHash =
       other instanceof Composite
         ? other.hash
@@ -237,7 +247,7 @@ export class Composite {
     return this.hash === otherHash
   }
 
-  merge(other: ComposeInput | Array<ComposeInput>, options: ComposeOptions = {}): Composite {
+  merge(other: CompositeInput | Array<CompositeInput>, options: CompositeOptions = {}): Composite {
     const nextParams = this.toParams()
     const nextDefinition = toStrictDefinition(nextParams.definition)
     const collectedEmbeds = new Set<string>()
@@ -280,7 +290,7 @@ export class Composite {
     return new Composite({ ...params, definition })
   }
 
-  setCommonEmbeds(names: Array<string> | Set<string>, replace = false): Composite {
+  setCommonEmbeds(names: Iterable<string>, replace = false): Composite {
     const params = this.toParams()
     const definition = setDefinitionCommonEmbeds(
       toStrictDefinition(params.definition),

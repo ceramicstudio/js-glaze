@@ -467,7 +467,7 @@ describe('composite', () => {
     })
   })
 
-  test('Composite.compose() merges composites into a new instance', () => {
+  test('Composite.from() merges composites into a new instance', () => {
     const first: CompositeParams = {
       commits: { fooID: [] },
       definition: {
@@ -492,7 +492,7 @@ describe('composite', () => {
         aliases: { bazID: 'Test' },
       },
     }
-    const composite = Composite.compose([new Composite(first), second, third], {
+    const composite = Composite.from([new Composite(first), second, third], {
       commonEmbeds: 'all',
     })
     const params = composite.toParams()
@@ -519,4 +519,10 @@ describe('composite', () => {
     expect(params).not.toEqual(second)
     expect(params).not.toEqual(third)
   })
+
+  test.todo('Composite.create()')
+
+  test.todo('Composite.fromJSON()')
+
+  test.todo('Composite.fromModels()')
 })
