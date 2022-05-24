@@ -336,37 +336,6 @@ describe('utils', () => {
     })
   })
 
-  it('@index directive is supported for strings and properly converted to ICD', () => {
-    expect(
-      internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIndexedProp @model(
-        accountRelation: SET,
-        description: "Test model with an indexed property"
-      ) {
-        indexedProp: String @index
-      }
-      `)
-    ).toMatchObject({
-      version: '1.0',
-      models: {
-        ModelWithIndexedPropID: {
-          name: 'ModelWithIndexedProp',
-          accountRelation: 'set',
-          schema: {
-            $schema: 'https://json-schema.org/draft/2020-12/schema',
-            type: 'object',
-            properties: {
-              indexedProp: {
-                type: 'string',
-                index: true,
-              },
-            },
-          },
-        },
-      },
-    })
-  })
-
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`

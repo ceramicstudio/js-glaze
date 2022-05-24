@@ -20,7 +20,6 @@ directive @floatRange(min: Float, max: Float) on FIELD_DEFINITION
 
 enum ModelAccountRelation {
   LIST # Account to multiple streams - default
-  SET # FUTURE - Account to multiple streams but only one reference
   LINK # Account to single stream (IDX)
   NONE # Indexing explicitly disabled
 }
@@ -28,6 +27,4 @@ directive @model(
   accountRelation: ModelAccountRelation = LIST
   description: String!
 ) on OBJECT
-# FUTURE - When a model has index = SET, at least one field must have the @index directive
-directive @index on FIELD_DEFINITION
 `
