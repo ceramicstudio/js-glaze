@@ -1,6 +1,11 @@
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
 import { GraphQLSchema, GraphQLObjectType, GraphQLFieldConfig } from 'graphql'
 
+const ARRAY_LENGTH_DIRECTIVE_NAME = 'arrayLength'
+const LENGTH_DIRECTIVE_NAME = 'length'
+const INT_RANGE_DIRECTIVE_NAME = 'intRange'
+const FLOAT_RANGE_DIRECTIVE_NAME = 'floatRange'
+
 function objectConfigMapperFactory(
   schema: GraphQLSchema
 ): (objectConfig: GraphQLObjectType<any, any>) => GraphQLObjectType<any, any> {
@@ -33,24 +38,14 @@ function fieldConfigMapperFactory(
   ): GraphQLFieldConfig<any, any, any> {
     let ceramicExtensions: Record<string, any> = {}
 
-    const indexDirectiveName = 'index'
-    const indexDirective = getDirective(schema, fieldConfig, indexDirectiveName)?.[0]
-    if (indexDirective) {
-      ceramicExtensions = {
-        ...ceramicExtensions,
-        [indexDirectiveName]: { ceramicDirectiveName: indexDirectiveName },
-      }
-    }
-
     // TODO: Add valication to check, if custom directive are applied to the right field types?
     // E.g. @arrayLength should only work for arrays, etc.
-    const arrayLengthDirectiveName = 'arrayLength'
-    const arrayLengthDirective = getDirective(schema, fieldConfig, arrayLengthDirectiveName)?.[0]
+    const arrayLengthDirective = getDirective(schema, fieldConfig, ARRAY_LENGTH_DIRECTIVE_NAME)?.[0]
     if (arrayLengthDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        [arrayLengthDirectiveName]: {
-          ceramicDirectiveName: arrayLengthDirectiveName,
+        [ARRAY_LENGTH_DIRECTIVE_NAME]: {
+          ceramicDirectiveName: ARRAY_LENGTH_DIRECTIVE_NAME,
           min: arrayLengthDirective.min || undefined,
           max: arrayLengthDirective.max || undefined,
         },
@@ -58,20 +53,19 @@ function fieldConfigMapperFactory(
     }
 
     // TODO: This needs to work differently for srings and for arrays of strings
-    const lengthDirectiveName = 'length'
-    const lengthDirective = getDirective(schema, fieldConfig, lengthDirectiveName)?.[0]
+    const lengthDirective = getDirective(schema, fieldConfig, LENGTH_DIRECTIVE_NAME)?.[0]
     if (lengthDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        [lengthDirectiveName]: {
-          ceramicDirectiveName: lengthDirectiveName,
+        [LENGTH_DIRECTIVE_NAME]: {
+          ceramicDirectiveName: LENGTH_DIRECTIVE_NAME,
           min: lengthDirective.min || undefined,
           max: lengthDirective.max || undefined,
         },
       }
     }
 
-    ['intRange', 'floatRange'].forEach((valueDirectiveName) => {
+    [INT_RANGE_DIRECTIVE_NAME, FLOAT_RANGE_DIRECTIVE_NAME].forEach((valueDirectiveName) => {
       const valueDirective = getDirective(schema, fieldConfig, valueDirectiveName)?.[0]
       if (valueDirective) {
         ceramicExtensions = {

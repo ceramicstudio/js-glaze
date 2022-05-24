@@ -395,27 +395,12 @@ function defaultFieldSchemaFromFieldDefinition(
   }
 
   if (ceramicExtensions) {
-    if (ceramicExtensions.index !== undefined) {
-      result = {
-        ...result,
-        index: true,
-      }
-    }
-
     if (ceramicExtensions.length !== undefined) {
       result = {
         ...result,
         type: 'string',
         maxLength: ceramicExtensions.length.max,
         minLength: ceramicExtensions.length.min,
-      }
-    }
-
-    if (ceramicExtensions.ipfs !== undefined) {
-      result = {
-        ...result,
-        type: 'string',
-        pattern: ceramicExtensions.ipfs.pattern,
       }
     }
 
