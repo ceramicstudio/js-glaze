@@ -1,6 +1,6 @@
 import type { StreamRef } from '@ceramicnetwork/streamid'
 import 'util'
-import { 
+import {
   GraphQLBoolean,
   GraphQLFloat,
   GraphQLID,
@@ -12,20 +12,17 @@ import {
   GraphQLScalarType,
   GraphQLSchema,
   GraphQLString,
-  GraphQLType
-} from 'graphql';
-import {
-  mapSchema,
-  getDirective,
-  MapperKind 
-} from '@graphql-tools/utils';
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { compositeDirectivesTransformer } from './graphQlDirectives/compositeDirectivesTransformer';
-import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types';
-import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema';
-import { Composite } from './composite';
-import { GraphQLDID } from 'graphql-scalars';
-import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar';
+  GraphQLType,
+  GraphQLUnionType,
+} from 'graphql'
+import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { compositeDirectivesTransformer } from './graphQlDirectives/compositeDirectivesTransformer'
+import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types'
+import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema'
+import { Composite } from './composite'
+import { GraphQLDID } from 'graphql-scalars'
+import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar'
 
 /** @internal */
 export function streamIDToString(id: StreamRef | string): string {
@@ -63,14 +60,15 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   schema: string | GraphQLSchema
 ): InternalCompositeDefinition {
   if (typeof schema === 'string') {
-    schema =  makeExecutableSchema({
+    schema = makeExecutableSchema({
       typeDefs: [compositeDirectivesAndScalarsSchema, schema],
       resolvers: {
-        StreamReference: GraphQLStreamReference
-      }
+        StreamReference: GraphQLStreamReference,
+      },
     })
   }
 
+  checkForUnsupportedTypes(schema)
   const compositeSchema = compositeDirectivesTransformer(schema)
   const definitions = embeddedObjectsDefinitionsFromGraphQLSchema(compositeSchema)
   const models = modelsFromGraphQLSchema(compositeSchema, definitions)
@@ -78,7 +76,7 @@ export function internalCompositeDefinitionFromGraphQLSchema(
 
   const result: InternalCompositeDefinition = {
     version: Composite.VERSION,
-    models: models
+    models: models,
   }
 
   if (commonEmbeds.length > 0) {
@@ -89,20 +87,35 @@ export function internalCompositeDefinitionFromGraphQLSchema(
 }
 
 /** @internal */
-function commonEmbedNamesFromModels(
-  models: Record<string, ModelDefinition>
-): string[] {
+function checkForUnsupportedTypes(schema: GraphQLSchema) {
+  mapSchema(schema, {
+    [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
+      if (objectConfig.getInterfaces().length > 0) {
+        throw new Error("GraphQL interfaces are not supported")
+      }
+      for (const fieldDefinition of Object.values(objectConfig.getFields())) {
+        if (fieldDefinition.type instanceof GraphQLUnionType) {
+          throw new Error('GraphQL unions are not supported')
+        }
+      }
+      return objectConfig
+    },
+  })
+}
+
+/** @internal */
+function commonEmbedNamesFromModels(models: Record<string, ModelDefinition>): Array<string> {
   const definitionOccurences: { [embedName: string]: number } = {}
   Object.values(models).forEach((modelDefinition: ModelDefinition) => {
     Object.keys(modelDefinition.schema.$defs || {}).forEach((embedName: string) => {
-      if(definitionOccurences[embedName] === undefined) {
+      if (definitionOccurences[embedName] === undefined) {
         definitionOccurences[embedName] = 0
       }
       definitionOccurences[embedName] += 1
     })
-  });
+  })
 
-  const commonEmbeds: string[] = []
+  const commonEmbeds: Array<string> = []
   Object.keys(definitionOccurences).forEach((embedName: string) => {
     if (definitionOccurences[embedName] > 1) {
       commonEmbeds.push(embedName)
@@ -114,14 +127,14 @@ function commonEmbedNamesFromModels(
 
 /** @internal */
 function embeddedObjectsDefinitionsFromGraphQLSchema(schema: GraphQLSchema): Record<string, any> {
-  let definitions: Record<string, any> = {}
+  const definitions: Record<string, any> = {}
   mapSchema(schema, {
     [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
-      const modelDirective = getDirective(schema as GraphQLSchema, objectConfig, 'model')?.[0];
+      const modelDirective = getDirective(schema, objectConfig, 'model')?.[0]
       if (!modelDirective) {
         definitions[objectConfig.name] = embeddedObjectDefinitionFromObjectConfig(objectConfig)
-      } 
-      return objectConfig;
+      }
+      return objectConfig
     },
   })
   return definitions
@@ -132,28 +145,34 @@ function modelsFromGraphQLSchema(
   schema: GraphQLSchema,
   definitions: Record<string, any>
 ): Record<string, ModelDefinition> {
-  let models: Record<string, ModelDefinition> = {}
+  const models: Record<string, ModelDefinition> = {}
   mapSchema(schema, {
     [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
-      const modelDirective = getDirective(schema as GraphQLSchema, objectConfig, 'model')?.[0];
+      const modelDirective = getDirective(schema, objectConfig, 'model')?.[0]
       if (modelDirective) {
-        models[`${objectConfig.name}ID`] = modelFromObjectConfig(modelDirective, objectConfig, definitions)
-      } 
-      return objectConfig;
+        models[`${objectConfig.name}ID`] = modelFromObjectConfig(
+          modelDirective,
+          objectConfig,
+          definitions
+        )
+      }
+      return objectConfig
     },
   })
 
   if (Object.keys(models).length === 0) {
-    throw new Error("No models found in Composite Definition Schema")
+    throw new Error('No models found in Composite Definition Schema')
   }
 
   return models
 }
 
 /** @internal */
-function embeddedObjectDefinitionFromObjectConfig(objectConfig: GraphQLObjectType): Record<string, any> {
-  const properties:Record<string, any> = {}
-  const required: string[] = []
+function embeddedObjectDefinitionFromObjectConfig(
+  objectConfig: GraphQLObjectType
+): Record<string, any> {
+  const properties: Record<string, any> = {}
+  const required: Array<string> = []
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
     properties[fieldName] = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
@@ -169,22 +188,22 @@ function embeddedObjectDefinitionFromObjectConfig(objectConfig: GraphQLObjectTyp
     type: 'object',
     title: objectConfig.name,
     properties: properties,
-    required: required.length > 0 ? required : undefined
+    required: required.length > 0 ? required : undefined,
   }
 }
 
 /** @internal */
 function modelFromObjectConfig(
-  modelDirective: Record<string, any>, 
-  objectConfig: GraphQLObjectType, 
+  modelDirective: Record<string, any>,
+  objectConfig: GraphQLObjectType,
   definitions: Record<string, any>
 ): ModelDefinition {
   const modelSchema: Record<string, any> = {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
-    type: 'object'
+    type: 'object',
   }
   const modelSchemaProperties: Record<string, any> = {}
-  const requiredProperties: string[] = []
+  const requiredProperties: Array<string> = []
   const requiredDefinitions: Record<string, any> = {}
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
     modelSchemaProperties[fieldName] = fieldSchemaFromFieldDefinition(
@@ -196,11 +215,10 @@ function modelFromObjectConfig(
       requiredProperties.push(fieldName)
     }
 
-    const typeName = (
-      fieldDefinition.type instanceof GraphQLList && fieldDefinition.type.ofType.toString() ||
-      fieldDefinition.type instanceof GraphQLNonNull && fieldDefinition.type.ofType.toString() ||
+    const typeName =
+      (fieldDefinition.type instanceof GraphQLList && fieldDefinition.type.ofType.toString()) ||
+      (fieldDefinition.type instanceof GraphQLNonNull && fieldDefinition.type.ofType.toString()) ||
       fieldDefinition.type.toString()
-    )
     if (Object.keys(definitions).includes(typeName)) {
       requiredDefinitions[typeName] = definitions[typeName]
     }
@@ -209,15 +227,16 @@ function modelFromObjectConfig(
   const nestedRequiredDefinitions: Record<string, any> = {}
   Object.keys(requiredDefinitions).forEach((fieldName: string) => {
     Object.keys(requiredDefinitions[fieldName].properties).forEach((propertyName: string) => {
-      if (Object.keys(requiredDefinitions[fieldName].properties[propertyName]).includes("$ref")) {
-        const nestedName = requiredDefinitions[fieldName].properties[propertyName].$ref.split("#/$defs/")[1]
+      if (Object.keys(requiredDefinitions[fieldName].properties[propertyName]).includes('$ref')) {
+        const nestedName =
+          requiredDefinitions[fieldName].properties[propertyName].$ref.split('#/$defs/')[1]
         nestedRequiredDefinitions[nestedName] = definitions[nestedName]
       }
     })
   })
 
   modelSchema.properties = modelSchemaProperties
-  modelSchema.$defs = {...requiredDefinitions, ...nestedRequiredDefinitions}
+  modelSchema.$defs = { ...requiredDefinitions, ...nestedRequiredDefinitions }
   if (Object.keys(modelSchema.$defs).length === 0) {
     delete modelSchema.$defs
   }
@@ -227,7 +246,7 @@ function modelFromObjectConfig(
     name: objectConfig.name,
     accountRelation: modelDirective.accountRelation.toLowerCase(),
     description: modelDirective.description,
-    schema: modelSchema
+    schema: modelSchema,
   }
 }
 
@@ -251,13 +270,13 @@ function fieldSchemaFromFieldDefinition(
 
 /** @internal */
 function referenceFieldSchemaFromFieldDefinition(
-  fieldType: GraphQLOutputType,
+  fieldType: GraphQLOutputType
 ): Record<string, any> | undefined {
   if (!(fieldType instanceof GraphQLObjectType)) {
-    return 
+    return
   }
   return {
-    $ref: `#/$defs/${fieldType.name}`
+    $ref: `#/$defs/${fieldType.name}`,
   }
 }
 
@@ -268,12 +287,12 @@ function arrayFieldSchemaFromFieldDefinition(
   ceramicExtensions?: Record<string, any>
 ): Record<string, any> | undefined {
   if (!(fieldType instanceof GraphQLList)) {
-    return 
+    return
   }
 
-  let result: Record<string, any> = {
+  const result: Record<string, any> = {
     type: 'array',
-    items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType)
+    items: fieldSchemaFromFieldDefinition(fieldName, fieldType.ofType),
   }
 
   if (ceramicExtensions) {
@@ -293,18 +312,20 @@ function arrayFieldSchemaFromFieldDefinition(
         result.items.maxLength = ceramicExtensions.length.max
       }
     }
-  } 
+  }
   return result
 }
 
 /** @internal */
 function fieldTypeIsinstanceOfOrWraps(
-  fieldType: GraphQLOutputType, 
+  fieldType: GraphQLOutputType,
   type: GraphQLType
 ): fieldType is GraphQLScalarType {
   return (
-    fieldType instanceof GraphQLScalarType && fieldType.name.toLowerCase() === type.toString().toLowerCase() ||
-    fieldType instanceof GraphQLNonNull && fieldType.ofType.toString().toLowerCase() === type.toString().toLowerCase()
+    (fieldType instanceof GraphQLScalarType &&
+      fieldType.name.toLowerCase() === type.toString().toLowerCase()) ||
+    (fieldType instanceof GraphQLNonNull &&
+      fieldType.ofType.toString().toLowerCase() === type.toString().toLowerCase())
   )
 }
 
@@ -319,56 +340,56 @@ function defaultFieldSchemaFromFieldDefinition(
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDID)) {
     result = {
-      ...result, 
+      ...result,
       type: 'string',
       title: GraphQLDID.toString(),
-      pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
-      maxLength: 80
+      pattern: "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
+      maxLength: 80,
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
     result = {
-      ...result, 
-      type: "string",
-      title: "StreamReference",
-      pattern: "<TBD>", //FIXME: define the pattern for StreamReference strings
-      maxLength: 80
+      ...result,
+      type: 'string',
+      title: 'StreamReference',
+      pattern: '<TBD>', //FIXME: define the pattern for StreamReference strings
+      maxLength: 80,
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLID)) {
     result = {
-      ...result, 
+      ...result,
       type: 'string',
-      title: "GraphQLID" // TODO: Should we just use GraphQLID.toString() here, which equals to "ID"?
+      title: 'GraphQLID', // TODO: Should we just use GraphQLID.toString() here, which equals to "ID"?
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLInt)) {
     result = {
-      ...result, 
-      type: 'integer'
+      ...result,
+      type: 'integer',
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLFloat)) {
     result = {
-      ...result, 
-      type: 'number'
+      ...result,
+      type: 'number',
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLBoolean)) {
     result = {
-      ...result, 
+      ...result,
       type: 'boolean',
     }
   }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLString)) {
     result = {
-      ...result, 
+      ...result,
       type: 'string',
     }
   }
@@ -376,23 +397,23 @@ function defaultFieldSchemaFromFieldDefinition(
   if (ceramicExtensions) {
     if (ceramicExtensions.index !== undefined) {
       result = {
-        ...result, 
+        ...result,
         index: true,
       }
     }
 
     if (ceramicExtensions.length !== undefined) {
       result = {
-        ...result, 
+        ...result,
         type: 'string',
         maxLength: ceramicExtensions.length.max,
         minLength: ceramicExtensions.length.min,
       }
     }
-    
+
     if (ceramicExtensions.ipfs !== undefined) {
       result = {
-        ...result, 
+        ...result,
         type: 'string',
         pattern: ceramicExtensions.ipfs.pattern,
       }
@@ -400,7 +421,7 @@ function defaultFieldSchemaFromFieldDefinition(
 
     if (ceramicExtensions.intRange !== undefined) {
       result = {
-        ...result, 
+        ...result,
         type: 'integer',
         maximum: ceramicExtensions.intRange.max,
         minimum: ceramicExtensions.intRange.min,
@@ -409,12 +430,12 @@ function defaultFieldSchemaFromFieldDefinition(
 
     if (ceramicExtensions.floatRange !== undefined) {
       result = {
-        ...result, 
+        ...result,
         type: 'number',
         maximum: ceramicExtensions.floatRange.max,
         minimum: ceramicExtensions.floatRange.min,
       }
     }
-  } 
+  }
   return result
 }

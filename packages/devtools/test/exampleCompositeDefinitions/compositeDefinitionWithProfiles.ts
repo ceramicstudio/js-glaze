@@ -1,4 +1,4 @@
-import { InternalCompositeDefinition, ModelDefinition } from "@glazed/types";
+import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types'
 
 export const genericProfileDefinition: ModelDefinition = {
   name: 'GenericProfile',
@@ -61,7 +61,7 @@ export const genericProfileDefinition: ModelDefinition = {
         required: ['original'],
       },
     },
-  }
+  },
 }
 
 export const socialProfileDefinition: ModelDefinition = {
@@ -185,6 +185,6 @@ export const compositeDefinitionWithProfiles: InternalCompositeDefinition = {
   models: {
     GenericProfileID: genericProfileDefinition,
     SocialProfileID: socialProfileDefinition,
-    PersonProfileID: personProfileDefinition
-  }
+    PersonProfileID: personProfileDefinition,
+  },
 }

@@ -17,18 +17,48 @@ describe('utils', () => {
     expect(res).toEqual({ one: 2, two: 4 })
   })
 
-  it('internalCompositeDefinitionFromGraphQLSchema throws when there\'s no top-level model object', () => {
+  it("internalCompositeDefinitionFromGraphQLSchema throws when there's no top-level model object", () => {
     expect(() => {
       internalCompositeDefinitionFromGraphQLSchema(graphQLSchemaWithoutModels)
-    }).toThrow("No models found in Composite Definition Schema")
+    }).toThrow('No models found in Composite Definition Schema')
+  })
+
+  it("internalCompositeDefinitionFromGraphQLSchema doesn't parse unions", () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      union IntOrString = Int | String
+
+      type ModelWithUnionProp @model(
+        accountRelation: LINK,
+        description: "Test model with a property that is a union of string and int"
+      ) {
+        intOrStringValue: IntOrString
+      }
+      `)
+    }).toThrow('GraphQL unions are not supported')
+  })
+
+  it("internalCompositeDefinitionFromGraphQLSchema doesn't parse interfaces", () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      interface GenericProfile {
+        name: String @length(max: 150)
+      }
+       
+      type SocialProfile implements GenericProfile @model(
+        accountRelation: LINK,
+        description: "A model to store properties that accounts would like to share on social media"
+      ) {
+        description: String @length(max: 420)
+        emoji: String @length(max: 2)
+        url: String @length(max: 240)
+      }
+      `)
+    }).toThrow('GraphQL interfaces are not supported')
   })
 
   it('internalCompositeDefinitionFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema', () => {
-    expect(
-      internalCompositeDefinitionFromGraphQLSchema(
-        compositeSchemaWithProfiles
-      )
-    ).toMatchObject(
+    expect(internalCompositeDefinitionFromGraphQLSchema(compositeSchemaWithProfiles)).toMatchObject(
       compositeDefinitionWithProfiles
     )
   })
@@ -37,12 +67,8 @@ describe('utils', () => {
     const compositeDefinition = internalCompositeDefinitionFromGraphQLSchema(
       compositeSchemaWithProfiles
     )
-    const { 
-      GenericProfileID, 
-      SocialProfileID, 
-      PersonProfileID 
-    } = compositeDefinition.models
-    
+    const { GenericProfileID, SocialProfileID, PersonProfileID } = compositeDefinition.models
+
     const validator = new ajv()
     expect(validator.validateSchema(GenericProfileID.schema, true)).toBe(true)
     expect(validator.validateSchema(SocialProfileID.schema, true)).toBe(true)
@@ -61,10 +87,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithDIDPropID: {
-          name: "ModelWithDIDProp",
+          name: 'ModelWithDIDProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -73,20 +99,22 @@ describe('utils', () => {
               didValue: {
                 type: 'string',
                 title: 'DID',
-                pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
-                maxLength: 80
+                pattern:
+                  "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
+                maxLength: 80,
               },
               requiredDidValue: {
                 type: 'string',
                 title: 'DID',
-                pattern: "/^did:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+$/",
-                maxLength: 80
+                pattern:
+                  "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
+                maxLength: 80,
               },
             },
-            required: ['requiredDidValue']
-          }
-        }
-      }
+            required: ['requiredDidValue'],
+          },
+        },
+      },
     })
   })
 
@@ -102,32 +130,32 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithStreamReferencePropID: {
-          name: "ModelWithStreamReferenceProp",
+          name: 'ModelWithStreamReferenceProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               streamReferenceValue: {
-                type: "string",
-                title: "StreamReference",
-                pattern: "<TBD>",
-                maxLength: 80
+                type: 'string',
+                title: 'StreamReference',
+                pattern: '<TBD>',
+                maxLength: 80,
               },
               requiredStreamReferenceValue: {
-                type: "string",
-                title: "StreamReference",
-                pattern: "<TBD>",
-                maxLength: 80
+                type: 'string',
+                title: 'StreamReference',
+                pattern: '<TBD>',
+                maxLength: 80,
               },
             },
-            required: ['requiredStreamReferenceValue']
-          }
-        }
-      }
+            required: ['requiredStreamReferenceValue'],
+          },
+        },
+      },
     })
   })
 
@@ -143,26 +171,26 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithBooleanPropID: {
-          name: "ModelWithBooleanProp",
+          name: 'ModelWithBooleanProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               booleanValue: {
-                type: "boolean",
+                type: 'boolean',
               },
               requiredBooleanValue: {
-                type: "boolean",
+                type: 'boolean',
               },
             },
-            required: ['requiredBooleanValue']
-          }
-        }
-      }
+            required: ['requiredBooleanValue'],
+          },
+        },
+      },
     })
   })
 
@@ -178,26 +206,26 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithIntPropID: {
-          name: "ModelWithIntProp",
+          name: 'ModelWithIntProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               intValue: {
-                type: "integer",
+                type: 'integer',
               },
               requiredIntValue: {
-                type: "integer",
+                type: 'integer',
               },
             },
-            required: ["requiredIntValue"]
-          }
-        }
-      }
+            required: ['requiredIntValue'],
+          },
+        },
+      },
     })
   })
 
@@ -213,26 +241,26 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithFloatPropID: {
-          name: "ModelWithFloatProp",
+          name: 'ModelWithFloatProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               floatValue: {
-                type: "number",
+                type: 'number',
               },
               requiredFloatValue: {
-                type: "number",
+                type: 'number',
               },
             },
-            required: ["requiredFloatValue"]
-          }
-        }
-      }
+            required: ['requiredFloatValue'],
+          },
+        },
+      },
     })
   })
 
@@ -248,26 +276,26 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithStringPropID: {
-          name: "ModelWithStringProp",
+          name: 'ModelWithStringProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               stringValue: {
-                type: "string",
+                type: 'string',
               },
               requiredStringValue: {
-                type: "string",
+                type: 'string',
               },
             },
-            required: ["requiredStringValue"]
-          }
-        }
-      }
+            required: ['requiredStringValue'],
+          },
+        },
+      },
     })
   })
 
@@ -283,28 +311,28 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithIDPropID: {
-          name: "ModelWithIDProp",
+          name: 'ModelWithIDProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               idValue: {
-                type: 'string', 
-                title: 'GraphQLID'
+                type: 'string',
+                title: 'GraphQLID',
               },
               requiredIdValue: {
-                type: 'string', 
-                title: 'GraphQLID'
+                type: 'string',
+                title: 'GraphQLID',
               },
             },
-            required: ["requiredIdValue"]
-          }
-        }
-      }
+            required: ['requiredIdValue'],
+          },
+        },
+      },
     })
   })
 
@@ -319,10 +347,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithIndexedPropID: {
-          name: "ModelWithIndexedProp",
+          name: 'ModelWithIndexedProp',
           accountRelation: 'set',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -330,12 +358,12 @@ describe('utils', () => {
             properties: {
               indexedProp: {
                 type: 'string',
-                index: true
+                index: true,
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -350,10 +378,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithStringPropID: {
-          name: "ModelWithStringProp",
+          name: 'ModelWithStringProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -365,9 +393,9 @@ describe('utils', () => {
                 maxLength: 140,
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -382,10 +410,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithArrayPropID: {
-          name: "ModelWithArrayProp",
+          name: 'ModelWithArrayProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -396,13 +424,13 @@ describe('utils', () => {
                 minItems: 10,
                 maxItems: 15,
                 items: {
-                  type: 'string'
-                }
+                  type: 'string',
+                },
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -417,10 +445,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithArrayPropID: {
-          name: "ModelWithArrayProp",
+          name: 'ModelWithArrayProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -432,12 +460,12 @@ describe('utils', () => {
                   type: 'string',
                   minLength: 4,
                   maxLength: 440,
-                }
+                },
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -452,10 +480,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithIntPropID: {
-          name: "ModelWithIntProp",
+          name: 'ModelWithIntProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -467,9 +495,9 @@ describe('utils', () => {
                 maximum: 10,
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 
@@ -484,10 +512,10 @@ describe('utils', () => {
       }
       `)
     ).toMatchObject({
-      version: "1.0",
+      version: '1.0',
       models: {
         ModelWithFloatPropID: {
-          name: "ModelWithFloatProp",
+          name: 'ModelWithFloatProp',
           accountRelation: 'link',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -499,9 +527,9 @@ describe('utils', () => {
                 maximum: 10.0,
               },
             },
-          }
-        }
-      }
+          },
+        },
+      },
     })
   })
 })
