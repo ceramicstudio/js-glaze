@@ -1,5 +1,5 @@
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
-import { GraphQLSchema, GraphQLObjectType, GraphQLFieldConfig } from 'graphql'
+import { GraphQLSchema, GraphQLObjectType, GraphQLFieldConfig, GraphQLList, GraphQLString } from 'graphql'
 
 const MODEL_DIRECTIVE_NAME = 'model'
 const ARRAY_LENGTH_DIRECTIVE_NAME = 'arrayLength'
@@ -36,17 +36,24 @@ export type CeramicGraphQLTypeExtensions = {
   [ceramicDirectiveName: string]: CeramicGraphQLTypeExtension
 }
 
+export function getCeramicModelDirective(
+  schema: GraphQLSchema, 
+  objectConfig: GraphQLObjectType<any, any>
+): ModelDirective | undefined {
+  return getDirective(
+    schema,
+    objectConfig,
+    MODEL_DIRECTIVE_NAME
+  )?.[0] as ModelDirective
+}
+
 function objectConfigMapperFactory(
   schema: GraphQLSchema
 ): (objectConfig: GraphQLObjectType<any, any>) => GraphQLObjectType<any, any> {
   function objectConfigMapper(
     objectConfig: GraphQLObjectType<any, any>
   ): GraphQLObjectType<any, any> {
-    const modelDirective = getDirective(
-      schema,
-      objectConfig,
-      MODEL_DIRECTIVE_NAME
-    )?.[0] as ModelDirective
+    const modelDirective = getCeramicModelDirective(schema, objectConfig)
     if (modelDirective) {
       objectConfig.extensions = {
         ...objectConfig.extensions,

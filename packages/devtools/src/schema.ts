@@ -13,11 +13,12 @@ import {
     GraphQLType,
     GraphQLUnionType,
   } from 'graphql'
-  import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
+  import { mapSchema, MapperKind } from '@graphql-tools/utils'
   import { makeExecutableSchema } from '@graphql-tools/schema'
   import {
     CeramicGraphQLTypeExtensions,
     compositeDirectivesTransformer,
+    getCeramicModelDirective,
     ModelDirective,
   } from './graphQlDirectives/compositeDirectivesTransformer'
   import {
@@ -44,10 +45,15 @@ export function internalCompositeDefinitionFromGraphQLSchema(
       })
     }
   
+    // Throw an error, if there are any unsupported types in the schema
     checkForUnsupportedTypes(schema)
+    // Parse and validate custom ceramic graphQL directives, throw an error if validation fails
     const compositeSchema = compositeDirectivesTransformer(schema)
+    // Extract embedded definitions from the schema
     const definitions = embeddedObjectsDefinitionsFromGraphQLSchema(compositeSchema)
+    // Extract the models in JSONSchema format (including $defs copied from definitions)
     const models = modelsFromGraphQLSchema(compositeSchema, definitions)
+    // Extract names of embeds (definitions) used in more than one model
     const commonEmbeds = commonEmbedNamesFromModels(models)
   
     const result: InternalCompositeDefinition = {
@@ -108,7 +114,7 @@ export function internalCompositeDefinitionFromGraphQLSchema(
     const definitions: Record<string, JSONSchema.Object> = {}
     mapSchema(schema, {
       [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
-        const modelDirective = getDirective(schema, objectConfig, 'model')?.[0]
+        const modelDirective = getCeramicModelDirective(schema, objectConfig)
         if (!modelDirective) {
           definitions[objectConfig.name] = embeddedObjectDefinitionFromObjectConfig(objectConfig)
         }
@@ -126,7 +132,7 @@ export function internalCompositeDefinitionFromGraphQLSchema(
     const models: Record<string, ModelDefinition> = {}
     mapSchema(schema, {
       [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
-        const modelDirective = getDirective(schema, objectConfig, 'model')?.[0] as ModelDirective
+        const modelDirective = getCeramicModelDirective(schema, objectConfig)
         if (modelDirective) {
           models[`${objectConfig.name}ID`] = modelFromObjectConfig(
             modelDirective,
@@ -202,7 +208,27 @@ export function internalCompositeDefinitionFromGraphQLSchema(
         definitionsUsedInTheModel[typeName] = allDefinitions[typeName]
       }
     }
-  
+    /**
+     * Some definitions in definitionsUsedInTheModel may have refs to other definitions 
+     * and we need to make sure that definitionUsedInModel contain them too.
+     * 
+     * Example:
+     * type ImageMetadata {
+     *   src: String! @length(max: 150)
+     * }
+     *
+     * type ImageSources {
+     *   original: ImageMetadata!
+     *   alternatives: [ImageMetadata]
+     * }
+     * 
+     * In this case, we need to make sure that definitionsUsedInTheModel also contain the definition of ImageMetadata.
+     * 
+     * To do this, we create a helper list var caller definitionsUsedInTheDefinitions and add 
+     * to this list all the definitions from definitionsUsedInTheModel that are referred to by other definitions
+     * 
+     * The final model definitions is gonna be the merge of definitionsUsedInTheModel and definitionsUsedInTheDefinitions
+     */
     const definitionsUsedInTheDefinitions: Record<string, JSONSchema.Object> = {}
     Object.values(definitionsUsedInTheModel).forEach((definitionUsedInModel) => {
       if (definitionUsedInModel.properties) {
