@@ -357,6 +357,58 @@ describe('schema', () => {
     })
   })
 
+  it('@intRange(min: Int, max: Int) can be applied to Int, Int! or [Int] properties', () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithStringProp @model(
+        accountRelation: LINK,
+        description: "Test model with incorrectly constrained string property"
+      ) {
+        intValue: String @intRange(min: 1)
+      }
+      `)
+    }).toThrow('@intRange can only be applied to integers or arrays of integers')
+  })
+
+  it('@floatRange(min: Int, max: Int) can be applied to Float, Float! or [Float] properties', () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithIntProp @model(
+        accountRelation: LINK,
+        description: "Test model with incorrectly constrained int property"
+      ) {
+        intValue: Int @floatRange(max: 1)
+      }
+      `)
+    }).toThrow('@floatRange can only be applied to floats or arrays of floats')
+  })
+
+  it('@length(min: Int, max: Int) can be applied to strings or arrays of strings', () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithArrayProp @model(
+        accountRelation: LINK,
+        description: "Test model with incorrectly constrained array property"
+      ) {
+        intValue: [Int] @length(min:10, max: 140)
+      }
+      `)
+    }).toThrow('@length can only be applied to strings or arrays of strings')
+  })
+
+  it('@arrayLength(min: Int, max: Int) can be applied to arrays', () => {
+    expect(() => {
+      internalCompositeDefinitionFromGraphQLSchema(`
+      type ModelWithStringProp @model(
+        accountRelation: LINK,
+        description: "Test model with incorrectly constrained strings property"
+      ) {
+        intValue: String @arrayLength(max: 140)
+      }
+      `)
+    }).toThrow('@arrayLength can only be applied to arrays')
+  })
+
   it('@arrayLength(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
