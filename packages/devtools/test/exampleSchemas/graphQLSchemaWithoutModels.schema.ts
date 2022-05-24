@@ -1,9 +1,9 @@
 export const graphQLSchemaWithoutModels = `
 type ImageMetadata {
-  src: URL! @ipfs
+  src: String!
   mimeType: String! @length(max: 50)
-  width: PositiveInt!
-  height: PositiveInt!
-  size: PositiveInt
+  width: Int! @intRange(min: 0)
+  height: Int! @intRange(min: 0)
+  size: Int @intRange(min: 0)
 }
 `

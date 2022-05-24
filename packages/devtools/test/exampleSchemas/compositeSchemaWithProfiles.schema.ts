@@ -1,10 +1,10 @@
 export const compositeSchemaWithProfiles = `
 type ImageMetadata {
-  src: URL! @ipfs @length(max: 150)
+  src: String! @length(max: 150)
   mimeType: String! @length(max: 50)
-  width: PositiveInt!
-  height: PositiveInt!
-  size: PositiveInt
+  width: Int! @intRange(min: 1)
+  height: Int! @intRange(min: 1)
+  size: Int @intRange(min: 1)
 }
 
 type ImageSources {
@@ -12,24 +12,33 @@ type ImageSources {
   alternatives: [ImageMetadata]
 }
 
-type GenericProfile @model(index: LINK) {
+type GenericProfile @model(
+  accountRelation: LINK,
+  description: "A model to store common profile-related properties"
+) {
   name: String @length(max: 150)
   image: ImageSources
 }
  
-type SocialProfile @model(index: LINK, description: "A social profile model") {
+type SocialProfile @model(
+  accountRelation: LINK,
+  description: "A model to store properties that accounts would like to share on social media"
+) {
   description: String @length(max: 420)
   emoji: String @length(max: 2)
   background: ImageSources
-  url: URL @length(max: 240)
+  url: String @length(max: 240)
 }
 
-type PersonProfile @model(index: LINK) {
-  birthDate: Date @length(max: 10)
+type PersonProfile @model(
+  accountRelation: LINK,
+  description: "A model to store accounts' personal data"
+) {
+  birthDate: String @length(max: 10)
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
-  residenceCountry: CountryCode
-  nationalities: [CountryCode] @length(min:1, max: 5)
-  affiliations: [String] @itemLength(max: 140)
+  residenceCountry: String @length(max: 2)
+  nationalities: [String] @arrayLength(min:1, max: 5)
+  affiliations: [String] @length(max: 140)
 }
 `

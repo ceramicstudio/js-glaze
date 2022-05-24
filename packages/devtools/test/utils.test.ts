@@ -4,7 +4,7 @@ import { applyMap, promiseMap, internalCompositeDefinitionFromGraphQLSchema } fr
 import { compositeDefinitionWithProfiles } from './exampleCompositeDefinitions/compositeDefinitionWithProfiles'
 import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
-import ajv from 'ajv'
+import ajv from 'ajv/dist/2020'
 
 describe('utils', () => {
   it('applyMap applies the given function to all values in a record', () => {
@@ -52,7 +52,10 @@ describe('utils', () => {
   it('DID scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithDIDProp @model(index: LINK) {
+      type ModelWithDIDProp @model(
+        accountRelation: LINK,
+        description: "Test model with DID properties"
+      ) {
         didValue: DID
         requiredDidValue: DID!
       }
@@ -64,7 +67,7 @@ describe('utils', () => {
           name: "ModelWithDIDProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               didValue: {
@@ -90,7 +93,10 @@ describe('utils', () => {
   it('StreamReference scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithStreamReferenceProp @model(index: LINK) {
+      type ModelWithStreamReferenceProp @model(
+        accountRelation: LINK,
+        description: "Test model with stream reference properties"
+      ) {
         streamReferenceValue: StreamReference
         requiredStreamReferenceValue: StreamReference!
       }
@@ -102,7 +108,7 @@ describe('utils', () => {
           name: "ModelWithStreamReferenceProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               streamReferenceValue: {
@@ -128,7 +134,10 @@ describe('utils', () => {
   it('Boolean scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithBooleanProp @model(index: LINK) {
+      type ModelWithBooleanProp @model(
+        accountRelation: LINK,
+        description: "Test model with boolean properties"
+      ) {
         booleanValue: Boolean
         requiredBooleanValue: Boolean!
       }
@@ -140,7 +149,7 @@ describe('utils', () => {
           name: "ModelWithBooleanProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               booleanValue: {
@@ -160,7 +169,10 @@ describe('utils', () => {
   it('Int scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIntProp @model(index: LINK) {
+      type ModelWithIntProp @model(
+        accountRelation: LINK,
+        description: "Test model with int properties"
+      ) {
         intValue: Int
         requiredIntValue: Int!
       }
@@ -172,7 +184,7 @@ describe('utils', () => {
           name: "ModelWithIntProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               intValue: {
@@ -192,7 +204,10 @@ describe('utils', () => {
   it('Float scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithFloatProp @model(index: LINK) {
+      type ModelWithFloatProp @model(
+        accountRelation: LINK,
+        description: "Test model with float properties"
+      ) {
         floatValue: Float
         requiredFloatValue: Float!
       }
@@ -204,7 +219,7 @@ describe('utils', () => {
           name: "ModelWithFloatProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               floatValue: {
@@ -224,7 +239,10 @@ describe('utils', () => {
   it('String scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithStringProp @model(index: LINK) {
+      type ModelWithStringProp @model(
+        accountRelation: LINK,
+        description: "Test model with string properties"
+      ) {
         stringValue: String
         requiredStringValue: String!
       }
@@ -236,7 +254,7 @@ describe('utils', () => {
           name: "ModelWithStringProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               stringValue: {
@@ -256,7 +274,10 @@ describe('utils', () => {
   it('ID scalar is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIDProp @model(index: LINK) {
+      type ModelWithIDProp @model(
+        accountRelation: LINK,
+        description: "Test model with GraphQL ID property"
+      ) {
         idValue: ID
         requiredIdValue: ID!
       }
@@ -268,7 +289,7 @@ describe('utils', () => {
           name: "ModelWithIDProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               idValue: {
@@ -290,7 +311,10 @@ describe('utils', () => {
   it('@index directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIndexedProp @model(index: SET) {
+      type ModelWithIndexedProp @model(
+        accountRelation: SET,
+        description: "Test model with an indexed property"
+      ) {
         indexedProp: String @index
       }
       `)
@@ -301,7 +325,7 @@ describe('utils', () => {
           name: "ModelWithIndexedProp",
           accountRelation: 'set',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               indexedProp: {
@@ -315,38 +339,13 @@ describe('utils', () => {
     })
   })
 
-  it('@ipfs directive is supported for strings and properly converted to ICD', () => {
-    expect(
-      internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIPFSURLProp @model(index: LINK) {
-        ipfsURLValue: String @ipfs
-      }
-      `)
-    ).toMatchObject({
-      version: "1.0",
-      models: {
-        ModelWithIPFSURLPropID: {
-          name: "ModelWithIPFSURLProp",
-          accountRelation: 'link',
-          schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
-            type: 'object',
-            properties: {
-              ipfsURLValue: {
-                type: 'string',
-                pattern: "^ipfs://.+",
-              },
-            },
-          }
-        }
-      }
-    })
-  })
-
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithStringProp @model(index: LINK) {
+      type ModelWithStringProp @model(
+        accountRelation: LINK,
+        description: "Test model with a constrained string property"
+      ) {
         stringValue: String @length(min: 1, max: 140)
       }
       `)
@@ -357,7 +356,7 @@ describe('utils', () => {
           name: "ModelWithStringProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               stringValue: {
@@ -372,11 +371,14 @@ describe('utils', () => {
     })
   })
 
-  it('@length(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
+  it('@arrayLength(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithArrayProp @model(index: LINK) {
-        arrayValue: [String] @length(min: 10, max: 15)
+      type ModelWithArrayProp @model(
+        accountRelation: LINK,
+        description: "Test model with a constrained array property"
+      ) {
+        arrayValue: [String] @arrayLength(min: 10, max: 15)
       }
       `)
     ).toMatchObject({
@@ -386,7 +388,7 @@ describe('utils', () => {
           name: "ModelWithArrayProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               arrayValue: {
@@ -404,11 +406,14 @@ describe('utils', () => {
     })
   })
 
-  it('@itemLength(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
+  it('@length(min: Int, max: Int) directive is supported for arrays of strings and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithArrayProp @model(index: LINK) {
-        arrayValue: [String] @itemLength(min: 4, max: 440)
+      type ModelWithArrayProp @model(
+        accountRelation: LINK,
+        description: "Test model with an array property with constrained items"
+      ) {
+        arrayValue: [String] @length(min: 4, max: 440)
       }
       `)
     ).toMatchObject({
@@ -418,7 +423,7 @@ describe('utils', () => {
           name: "ModelWithArrayProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               arrayValue: {
@@ -439,7 +444,10 @@ describe('utils', () => {
   it('@intRange(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithIntProp @model(index: LINK) {
+      type ModelWithIntProp @model(
+        accountRelation: LINK,
+        description: "Test model with a constreained int property"
+      ) {
         intValue: Int @intRange(min: 5, max: 10)
       }
       `)
@@ -450,13 +458,13 @@ describe('utils', () => {
           name: "ModelWithIntProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               intValue: {
                 type: 'integer',
-                min: 5,
-                max: 10,
+                minimum: 5,
+                maximum: 10,
               },
             },
           }
@@ -468,7 +476,10 @@ describe('utils', () => {
   it('@floatRange(min: Float, max: Float) directive is supported and properly converted to ICD', () => {
     expect(
       internalCompositeDefinitionFromGraphQLSchema(`
-      type ModelWithFloatProp @model(index: LINK) {
+      type ModelWithFloatProp @model(
+        accountRelation: LINK,
+        description: "Test model with a constrained float property"
+      ) {
         floatValue: Float @floatRange(min: 5.0, max: 10.0)
       }
       `)
@@ -479,13 +490,13 @@ describe('utils', () => {
           name: "ModelWithFloatProp",
           accountRelation: 'link',
           schema: {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               floatValue: {
                 type: 'number',
-                min: 5.0,
-                max: 10.0,
+                minimum: 5.0,
+                maximum: 10.0,
               },
             },
           }

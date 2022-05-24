@@ -2,9 +2,10 @@ import { InternalCompositeDefinition, ModelDefinition } from "@glazed/types";
 
 export const genericProfileDefinition: ModelDefinition = {
   name: 'GenericProfile',
+  description: 'A model to store common profile-related properties',
   accountRelation: 'link',
   schema: {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
     properties: {
       name: {
@@ -12,17 +13,16 @@ export const genericProfileDefinition: ModelDefinition = {
         maxLength: 150,
       },
       image: {
-        $ref: '#/definitions/ImageSources',
+        $ref: '#/$defs/ImageSources',
       },
     },
-    definitions: {
+    $defs: {
       ImageMetadata: {
         type: 'object',
         title: 'ImageMetadata',
         properties: {
           src: {
             type: 'string',
-            pattern: '^ipfs://.+',
             maxLength: 150,
           },
           mimeType: {
@@ -49,12 +49,12 @@ export const genericProfileDefinition: ModelDefinition = {
         title: 'ImageSources',
         properties: {
           original: {
-            $ref: '#/definitions/ImageMetadata',
+            $ref: '#/$defs/ImageMetadata',
           },
           alternatives: {
             type: 'array',
             items: {
-              $ref: '#/definitions/ImageMetadata',
+              $ref: '#/$defs/ImageMetadata',
             },
           },
         },
@@ -66,10 +66,10 @@ export const genericProfileDefinition: ModelDefinition = {
 
 export const socialProfileDefinition: ModelDefinition = {
   name: 'SocialProfile',
-  description: 'A social profile model',
+  description: 'A model to store properties that accounts would like to share on social media',
   accountRelation: 'link',
   schema: {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
     properties: {
       description: {
@@ -81,21 +81,20 @@ export const socialProfileDefinition: ModelDefinition = {
         maxLength: 2,
       },
       background: {
-        $ref: '#/definitions/ImageSources',
+        $ref: '#/$defs/ImageSources',
       },
       url: {
         type: 'string',
         maxLength: 240,
       },
     },
-    definitions: {
+    $defs: {
       ImageMetadata: {
         type: 'object',
         title: 'ImageMetadata',
         properties: {
           src: {
             type: 'string',
-            pattern: '^ipfs://.+',
             maxLength: 150,
           },
           mimeType: {
@@ -122,12 +121,12 @@ export const socialProfileDefinition: ModelDefinition = {
         title: 'ImageSources',
         properties: {
           original: {
-            $ref: '#/definitions/ImageMetadata',
+            $ref: '#/$defs/ImageMetadata',
           },
           alternatives: {
             type: 'array',
             items: {
-              $ref: '#/definitions/ImageMetadata',
+              $ref: '#/$defs/ImageMetadata',
             },
           },
         },
@@ -139,14 +138,14 @@ export const socialProfileDefinition: ModelDefinition = {
 
 export const personProfileDefinition: ModelDefinition = {
   name: 'PersonProfile',
+  description: `A model to store accounts' personal data`,
   accountRelation: 'link',
   schema: {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
     properties: {
       birthDate: {
         type: 'string',
-        format: 'date',
         maxLength: 10,
       },
       gender: {
@@ -159,7 +158,6 @@ export const personProfileDefinition: ModelDefinition = {
       },
       residenceCountry: {
         type: 'string',
-        pattern: '^[A-Z]{2}$',
         maxLength: 2,
       },
       nationalities: {
@@ -168,7 +166,6 @@ export const personProfileDefinition: ModelDefinition = {
         maxItems: 5,
         items: {
           type: 'string',
-          pattern: '^[A-Z]{2}$',
         },
       },
       affiliations: {

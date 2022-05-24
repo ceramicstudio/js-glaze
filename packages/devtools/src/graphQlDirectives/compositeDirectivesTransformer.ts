@@ -6,7 +6,7 @@ import {
 import { 
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLFieldConfig
+  GraphQLFieldConfig,
 } from 'graphql';
 
 function objectConfigMapperFactory(
@@ -22,7 +22,7 @@ function objectConfigMapperFactory(
           ceramicExtensions: [
             {
               ceramicDirectiveName: "model",
-              accountRelation: modelDirective['index'].toLowerCase(),
+              accountRelation: modelDirective['accountRelation'].toLowerCase(),
               modelDescription: modelDirective['description'],
             }
           ]
@@ -51,19 +51,21 @@ function fieldConfigMapperFactory(
     }
 
     // TODO: Add valication to check, if custom directive are applied to the right field types?
-    // E.g. @itemLength should only work for arrays, etc.
-    const itemLengthDirectiveName = "itemLength"
-    const itemLengthDirective = getDirective(schema, fieldConfig, itemLengthDirectiveName)?.[0];
-    if (itemLengthDirective) {
+    // E.g. @arrayLength should only work for arrays, etc.
+    const arrayLengthDirectiveName = "arrayLength"
+    const arrayLengthDirective = getDirective(schema, fieldConfig, arrayLengthDirectiveName)?.[0];
+    if (arrayLengthDirective) {
       ceramicExtensions = {
         ...ceramicExtensions,
-        [itemLengthDirectiveName]: {
-          ceramicDirectiveName: itemLengthDirectiveName,
-          min: itemLengthDirective.min || undefined,
-          max: itemLengthDirective.max || undefined,
+        [arrayLengthDirectiveName]: {
+          ceramicDirectiveName: arrayLengthDirectiveName,
+          min: arrayLengthDirective.min || undefined,
+          max: arrayLengthDirective.max || undefined,
         }
       }
     }
+
+    // TODO: This needs to work differently for srings and for arrays of strings
     const lengthDirectiveName = "length"
     const lengthDirective = getDirective(schema, fieldConfig, lengthDirectiveName)?.[0];
     if (lengthDirective) {
@@ -90,19 +92,6 @@ function fieldConfigMapperFactory(
       }
     }
     })
-
-    const ipfsDirectiveName = "ipfs"
-    const ipfsDirective = getDirective(schema, fieldConfig, ipfsDirectiveName)?.[0];
-    if (ipfsDirective) {
-      ceramicExtensions = {
-        ...ceramicExtensions,
-        [ipfsDirectiveName]: {
-          ceramicDirectiveName: ipfsDirectiveName,
-          pattern: "^ipfs://.+",
-          max: 150,
-        }
-      }
-    }
 
     if (Object.keys(ceramicExtensions).length > 0) {
       fieldConfig.extensions = {

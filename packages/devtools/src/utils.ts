@@ -24,7 +24,7 @@ import { compositeDirectivesTransformer } from './graphQlDirectives/compositeDir
 import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types';
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema';
 import { Composite } from './composite';
-import { GraphQLCountryCode, GraphQLDate, GraphQLDID, GraphQLPositiveInt } from 'graphql-scalars';
+import { GraphQLDID } from 'graphql-scalars';
 import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar';
 
 /** @internal */
@@ -75,7 +75,6 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   const definitions = embeddedObjectsDefinitionsFromGraphQLSchema(compositeSchema)
   const models = modelsFromGraphQLSchema(compositeSchema, definitions)
   const commonEmbeds = commonEmbedNamesFromModels(models)
-  fixArrayItemsConstraints(models)
 
   const result: InternalCompositeDefinition = {
     version: Composite.VERSION,
@@ -90,44 +89,12 @@ export function internalCompositeDefinitionFromGraphQLSchema(
 }
 
 /** @internal */
-function fixArrayItemsConstraints(models: Record<string, ModelDefinition>) {
-  function rewriteArrayRecord(arrayRecord: Record<string, any>) {
-    if (arrayRecord.minItemLength !== undefined) {
-      arrayRecord.items.minLength = arrayRecord.minItemLength
-      delete arrayRecord.minItemLength
-    }
-    if (arrayRecord.maxItemLength !== undefined) {
-      arrayRecord.items.maxLength = arrayRecord.maxItemLength
-      delete arrayRecord.maxItemLength
-    }
-  }
-
-  Object.values(models).forEach((model: ModelDefinition) => {
-    Object.values(model.schema.properties!).forEach((modelProperty) => {
-      const propertyRecord = modelProperty as Record<string, any>
-      if (propertyRecord.type === 'array') {
-        rewriteArrayRecord(propertyRecord)
-      }
-    })
-
-    if (model.schema.definitions) {
-      Object.values(model.schema.definitions).forEach((definition) => {
-        const definitionRecord = definition as Record<string, any>
-        if (definitionRecord.type === 'array') {
-          rewriteArrayRecord(definitionRecord)
-        }
-      })
-    }
-  })
-}
-
-/** @internal */
 function commonEmbedNamesFromModels(
   models: Record<string, ModelDefinition>
 ): string[] {
   const definitionOccurences: { [embedName: string]: number } = {}
   Object.values(models).forEach((modelDefinition: ModelDefinition) => {
-    Object.keys(modelDefinition.schema.definitions || {}).forEach((embedName: string) => {
+    Object.keys(modelDefinition.schema.$defs || {}).forEach((embedName: string) => {
       if(definitionOccurences[embedName] === undefined) {
         definitionOccurences[embedName] = 0
       }
@@ -213,7 +180,7 @@ function modelFromObjectConfig(
   definitions: Record<string, any>
 ): ModelDefinition {
   const modelSchema: Record<string, any> = {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object'
   }
   const modelSchemaProperties: Record<string, any> = {}
@@ -243,22 +210,22 @@ function modelFromObjectConfig(
   Object.keys(requiredDefinitions).forEach((fieldName: string) => {
     Object.keys(requiredDefinitions[fieldName].properties).forEach((propertyName: string) => {
       if (Object.keys(requiredDefinitions[fieldName].properties[propertyName]).includes("$ref")) {
-        const nestedName = requiredDefinitions[fieldName].properties[propertyName].$ref.split("#/definitions/")[1]
+        const nestedName = requiredDefinitions[fieldName].properties[propertyName].$ref.split("#/$defs/")[1]
         nestedRequiredDefinitions[nestedName] = definitions[nestedName]
       }
     })
   })
 
   modelSchema.properties = modelSchemaProperties
-  modelSchema.definitions = {...requiredDefinitions, ...nestedRequiredDefinitions}
-  if (Object.keys(modelSchema.definitions).length === 0) {
-    delete modelSchema.definitions
+  modelSchema.$defs = {...requiredDefinitions, ...nestedRequiredDefinitions}
+  if (Object.keys(modelSchema.$defs).length === 0) {
+    delete modelSchema.$defs
   }
   modelSchema.required = requiredProperties.length > 0 ? requiredProperties : undefined
 
   return {
     name: objectConfig.name,
-    accountRelation: modelDirective.index.toLowerCase(),
+    accountRelation: modelDirective.accountRelation.toLowerCase(),
     description: modelDirective.description,
     schema: modelSchema
   }
@@ -290,7 +257,7 @@ function referenceFieldSchemaFromFieldDefinition(
     return 
   }
   return {
-    $ref: `#/definitions/${fieldType.name}`
+    $ref: `#/$defs/${fieldType.name}`
   }
 }
 
@@ -310,20 +277,20 @@ function arrayFieldSchemaFromFieldDefinition(
   }
 
   if (ceramicExtensions) {
-    if (ceramicExtensions.length !== undefined) {
-      if (ceramicExtensions.length.min) {
-        result.minItems = ceramicExtensions.length.min
+    if (ceramicExtensions.arrayLength !== undefined) {
+      if (ceramicExtensions.arrayLength.min) {
+        result.minItems = ceramicExtensions.arrayLength.min
       }
-      if (ceramicExtensions.length.max) {
-        result.maxItems = ceramicExtensions.length.max
+      if (ceramicExtensions.arrayLength.max) {
+        result.maxItems = ceramicExtensions.arrayLength.max
       }
     }
-    if (ceramicExtensions.itemLength !== undefined) {
-      if (ceramicExtensions.itemLength.min) {
-        result.minItemLength = ceramicExtensions.itemLength.min
+    if (ceramicExtensions.length !== undefined) {
+      if (ceramicExtensions.length.min) {
+        result.items.minLength = ceramicExtensions.length.min
       }
-      if (ceramicExtensions.itemLength.max) {
-        result.maxItemLength = ceramicExtensions.itemLength.max
+      if (ceramicExtensions.length.max) {
+        result.items.maxLength = ceramicExtensions.length.max
       }
     }
   } 
@@ -392,30 +359,6 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLPositiveInt)) {
-    result = {
-      ...result, 
-      type: 'integer',
-      minimum: 1
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDate)) {
-    result = {
-      ...result, 
-      format: "date"
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLCountryCode)) {
-    result = {
-      ...result, 
-      type: 'string',
-      pattern: '^[A-Z]{2}$',
-      maxLength: 2,
-    }
-  }
-
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLBoolean)) {
     result = {
       ...result, 
@@ -459,8 +402,8 @@ function defaultFieldSchemaFromFieldDefinition(
       result = {
         ...result, 
         type: 'integer',
-        max: ceramicExtensions.intRange.max,
-        min: ceramicExtensions.intRange.min,
+        maximum: ceramicExtensions.intRange.max,
+        minimum: ceramicExtensions.intRange.min,
       }
     }
 
@@ -468,8 +411,8 @@ function defaultFieldSchemaFromFieldDefinition(
       result = {
         ...result, 
         type: 'number',
-        max: ceramicExtensions.floatRange.max,
-        min: ceramicExtensions.floatRange.min,
+        maximum: ceramicExtensions.floatRange.max,
+        minimum: ceramicExtensions.floatRange.min,
       }
     }
   } 
