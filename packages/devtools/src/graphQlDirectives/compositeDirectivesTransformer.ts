@@ -1,3 +1,4 @@
+import type { ModelAccountRelation } from '@glazed/types'
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
 import {
   GraphQLSchema,
@@ -34,16 +35,12 @@ export type RangeDirective = {
   max?: number
 }
 
-export type CeramicGraphQLTypeExtension = {
-  ceramicDirectiveName: string
-  accountRelation?: string
-  modelDescription?: string
-  min?: number
-  max?: number
-}
-
 export type CeramicGraphQLTypeExtensions = {
-  [ceramicDirectiveName: string]: CeramicGraphQLTypeExtension
+  [MODEL_DIRECTIVE_NAME]?: ModelDirective
+  [ARRAY_LENGTH_DIRECTIVE_NAME]?: LengthDirective
+  [LENGTH_DIRECTIVE_NAME]?: LengthDirective
+  [INT_RANGE_DIRECTIVE_NAME]?: RangeDirective
+  [FLOAT_RANGE_DIRECTIVE_NAME]?: RangeDirective
 }
 
 /** @internal */
@@ -137,9 +134,8 @@ function parseLengthDirective(
     ceramicExtensions = {
       ...ceramicExtensions,
       [LENGTH_DIRECTIVE_NAME]: {
-        ceramicDirectiveName: LENGTH_DIRECTIVE_NAME,
-        min: lengthDirective.min || undefined,
-        max: lengthDirective.max || undefined,
+        min: lengthDirective.min,
+        max: lengthDirective.max,
       },
     }
   }
@@ -165,9 +161,8 @@ function parseArrayLengthDirective(
     ceramicExtensions = {
       ...ceramicExtensions,
       [ARRAY_LENGTH_DIRECTIVE_NAME]: {
-        ceramicDirectiveName: ARRAY_LENGTH_DIRECTIVE_NAME,
-        min: arrayLengthDirective.min || undefined,
-        max: arrayLengthDirective.max || undefined,
+        min: arrayLengthDirective.min,
+        max: arrayLengthDirective.max,
       },
     }
   }
@@ -198,9 +193,8 @@ function parseIntRangeDirective(
     ceramicExtensions = {
       ...ceramicExtensions,
       [INT_RANGE_DIRECTIVE_NAME]: {
-        ceramicDirectiveName: INT_RANGE_DIRECTIVE_NAME,
-        min: intRangeDirective.min || undefined,
-        max: intRangeDirective.max || undefined,
+        min: intRangeDirective.min,
+        max: intRangeDirective.max,
       },
     }
   }
@@ -231,9 +225,8 @@ function parseFloatRangeDirective(
     ceramicExtensions = {
       ...ceramicExtensions,
       [FLOAT_RANGE_DIRECTIVE_NAME]: {
-        ceramicDirectiveName: FLOAT_RANGE_DIRECTIVE_NAME,
-        min: floatRangeDirective.min || undefined,
-        max: floatRangeDirective.max || undefined,
+        min: floatRangeDirective.min,
+        max: floatRangeDirective.max,
       },
     }
   }

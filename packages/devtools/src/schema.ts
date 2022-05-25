@@ -14,33 +14,29 @@ import {
 import { mapSchema, MapperKind } from '@graphql-tools/utils'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import {
-  CeramicGraphQLTypeExtensions,
   compositeDirectivesTransformer,
   fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
-  ModelDirective,
 } from './graphQlDirectives/compositeDirectivesTransformer'
-import {
-  InternalCompositeDefinition,
-  JSONSchema,
-  ModelAccountRelation,
-  ModelDefinition,
-} from '@glazed/types'
+import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer'
+import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer'
+import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema'
-import { Composite } from './composite'
 import { GraphQLDID } from 'graphql-scalars'
 import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar'
 
+export type ModelsWithEmbeds = {
+  models: Array<ModelDefinition>
+  commonEmbeds?: Array<string>
+}
+
 /** @internal */
-export function internalCompositeDefinitionFromGraphQLSchema(
+export function compositeModelsAndCommonEmbedsFromGraphQLSchema(
   schema: string | GraphQLSchema
-): InternalCompositeDefinition {
+): ModelsWithEmbeds {
   if (typeof schema === 'string') {
     schema = makeExecutableSchema({
-      typeDefs: [compositeDirectivesAndScalarsSchema, schema],
-      resolvers: {
-        StreamReference: GraphQLStreamReference,
-      },
+      typeDefs: [compositeDirectivesAndScalarsSchema, schema]
     })
   }
 
@@ -55,8 +51,7 @@ export function internalCompositeDefinitionFromGraphQLSchema(
   // Extract names of embeds (definitions) used in more than one model
   const commonEmbeds = commonEmbedNamesFromModels(models)
 
-  const result: InternalCompositeDefinition = {
-    version: Composite.VERSION,
+  const result: ModelsWithEmbeds = {
     models: models,
   }
 
@@ -85,9 +80,9 @@ function checkForUnsupportedTypes(schema: GraphQLSchema) {
 }
 
 /** @internal */
-function commonEmbedNamesFromModels(models: Record<string, ModelDefinition>): Array<string> {
+function commonEmbedNamesFromModels(models: Array<ModelDefinition>): Array<string> {
   const definitionOccurences: { [embedName: string]: number } = {}
-  Object.values(models).forEach((modelDefinition: ModelDefinition) => {
+  models.forEach((modelDefinition: ModelDefinition) => {
     Object.keys(modelDefinition.schema.$defs || {}).forEach((embedName: string) => {
       if (definitionOccurences[embedName] === undefined) {
         definitionOccurences[embedName] = 0
@@ -127,17 +122,13 @@ function embeddedObjectsDefinitionsFromGraphQLSchema(
 function modelsFromGraphQLSchema(
   schema: GraphQLSchema,
   definitions: Record<string, JSONSchema.Object>
-): Record<string, ModelDefinition> {
-  const models: Record<string, ModelDefinition> = {}
+): Array<ModelDefinition> {
+  const models: Array<ModelDefinition> = []
   mapSchema(schema, {
     [MapperKind.OBJECT_TYPE]: (objectConfig: GraphQLObjectType) => {
       const modelDirective = getCeramicModelDirective(schema, objectConfig)
       if (modelDirective) {
-        models[`${objectConfig.name}ID`] = modelFromObjectConfig(
-          modelDirective,
-          objectConfig,
-          definitions
-        )
+        models.push(modelFromObjectConfig(modelDirective, objectConfig, definitions))
       }
       return objectConfig
     },
@@ -153,14 +144,14 @@ function modelsFromGraphQLSchema(
 /** @internal */
 function embeddedObjectDefinitionFromObjectConfig(
   objectConfig: GraphQLObjectType
-): Record<string, any> {
-  const properties: Record<string, any> = {}
+): JSONSchema.Object {
+  const properties: Record<string, JSONSchema> = {}
   const required: Array<string> = []
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
     properties[fieldName] = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
       fieldDefinition.type,
-      fieldDefinition.extensions?.ceramicExtensions as Record<string, any>
+      fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
     )
     if (fieldDefinition.type instanceof GraphQLNonNull) {
       required.push(fieldName)
@@ -171,6 +162,7 @@ function embeddedObjectDefinitionFromObjectConfig(
     type: 'object',
     title: objectConfig.name,
     properties: properties,
+    additionalProperties: false,
     required: required.length > 0 ? required : undefined,
   }
 }
@@ -184,6 +176,7 @@ function modelFromObjectConfig(
   const modelSchema: JSONSchema.Object = {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
+    additionalProperties: false,
   }
   const modelSchemaProperties: Record<string, JSONSchema> = {}
   const requiredProperties: Array<string> = []
@@ -193,7 +186,7 @@ function modelFromObjectConfig(
     modelSchemaProperties[fieldName] = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
       fieldDefinition.type,
-      fieldDefinition.extensions?.ceramicExtensions as Record<string, any>
+      fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
     )
     if (fieldDefinition.type instanceof GraphQLNonNull) {
       requiredProperties.push(fieldName)
@@ -260,8 +253,8 @@ function modelFromObjectConfig(
 function fieldSchemaFromFieldDefinition(
   fieldName: string,
   fieldType: GraphQLOutputType,
-  ceramicExtensions?: Record<string, any>
-): Record<string, JSONSchema> {
+  ceramicExtensions?: CeramicGraphQLTypeExtensions
+): JSONSchema {
   if (fieldType instanceof GraphQLObjectType) {
     return referenceFieldSchemaFromFieldDefinition(fieldType) || {}
   }
@@ -277,7 +270,7 @@ function fieldSchemaFromFieldDefinition(
 /** @internal */
 function referenceFieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType
-): Record<string, any> | undefined {
+): JSONSchema | undefined {
   if (!(fieldType instanceof GraphQLObjectType)) {
     return
   }
@@ -291,7 +284,7 @@ function arrayFieldSchemaFromFieldDefinition(
   fieldName: string,
   fieldType: GraphQLOutputType,
   ceramicExtensions?: CeramicGraphQLTypeExtensions
-): Record<string, any> | undefined {
+): JSONSchema.Array | undefined {
   if (!(fieldType instanceof GraphQLList)) {
     return
   }
@@ -322,8 +315,8 @@ function arrayFieldSchemaFromFieldDefinition(
 function defaultFieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType,
   ceramicExtensions?: CeramicGraphQLTypeExtensions
-): Record<string, any> {
-  let result: Record<string, any> = {
+): JSONSchema {
+  let result: JSONSchema = {
     type: fieldType.toString().toLowerCase(),
   }
 
@@ -331,7 +324,7 @@ function defaultFieldSchemaFromFieldDefinition(
     result = {
       ...result,
       type: 'string',
-      title: GraphQLDID.toString(),
+      title: 'GraphQLDID',
       pattern: "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
       maxLength: 80,
     }
@@ -341,7 +334,7 @@ function defaultFieldSchemaFromFieldDefinition(
     result = {
       ...result,
       type: 'string',
-      title: 'StreamReference',
+      title: 'CeramicStreamReference',
       pattern: '<TBD>', //FIXME: define the pattern for StreamReference strings
       maxLength: 80,
     }
@@ -351,7 +344,7 @@ function defaultFieldSchemaFromFieldDefinition(
     result = {
       ...result,
       type: 'string',
-      title: 'GraphQLID', // TODO: Should we just use GraphQLID.toString() here, which equals to "ID"?
+      title: 'GraphQLID',
     }
   }
 

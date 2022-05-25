@@ -1,4 +1,5 @@
-import { InternalCompositeDefinition, ModelDefinition } from '@glazed/types'
+import type { ModelDefinition } from '@glazed/types'
+import type { ModelsWithEmbeds } from '../../src/schema'
 
 export const genericProfileDefinition: ModelDefinition = {
   name: 'GenericProfile',
@@ -16,6 +17,7 @@ export const genericProfileDefinition: ModelDefinition = {
         $ref: '#/$defs/ImageSources',
       },
     },
+    additionalProperties: false,
     $defs: {
       ImageMetadata: {
         type: 'object',
@@ -42,6 +44,7 @@ export const genericProfileDefinition: ModelDefinition = {
             minimum: 1,
           },
         },
+        additionalProperties: false,
         required: ['src', 'mimeType', 'width', 'height'],
       },
       ImageSources: {
@@ -58,6 +61,7 @@ export const genericProfileDefinition: ModelDefinition = {
             },
           },
         },
+        additionalProperties: false,
         required: ['original'],
       },
     },
@@ -88,6 +92,7 @@ export const socialProfileDefinition: ModelDefinition = {
         maxLength: 240,
       },
     },
+    additionalProperties: false,
     $defs: {
       ImageMetadata: {
         type: 'object',
@@ -114,6 +119,7 @@ export const socialProfileDefinition: ModelDefinition = {
             minimum: 1,
           },
         },
+        additionalProperties: false,
         required: ['src', 'mimeType', 'width', 'height'],
       },
       ImageSources: {
@@ -130,6 +136,7 @@ export const socialProfileDefinition: ModelDefinition = {
             },
           },
         },
+        additionalProperties: false,
         required: ['original'],
       },
     },
@@ -176,15 +183,11 @@ export const personProfileDefinition: ModelDefinition = {
         },
       },
     },
+    additionalProperties: false,
   },
 }
 
-export const compositeDefinitionWithProfiles: InternalCompositeDefinition = {
-  version: '1.0',
+export const compositeDefinitionWithProfiles: ModelsWithEmbeds = {
   commonEmbeds: ['ImageSources', 'ImageMetadata'],
-  models: {
-    GenericProfileID: genericProfileDefinition,
-    SocialProfileID: socialProfileDefinition,
-    PersonProfileID: personProfileDefinition,
-  },
+  models: [genericProfileDefinition, socialProfileDefinition, personProfileDefinition],
 }
