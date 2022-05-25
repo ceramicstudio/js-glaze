@@ -380,7 +380,6 @@ function defaultFieldSchemaFromFieldDefinition(
     if (ceramicExtensions.length !== undefined) {
       result = {
         ...result,
-        type: 'string',
         maxLength: ceramicExtensions.length.max,
         minLength: ceramicExtensions.length.min,
       }
@@ -389,7 +388,6 @@ function defaultFieldSchemaFromFieldDefinition(
     if (ceramicExtensions.intRange !== undefined) {
       result = {
         ...result,
-        type: 'integer',
         maximum: ceramicExtensions.intRange.max,
         minimum: ceramicExtensions.intRange.min,
       }
@@ -398,7 +396,6 @@ function defaultFieldSchemaFromFieldDefinition(
     if (ceramicExtensions.floatRange !== undefined) {
       result = {
         ...result,
-        type: 'number',
         maximum: ceramicExtensions.floatRange.max,
         minimum: ceramicExtensions.floatRange.min,
       }

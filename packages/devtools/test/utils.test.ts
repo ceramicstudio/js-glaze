@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { applyMap, promiseMap } from '../src/'
+import { applyMap, promiseMap } from '../src'
 
 describe('utils', () => {
   it('applyMap applies the given function to all values in a record', () => {

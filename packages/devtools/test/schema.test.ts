@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from '../src/schema'
-import { compositeDefinitionWithProfiles } from './exampleCompositeDefinitions/compositeDefinitionWithProfiles'
 import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
 import ajv from 'ajv/dist/2020'
@@ -49,7 +48,7 @@ describe('schema', () => {
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeSchemaWithProfiles)
-    ).toMatchObject(compositeDefinitionWithProfiles)
+    ).toMatchSnapshot() 
   })
 
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates models whose schemas conform to JSON Schema standard', () => {
