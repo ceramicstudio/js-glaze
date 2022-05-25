@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "change-case": "^4.1.2",
+    "graphql-scalars": "^1.17.0",
     "json-ptr": "^3.1.0",
     "lodash-es": "^4.17.21",
     "multiformats": "^9.6.3",
@@ -54,6 +55,7 @@
     "dids": "^3.0.0",
     "fs-extra": "^10.0.1",
     "graphql": "^16.5.0",
+    "graphql-tools": "^8.2.9",
     "jest-environment-glaze": "^0.3.0"
   },
   "jest": {

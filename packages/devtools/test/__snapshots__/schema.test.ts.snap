@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schema compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
+Object {
+  "commonEmbeds": Array [
+    "ImageSources",
+    "ImageMetadata",
+  ],
+  "models": Array [
+    Object {
+      "accountRelation": "link",
+      "description": "A model to store common profile-related properties",
+      "name": "GenericProfile",
+      "schema": Object {
+        "$defs": Object {
+          "ImageMetadata": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "height": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+              "mimeType": Object {
+                "maxLength": 50,
+                "minLength": 0,
+                "type": "string",
+              },
+              "size": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+              "src": Object {
+                "maxLength": 150,
+                "minLength": 0,
+                "type": "string",
+              },
+              "width": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+            },
+            "required": Array [
+              "src",
+              "mimeType",
+              "width",
+              "height",
+            ],
+            "title": "ImageMetadata",
+            "type": "object",
+          },
+          "ImageSources": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "alternatives": Object {
+                "items": Object {
+                  "$ref": "#/$defs/ImageMetadata",
+                },
+                "type": "array",
+              },
+              "original": Object {
+                "$ref": "#/$defs/ImageMetadata",
+              },
+            },
+            "required": Array [
+              "original",
+            ],
+            "title": "ImageSources",
+            "type": "object",
+          },
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": Object {
+          "image": Object {
+            "$ref": "#/$defs/ImageSources",
+          },
+          "name": Object {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+          },
+        },
+        "required": undefined,
+        "type": "object",
+      },
+    },
+    Object {
+      "accountRelation": "link",
+      "description": "A model to store properties that accounts would like to share on social media",
+      "name": "SocialProfile",
+      "schema": Object {
+        "$defs": Object {
+          "ImageMetadata": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "height": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+              "mimeType": Object {
+                "maxLength": 50,
+                "minLength": 0,
+                "type": "string",
+              },
+              "size": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+              "src": Object {
+                "maxLength": 150,
+                "minLength": 0,
+                "type": "string",
+              },
+              "width": Object {
+                "maximum": undefined,
+                "minimum": 1,
+                "type": "integer",
+              },
+            },
+            "required": Array [
+              "src",
+              "mimeType",
+              "width",
+              "height",
+            ],
+            "title": "ImageMetadata",
+            "type": "object",
+          },
+          "ImageSources": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "alternatives": Object {
+                "items": Object {
+                  "$ref": "#/$defs/ImageMetadata",
+                },
+                "type": "array",
+              },
+              "original": Object {
+                "$ref": "#/$defs/ImageMetadata",
+              },
+            },
+            "required": Array [
+              "original",
+            ],
+            "title": "ImageSources",
+            "type": "object",
+          },
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": Object {
+          "background": Object {
+            "$ref": "#/$defs/ImageSources",
+          },
+          "description": Object {
+            "maxLength": 420,
+            "minLength": 0,
+            "type": "string",
+          },
+          "emoji": Object {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string",
+          },
+          "url": Object {
+            "maxLength": 240,
+            "minLength": 0,
+            "type": "string",
+          },
+        },
+        "required": undefined,
+        "type": "object",
+      },
+    },
+    Object {
+      "accountRelation": "link",
+      "description": "A model to store accounts' personal data",
+      "name": "PersonProfile",
+      "schema": Object {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": Object {
+          "affiliations": Object {
+            "items": Object {
+              "maxLength": 140,
+              "minLength": 0,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "birthDate": Object {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string",
+          },
+          "gender": Object {
+            "maxLength": 42,
+            "minLength": 0,
+            "type": "string",
+          },
+          "homeLocation": Object {
+            "maxLength": 140,
+            "minLength": 0,
+            "type": "string",
+          },
+          "nationalities": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+          },
+          "residenceCountry": Object {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string",
+          },
+        },
+        "required": undefined,
+        "type": "object",
+      },
+    },
+  ],
+}
+`;
