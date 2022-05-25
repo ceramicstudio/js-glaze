@@ -20,7 +20,7 @@ const INT_RANGE_DIRECTIVE_NAME = 'intRange'
 const FLOAT_RANGE_DIRECTIVE_NAME = 'floatRange'
 
 export type ModelDirective = {
-  accountRelation: string
+  accountRelation: ModelAccountRelation
   description: string
 }
 
