@@ -54,9 +54,6 @@
       "did": {
         "description": "Create and interact with DIDs."
       },
-      "model": {
-        "description": "Interact with data models."
-      },
       "pin": {
         "description": "Interact with Ceramic streams pins."
       },
@@ -65,6 +62,9 @@
       },
       "tile": {
         "description": "Interact with Ceramic Tile streams."
+      },
+      "composite": {
+        "description": "Interact with Ceramic Model streams via Composites."
       }
     },
     "plugins": [
