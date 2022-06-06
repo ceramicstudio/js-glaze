@@ -17,13 +17,13 @@ import {
   compositeDirectivesTransformer,
   fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
-} from './graphQlDirectives/compositeDirectivesTransformer'
-import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer'
-import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer'
+} from './graphQlDirectives/compositeDirectivesTransformer.js'
+import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer.js'
+import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer.js'
 import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
-import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema'
+import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar'
+import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>

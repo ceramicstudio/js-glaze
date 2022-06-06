@@ -15,6 +15,7 @@ import createObjectHash from 'object-hash'
 
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
 import { createRuntimeDefinition } from './formats/runtime.js'
+import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from './schema.js'
 
 type StrictCompositeDefinition = Required<InternalCompositeDefinition>
 
@@ -134,8 +135,13 @@ export type FromModelsParams = CompositeOptions & {
 export class Composite {
   static VERSION = '1.0'
 
-  static create(_params: CreateParams): Promise<Composite> {
+  static create(params: CreateParams): Promise<Composite> {
     // TODO: convert the schema to models, create the models on the Ceramice node, load their commits
+
+    const { models, commonEmbeds } = compositeModelsAndCommonEmbedsFromGraphQLSchema(params.schema)
+    console.log('MODELS', models)
+    console.log('COMMON EMBEDS', commonEmbeds)
+
     throw new Error('Not implemented')
   }
 
