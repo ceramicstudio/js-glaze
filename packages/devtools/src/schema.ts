@@ -158,13 +158,18 @@ function embeddedObjectDefinitionFromObjectConfig(
     }
   }
 
-  return {
+  const schema: JSONSchema.Object = {
     type: 'object',
     title: objectConfig.name,
     properties: properties,
     additionalProperties: false,
-    required: required.length > 0 ? required : undefined,
   }
+
+  if (required.length > 0) {
+    schema.required = required
+  }
+
+  return schema
 }
 
 /** @internal */
@@ -239,7 +244,10 @@ function modelFromObjectConfig(
   if (Object.keys(modelSchema.$defs).length === 0) {
     delete modelSchema.$defs
   }
-  modelSchema.required = requiredProperties.length > 0 ? requiredProperties : undefined
+
+  if (requiredProperties.length > 0) {
+    modelSchema.required = requiredProperties
+  }
 
   return {
     name: objectConfig.name,

@@ -4,6 +4,7 @@ import type {
   EncodedCompositeDefinition,
   InternalCompositeDefinition,
   Model,
+  ModelAccountRelation,
   ModelDefinition,
   RuntimeCompositeDefinition,
   StreamCommits,
@@ -16,8 +17,24 @@ import createObjectHash from 'object-hash'
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
 import { createRuntimeDefinition } from './formats/runtime.js'
 import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from './schema.js'
+import {
+  Model as ModelStream,
+  ModelAccountRelation as CeramicModelAccountRelation,
+} from '@ceramicnetwork/stream-model'
 
 type StrictCompositeDefinition = Required<InternalCompositeDefinition>
+
+function translateModelAccountRelation(from: ModelAccountRelation): CeramicModelAccountRelation {
+  switch (from) {
+    case 'list':
+      return CeramicModelAccountRelation.LIST
+    case 'link':
+      return CeramicModelAccountRelation.LINK
+    case 'set':
+    case 'none':
+      throw new Error(`${from} model account relation is not supported yet`)
+  }
+}
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
   return {
@@ -120,6 +137,9 @@ export type CompositeOptions = {
 export type CreateParams = {
   ceramic: CeramicApi
   schema: string | GraphQLSchema
+  metadata: {
+    controller: string
+  }
 }
 
 export type FromJSONParams = {
@@ -135,14 +155,51 @@ export type FromModelsParams = CompositeOptions & {
 export class Composite {
   static VERSION = '1.0'
 
-  static create(params: CreateParams): Promise<Composite> {
-    // TODO: convert the schema to models, create the models on the Ceramice node, load their commits
+  static async create(params: CreateParams): Promise<Composite> {
+    const { models } = compositeModelsAndCommonEmbedsFromGraphQLSchema(params.schema)
 
-    const { models, commonEmbeds } = compositeModelsAndCommonEmbedsFromGraphQLSchema(params.schema)
-    console.log('MODELS', models)
-    console.log('COMMON EMBEDS', commonEmbeds)
+    const modelsMapping: Record<string, ModelDefinition> = {}
+    let commits: Record<string, any> = {}
 
-    throw new Error('Not implemented')
+    await Promise.all(
+      // For each model definition...
+      models.map((modelDefinition) => {
+        // create the model stream,
+        return ModelStream.create(
+          params.ceramic,
+          {
+            name: modelDefinition.name,
+            description: modelDefinition.description,
+            schema: modelDefinition.schema,
+            accountRelation: translateModelAccountRelation(modelDefinition.accountRelation),
+          },
+          params.metadata
+        )
+          .then((modelStream) => {
+            // put the model stream in the models mapping,
+            modelsMapping[modelStream.id.toString()] = modelDefinition
+            return {
+              modelStream: modelStream,
+              // fetch commits for the stream,
+              modelCommits: params.ceramic.loadStreamCommits(modelStream.id.toString()),
+            }
+          })
+          .then(({ modelStream, modelCommits }) => {
+            // and put the commits in the commits mapping
+            commits = {
+              ...commits,
+              [modelStream.id.toString()]: modelCommits,
+            }
+          })
+      })
+    )
+
+    const definition: InternalCompositeDefinition = {
+      version: Composite.VERSION,
+      models: modelsMapping,
+    }
+
+    return new Composite({ commits: commits, definition: definition })
   }
 
   static from(composites: Iterable<CompositeInput>, options?: CompositeOptions): Composite {
