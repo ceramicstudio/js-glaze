@@ -1,6 +1,7 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
+import type { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
-import type { ModelInstanceDocument, QueryAPIs } from '@glazed/types'
+import type { QueryAPIs } from '@glazed/types'
 // import {
 //   type Connection,
 //   type ConnectionArguments,
@@ -111,18 +112,18 @@ export class Context {
     return await this.#loader.load<Content>(id)
   }
 
-  createDoc<Content = Record<string, any>>(
-    _model: string,
-    _content: Content
+  async createDoc<Content = Record<string, any>>(
+    model: string,
+    content: Content
   ): Promise<ModelInstanceDocument<Content>> {
-    throw new Error('Not implemented')
+    return await this.#loader.create(model, content)
   }
 
-  updateDoc<Content = Record<string, any>>(
-    _id: string | StreamID,
-    _content: Content
-  ): Promise<ModelInstanceDocument<Content | null | undefined>> {
-    throw new Error('Not implemented')
+  async updateDoc<Content = Record<string, any>>(
+    id: string | StreamID,
+    content: Content
+  ): Promise<ModelInstanceDocument<Content | null>> {
+    return await this.#loader.update(id, content)
   }
 
   // async loadListConnection(
