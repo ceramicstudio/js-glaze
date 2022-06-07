@@ -48,7 +48,7 @@ describe('schema', () => {
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeSchemaWithProfiles)
-    ).toMatchSnapshot() 
+    ).toMatchSnapshot()
   })
 
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates models whose schemas conform to JSON Schema standard', () => {

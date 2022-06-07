@@ -7,7 +7,7 @@ exports[`schema printGraphQLSchema() 1`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: ID!): CeramicAccount!
+  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
 }
 

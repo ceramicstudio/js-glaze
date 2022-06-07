@@ -48,14 +48,15 @@ export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
   #modelSchema: JSONSchema.Object
-  #modelViews: ModelViewsDefinition
+  #modelViews: ModelViewsDefinition = {}
   #objects: Record<string, RuntimeObjectFields> = {}
 
   constructor(params: RuntimeModelBuilderParams) {
     this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
-    this.#modelViews = params.definition.views ?? {}
+    // Post-MVP logic
+    // this.#modelViews = params.definition.views ?? {}
   }
 
   build(): Record<string, RuntimeObjectFields> {
@@ -240,7 +241,7 @@ export function createRuntimeDefinition(
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type
-    if (modelDefinition.accountRelation !== 'none') {
+    if (modelDefinition.accountRelation != null) {
       const key = camelCase(modelName)
       if (modelDefinition.accountRelation === 'link') {
         runtime.accountData[key] = { type: 'model', name: modelName }

@@ -125,7 +125,7 @@ class SchemaBuilder {
 
     const nodeDefs = nodeDefinitions(
       async (id: string, ctx: Context) => await ctx.loadDoc(id),
-      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model]
+      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString() as string]
     )
 
     // AccountData object is model-specific and needed to generate object using it
@@ -192,6 +192,7 @@ class SchemaBuilder {
         const config: GraphQLFieldConfigMap<ModelInstanceDocument, Context> = {}
         if (modelID != null) {
           config.id = {
+            // Use GraphQLID rather than CeramicStreamReference here for Relay compliance
             type: new GraphQLNonNull(GraphQLID),
             resolve: (doc) => doc.id.toString(),
           }
@@ -272,7 +273,7 @@ class SchemaBuilder {
           },
         }
       case 'object':
-        return { type, resolve: (doc) => doc.content[key] }
+        return { type, resolve: (doc) => doc.content[key] as unknown }
       default:
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unsupported reference type: ${field.refType}`)
@@ -316,7 +317,7 @@ class SchemaBuilder {
     if (field.viewType === 'documentAccount') {
       return {
         type: new GraphQLNonNull(definitions.accountObject),
-        resolve: (doc): string => doc.metadata.controller,
+        resolve: (doc): string => doc.metadata.controller as string,
       }
     }
     if (field.viewType === 'documentVersion') {
@@ -450,7 +451,7 @@ class SchemaBuilder {
       account: {
         type: new GraphQLNonNull(definitions.accountObject),
         args: {
-          id: { type: new GraphQLNonNull(GraphQLID) },
+          id: { type: new GraphQLNonNull(GraphQLDID) },
         },
         resolve: (_, args: { id: string }): string => args.id,
       },

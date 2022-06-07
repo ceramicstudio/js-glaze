@@ -36,7 +36,7 @@ export function compositeModelsAndCommonEmbedsFromGraphQLSchema(
 ): ModelsWithEmbeds {
   if (typeof schema === 'string') {
     schema = makeExecutableSchema({
-      typeDefs: [compositeDirectivesAndScalarsSchema, schema]
+      typeDefs: [compositeDirectivesAndScalarsSchema, schema],
     })
   }
 
