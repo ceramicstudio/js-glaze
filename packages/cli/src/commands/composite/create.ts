@@ -40,20 +40,19 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
       })
       const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 4)
       if (this.flags.outputPath === undefined) {
-        console.log("NO OUTPUT PATH GIVEN", this.flags)
         this.spinner.succeed(encodedAsJSON)
       } else {
-        console.log("OUTPUT PATH GIVEN", this.flags.outputPath)
-        fs.writeFile(this.flags.outputPath, encodedAsJSON, err => {
+        fs.writeFile(this.flags.outputPath, encodedAsJSON, (err) => {
           if (err) {
-            console.error(err);
+            console.error(err)
             this.spinner.fail(err.message)
           } else {
-            this.spinner.succeed(`Composite was created and its encoded representation was saved in ${this.flags.outputPath}`)
+            this.spinner.succeed(
+              `Composite was created and its encoded representation was saved in ${this.flags.outputPath}`
+            )
           }
-        });
+        })
       }
-      
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return

@@ -1,4 +1,4 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi, SignedCommit } from '@ceramicnetwork/common'
 import type {
   CompositeViewsDefinition,
   EncodedCompositeDefinition,
@@ -21,6 +21,12 @@ import {
 } from '@ceramicnetwork/stream-model'
 
 type StrictCompositeDefinition = Required<InternalCompositeDefinition>
+
+function isSignedCommit(
+  input: Record<string, any>
+): input is SignedCommit {
+  return Object.keys(input).includes("jws") && Object.keys(input).includes("linkedBlock")
+}
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
   return {
@@ -169,12 +175,20 @@ export class Composite {
     )
 
     await Promise.all(
+      // For each model stream id from modelsMapping keys...
       Object.keys(modelsMapping).map((modelStreamIdAsString) => {
+        // load stream commits for the model stream,
         return params.ceramic.loadStreamCommits(modelStreamIdAsString)
         .then((modelCommits) => {
           commits = {
             ...commits,
-            [modelStreamIdAsString]: modelCommits.map((modelCommit) => { return modelCommit.value }),
+            [modelStreamIdAsString]: modelCommits
+            // convert the result to what we need (the result is {cid: <cid>, value: <commit>}, we only need the commit),
+            .map((modelCommit) => { 
+              return modelCommit.value
+            })
+            // and filter out everything that is not a signed commit (i.e. we filter out anchor commits)
+            .filter(isSignedCommit),
           }
         })
       })
