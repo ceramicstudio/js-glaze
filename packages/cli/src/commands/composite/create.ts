@@ -1,8 +1,13 @@
 import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags } from '../../command.js'
+import { Flags } from '@oclif/core'
 import fs from 'fs'
 
-export default class CreateComposite extends Command<CommandFlags, { schemaFilePath: string }> {
+type Flags = CommandFlags & {
+  outputPath?: string
+}
+
+export default class CreateComposite extends Command<Flags, { schemaFilePath: string }> {
   static description =
     'create a Composite (a list of Model Streams) from a graphQL Schema Definition Language definition'
 
@@ -13,6 +18,14 @@ export default class CreateComposite extends Command<CommandFlags, { schemaFileP
       description: 'A graphQL SDL definition of the Composite encoded as a string',
     },
   ]
+
+  static flags = {
+    ...Command.flags,
+    outputPath: Flags.string({
+      char: 'o',
+      description: 'path to the file where the composite representation should be saved',
+    }),
+  }
 
   async run(): Promise<void> {
     this.spinner.start('Creating the composite...')
@@ -26,7 +39,21 @@ export default class CreateComposite extends Command<CommandFlags, { schemaFileP
         },
       })
       const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 4)
-      this.spinner.succeed(encodedAsJSON)
+      if (this.flags.outputPath === undefined) {
+        console.log("NO OUTPUT PATH GIVEN", this.flags)
+        this.spinner.succeed(encodedAsJSON)
+      } else {
+        console.log("OUTPUT PATH GIVEN", this.flags.outputPath)
+        fs.writeFile(this.flags.outputPath, encodedAsJSON, err => {
+          if (err) {
+            console.error(err);
+            this.spinner.fail(err.message)
+          } else {
+            this.spinner.succeed(`Composite was created and its encoded representation was saved in ${this.flags.outputPath}`)
+          }
+        });
+      }
+      
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return
