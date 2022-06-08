@@ -4,7 +4,6 @@ import type {
   EncodedCompositeDefinition,
   InternalCompositeDefinition,
   Model,
-  ModelAccountRelation,
   ModelDefinition,
   RuntimeCompositeDefinition,
   StreamCommits,
@@ -19,22 +18,9 @@ import { createRuntimeDefinition } from './formats/runtime.js'
 import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from './schema.js'
 import {
   Model as ModelStream,
-  ModelAccountRelation as CeramicModelAccountRelation,
 } from '@ceramicnetwork/stream-model'
 
 type StrictCompositeDefinition = Required<InternalCompositeDefinition>
-
-function translateModelAccountRelation(from: ModelAccountRelation): CeramicModelAccountRelation {
-  switch (from) {
-    case 'list':
-      return CeramicModelAccountRelation.LIST
-    case 'link':
-      return CeramicModelAccountRelation.LINK
-    case 'set':
-    case 'none':
-      throw new Error(`${from} model account relation is not supported yet`)
-  }
-}
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
   return {
@@ -171,7 +157,7 @@ export class Composite {
             name: modelDefinition.name,
             description: modelDefinition.description,
             schema: modelDefinition.schema,
-            accountRelation: translateModelAccountRelation(modelDefinition.accountRelation),
+            accountRelation: modelDefinition.accountRelation,
           },
           params.metadata
         )
