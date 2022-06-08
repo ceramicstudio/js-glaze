@@ -164,19 +164,19 @@ export class Composite {
           .then((modelStream) => {
             // put the model stream in the models mapping,
             modelsMapping[modelStream.id.toString()] = modelDefinition
-            return {
-              modelStream: modelStream,
-              // fetch commits for the stream,
-              modelCommits: params.ceramic.loadStreamCommits(modelStream.id.toString()),
-            }
           })
-          .then(({ modelStream, modelCommits }) => {
-            // and put the commits in the commits mapping
-            commits = {
-              ...commits,
-              [modelStream.id.toString()]: modelCommits,
-            }
-          })
+      })
+    )
+
+    await Promise.all(
+      Object.keys(modelsMapping).map((modelStreamIdAsString) => {
+        return params.ceramic.loadStreamCommits(modelStreamIdAsString)
+        .then((modelCommits) => {
+          commits = {
+            ...commits,
+            [modelStreamIdAsString]: modelCommits.map((modelCommit) => { return modelCommit.value }),
+          }
+        })
       })
     )
 

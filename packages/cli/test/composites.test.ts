@@ -31,7 +31,6 @@ describe('composites', () => {
         'test/mocks/composite.schema',
         `--key=${seed}`,
       ])
-      console.log("OUTPUT", create.stderr.toString())
       expect(create.stderr.toString().includes('Created')).toBe(true)
     }, 60000)
   })

@@ -18,7 +18,6 @@ export default class CreateComposite extends Command<CommandFlags, { schemaFileP
     this.spinner.start('Creating the composite...')
     try {
       const schema = fs.readFileSync(this.args.schemaFilePath, 'utf8')
-      console.log('Loaded schema: ', schema)
       const composite = await Composite.create({
         ceramic: this.ceramic,
         schema: schema,
@@ -26,8 +25,8 @@ export default class CreateComposite extends Command<CommandFlags, { schemaFileP
           controller: this.authenticatedDID.id,
         },
       })
-      const runtimeAsJSON = JSON.stringify(composite.toRuntime(), null, 4)
-      this.spinner.succeed(`Created composite with runtime representation: ${runtimeAsJSON}.`)
+      const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 4)
+      this.spinner.succeed(encodedAsJSON)
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return
