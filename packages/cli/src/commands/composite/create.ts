@@ -4,7 +4,7 @@ import { Flags } from '@oclif/core'
 import fs from 'fs'
 
 type Flags = CommandFlags & {
-  outputPath?: string
+  output?: string
 }
 
 export default class CreateComposite extends Command<Flags, { schemaFilePath: string }> {
@@ -21,7 +21,7 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
 
   static flags = {
     ...Command.flags,
-    outputPath: Flags.string({
+    output: Flags.string({
       char: 'o',
       description: 'path to the file where the composite representation should be saved',
     }),
@@ -39,15 +39,15 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
         },
       })
       const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 4)
-      if (this.flags.outputPath !== undefined) {
-        const outpath = this.flags.outputPath
-        fs.writeFile(outpath, encodedAsJSON, (err) => {
+      if (this.flags.output !== undefined) {
+        const output = this.flags.output
+        fs.writeFile(output, encodedAsJSON, (err) => {
           if (err) {
             console.error(err)
             this.spinner.fail(err.message)
           } else {
             this.spinner.succeed(
-              `Composite was created and its encoded representation was saved in ${outpath}`
+              `Composite was created and its encoded representation was saved in ${output}`
             )
           }
         })

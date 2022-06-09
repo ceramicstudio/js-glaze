@@ -350,7 +350,7 @@ ARGUMENTS
   INPUT  a path to file containing valid ceramic composite definition in GraphQL Schema Definition Language
 
 OPTIONS
-  -o, --outputPath a path to file where the resulting encoded composite definition should be saved
+  -o, --output a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze pin:add STREAMID`
