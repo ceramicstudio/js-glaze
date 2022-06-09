@@ -556,14 +556,7 @@ describe('composite', () => {
     })
 
     afterAll(async () => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await teardown({
-        command:
-          'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
-        port: 7007,
-        usedPortAction: 'kill',
-      })
+      await teardown()
     })
 
     test(
