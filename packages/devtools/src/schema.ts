@@ -386,26 +386,29 @@ function defaultFieldSchemaFromFieldDefinition(
 
   if (ceramicExtensions) {
     if (ceramicExtensions.length !== undefined) {
-      result = {
-        ...result,
-        maxLength: ceramicExtensions.length.max,
-        minLength: ceramicExtensions.length.min,
+      if (ceramicExtensions.length.max !== undefined) {
+        result.maxLength = ceramicExtensions.length.max
+      }
+      if (ceramicExtensions.length.min !== undefined) {
+        result.minLength = ceramicExtensions.length.min
       }
     }
 
     if (ceramicExtensions.intRange !== undefined) {
-      result = {
-        ...result,
-        maximum: ceramicExtensions.intRange.max,
-        minimum: ceramicExtensions.intRange.min,
+      if (ceramicExtensions.intRange.max !== undefined) {
+        result.maximum = ceramicExtensions.intRange.max
+      }
+      if (ceramicExtensions.intRange.min !== undefined) {
+        result.minimum = ceramicExtensions.intRange.min
       }
     }
 
     if (ceramicExtensions.floatRange !== undefined) {
-      result = {
-        ...result,
-        maximum: ceramicExtensions.floatRange.max,
-        minimum: ceramicExtensions.floatRange.min,
+      if (ceramicExtensions.floatRange.max !== undefined) {
+        result.maximum = ceramicExtensions.floatRange.max
+      }
+      if (ceramicExtensions.floatRange.min !== undefined) {
+        result.minimum = ceramicExtensions.floatRange.min
       }
     }
   }

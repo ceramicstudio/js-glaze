@@ -545,6 +545,7 @@ describe('composite', () => {
     ceramic.did = did
 
     beforeAll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       await setup({
         command:
           'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
@@ -554,44 +555,50 @@ describe('composite', () => {
       })
     })
 
-    test('creates a new composite from valid schema', async () => {
-      await did.authenticate()
-      
-      expect(async () => {
-        const composite = await Composite.create({
-          ceramic: ceramic,
-          schema: compositeSchemaWithProfiles,
-          metadata: {
-            controller: ceramic.did.id
-          }
-        })
-        expect(composite.hash).not.toBeFalsy()
-      })
-    }, timeout)
-
-    test('fails to create a new composite from invalid schema', async () => {
-      await did.authenticate()
-
-      expect(async () => {
-        return Composite.create({
-          ceramic: ceramic,
-          schema: graphQLSchemaWithoutModels,
-          metadata: {
-            controller: ceramic.did.id
-          }
-        })
-      }).rejects.toThrow('No models found in Composite Definition Schema')
-    }, timeout)
-
     afterAll(async () => {
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       await teardown({
         command:
           'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
         port: 7007,
         usedPortAction: 'kill',
       })
-    });
+    })
+
+    test(
+      'creates a new composite from valid schema',
+      async () => {
+        await did.authenticate()
+        const composite = await Composite.create({
+          ceramic: ceramic,
+          schema: compositeSchemaWithProfiles,
+          metadata: {
+            controller: ceramic.did.id,
+          },
+        })
+        expect(composite.hash).not.toBeFalsy()
+      },
+      timeout
+    )
+
+    test(
+      'fails to create a new composite from invalid schema',
+      async () => {
+        await did.authenticate()
+
+        await expect(async () => {
+          await Composite.create({
+            ceramic: ceramic,
+            schema: graphQLSchemaWithoutModels,
+            metadata: {
+              controller: ceramic.did.id,
+            },
+          })
+        }).rejects.toThrow('No models found in Composite Definition Schema')
+      },
+      timeout
+    )
   })
 
   test.todo('Composite.fromJSON()')
