@@ -572,6 +572,9 @@ describe('composite', () => {
           },
         })
         expect(composite.hash).not.toBeFalsy()
+        const compositeParams = composite.toParams()
+        expect(Object.keys(compositeParams.commits).length).toEqual(3)
+        expect(Object.keys(compositeParams.definition).length).toEqual(3)
       },
       timeout
     )

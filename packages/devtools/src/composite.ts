@@ -165,25 +165,21 @@ export class Composite {
         ).then((modelStream) => {
           // put the model stream in the models mapping,
           modelsMapping[modelStream.id.toString()] = modelDefinition
-        })
-      })
-    )
-
-    await Promise.all(
-      // For each model stream id from modelsMapping keys...
-      Object.keys(modelsMapping).map((modelStreamIdAsString) => {
-        // load stream commits for the model stream,
-        return params.ceramic.loadStreamCommits(modelStreamIdAsString).then((modelCommits) => {
-          commits = {
-            ...commits,
-            [modelStreamIdAsString]: modelCommits
-              // convert the result to what we need (the result is {cid: <cid>, value: <commit>}, we only need the commit),
-              .map((modelCommit) => {
-                return modelCommit.value as Record<string, any>
-              })
-              // and filter out everything that is not a signed commit (i.e. we filter out anchor commits)
-              .filter(isSignedCommit),
-          }
+          // load stream commits for the model stream,
+          return params.ceramic
+            .loadStreamCommits(modelStream.id.toString())
+            .then((modelCommits) => {
+              commits = {
+                ...commits,
+                [modelStream.id.toString()]: modelCommits
+                  // convert the result to what we need (the result is {cid: <cid>, value: <commit>}, we only need the commit),
+                  .map((modelCommit) => {
+                    return modelCommit.value as Record<string, any>
+                  })
+                  // and filter out everything that is not a signed commit (i.e. we filter out anchor commits)
+                  .filter(isSignedCommit),
+              }
+            })
         })
       })
     )
