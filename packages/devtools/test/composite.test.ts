@@ -1,4 +1,14 @@
+import { jest } from '@jest/globals'
 import type { ModelDefinition } from '@glazed/types'
+import { setup, teardown } from 'jest-dev-server'
+import { CeramicClient } from '@ceramicnetwork/http-client'
+import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
+import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
+import { DID } from 'dids'
+import { Resolver } from 'did-resolver'
+import * as KeyDidResolver from 'key-did-resolver'
+import { Ed25519Provider } from 'key-did-provider-ed25519'
+import * as random from '@stablelib/random'
 
 import { Composite, type CompositeParams } from '../src'
 
@@ -520,7 +530,69 @@ describe('composite', () => {
     expect(params).not.toEqual(third)
   })
 
-  test.todo('Composite.create()')
+  describe('Composite.create()', () => {
+    const timeout = 60000
+    jest.setTimeout(timeout)
+
+    const ceramic = new CeramicClient('http://localhost:7007')
+    const resolver = new Resolver({
+      ...KeyDidResolver.getResolver(),
+    })
+    const did = new DID({
+      resolver: resolver,
+      provider: new Ed25519Provider(random.randomBytes(32)),
+    })
+    ceramic.did = did
+
+    beforeAll(async () => {
+      await setup({
+        command:
+          'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
+        debug: true,
+        launchTimeout: timeout,
+        port: 7007,
+      })
+    })
+
+    test('creates a new composite from valid schema', async () => {
+      await did.authenticate()
+      
+      expect(async () => {
+        const composite = await Composite.create({
+          ceramic: ceramic,
+          schema: compositeSchemaWithProfiles,
+          metadata: {
+            controller: ceramic.did.id
+          }
+        })
+        expect(composite.hash).not.toBeFalsy()
+      })
+    }, timeout)
+
+    test('fails to create a new composite from invalid schema', async () => {
+      await did.authenticate()
+
+      expect(async () => {
+        return Composite.create({
+          ceramic: ceramic,
+          schema: graphQLSchemaWithoutModels,
+          metadata: {
+            controller: ceramic.did.id
+          }
+        })
+      }).rejects.toThrow('No models found in Composite Definition Schema')
+    }, timeout)
+
+    afterAll(async () => {
+      // @ts-ignore
+      await teardown({
+        command:
+          'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
+        port: 7007,
+        usedPortAction: 'kill',
+      })
+    });
+  })
 
   test.todo('Composite.fromJSON()')
 
