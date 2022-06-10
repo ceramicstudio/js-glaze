@@ -543,13 +543,13 @@ describe('composite', () => {
       expect(composite.hash).not.toBeFalsy()
       const compositeParams = composite.toParams()
       expect(Object.keys(compositeParams.commits).length).toEqual(3)
-      expect(Object.keys(compositeParams.definition.models).length).toEqual(3)
       const modelNames = ['GenericProfile', 'SocialProfile', 'PersonProfile']
       Object.values(compositeParams.definition.models).map((modelDefinition: ModelDefinition) => {
         const index = modelNames.indexOf(modelDefinition.name)
-        expect(index).not.toBeUndefined()
+        expect(index).toBeGreaterThan(-1)
         modelNames.splice(index, 1)
       })
+      expect(modelNames.length).toEqual(0)
     }, 60000)
 
     test('fails to create a new composite from invalid schema', async () => {

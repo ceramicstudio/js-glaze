@@ -9,8 +9,7 @@ import type {
   StreamCommits,
 } from '@glazed/types'
 import type { GraphQLSchema } from 'graphql'
-import cloneDeep from 'lodash-es/cloneDeep.js'
-import merge from 'lodash-es/merge.js'
+import { cloneDeep, merge } from 'lodash-es'
 import createObjectHash from 'object-hash'
 
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'

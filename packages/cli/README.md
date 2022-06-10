@@ -36,7 +36,7 @@ glaze COMMAND
 - [`glaze model:import LOCALNAME IMPORTNAME`](#glaze-modelimport-localname-importname)
 - [`glaze model:inspect NAME`](#glaze-modelinspect-name)
 - [`glaze model:list`](#glaze-modellist)
-- [`glaze composite:create INPUT [OUTPUT]`](#glaze-modellist)
+- [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
