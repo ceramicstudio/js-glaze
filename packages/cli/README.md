@@ -36,6 +36,7 @@ glaze COMMAND
 - [`glaze model:import LOCALNAME IMPORTNAME`](#glaze-modelimport-localname-importname)
 - [`glaze model:inspect NAME`](#glaze-modelinspect-name)
 - [`glaze model:list`](#glaze-modellist)
+- [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -335,6 +336,21 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze composite:create`
+
+create an encoded composite definition from GraphQL schema
+
+```
+USAGE
+  $ glaze composite:create INPUT
+
+ARGUMENTS
+  INPUT  a path to file containing valid ceramic composite definition in GraphQL Schema Definition Language
+
+OPTIONS
+  -o, --output a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze pin:add STREAMID`

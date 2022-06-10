@@ -17,13 +17,13 @@ import {
   compositeDirectivesTransformer,
   fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
-} from './graphQlDirectives/compositeDirectivesTransformer'
-import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer'
-import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer'
+} from './graphQlDirectives/compositeDirectivesTransformer.js'
+import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer.js'
+import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer.js'
 import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
-import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema'
+import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar'
+import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>
@@ -158,13 +158,18 @@ function embeddedObjectDefinitionFromObjectConfig(
     }
   }
 
-  return {
+  const schema: JSONSchema.Object = {
     type: 'object',
     title: objectConfig.name,
     properties: properties,
     additionalProperties: false,
-    required: required.length > 0 ? required : undefined,
   }
+
+  if (required.length > 0) {
+    schema.required = required
+  }
+
+  return schema
 }
 
 /** @internal */
@@ -239,7 +244,10 @@ function modelFromObjectConfig(
   if (Object.keys(modelSchema.$defs).length === 0) {
     delete modelSchema.$defs
   }
-  modelSchema.required = requiredProperties.length > 0 ? requiredProperties : undefined
+
+  if (requiredProperties.length > 0) {
+    modelSchema.required = requiredProperties
+  }
 
   return {
     name: objectConfig.name,
@@ -378,26 +386,29 @@ function defaultFieldSchemaFromFieldDefinition(
 
   if (ceramicExtensions) {
     if (ceramicExtensions.length !== undefined) {
-      result = {
-        ...result,
-        maxLength: ceramicExtensions.length.max,
-        minLength: ceramicExtensions.length.min,
+      if (ceramicExtensions.length.max !== undefined) {
+        result.maxLength = ceramicExtensions.length.max
+      }
+      if (ceramicExtensions.length.min !== undefined) {
+        result.minLength = ceramicExtensions.length.min
       }
     }
 
     if (ceramicExtensions.intRange !== undefined) {
-      result = {
-        ...result,
-        maximum: ceramicExtensions.intRange.max,
-        minimum: ceramicExtensions.intRange.min,
+      if (ceramicExtensions.intRange.max !== undefined) {
+        result.maximum = ceramicExtensions.intRange.max
+      }
+      if (ceramicExtensions.intRange.min !== undefined) {
+        result.minimum = ceramicExtensions.intRange.min
       }
     }
 
     if (ceramicExtensions.floatRange !== undefined) {
-      result = {
-        ...result,
-        maximum: ceramicExtensions.floatRange.max,
-        minimum: ceramicExtensions.floatRange.min,
+      if (ceramicExtensions.floatRange.max !== undefined) {
+        result.maximum = ceramicExtensions.floatRange.max
+      }
+      if (ceramicExtensions.floatRange.min !== undefined) {
+        result.minimum = ceramicExtensions.floatRange.min
       }
     }
   }

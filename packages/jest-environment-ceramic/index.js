@@ -6,6 +6,15 @@ import { dir } from 'tmp-promise'
 
 const NodeEnvironment = NodeEnv.default ?? NodeEnv
 export default class CeramicEnvironment extends NodeEnvironment {
+  constructor(config, context) {
+    super(config, context)
+    
+    this.indexingConfig = {
+      db: config.db,
+      models: config.models
+    }
+  }
+
   async setup() {
     this.tmpFolder = await dir({ unsafeCleanup: true })
     this.global.ipfs = await create({
@@ -17,16 +26,21 @@ export default class CeramicEnvironment extends NodeEnvironment {
         },
         Pubsub: {
           // default "gossipsub" uses CJS and fails to import
-          Router: 'floodsub',
+          PubSubRouter: 'floodsub',
         },
       },
-      profiles: ['test'],
       repo: path.join(this.tmpFolder.path, 'ipfs'),
       silent: true,
     })
+
+    const stateStoreDirectory = path.join(this.tmpFolder.path, 'ceramic')
+  
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
-      anchorOnRequest: false,
-      stateStoreDirectory: path.join(this.tmpFolder.path, 'ceramic'),
+      stateStoreDirectory: stateStoreDirectory,
+      indexing: {
+        db: this.indexingConfig.db ?? `sqlite://${stateStoreDirectory}/ceramic.sqlite`,
+        models: this.indexingConfig.models ?? []
+      }
     })
   }
 
