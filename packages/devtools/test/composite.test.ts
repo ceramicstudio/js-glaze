@@ -1,16 +1,17 @@
-import { jest } from '@jest/globals'
+/**
+ * @jest-environment glaze
+ */
+
 import type { ModelDefinition } from '@glazed/types'
-import { setup, teardown } from 'jest-dev-server'
-import { CeramicClient } from '@ceramicnetwork/http-client'
 import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
-import { DID } from 'dids'
-import { Resolver } from 'did-resolver'
-import * as KeyDidResolver from 'key-did-resolver'
-import { Ed25519Provider } from 'key-did-provider-ed25519'
-import * as random from '@stablelib/random'
+import type { CeramicApi } from '@ceramicnetwork/common'
 
 import { Composite, type CompositeParams } from '../src'
+
+declare global {
+  const ceramic: CeramicApi
+}
 
 describe('composite', () => {
   describe('Composite instance', () => {
@@ -531,71 +532,37 @@ describe('composite', () => {
   })
 
   describe('Composite.create()', () => {
-    const timeout = 60000
-    jest.setTimeout(timeout)
-
-    const ceramic = new CeramicClient('http://localhost:7007')
-    const resolver = new Resolver({
-      ...KeyDidResolver.getResolver(),
-    })
-    const did = new DID({
-      resolver: resolver,
-      provider: new Ed25519Provider(random.randomBytes(32)),
-    })
-    ceramic.did = did
-
-    beforeAll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await setup({
-        command:
-          'rm -rf ./test/statestore && ceramic daemon --network inmemory --state-store-directory ./test/statestore',
-        debug: true,
-        launchTimeout: timeout,
-        port: 7007,
+    test('creates a new composite from valid schema', async () => {
+      const composite = await Composite.create({
+        ceramic: ceramic,
+        schema: compositeSchemaWithProfiles,
+        metadata: {
+          controller: ceramic.did.id,
+        },
       })
-    })
+      expect(composite.hash).not.toBeFalsy()
+      const compositeParams = composite.toParams()
+      expect(Object.keys(compositeParams.commits).length).toEqual(3)
+      expect(Object.keys(compositeParams.definition.models).length).toEqual(3)
+      const modelNames = ['GenericProfile', 'SocialProfile', 'PersonProfile']
+      Object.values(compositeParams.definition.models).map((modelDefinition: ModelDefinition) => {
+        const index = modelNames.indexOf(modelDefinition.name)
+        expect(index).not.toBeUndefined()
+        modelNames.splice(index, 1)
+      })
+    }, 60000)
 
-    afterAll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await teardown()
-    })
-
-    test(
-      'creates a new composite from valid schema',
-      async () => {
-        await did.authenticate()
-        const composite = await Composite.create({
+    test('fails to create a new composite from invalid schema', async () => {
+      await expect(async () => {
+        await Composite.create({
           ceramic: ceramic,
-          schema: compositeSchemaWithProfiles,
+          schema: graphQLSchemaWithoutModels,
           metadata: {
             controller: ceramic.did.id,
           },
         })
-        expect(composite.hash).not.toBeFalsy()
-        const compositeParams = composite.toParams()
-        expect(Object.keys(compositeParams.commits).length).toEqual(3)
-        expect(Object.keys(compositeParams.definition).length).toEqual(3)
-      },
-      timeout
-    )
-
-    test(
-      'fails to create a new composite from invalid schema',
-      async () => {
-        await did.authenticate()
-
-        await expect(async () => {
-          await Composite.create({
-            ceramic: ceramic,
-            schema: graphQLSchemaWithoutModels,
-            metadata: {
-              controller: ceramic.did.id,
-            },
-          })
-        }).rejects.toThrow('No models found in Composite Definition Schema')
-      },
-      timeout
-    )
+      }).rejects.toThrow('No models found in Composite Definition Schema')
+    }, 60000)
   })
 
   test.todo('Composite.fromJSON()')
