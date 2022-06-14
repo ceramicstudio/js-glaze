@@ -1,5 +1,5 @@
 {
-  "name": "@glazed/graphql",
+  "name": "@glazed/graph",
   "version": "0.1.0",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ceramicstudio/js-glaze",
-    "directory": "packages/graphql"
+    "directory": "packages/graph"
   },
   "type": "module",
   "main": "dist/index.js",
@@ -38,16 +38,17 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^2.0.0",
-    "@ceramicnetwork/streamid": "^2.0.0",
+    "@ceramicnetwork/stream-model-instance": "^0.1.0",
+    "@ceramicnetwork/streamid": "^2.1.0",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0",
     "graphql-scalars": "^1.17.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/common": "^2.1.0",
     "@glazed/devtools": "^0.2.0",
     "@glazed/types": "^0.2.0",
+    "dids": "^3.2.0",
     "jest-environment-glaze": "^0.3.0"
   },
   "jest": {

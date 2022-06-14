@@ -4,11 +4,13 @@
  * @module types
  */
 
-import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
+import type { ModelDefinition } from '@ceramicnetwork/stream-model'
+import type { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 import type { DagJWSResult, JWSSignature } from 'dids'
-import type { JSONSchema } from 'json-schema-typed/draft-07'
 
-export type { JSONSchema } from 'json-schema-typed/draft-07'
+export type { Model, ModelAccountRelation, ModelDefinition } from '@ceramicnetwork/stream-model'
+export type { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
+export type { JSONSchema } from 'json-schema-typed/draft-2020-12'
 
 /** JSON-encoded DAG-JWS. */
 export type EncodedDagJWS = {
@@ -26,12 +28,6 @@ export type EncodedDagJWSResult = {
 export type StreamCommits = Array<DagJWSResult>
 export type EncodedStreamCommits = Array<EncodedDagJWSResult>
 
-export type ModelAccountRelation =
-  | 'list' // Multiple documents, ordered by insertion time in the local node's database
-  | 'set' // Multiple documents, but only one per reference (streamID or DID). Which field gets the set semantics is configured in 'relations'
-  | 'link' // Single document
-  | 'none' // No indexing
-
 export type ModelRelationDefinition =
   | { type: 'account' }
   | { type: 'document'; models: Array<string> }
@@ -45,20 +41,6 @@ export type ModelViewDefinition =
   | { type: 'referencedBy'; property: string }
 
 export type ModelViewsDefinition = Record<string, ModelViewDefinition>
-
-export type ModelDefinition = {
-  name: string
-  description?: string
-  schema: JSONSchema.Object
-  accountRelation: ModelAccountRelation
-  relations?: ModelRelationsDefinition
-  views?: ModelViewsDefinition
-}
-
-export interface Model {
-  id: StreamID
-  content: ModelDefinition
-}
 
 export type ReferencedFromViewDefinition = {
   type: 'ReferencedFrom'
@@ -91,13 +73,6 @@ export type EncodedCompositeDefinition = CompositeDefinitionType<EncodedStreamCo
 export type DocumentMetadata = {
   controller: string
   model: string
-}
-
-export interface ModelInstanceDocument<T = Record<string, unknown>> {
-  get id(): StreamID
-  get commitId(): CommitID
-  get metadata(): DocumentMetadata
-  get content(): T
 }
 
 // Response payload for collection pattern queries
@@ -161,12 +136,10 @@ export type RuntimeStringScalar = RuntimeScalarCommon & {
   type: 'string'
   maxLength?: number
 }
-export type RuntimeDIDStringScalar = RuntimeScalarCommon & {
-  type: 'did'
-  maxLength?: number
-}
-export type RuntimeStreamRefStringScalar = RuntimeScalarCommon & {
-  type: 'streamref'
+
+export type CustomRuntimeScalarType = 'did' | 'id' | 'streamref'
+type RuntimeStringScalarType<Type extends CustomRuntimeScalarType> = RuntimeScalarCommon & {
+  type: Type
   maxLength?: number
 }
 
@@ -175,8 +148,9 @@ export type RuntimeScalar =
   | RuntimeIntegerScalar
   | RuntimeFloatScalar
   | RuntimeStringScalar
-  | RuntimeDIDStringScalar
-  | RuntimeStreamRefStringScalar
+  | RuntimeStringScalarType<'did'>
+  | RuntimeStringScalarType<'id'>
+  | RuntimeStringScalarType<'streamref'>
 export type RuntimeScalarType = RuntimeScalar['type']
 
 export type RuntimeReferenceType =
@@ -208,6 +182,6 @@ export type RuntimeViewReference = { type: RuntimeViewReferenceType; name: strin
 export type RuntimeCompositeDefinition = {
   models: Record<string, string> // Name key, streamID value
   objects: Record<string, RuntimeObjectFields> // Name key
-  accountStore: Record<string, RuntimeViewReference>
+  accountData: Record<string, RuntimeViewReference>
   query?: Record<string, RuntimeViewReference>
 }

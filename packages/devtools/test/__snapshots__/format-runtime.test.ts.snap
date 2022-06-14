@@ -2,7 +2,7 @@
 
 exports[`Runtime format Profile - multiples models with common local references 1`] = `
 Object {
-  "accountStore": Object {
+  "accountData": Object {
     "genericProfile": Object {
       "name": "GenericProfile",
       "type": "model",

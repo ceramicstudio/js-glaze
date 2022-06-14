@@ -1,6 +1,6 @@
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { Composite } from '@glazed/devtools'
-import { printGraphQLSchema } from '@glazed/graphql'
+import { printGraphQLSchema } from '@glazed/graph'
 import type { EncodedCompositeDefinition, RuntimeCompositeDefinition } from '@glazed/types'
 import fs from 'fs-extra'
 import { resolve } from 'path'
@@ -85,7 +85,7 @@ export async function writeEncodedCompositeRuntime(
   }
 }
 
-export async function composeEncodedComposites(
+export async function mergeEncodedComposites(
   ceramic: CeramicClient | string,
   source: PathInput | Array<PathInput>,
   destination: PathInput
@@ -95,6 +95,6 @@ export async function composeEncodedComposites(
     sources.map(async (path) => await readEncodedComposite(ceramic, path))
   )
   const file = getFilePath(destination)
-  await writeEncodedComposite(Composite.compose(composites), file)
+  await writeEncodedComposite(Composite.from(composites), file)
   return file
 }

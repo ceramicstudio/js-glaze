@@ -1,5 +1,5 @@
 import { CeramicClient } from '@ceramicnetwork/http-client'
-import { Context, createGraphQLSchema } from '@glazed/graphql'
+import { Context, createGraphQLSchema } from '@glazed/graph'
 import type { RuntimeCompositeDefinition } from '@glazed/types'
 import type { DID } from 'dids'
 import express from 'express'

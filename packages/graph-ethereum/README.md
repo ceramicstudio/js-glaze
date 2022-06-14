@@ -1,9 +1,9 @@
-# Ethereum bridge
+# Graph Ethereum runtime
 
 ## Installation
 
 ```sh
-npm install @glazed/bridge-ethereum
+npm install @glazed/graph-ethereum
 ```
 
 ## License

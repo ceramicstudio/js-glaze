@@ -1,10 +1,10 @@
 /**
- * GraphQL client
+ * Ceramic Graph client
  *
- * @module graphql
+ * @module graph
  */
 
-export { GraphQLClient, type GraphQLClientParams } from './client.js'
+export { GraphClient, type GraphClientParams } from './client.js'
 export { Context, type ContextParams } from './context.js'
 export { createGraphQLSchema } from './schema.js'
 export { printGraphQLSchema } from './utils.js'

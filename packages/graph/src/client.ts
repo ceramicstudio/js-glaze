@@ -1,5 +1,6 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
 import type { RuntimeCompositeDefinition } from '@glazed/types'
+import type { DID } from 'dids'
 import {
   type DocumentNode,
   type ExecutionResult,
@@ -15,34 +16,45 @@ import { Context } from './context.js'
 import type { DocumentCache, DocumentLoader } from './loader.js'
 import { createGraphQLSchema } from './schema.js'
 
-export type FromDefinitionParams = {
-  ceramic: CeramicApi
-  definition: RuntimeCompositeDefinition
-}
-
-export type GraphQLClientParams = {
+export type GraphClientParams = {
   cache?: DocumentCache | boolean
   ceramic: CeramicApi
+  definition: RuntimeCompositeDefinition
   loader?: DocumentLoader
-  schema: GraphQLSchema
 }
 
-export class GraphQLClient {
+export class GraphClient {
   #context: Context
+  #resources: Array<string>
   #schema: GraphQLSchema
 
-  static fromDefinition({ ceramic, definition }: FromDefinitionParams): GraphQLClient {
-    return new GraphQLClient({ ceramic, schema: createGraphQLSchema({ definition }) })
-  }
-
-  constructor(params: GraphQLClientParams) {
-    const { schema, ...contextParams } = params
+  constructor(params: GraphClientParams) {
+    const { definition, ...contextParams } = params
     this.#context = new Context(contextParams)
-    this.#schema = schema
+    this.#resources = Object.values(definition.models).map((modelID) => {
+      return `ceramic://*?model=${modelID}`
+    })
+    this.#schema = createGraphQLSchema({ definition })
   }
 
   get context(): Context {
     return this.#context
+  }
+
+  get did(): DID | undefined {
+    return this.#context.ceramic.did
+  }
+
+  get id(): string | undefined {
+    return this.did?.id
+  }
+
+  get resources(): Array<string> {
+    return this.#resources
+  }
+
+  setDID(did: DID): void {
+    this.#context.ceramic.did = did
   }
 
   async execute(

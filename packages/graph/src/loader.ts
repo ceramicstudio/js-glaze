@@ -1,10 +1,17 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
-import { type CommitID, type StreamID, StreamRef } from '@ceramicnetwork/streamid'
-import type { ModelInstanceDocument } from '@glazed/types'
+import type { CeramicApi, CreateOpts, UpdateOpts } from '@ceramicnetwork/common'
+import {
+  ModelInstanceDocument,
+  type ModelInstanceDocumentMetadata,
+} from '@ceramicnetwork/stream-model-instance'
+import { type CommitID, StreamID, StreamRef } from '@ceramicnetwork/streamid'
 import DataLoader from 'dataloader'
 import type { BatchLoadFn } from 'dataloader'
 
 export type DocID = CommitID | StreamID | string
+
+export type CreateOptions = CreateOpts & {
+  controller?: string
+}
 
 // Implements CacheMap from dataloader, copied here to generate docs
 export type DocumentCache = {
@@ -50,8 +57,8 @@ export function idToString(id: DocID): string {
 const tempBatchLoadFn: BatchLoadFn<DocID, ModelInstanceDocument> = () => Promise.resolve([])
 
 export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
-  // #ceramic: CeramicApi
-  // #useCache: boolean
+  #ceramic: CeramicApi
+  #useCache: boolean
 
   constructor(params: DocumentLoaderParams) {
     super(tempBatchLoadFn, {
@@ -81,35 +88,39 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
       })
     }
 
-    // this.#ceramic = params.ceramic
-    // this.#useCache = !!params.cache
+    this.#ceramic = params.ceramic
+    this.#useCache = !!params.cache
   }
 
   /**
-   * Add a TileDocument to the local cache, if enabled.
+   * Add a ModelInstanceDocument to the local cache, if enabled.
    */
-  // cache(stream: TileDocument): boolean {
-  //   if (!this.#useCache) {
-  //     return false
-  //   }
+  cache(stream: ModelInstanceDocument): boolean {
+    if (!this.#useCache) {
+      return false
+    }
 
-  //   const id = stream.id.toString()
-  //   this.clear(id).prime(id, stream)
-  //   return true
-  // }
+    const id = stream.id.toString()
+    this.clear(id).prime(id, stream)
+    return true
+  }
 
   /**
-   * Create a new TileDocument and add it to the cache, if enabled.
+   * Create a new ModelInstanceDocument and add it to the cache, if enabled.
    */
-  // async create<T extends Record<string, any> = Record<string, any>>(
-  //   content: T,
-  //   metadata?: TileMetadataArgs,
-  //   options?: CreateOpts
-  // ): Promise<TileDocument<T>> {
-  //   const stream = await TileDocument.create<T>(this.#ceramic, content, metadata, options)
-  //   this.cache(stream)
-  //   return stream
-  // }
+  async create<T extends Record<string, any> = Record<string, any>>(
+    model: string | StreamID,
+    content: T,
+    { controller, ...options }: CreateOptions = {}
+  ): Promise<ModelInstanceDocument<T>> {
+    const metadata: ModelInstanceDocumentMetadata = {
+      controller,
+      model: model instanceof StreamID ? model : StreamID.fromString(model),
+    }
+    const stream = await ModelInstanceDocument.create<T>(this.#ceramic, content, metadata, options)
+    this.cache(stream)
+    return stream
+  }
 
   /**
    * Load a ModelInstanceDocument from the cache (if enabled) or remotely.
@@ -121,18 +132,17 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
   }
 
   /**
-   * Update a TileDocument after loading the stream remotely, bypassing the cache.
+   * Update a ModelInstanceDocument after loading the stream remotely, bypassing the cache.
    */
-  // async update<T extends Record<string, any> = Record<string, any>>(
-  //   streamID: string | StreamID,
-  //   content?: T,
-  //   metadata?: TileMetadataArgs,
-  //   options?: UpdateOpts
-  // ): Promise<TileDocument<T | null | undefined>> {
-  //   const id = keyToString(streamID)
-  //   this.clear(id)
-  //   const stream = await this.load<T>({ streamId: id })
-  //   await stream.update(content, metadata, options)
-  //   return stream
-  // }
+  async update<T extends Record<string, any> = Record<string, any>>(
+    streamID: string | StreamID,
+    content: T | null = null,
+    options?: UpdateOpts
+  ): Promise<ModelInstanceDocument<T | null>> {
+    const id = idToString(streamID)
+    this.clear(id)
+    const stream = await this.load<T>(id)
+    await stream.replace(content, options)
+    return stream
+  }
 }

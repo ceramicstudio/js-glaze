@@ -12,6 +12,13 @@
       "execa"
     ]
   },
+  "resolutions": {
+    "@ceramicnetwork/common": "^2.1.0",
+    "@ceramicnetwork/core": "^2.1.0",
+    "@ceramicnetwork/http-client": "^2.1.0",
+    "@ceramicnetwork/streamid": "^2.1.0",
+    "dids": "^3.2.0"
+  },
   "scripts": {
     "docs": "typedoc --tsconfig tsconfig.docs.json",
     "test": "yarn turbo run test",
@@ -23,21 +30,21 @@
   "devDependencies": {
     "@skypack/package-check": "^0.2.2",
     "@swc/cli": "^0.1.57",
-    "@swc/core": "^1.2.186",
+    "@swc/core": "^1.2.198",
     "@swc/jest": "^0.2.20",
-    "@types/jest": "^27.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.25.0",
-    "@typescript-eslint/parser": "^5.25.0",
+    "@types/jest": "^28.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
     "del-cli": "^4.0.1",
-    "eslint": "^8.14.0",
+    "eslint": "^8.17.0",
     "eslint-config-3box": "^0.4.0",
-    "eslint-plugin-jest": "^26.2.2",
-    "jest": "^28.0.2",
-    "lerna": "^4.0.0",
+    "eslint-plugin-jest": "^26.5.3",
+    "jest": "^28.1.1",
+    "lerna": "^5.1.2",
     "prettier": "^2.6.2",
-    "turbo": "^1.2.5",
-    "typedoc": "0.22.15",
+    "turbo": "^1.2.16",
+    "typedoc": "0.22.17",
     "typedoc-plugin-markdown": "^3.12.1",
-    "typescript": "^4.5.5"
+    "typescript": "^4.7.3"
   }
 }

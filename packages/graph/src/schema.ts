@@ -43,6 +43,7 @@ const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   boolean: GraphQLBoolean,
   did: GraphQLDID,
   float: GraphQLFloat,
+  id: GraphQLID,
   integer: GraphQLInt,
   streamref: CeramicStreamReference,
   string: GraphQLString,
@@ -55,8 +56,8 @@ type GraphQLNodeDefinitions = {
   nodesField: GraphQLFieldConfig<unknown, Context>
 }
 type SharedDefinitions = GraphQLNodeDefinitions & {
-  storeObject: GraphQLObjectType<string, Context>
   accountObject: GraphQLObjectType<string, Context>
+  accountDataObject: GraphQLObjectType<string, Context>
 }
 
 type BuildObjectParams = {
@@ -66,7 +67,7 @@ type BuildObjectParams = {
 }
 
 function createCeramicAccountObject(
-  dataStore: GraphQLObjectType
+  accountDataObject: GraphQLObjectType
 ): GraphQLObjectType<string, Context> {
   return new GraphQLObjectType<string, Context>({
     name: 'CeramicAccount',
@@ -79,8 +80,8 @@ function createCeramicAccountObject(
         type: new GraphQLNonNull(GraphQLBoolean),
         resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
       },
-      store: {
-        type: new GraphQLNonNull(dataStore),
+      data: {
+        type: new GraphQLNonNull(accountDataObject),
         resolve: (did) => did,
       },
     },
@@ -124,15 +125,15 @@ class SchemaBuilder {
 
     const nodeDefs = nodeDefinitions(
       async (id: string, ctx: Context) => await ctx.loadDoc(id),
-      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model]
+      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString() as string]
     )
 
-    // DataStore object is model-specific and needed to generate object using it
-    const storeObject = new GraphQLObjectType({
-      name: 'DataStore',
+    // AccountData object is model-specific and needed to generate object using it
+    const accountDataObject = new GraphQLObjectType({
+      name: 'CeramicAccountData',
       fields: () => {
         const config: GraphQLFieldConfigMap<string, Context> = {}
-        for (const [alias, reference] of Object.entries(this.#def.accountStore ?? {})) {
+        for (const [alias, reference] of Object.entries(this.#def.accountData ?? {})) {
           const model = this.#def.models[reference.name]
           if (model == null) {
             throw new Error(`Missing model for reference name: ${reference.name}`)
@@ -167,7 +168,11 @@ class SchemaBuilder {
       },
     })
 
-    return { ...nodeDefs, storeObject, accountObject: createCeramicAccountObject(storeObject) }
+    return {
+      ...nodeDefs,
+      accountDataObject,
+      accountObject: createCeramicAccountObject(accountDataObject),
+    }
   }
 
   _buildObjects(definitions: SharedDefinitions): Set<string> {
@@ -187,6 +192,7 @@ class SchemaBuilder {
         const config: GraphQLFieldConfigMap<ModelInstanceDocument, Context> = {}
         if (modelID != null) {
           config.id = {
+            // Use GraphQLID rather than CeramicStreamReference here for Relay compliance
             type: new GraphQLNonNull(GraphQLID),
             resolve: (doc) => doc.id.toString(),
           }
@@ -267,7 +273,7 @@ class SchemaBuilder {
           },
         }
       case 'object':
-        return { type, resolve: (doc) => doc.content[key] }
+        return { type, resolve: (doc) => doc.content[key] as unknown }
       default:
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unsupported reference type: ${field.refType}`)
@@ -311,7 +317,7 @@ class SchemaBuilder {
     if (field.viewType === 'documentAccount') {
       return {
         type: new GraphQLNonNull(definitions.accountObject),
-        resolve: (doc): string => doc.metadata.controller,
+        resolve: (doc): string => doc.metadata.controller as string,
       }
     }
     if (field.viewType === 'documentVersion') {
@@ -445,7 +451,7 @@ class SchemaBuilder {
       account: {
         type: new GraphQLNonNull(definitions.accountObject),
         args: {
-          id: { type: new GraphQLNonNull(GraphQLID) },
+          id: { type: new GraphQLNonNull(GraphQLDID) },
         },
         resolve: (_, args: { id: string }): string => args.id,
       },

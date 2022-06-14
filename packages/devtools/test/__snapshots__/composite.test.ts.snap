@@ -15,7 +15,7 @@ Object {
 
 exports[`composite Composite instance toRuntime() returns the runtime definition for the Composite 1`] = `
 Object {
-  "accountStore": Object {},
+  "accountData": Object {},
   "models": Object {},
   "objects": Object {},
 }

@@ -1,4 +1,5 @@
 import type {
+  CustomRuntimeScalarType,
   InternalCompositeDefinition,
   JSONSchema,
   ModelDefinition,
@@ -23,9 +24,10 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
-const CUSTOM_SCALARS_TITLES: Record<string, RuntimeScalar['type']> = {
+const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
   CeramicStreamReference: 'streamref',
   GraphQLDID: 'did',
+  GraphQLID: 'id',
 }
 type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
@@ -46,14 +48,15 @@ export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
   #modelSchema: JSONSchema.Object
-  #modelViews: ModelViewsDefinition
+  #modelViews: ModelViewsDefinition = {}
   #objects: Record<string, RuntimeObjectFields> = {}
 
   constructor(params: RuntimeModelBuilderParams) {
     this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
-    this.#modelViews = params.definition.views ?? {}
+    // Post-MVP logic
+    // this.#modelViews = params.definition.views ?? {}
   }
 
   build(): Record<string, RuntimeObjectFields> {
@@ -223,7 +226,7 @@ export function createRuntimeDefinition(
   const runtime: RuntimeCompositeDefinition = {
     models: {},
     objects: {},
-    accountStore: {},
+    accountData: {},
   }
 
   for (const [modelID, modelDefinition] of Object.entries(definition.models)) {
@@ -238,17 +241,17 @@ export function createRuntimeDefinition(
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type
-    if (modelDefinition.accountRelation !== 'none') {
+    if (modelDefinition.accountRelation != null) {
       const key = camelCase(modelName)
       if (modelDefinition.accountRelation === 'link') {
-        runtime.accountStore[key] = { type: 'model', name: modelName }
+        runtime.accountData[key] = { type: 'model', name: modelName }
       } else {
-        runtime.accountStore[key + 'Collection'] = { type: 'collection', name: modelName }
+        runtime.accountData[key + 'Collection'] = { type: 'collection', name: modelName }
       }
     }
   }
 
-  // TODO: handle definition.views for additional models, accountStore and root view
+  // TODO: handle definition.views for additional models, accountData and root view
 
   return runtime
 }

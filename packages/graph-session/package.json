@@ -1,5 +1,5 @@
 {
-  "name": "@glazed/bridge-ethereum",
+  "name": "@glazed/graph-session",
   "version": "0.1.0",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ceramicstudio/js-glaze",
-    "directory": "packages/bridge-ethereum"
+    "directory": "packages/graph-session"
   },
   "type": "module",
   "main": "dist/index.js",
@@ -39,12 +39,11 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/blockchain-utils-linking": "^2.0.0",
-    "@ceramicnetwork/http-client": "^2.0.0",
-    "@glazed/did-session": "^0.0.1",
-    "@glazed/graphql": "^0.1.0"
+    "@glazed/did-session": "^0.0.1-rc.0",
+    "@glazed/graph": "^0.1.0"
   },
   "devDependencies": {
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.4",
     "@ceramicnetwork/common": "^2.0.0",
     "@glazed/types": "^0.2.0"
   },
