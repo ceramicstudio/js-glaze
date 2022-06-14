@@ -17,7 +17,6 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "height": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -27,7 +26,6 @@ Object {
                 "type": "string",
               },
               "size": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -37,7 +35,6 @@ Object {
                 "type": "string",
               },
               "width": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -83,7 +80,6 @@ Object {
             "type": "string",
           },
         },
-        "required": undefined,
         "type": "object",
       },
     },
@@ -97,7 +93,6 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "height": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -107,7 +102,6 @@ Object {
                 "type": "string",
               },
               "size": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -117,7 +111,6 @@ Object {
                 "type": "string",
               },
               "width": Object {
-                "maximum": undefined,
                 "minimum": 1,
                 "type": "integer",
               },
@@ -173,7 +166,6 @@ Object {
             "type": "string",
           },
         },
-        "required": undefined,
         "type": "object",
       },
     },
@@ -222,7 +214,6 @@ Object {
             "type": "string",
           },
         },
-        "required": undefined,
         "type": "object",
       },
     },

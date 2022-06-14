@@ -1,6 +1,17 @@
+/**
+ * @jest-environment glaze
+ */
+
 import type { ModelDefinition } from '@glazed/types'
+import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
+import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
+import type { CeramicApi } from '@ceramicnetwork/common'
 
 import { Composite, type CompositeParams } from '../src'
+
+declare global {
+  const ceramic: CeramicApi
+}
 
 describe('composite', () => {
   describe('Composite instance', () => {
@@ -520,7 +531,39 @@ describe('composite', () => {
     expect(params).not.toEqual(third)
   })
 
-  test.todo('Composite.create()')
+  describe('Composite.create()', () => {
+    test('creates a new composite from valid schema', async () => {
+      const composite = await Composite.create({
+        ceramic: ceramic,
+        schema: compositeSchemaWithProfiles,
+        metadata: {
+          controller: ceramic.did.id,
+        },
+      })
+      expect(composite.hash).not.toBeFalsy()
+      const compositeParams = composite.toParams()
+      expect(Object.keys(compositeParams.commits).length).toEqual(3)
+      const modelNames = ['GenericProfile', 'SocialProfile', 'PersonProfile']
+      Object.values(compositeParams.definition.models).map((modelDefinition: ModelDefinition) => {
+        const index = modelNames.indexOf(modelDefinition.name)
+        expect(index).toBeGreaterThan(-1)
+        modelNames.splice(index, 1)
+      })
+      expect(modelNames.length).toEqual(0)
+    }, 60000)
+
+    test('fails to create a new composite from invalid schema', async () => {
+      await expect(async () => {
+        await Composite.create({
+          ceramic: ceramic,
+          schema: graphQLSchemaWithoutModels,
+          metadata: {
+            controller: ceramic.did.id,
+          },
+        })
+      }).rejects.toThrow('No models found in Composite Definition Schema')
+    }, 60000)
+  })
 
   test.todo('Composite.fromJSON()')
 

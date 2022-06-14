@@ -1,4 +1,4 @@
-import type { CeramicApi } from '@ceramicnetwork/common'
+import type { CeramicApi, SignedCommit } from '@ceramicnetwork/common'
 import type {
   CompositeViewsDefinition,
   EncodedCompositeDefinition,
@@ -9,14 +9,19 @@ import type {
   StreamCommits,
 } from '@glazed/types'
 import type { GraphQLSchema } from 'graphql'
-import cloneDeep from 'lodash-es/cloneDeep'
-import merge from 'lodash-es/merge'
+import { cloneDeep, merge } from 'lodash-es'
 import createObjectHash from 'object-hash'
 
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
 import { createRuntimeDefinition } from './formats/runtime.js'
+import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from './schema.js'
+import { Model as ModelStream } from '@ceramicnetwork/stream-model'
 
 type StrictCompositeDefinition = Required<InternalCompositeDefinition>
+
+function isSignedCommit(input: Record<string, any>): input is SignedCommit {
+  return Object.keys(input).includes('jws') && Object.keys(input).includes('linkedBlock')
+}
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
   return {
@@ -119,6 +124,9 @@ export type CompositeOptions = {
 export type CreateParams = {
   ceramic: CeramicApi
   schema: string | GraphQLSchema
+  metadata: {
+    controller: string
+  }
 }
 
 export type FromJSONParams = {
@@ -134,9 +142,53 @@ export type FromModelsParams = CompositeOptions & {
 export class Composite {
   static VERSION = '1.0'
 
-  static create(_params: CreateParams): Promise<Composite> {
-    // TODO: convert the schema to models, create the models on the Ceramice node, load their commits
-    throw new Error('Not implemented')
+  static async create(params: CreateParams): Promise<Composite> {
+    const { models } = compositeModelsAndCommonEmbedsFromGraphQLSchema(params.schema)
+
+    const modelsMapping: Record<string, ModelDefinition> = {}
+    let commits: Record<string, any> = {}
+
+    await Promise.all(
+      // For each model definition...
+      models.map((modelDefinition) => {
+        // create the model stream,
+        return ModelStream.create(
+          params.ceramic,
+          {
+            name: modelDefinition.name,
+            description: modelDefinition.description,
+            schema: modelDefinition.schema,
+            accountRelation: modelDefinition.accountRelation,
+          },
+          params.metadata
+        ).then((modelStream) => {
+          // put the model stream in the models mapping,
+          modelsMapping[modelStream.id.toString()] = modelDefinition
+          // load stream commits for the model stream,
+          return params.ceramic
+            .loadStreamCommits(modelStream.id.toString())
+            .then((modelCommits) => {
+              commits = {
+                ...commits,
+                [modelStream.id.toString()]: modelCommits
+                  // convert the result to what we need (the result is {cid: <cid>, value: <commit>}, we only need the commit),
+                  .map((modelCommit) => {
+                    return modelCommit.value as Record<string, any>
+                  })
+                  // and filter out everything that is not a signed commit (i.e. we filter out anchor commits)
+                  .filter(isSignedCommit),
+              }
+            })
+        })
+      })
+    )
+
+    const definition: InternalCompositeDefinition = {
+      version: Composite.VERSION,
+      models: modelsMapping,
+    }
+
+    return new Composite({ commits: commits, definition: definition })
   }
 
   static from(composites: Iterable<CompositeInput>, options?: CompositeOptions): Composite {
