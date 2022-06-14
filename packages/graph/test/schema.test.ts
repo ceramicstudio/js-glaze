@@ -10,7 +10,7 @@ describe('schema', () => {
       models: {
         genericProfileID: {
           name: 'GenericProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',
@@ -77,7 +77,7 @@ describe('schema', () => {
         },
         socialProfileID: {
           name: 'SocialProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',
@@ -152,7 +152,7 @@ describe('schema', () => {
         },
         personProfileID: {
           name: 'PersonProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',

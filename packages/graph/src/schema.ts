@@ -143,20 +143,19 @@ class SchemaBuilder {
             config[alias] = {
               type: this.#types[reference.name],
               resolve: async (account, _, ctx): Promise<ModelInstanceDocument | null> => {
-                const res = await ctx.query.getLink({ account, model })
-                return res.result
+                return await ctx.querySingle({ account, model })
               },
             }
           } else if (reference.type === 'collection') {
             config[alias] = {
               type: this.#types[reference.name],
               args: connectionArgs,
-              resolve: (
-                _account,
-                _args: ConnectionArguments,
-                _ctx
-              ): Promise<Connection<any> | null> => {
-                throw new Error('Not implemented')
+              resolve: async (
+                account,
+                args: ConnectionArguments,
+                ctx
+              ): Promise<Connection<ModelInstanceDocument> | null> => {
+                return await ctx.queryConnection({ ...args, account, model })
               },
             }
           } else {
@@ -471,8 +470,8 @@ class SchemaBuilder {
         queryFields[alias] = {
           type: this.#types[reference.name],
           args: connectionArgs,
-          resolve: (_, _args: ConnectionArguments, _ctx): Promise<Connection<any> | null> => {
-            throw new Error('Not implemented')
+          resolve: async (_, args: ConnectionArguments, ctx): Promise<Connection<any> | null> => {
+            return await ctx.queryConnection({ ...args, model })
           },
         }
       } else {
