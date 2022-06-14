@@ -5,7 +5,8 @@
     "./packages/devtools/src",
     "./packages/did-datastore/src",
     "./packages/tile-loader/src",
-    "./packages/types/src"
+    "./packages/types/src",
+    "./packages/did-session/src"
   ],
   "compilerOptions": {
     "jsx": "preserve",
@@ -21,7 +22,8 @@
       "./packages/devtools/src/index.ts",
       "./packages/did-datastore/src/index.ts",
       "./packages/tile-loader/src/index.ts",
-      "./packages/types/src/index.ts"
+      "./packages/types/src/index.ts",
+      "./packages/did-session/src/index.ts"
     ],
     "disableSources": true,
     "excludeExternals": true,

@@ -1,4 +1,8 @@
 /**
+ * Manages user account and DID in web based environments.
+ *
+ * ## Purpose
+ * 
  * Manages, creates and authorizes a DID session key for a user. Returns an authenticated DIDs instance
  * to be used in other Ceramic libraries. Supports did:pkh for blockchain accounts with Sign-In with
  * Ethereum and CACAO for authorization.
@@ -11,7 +15,8 @@
  *
  * ## Usage
  *
- * Create an instance, authorize and use DIDs where needed.
+ * Create an instance, authorize and use DIDs where needed. At the moment, only Ethereum accounts 
+ * are supported with the EthereumAuthProvider. Additional accounts will be supported in the future.
  *
  * ```ts
  * import { DIDSession } from '@glazed/did-session'
@@ -21,12 +26,14 @@
  * const addresses = await ethProvider.enable()
  * const authProvider = new EthereumAuthProvider(ethProvider, addresses[0])
  *
- * const session = await DIDSession.create({ authProvider })
+ * const session = new DIDSession({ authProvider })
  * const did = await session.authorize()
  *
  * // Uses DIDs in ceramic & glaze libraries, ie
  * const ceramic = new CeramicClient()
  * ceramic.did = did
+ * 
+ * // pass ceramic instance where needed
  *
  * ```
  *
