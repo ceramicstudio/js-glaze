@@ -3,7 +3,7 @@
  */
 
 import type { ModelDefinition } from '@glazed/types'
-import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
+import { compositeExample } from './exampleSchemas/compositeExample.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
 import type { CeramicApi } from '@ceramicnetwork/common'
 
@@ -535,15 +535,23 @@ describe('composite', () => {
     test('creates a new composite from valid schema', async () => {
       const composite = await Composite.create({
         ceramic: ceramic,
-        schema: compositeSchemaWithProfiles,
+        schema: compositeExample,
         metadata: {
           controller: ceramic.did.id,
         },
       })
       expect(composite.hash).not.toBeFalsy()
       const compositeParams = composite.toParams()
-      expect(Object.keys(compositeParams.commits).length).toEqual(3)
-      const modelNames = ['GenericProfile', 'SocialProfile', 'PersonProfile']
+      expect(Object.keys(compositeParams.commits).length).toEqual(7)
+      const modelNames = [
+        'GenericProfile',
+        'SocialProfile',
+        'PersonProfile',
+        'Post',
+        'PostComment',
+        'CeramicContact',
+        'TextDocument',
+      ]
       Object.values(compositeParams.definition.models).map((modelDefinition: ModelDefinition) => {
         const index = modelNames.indexOf(modelDefinition.name)
         expect(index).toBeGreaterThan(-1)

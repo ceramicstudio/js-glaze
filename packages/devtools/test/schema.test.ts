@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from '../src/schema'
-import { compositeSchemaWithProfiles } from './exampleSchemas/compositeSchemaWithProfiles.schema'
+import { compositeExample } from './exampleSchemas/compositeExample.schema'
 import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
 import ajv from 'ajv/dist/2020'
 
@@ -46,15 +46,11 @@ describe('schema', () => {
   })
 
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema', () => {
-    expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeSchemaWithProfiles)
-    ).toMatchSnapshot()
+    expect(compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeExample)).toMatchSnapshot()
   })
 
   it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates models whose schemas conform to JSON Schema standard', () => {
-    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(
-      compositeSchemaWithProfiles
-    )
+    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeExample)
     const [genericProfile, socialProfile, personalProfile] = compositeDefinition.models
 
     const validator = new ajv()
@@ -85,14 +81,14 @@ describe('schema', () => {
             properties: {
               didValue: {
                 type: 'string',
-                title: 'GraphQLDID',
+                title: 'DID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
                 maxLength: 80,
               },
               requiredDidValue: {
                 type: 'string',
-                title: 'GraphQLDID',
+                title: 'DID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
                 maxLength: 80,
@@ -104,6 +100,36 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@documentAccount is only valid for DIDs', () => {
+    expect(() => {
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithInvalidDocumentAccountProp @model(
+        accountRelation: LINK,
+        description: "Test model with an invalid @documentAccount directive"
+      ) {
+        nonDIDValue: String @documentAccount
+      }
+      `)
+    }).toThrow('@documentAccount can only be applied to DIDs')
+  })
+
+  it('fields annotated with @documentAccount are not added to the resulting schema', () => {
+    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithDocumentVersionProp @model(
+        accountRelation: LINK,
+        description: "Test model with a @documentAccount directive"
+      ) {
+        floatProp: Float!
+        didProp: DID @documentAccount
+      }
+      `)
+    expect(compositeDefinition.models.length).toEqual(1)
+    const properties = compositeDefinition.models[0].schema.properties
+    expect(properties).not.toBeFalsy()
+    expect(Object.keys(properties!).length).toEqual(1)
+    expect(Object.keys(properties!)[0]).toEqual('floatProp')
   })
 
   it('StreamReference scalar is supported and properly converted to ICD', () => {
@@ -128,14 +154,12 @@ describe('schema', () => {
             properties: {
               streamReferenceValue: {
                 type: 'string',
-                title: 'CeramicStreamReference',
-                pattern: '<TBD>',
+                title: 'StreamReference',
                 maxLength: 80,
               },
               requiredStreamReferenceValue: {
                 type: 'string',
-                title: 'CeramicStreamReference',
-                pattern: '<TBD>',
+                title: 'StreamReference',
                 maxLength: 80,
               },
             },
@@ -145,6 +169,36 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@documentVersion is only valid for StreamReferences', () => {
+    expect(() => {
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithInvalidDocumentVersionProp @model(
+        accountRelation: LINK,
+        description: "Test model with an invalid @documentVersion directive"
+      ) {
+        nonDIDValue: Int @documentVersion
+      }
+      `)
+    }).toThrow('@documentVersion can only be applied to StreamReferences')
+  })
+
+  it('fields annotated with @documentVersion are not added to the resulting schema', () => {
+    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithDocumentVersionProp @model(
+        accountRelation: LINK,
+        description: "Test model with a @documentVersion directive"
+      ) {
+        numberProp: Int!
+        version: StreamReference @documentVersion
+      }
+      `)
+    expect(compositeDefinition.models.length).toEqual(1)
+    const properties = compositeDefinition.models[0].schema.properties
+    expect(properties).not.toBeFalsy()
+    expect(Object.keys(properties!).length).toEqual(1)
+    expect(Object.keys(properties!)[0]).toEqual('numberProp')
   })
 
   it('Boolean scalar is supported and properly converted to ICD', () => {
@@ -259,8 +313,8 @@ describe('schema', () => {
         accountRelation: LINK,
         description: "Test model with string properties"
       ) {
-        stringValue: String
-        requiredStringValue: String!
+        stringValue: String @length(max: 100)
+        requiredStringValue: String! @length(max: 100)
       }
       `)
     ).toMatchObject({
@@ -285,6 +339,32 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@length is required for Strings', () => {
+    expect(() => {
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithStringPropWithoutLengthDirective @model(
+        accountRelation: LINK,
+        description: "Test model with string property without @length directive"
+      ) {
+        stringValue: String
+      }
+      `)
+    }).toThrow('Missing @length directive')
+  })
+
+  it('@length is required for arrays Strings', () => {
+    expect(() => {
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithStringArrayPropWithoutLengthDirective @model(
+        accountRelation: LINK,
+        description: "Test model with string array property without @length directive"
+      ) {
+        stringArrayValue: [String] @arrayLength(max: 1)
+      }
+      `)
+    }).toThrow('Missing @length directive')
   })
 
   it('ID scalar is supported and properly converted to ICD', () => {
@@ -363,7 +443,7 @@ describe('schema', () => {
         accountRelation: LINK,
         description: "Test model with incorrectly constrained string property"
       ) {
-        intValue: String @intRange(min: 1)
+        intValue: String @length(max: 10) @intRange(min: 1)
       }
       `)
     }).toThrow('@intRange can only be applied to integers or arrays of integers')
@@ -402,7 +482,7 @@ describe('schema', () => {
         accountRelation: LINK,
         description: "Test model with incorrectly constrained strings property"
       ) {
-        intValue: String @arrayLength(max: 140)
+        intValue: String @length(max: 10) @arrayLength(max: 140)
       }
       `)
     }).toThrow('@arrayLength can only be applied to arrays')
@@ -415,7 +495,7 @@ describe('schema', () => {
         accountRelation: LINK,
         description: "Test model with a constrained array property"
       ) {
-        arrayValue: [String] @arrayLength(min: 10, max: 15)
+        arrayValue: [String] @length(max: 10) @arrayLength(min: 10, max: 15)
       }
       `)
     ).toMatchObject({
@@ -450,7 +530,7 @@ describe('schema', () => {
         accountRelation: LINK,
         description: "Test model with an array property with constrained items"
       ) {
-        arrayValue: [String] @length(min: 4, max: 440)
+        arrayValue: [String] @length(min: 4, max: 440) @arrayLength(max: 10)
       }
       `)
     ).toMatchObject({
@@ -476,6 +556,19 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@arrayLength is required for arrays', () => {
+    expect(() => {
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithArrayPropWithoutArrayLengthDirective @model(
+        accountRelation: LINK,
+        description: "Test model with an array property without @arrayLength directive"
+      ) {
+        arrayValue: [Int]
+      }
+      `)
+    }).toThrow('Missing @arrayLength directive')
   })
 
   it('@intRange(min: Int, max: Int) directive is supported and properly converted to ICD', () => {

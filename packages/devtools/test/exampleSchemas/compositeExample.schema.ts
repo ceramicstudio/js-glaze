@@ -1,4 +1,4 @@
-export const compositeSchemaWithProfiles = `
+export const compositeExample = `
 type ImageMetadata {
   src: String! @length(max: 150)
   mimeType: String! @length(max: 50)
@@ -9,7 +9,7 @@ type ImageMetadata {
 
 type ImageSources {
   original: ImageMetadata!
-  alternatives: [ImageMetadata]
+  alternatives: [ImageMetadata] @arrayLength(max: 10)
 }
 
 type GenericProfile @model(
@@ -38,7 +38,39 @@ type PersonProfile @model(
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
   residenceCountry: String @length(max: 2)
-  nationalities: [String] @arrayLength(min:1, max: 5)
-  affiliations: [String] @length(max: 140)
+  nationalities: [String] @arrayLength(min:1, max: 5) @length(max: 2)
+  affiliations: [String] @arrayLength(max: 100) @length(max: 140)
+}
+
+type Post @model(
+  accountRelation: LINK,
+  description: "A model to store account's posts"
+) {
+  author: DID! @documentAccount
+  text: String! @length(max: 1000)
+}
+
+type PostComment @model(
+  accountRelation: LINK,
+  description: "A model to store account's comments on posts"
+) {
+  author: DID! @documentAccount
+  postStreamId: StreamReference!
+  text: String! @length(max: 240)
+}
+
+type CeramicContact @model(
+  accountRelation: LINK,
+  description: "A model to store account's contacts (understood as other ceramic accounts)"
+) {
+  owner: DID! @documentAccount
+  contact: DID!
+}
+
+type TextDocument @model(
+  accountRelation: LINK,
+  description: "A model to store text documents"
+) {
+  latestAcceptedVersion: StreamReference @documentVersion
 }
 `
