@@ -38,7 +38,7 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-model": "^0.0.2",
+    "@ceramicnetwork/stream-model": "^0.2.0-rc.2",
     "change-case": "^4.1.2",
     "graphql-scalars": "^1.17.0",
     "json-ptr": "^3.1.0",
@@ -49,7 +49,6 @@
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^2.1.0",
-    "@ceramicnetwork/stream-model": "^0.1.0",
     "@glazed/types": "^0.2.0",
     "@types/jest": "^28.1.1",
     "@types/lodash-es": "^4.17.6",

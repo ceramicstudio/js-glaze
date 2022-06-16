@@ -1,4 +1,5 @@
 import type { CeramicApi } from '@ceramicnetwork/common'
+import { CeramicClient } from '@ceramicnetwork/http-client'
 import type { RuntimeCompositeDefinition } from '@glazed/types'
 import type { DID } from 'dids'
 import {
@@ -18,7 +19,7 @@ import { createGraphQLSchema } from './schema.js'
 
 export type GraphClientParams = {
   cache?: DocumentCache | boolean
-  ceramic: CeramicApi
+  ceramic: CeramicApi | string
   definition: RuntimeCompositeDefinition
   loader?: DocumentLoader
 }
@@ -29,8 +30,10 @@ export class GraphClient {
   #schema: GraphQLSchema
 
   constructor(params: GraphClientParams) {
-    const { definition, ...contextParams } = params
-    this.#context = new Context(contextParams)
+    const { ceramic, definition, ...contextParams } = params
+    const ceramiClient = typeof ceramic === 'string' ? new CeramicClient(ceramic) : ceramic
+
+    this.#context = new Context({ ...contextParams, ceramic: ceramiClient })
     this.#resources = Object.values(definition.models).map((modelID) => {
       return `ceramic://*?model=${modelID}`
     })
@@ -58,6 +61,21 @@ export class GraphClient {
   }
 
   async execute(
+    document: DocumentNode,
+    variableValues?: Record<string, unknown>
+  ): Promise<ExecutionResult> {
+    const errors = validate(this.#schema, document)
+    return errors.length > 0
+      ? { errors }
+      : await execute({
+          document,
+          variableValues,
+          contextValue: this.#context,
+          schema: this.#schema,
+        })
+  }
+
+  async executeQuery(
     source: string | Source,
     variableValues?: Record<string, unknown>
   ): Promise<ExecutionResult> {
@@ -65,23 +83,8 @@ export class GraphClient {
     try {
       document = parse(source)
     } catch (syntaxError) {
-      return {
-        errors: [syntaxError as GraphQLError],
-      }
+      return { errors: [syntaxError as GraphQLError] }
     }
-
-    const validationErrors = validate(this.#schema, document)
-    if (validationErrors.length > 0) {
-      return {
-        errors: validationErrors,
-      }
-    }
-
-    return await execute({
-      document,
-      variableValues,
-      contextValue: this.#context,
-      schema: this.#schema,
-    })
+    return await this.execute(document, variableValues)
   }
 }

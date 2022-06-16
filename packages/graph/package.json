@@ -38,7 +38,8 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-model-instance": "^0.1.0",
+    "@ceramicnetwork/http-client": "^2.2.0-rc.2",
+    "@ceramicnetwork/stream-model-instance": "^0.2.0-rc.2",
     "@ceramicnetwork/streamid": "^2.1.0",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0",

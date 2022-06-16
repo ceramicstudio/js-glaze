@@ -57,7 +57,6 @@ type GraphQLNodeDefinitions = {
 }
 type SharedDefinitions = GraphQLNodeDefinitions & {
   accountObject: GraphQLObjectType<string, Context>
-  accountDataObject: GraphQLObjectType<string, Context>
 }
 
 type BuildObjectParams = {
@@ -67,25 +66,25 @@ type BuildObjectParams = {
 }
 
 function createCeramicAccountObject(
-  accountDataObject: GraphQLObjectType
+  accountDataObject?: GraphQLObjectType
 ): GraphQLObjectType<string, Context> {
-  return new GraphQLObjectType<string, Context>({
-    name: 'CeramicAccount',
-    fields: {
-      id: {
-        type: new GraphQLNonNull(GraphQLDID),
-        resolve: (did) => did,
-      },
-      isViewer: {
-        type: new GraphQLNonNull(GraphQLBoolean),
-        resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
-      },
-      data: {
-        type: new GraphQLNonNull(accountDataObject),
-        resolve: (did) => did,
-      },
+  const fields: GraphQLFieldConfigMap<string, Context> = {
+    id: {
+      type: new GraphQLNonNull(GraphQLDID),
+      resolve: (did) => did,
     },
-  })
+    isViewer: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
+    },
+  }
+  if (accountDataObject != null) {
+    fields.data = {
+      type: new GraphQLNonNull(accountDataObject),
+      resolve: (did) => did,
+    }
+  }
+  return new GraphQLObjectType<string, Context>({ name: 'CeramicAccount', fields })
 }
 
 export type CreateSchemaParams = {
@@ -128,12 +127,17 @@ class SchemaBuilder {
       (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString() as string]
     )
 
+    const accountDataEntries = Object.entries(this.#def.accountData ?? {})
+    if (accountDataEntries.length === 0) {
+      return { ...nodeDefs, accountObject: createCeramicAccountObject() }
+    }
+
     // AccountData object is model-specific and needed to generate object using it
     const accountDataObject = new GraphQLObjectType({
       name: 'CeramicAccountData',
       fields: () => {
         const config: GraphQLFieldConfigMap<string, Context> = {}
-        for (const [alias, reference] of Object.entries(this.#def.accountData ?? {})) {
+        for (const [alias, reference] of accountDataEntries) {
           const model = this.#def.models[reference.name]
           if (model == null) {
             throw new Error(`Missing model for reference name: ${reference.name}`)
@@ -169,7 +173,6 @@ class SchemaBuilder {
 
     return {
       ...nodeDefs,
-      accountDataObject,
       accountObject: createCeramicAccountObject(accountDataObject),
     }
   }
@@ -439,6 +442,9 @@ class SchemaBuilder {
         input: { id: string; content: Record<string, any> },
         ctx: Context
       ) => {
+        if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
+          throw new Error('Ceramic instance is not authenticated')
+        }
         return { node: await ctx.updateDoc(input.id, input.content) }
       },
     })
@@ -482,7 +488,7 @@ class SchemaBuilder {
     const schemaFields: Record<string, GraphQLObjectType> = {
       query: new GraphQLObjectType({ name: 'Query', fields: queryFields }),
     }
-    if (!this.#isReadonly) {
+    if (!this.#isReadonly && Object.keys(this.#mutations).length !== 0) {
       schemaFields.mutation = new GraphQLObjectType({ name: 'Mutation', fields: this.#mutations })
     }
 

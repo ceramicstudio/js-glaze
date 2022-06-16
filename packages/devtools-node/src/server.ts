@@ -58,8 +58,8 @@ export async function serveGraphQL({
     const server = app.listen(serverPort, () => {
       resolve({
         url: `http://localhost:${serverPort}/graphql`,
-        stop: () => {
-          server.close()
+        stop: (callback?: (err?: Error | undefined) => void) => {
+          server.close(callback)
         },
       })
     })

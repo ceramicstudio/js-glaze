@@ -17,7 +17,7 @@ describe('schema', () => {
       union IntOrString = Int | String
 
       type ModelWithUnionProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a property that is a union of string and int"
       ) {
         intOrStringValue: IntOrString
@@ -34,7 +34,7 @@ describe('schema', () => {
       }
        
       type SocialProfile implements GenericProfile @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "A model to store properties that accounts would like to share on social media"
       ) {
         description: String @length(max: 420)
@@ -67,7 +67,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithDIDProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with DID properties"
       ) {
         didValue: DID
@@ -78,7 +78,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithDIDProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -110,7 +110,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithStreamReferenceProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with stream reference properties"
       ) {
         streamReferenceValue: StreamReference
@@ -121,7 +121,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithStreamReferenceProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -151,7 +151,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithBooleanProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with boolean properties"
       ) {
         booleanValue: Boolean
@@ -162,7 +162,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithBooleanProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -186,7 +186,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with int properties"
       ) {
         intValue: Int
@@ -197,7 +197,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIntProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -221,7 +221,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithFloatProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with float properties"
       ) {
         floatValue: Float
@@ -232,7 +232,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithFloatProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -256,7 +256,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with string properties"
       ) {
         stringValue: String
@@ -267,7 +267,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithStringProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -291,7 +291,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithIDProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with GraphQL ID property"
       ) {
         idValue: ID
@@ -302,7 +302,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIDProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -328,7 +328,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained string property"
       ) {
         stringValue: String @length(min: 1, max: 140)
@@ -338,7 +338,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithStringProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -360,7 +360,7 @@ describe('schema', () => {
     expect(() => {
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained string property"
       ) {
         intValue: String @intRange(min: 1)
@@ -373,7 +373,7 @@ describe('schema', () => {
     expect(() => {
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained int property"
       ) {
         intValue: Int @floatRange(max: 1)
@@ -386,7 +386,7 @@ describe('schema', () => {
     expect(() => {
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained array property"
       ) {
         intValue: [Int] @length(min:10, max: 140)
@@ -399,7 +399,7 @@ describe('schema', () => {
     expect(() => {
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained strings property"
       ) {
         intValue: String @arrayLength(max: 140)
@@ -412,7 +412,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained array property"
       ) {
         arrayValue: [String] @arrayLength(min: 10, max: 15)
@@ -422,7 +422,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithArrayProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -447,7 +447,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with an array property with constrained items"
       ) {
         arrayValue: [String] @length(min: 4, max: 440)
@@ -457,7 +457,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithArrayProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -482,7 +482,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constreained int property"
       ) {
         intValue: Int @intRange(min: 5, max: 10)
@@ -492,7 +492,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIntProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -514,7 +514,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithFloatProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained float property"
       ) {
         floatValue: Float @floatRange(min: 5.0, max: 10.0)
@@ -524,7 +524,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithFloatProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',

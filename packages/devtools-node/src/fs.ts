@@ -6,12 +6,21 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { cwd } from 'process'
 // // fs-extra is a CommonJS module
-const { readJSON, writeFile, writeJSON } = fs
+const { readFile, readJSON, writeFile, writeJSON } = fs
 
 import type { PathInput } from './types.js'
 
 export function getFilePath(path: PathInput): string {
   return path instanceof URL ? path.pathname : resolve(cwd(), path)
+}
+
+export async function createComposite(
+  ceramic: CeramicClient | string,
+  path: PathInput
+): Promise<Composite> {
+  const client = ceramic instanceof CeramicClient ? ceramic : new CeramicClient(ceramic)
+  const file = await readFile(getFilePath(path))
+  return await Composite.create({ ceramic: client, schema: file.toString() })
 }
 
 export async function readEncodedComposite(
