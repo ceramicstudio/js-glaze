@@ -102,7 +102,7 @@ async function loadModelsFromCommits<Models = Record<string, StreamCommits>>(
         MODEL_GENESIS_OPTS
       )
       for (const commit of updates) {
-        await ceramic.applyCommit(model.id, commit)
+        await ceramic.applyCommit(model.id, commit as SignedCommit)
       }
       return model
     })
@@ -174,7 +174,9 @@ export class Composite {
 
         // load stream commits for the model stream
         const streamCommits = await params.ceramic.loadStreamCommits(id)
-        commits[id] = streamCommits.map((c) => c.value).filter(isSignedCommit)
+        commits[id] = streamCommits
+          .map((c) => c.value as Record<string, any>)
+          .filter(isSignedCommit)
       })
     )
 
@@ -216,7 +218,9 @@ export class Composite {
           params.ceramic.loadStreamCommits(id),
         ])
         definition.models[id] = model.content
-        commits[id] = streamCommits.map((c) => c.value).filter(isSignedCommit)
+        commits[id] = streamCommits
+          .map((c) => c.value as Record<string, any>)
+          .filter(isSignedCommit)
       })
     )
 

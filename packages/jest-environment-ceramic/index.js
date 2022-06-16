@@ -8,10 +8,10 @@ const NodeEnvironment = NodeEnv.default ?? NodeEnv
 export default class CeramicEnvironment extends NodeEnvironment {
   constructor(config, context) {
     super(config, context)
-    
+
     this.indexingConfig = {
       db: config.db,
-      models: config.models
+      models: config.models,
     }
   }
 
@@ -34,13 +34,13 @@ export default class CeramicEnvironment extends NodeEnvironment {
     })
 
     const stateStoreDirectory = path.join(this.tmpFolder.path, 'ceramic')
-  
+
     this.global.ceramic = await Ceramic.create(this.global.ipfs, {
       stateStoreDirectory: stateStoreDirectory,
       indexing: {
         db: this.indexingConfig.db ?? `sqlite://${stateStoreDirectory}/ceramic.sqlite`,
-        models: this.indexingConfig.models ?? []
-      }
+        models: this.indexingConfig.models ?? [],
+      },
     })
   }
 
