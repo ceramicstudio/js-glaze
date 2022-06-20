@@ -1,15 +1,18 @@
+import { ApolloProvider } from '@apollo/client'
 import { StyledEngineProvider } from '@mui/material/styles'
 import React, { StrictMode } from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 import './index.css'
 import App from './App'
+import { client } from './graphql'
 
-ReactDOM.render(
+createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <StyledEngineProvider injectFirst>
-      <App />
+      <ApolloProvider client={client}>
+        <App />
+      </ApolloProvider>
     </StyledEngineProvider>
-  </StrictMode>,
-  document.getElementById('root'),
+  </StrictMode>
 )

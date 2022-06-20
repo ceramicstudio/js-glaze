@@ -1,0 +1,112 @@
+type Query {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  account(id: DID!): CeramicAccount!
+  viewer: CeramicAccount
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+type CeramicAccount {
+  id: DID!
+  isViewer: Boolean!
+  data: CeramicAccountData!
+}
+
+"""
+A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
+"""
+scalar DID @specifiedBy(url: "https://www.w3.org/TR/did-core/")
+
+type CeramicAccountData {
+  noteCollection(
+    """Returns the items in the list that come after the specified cursor."""
+    after: String
+
+    """Returns the first n items from the list."""
+    first: Int
+
+    """Returns the items in the list that come before the specified cursor."""
+    before: String
+
+    """Returns the last n items from the list."""
+    last: Int
+  ): Note
+  profile: Profile
+}
+
+type Note implements Node {
+  id: ID!
+  text: String!
+  title: String!
+}
+
+type Profile implements Node {
+  id: ID!
+  name: String!
+}
+
+type Mutation {
+  createNote(input: CreateNoteInput!): CreateNotePayload
+  updateNote(input: UpdateNoteInput!): UpdateNotePayload
+  createProfile(input: CreateProfileInput!): CreateProfilePayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+}
+
+type CreateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input CreateNoteInput {
+  content: NoteInput!
+  clientMutationId: String
+}
+
+input NoteInput {
+  text: String!
+  title: String!
+}
+
+type UpdateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input UpdateNoteInput {
+  id: ID!
+  content: NoteInput!
+  clientMutationId: String
+}
+
+type CreateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input CreateProfileInput {
+  content: ProfileInput!
+  clientMutationId: String
+}
+
+input ProfileInput {
+  name: String!
+}
+
+type UpdateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input UpdateProfileInput {
+  id: ID!
+  content: ProfileInput!
+  clientMutationId: String
+}

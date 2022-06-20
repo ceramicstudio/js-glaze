@@ -2,7 +2,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { useCallback, useReducer } from 'react'
 
 import { getEnv } from './env'
-import type { Context, Env, Note } from './env'
+import type { Env, Note } from './env'
 
 type AuthStatus = 'pending' | 'loading' | 'failed'
 export type DraftStatus = 'unsaved' | 'saving' | 'failed' | 'saved'
@@ -10,7 +10,7 @@ type NoteLoadingStatus = 'init' | 'loading' | 'loading failed'
 type NoteSavingStatus = 'loaded' | 'saving' | 'saving failed' | 'saved'
 
 type UnauthenticatedState = { status: AuthStatus }
-type AuthenticatedState = Context & { status: 'done' }
+type AuthenticatedState = { status: 'done' }
 export type AuthState = UnauthenticatedState | AuthenticatedState
 
 type NavDefaultState = { type: 'default' }
@@ -25,7 +25,6 @@ export type StoredNote = {
 }
 
 type Store = {
-  draftStatus: DraftStatus
   notes: Record<string, IndexLoadedNote | StoredNote>
   placeholderText: string
 }
@@ -37,177 +36,47 @@ type NoteState = {
   auth: AuthenticatedState
   nav: NavDraftState | NavNoteState
 }
-export type State = Store & (DefaultState | NoteState)
+export type State = {
+  authStatus: AuthStatus | 'done'
+  draftStatus: DraftStatus
+}
 
 const DEFAULT_STATE: State = {
-  auth: { status: 'pending' },
+  authStatus: 'pending',
   draftStatus: 'unsaved',
-  nav: { type: 'default' },
-  notes: {},
-  placeholderText: '',
 }
 
 type AuthAction = { type: 'auth'; status: AuthStatus }
-type AuthSuccessAction = { type: 'auth success' } & Env
-type NavResetAction = { type: 'nav reset' }
-type NavDraftAction = { type: 'nav draft' }
-type NavNoteAction = { type: 'nav note'; docID: string }
+type AuthSuccessAction = { type: 'auth success' }
 type DraftDeleteAction = { type: 'draft delete' }
 type DraftStatusAction = { type: 'draft status'; status: 'saving' | 'failed' }
-type DraftSavedAction = {
-  type: 'draft saved'
-  title: string
-  docID: string
-  doc: TileDocument<Note>
-}
-type NoteLoadedAction = {
-  type: 'note loaded'
-  docID: string
-  doc: TileDocument<Note>
-}
-type NoteLoadingStatusAction = {
-  type: 'note loading status'
-  docID: string
-  status: NoteLoadingStatus
-}
-type NoteSavingStatusAction = {
-  type: 'note saving status'
-  docID: string
-  status: NoteSavingStatus
-}
+type DraftSavedAction = { type: 'draft saved'; docID: string }
+// type NoteSavingStatusAction = {
+//   type: 'note saving status'
+//   docID: string
+//   status: NoteSavingStatus
+// }
 type ResetAction = { type: 'reset' }
 type Action =
   | AuthAction
   | AuthSuccessAction
-  | NavResetAction
-  | NavDraftAction
-  | NavNoteAction
   | DraftDeleteAction
   | DraftStatusAction
   | DraftSavedAction
-  | NoteLoadedAction
-  | NoteLoadingStatusAction
-  | NoteSavingStatusAction
+  // | NoteSavingStatusAction
   | ResetAction
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'auth':
-      return {
-        ...state,
-        nav: { type: 'default' },
-        auth: { status: action.status },
-      }
-    case 'auth success': {
-      const auth = {
-        status: 'done',
-        loader: action.loader,
-        model: action.model,
-        store: action.store,
-      } as AuthenticatedState
-      return action.notes.length
-        ? {
-            ...state,
-            auth,
-            notes: action.notes.reduce((acc, item) => {
-              acc[item.id] = { status: 'init', title: item.title }
-              return acc
-            }, {} as Record<string, IndexLoadedNote>),
-            placeholderText: action.placeholderText,
-          }
-        : {
-            auth,
-            draftStatus: 'unsaved',
-            nav: { type: 'draft' },
-            notes: {},
-            placeholderText: action.placeholderText,
-          }
-    }
-    case 'nav reset':
-      return { ...state, nav: { type: 'default' } }
-    case 'nav draft':
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        nav: { type: 'draft' },
-      }
+      return { ...state, authStatus: action.status }
+    case 'auth success':
+      return { ...state, authStatus: 'done' }
     case 'draft status':
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        draftStatus: action.status,
-      }
+      return { ...state, draftStatus: action.status }
     case 'draft delete':
-      return {
-        ...state,
-        draftStatus: 'unsaved',
-        nav: { type: 'default' },
-      }
-    case 'draft saved': {
-      return {
-        auth: state.auth as AuthenticatedState,
-        draftStatus: 'unsaved',
-        nav: { type: 'note', docID: action.docID },
-        notes: {
-          ...state.notes,
-          [action.docID]: {
-            status: 'saved',
-            title: action.title,
-            doc: action.doc,
-          },
-        },
-        placeholderText: state.placeholderText,
-      }
-    }
-    case 'nav note':
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        nav: {
-          type: 'note',
-          docID: action.docID,
-        },
-      }
-    case 'note loaded': {
-      const id = (state.nav as NavNoteState).docID
-      const noteState = state.notes[id]
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        notes: {
-          ...state.notes,
-          [id]: {
-            status: 'loaded',
-            title: noteState.title,
-            doc: action.doc,
-          },
-        },
-      }
-    }
-    case 'note loading status': {
-      const id = (state.nav as NavNoteState).docID
-      const noteState = state.notes[id] as IndexLoadedNote
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        notes: {
-          ...state.notes,
-          [id]: { ...noteState, status: action.status },
-        },
-      }
-    }
-    case 'note saving status': {
-      const id = (state.nav as NavNoteState).docID
-      const noteState = state.notes[id] as StoredNote
-      return {
-        ...state,
-        auth: state.auth as AuthenticatedState,
-        notes: {
-          ...state.notes,
-          [id]: { ...noteState, status: action.status },
-        },
-      }
-    }
+    case 'draft saved':
+      return { ...state, draftStatus: 'unsaved' }
     case 'reset':
       return DEFAULT_STATE
   }
@@ -255,7 +124,7 @@ export function useApp() {
         dispatch({ type: 'draft status', status: 'failed' })
       }
     },
-    [state.auth],
+    [state.auth]
   )
 
   const openNote = useCallback(
@@ -277,23 +146,20 @@ export function useApp() {
         }
       }
     },
-    [state.auth, state.notes],
+    [state.auth, state.notes]
   )
 
-  const saveNote = useCallback(
-    async (doc: TileDocument<Note>, text: string) => {
-      const docID = doc.id.toString()
-      dispatch({ type: 'note saving status', docID, status: 'saving' })
-      try {
-        await doc.update({ date: new Date().toISOString(), text })
-        dispatch({ type: 'note saving status', docID, status: 'saved' })
-      } catch (err) {
-        console.log('failed to save note', err)
-        dispatch({ type: 'note saving status', docID, status: 'saving failed' })
-      }
-    },
-    [],
-  )
+  const saveNote = useCallback(async (doc: TileDocument<Note>, text: string) => {
+    const docID = doc.id.toString()
+    dispatch({ type: 'note saving status', docID, status: 'saving' })
+    try {
+      await doc.update({ date: new Date().toISOString(), text })
+      dispatch({ type: 'note saving status', docID, status: 'saved' })
+    } catch (err) {
+      console.log('failed to save note', err)
+      dispatch({ type: 'note saving status', docID, status: 'saving failed' })
+    }
+  }, [])
 
   const reset = useCallback(() => {
     dispatch({ type: 'reset' })

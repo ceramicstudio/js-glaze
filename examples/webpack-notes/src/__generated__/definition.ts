@@ -1,0 +1,3 @@
+// This is an auto-generated file, do not edit manually
+import type { RuntimeCompositeDefinition } from '@glazed/types'
+export const definition: RuntimeCompositeDefinition = {"models":{"Note":"kjzl6hvfrbw6cabh5i5mj7omvvg05sbl3vzzgomsaijghljfv7a0u8ilf2koewm","Profile":"kjzl6hvfrbw6c8vwqjdrobb77vwy7xh2s3pkfr5y7zeoi0wj6acco4cbm005j1i"},"objects":{"Note":{"text":{"type":"string","required":true},"title":{"type":"string","required":true}},"Profile":{"name":{"type":"string","required":true}}},"accountData":{"noteCollection":{"type":"collection","name":"Note"},"profile":{"type":"model","name":"Profile"}}}
