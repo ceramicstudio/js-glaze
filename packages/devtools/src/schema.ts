@@ -264,14 +264,38 @@ function fieldSchemaFromFieldDefinition(
   ceramicExtensions?: CeramicGraphQLTypeExtensions
 ): JSONSchema {
   if (fieldType instanceof GraphQLObjectType) {
-    return referenceFieldSchemaFromFieldDefinition(fieldType) || {}
+    const objectSchema = referenceFieldSchemaFromFieldDefinition(fieldType)
+    if (!objectSchema) {
+      throw new Error('Unexpected error when parsing an object definition')
+    }
+    return objectSchema
   }
   if (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLObjectType) {
-    return referenceFieldSchemaFromFieldDefinition(fieldType.ofType) || {}
+    const objectSchema = referenceFieldSchemaFromFieldDefinition(fieldType.ofType)
+    if (!objectSchema) {
+      throw new Error('Unexpected error when parsing an object definition')
+    }
+    return objectSchema
   }
   if (fieldType instanceof GraphQLList) {
-    return arrayFieldSchemaFromFieldDefinition(fieldName, fieldType, ceramicExtensions) || {}
+    const arraySchema = arrayFieldSchemaFromFieldDefinition(fieldName, fieldType, ceramicExtensions)
+    if (!arraySchema) {
+      throw new Error('Unexpected error when parsing a list definition')
+    }
+    return arraySchema
   }
+  if (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLList) {
+    const arraySchema = arrayFieldSchemaFromFieldDefinition(
+      fieldName,
+      fieldType.ofType,
+      ceramicExtensions
+    )
+    if (!arraySchema) {
+      throw new Error('Unexpected error when parsing a list definition')
+    }
+    return arraySchema
+  }
+
   return defaultFieldSchemaFromFieldDefinition(fieldType, ceramicExtensions)
 }
 

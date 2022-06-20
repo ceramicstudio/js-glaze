@@ -324,6 +324,47 @@ describe('schema', () => {
     })
   })
 
+  it('Arrays are supported and properly converted to ICD', () => {
+    expect(
+      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      type ModelWithArrayProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with GraphQL ID property"
+      ) {
+        arrayValue: [Int]
+        requiredArrayValue: [Int]!
+      }
+      `)
+    ).toMatchObject({
+      models: [
+        {
+          name: 'ModelWithArrayProp',
+          accountRelation: 'single',
+          schema: {
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
+            type: 'object',
+            properties: {
+              arrayValue: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                },
+              },
+              requiredArrayValue: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                },
+              },
+            },
+            additionalProperties: false,
+            required: ['requiredArrayValue'],
+          },
+        },
+      ],
+    })
+  })
+
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
