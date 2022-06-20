@@ -13,7 +13,7 @@ type ImageSources {
 }
 
 type GenericProfile @model(
-  accountRelation: LINK,
+  accountRelation: SINGLE,
   description: "A model to store common profile-related properties"
 ) {
   name: String @length(max: 150)
@@ -21,7 +21,7 @@ type GenericProfile @model(
 }
  
 type SocialProfile @model(
-  accountRelation: LINK,
+  accountRelation: SINGLE,
   description: "A model to store properties that accounts would like to share on social media"
 ) {
   description: String @length(max: 420)
@@ -31,7 +31,7 @@ type SocialProfile @model(
 }
 
 type PersonProfile @model(
-  accountRelation: LINK,
+  accountRelation: SINGLE,
   description: "A model to store accounts' personal data"
 ) {
   birthDate: String @length(max: 10)

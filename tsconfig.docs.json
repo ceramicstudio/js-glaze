@@ -12,7 +12,7 @@
     "entryDocument": "overview.md",
     "entryPoints": [
       "./packages/devtools/src/index.ts",
-      "./packages/graphql/src/index.ts",
+      "./packages/graph/src/index.ts",
       "./packages/types/src/index.ts"
     ],
     "disableSources": true,

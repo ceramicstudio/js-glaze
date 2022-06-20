@@ -27,7 +27,7 @@ describe('Runtime format', () => {
       models: {
         genericProfileID: {
           name: 'GenericProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',
@@ -94,7 +94,7 @@ describe('Runtime format', () => {
         },
         socialProfileID: {
           name: 'SocialProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',
@@ -169,7 +169,7 @@ describe('Runtime format', () => {
         },
         personProfileID: {
           name: 'PersonProfile',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'http://json-schema.org/draft-07/schema#',
             type: 'object',

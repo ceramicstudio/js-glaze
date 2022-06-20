@@ -8,7 +8,7 @@ Object {
   ],
   "models": Array [
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store common profile-related properties",
       "name": "GenericProfile",
       "schema": Object {
@@ -84,7 +84,7 @@ Object {
       },
     },
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store properties that accounts would like to share on social media",
       "name": "SocialProfile",
       "schema": Object {
@@ -170,7 +170,7 @@ Object {
       },
     },
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store accounts' personal data",
       "name": "PersonProfile",
       "schema": Object {

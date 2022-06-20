@@ -136,13 +136,13 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
    */
   async update<T extends Record<string, any> = Record<string, any>>(
     streamID: string | StreamID,
-    content: T | null = null,
+    content: T,
     options?: UpdateOpts
-  ): Promise<ModelInstanceDocument<T | null>> {
+  ): Promise<ModelInstanceDocument<T>> {
     const id = idToString(streamID)
     this.clear(id)
     const stream = await this.load<T>(id)
-    await stream.replace(content, options)
+    await stream.replace({ ...stream.content, ...content }, options)
     return stream
   }
 }
