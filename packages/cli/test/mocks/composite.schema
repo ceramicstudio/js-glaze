@@ -1,4 +1,4 @@
-type Profile @model(accountRelation: LINK, description:"Profile model") { 
+type Profile @model(accountRelation: SINGLE, description:"Profile model") { 
   name: String @length(max: 150)
 }
 
