@@ -1,10 +1,6 @@
 import { Model, ModelDefinition } from '@ceramicnetwork/stream-model'
 import { Command, type CommandFlags } from '../../command.js'
 
-/*
-model:create '{"name":"MyModel","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}' -k <did_seed>
- */
-
 export default class CreateModel extends Command<CommandFlags, { content: string }> {
   static description = 'create a model stream from content encoded as JSON'
 

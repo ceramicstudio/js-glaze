@@ -8,8 +8,7 @@ type ModelContentFlags = QueryCommandFlags & {
 }
 
 export default class ModelContent extends Command<ModelContentFlags, { streamId: string }> {
-  static description =
-    'load a model stream with a given stream id and display its contents'
+  static description = 'load a model stream with a given stream id and display its contents'
 
   static args = [STREAM_ID_ARG]
 
@@ -31,9 +30,7 @@ export default class ModelContent extends Command<ModelContentFlags, { streamId:
       if (this.flags.output !== undefined) {
         const output = this.flags.output
         await fs.writeFile(output, modelContentAsJSON)
-        this.spinner.succeed(
-          `Model's content was loaded and saved in ${output}`
-        )
+        this.spinner.succeed(`Model's content was loaded and saved in ${output}`)
       } else {
         this.spinner.succeed(modelContentAsJSON)
       }
