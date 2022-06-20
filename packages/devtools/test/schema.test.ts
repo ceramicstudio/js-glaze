@@ -328,7 +328,7 @@ describe('schema', () => {
     expect(
       compositeModelsAndCommonEmbedsFromGraphQLSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with GraphQL ID property"
       ) {
         arrayValue: [Int]
@@ -339,7 +339,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithArrayProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
