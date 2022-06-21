@@ -32,7 +32,8 @@ glaze COMMAND
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
-- [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
+- [`glaze composite:create INPUT`](#glaze-compositecreate)
+- [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
@@ -297,6 +298,21 @@ USAGE
 
 ARGUMENTS
   INPUT  a path to file containing valid ceramic composite definition in GraphQL Schema Definition Language
+
+OPTIONS
+  -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:from-model`
+
+create an encoded composite definition from a list of model stream ids
+
+```
+USAGE
+  $ glaze composite:from-model STREAMIDS
+
+ARGUMENTS
+  STREAMIDS  a list of model stream ids separated by spaces
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
