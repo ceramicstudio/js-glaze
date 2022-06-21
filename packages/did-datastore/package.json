@@ -1,6 +1,6 @@
 {
   "name": "@glazed/did-datastore",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -39,8 +39,8 @@
   "dependencies": {
     "@ceramicnetwork/streamid": "^2.1.0",
     "@glazed/constants": "^0.2.0",
-    "@glazed/datamodel": "^0.3.0",
-    "@glazed/tile-loader": "^0.2.0"
+    "@glazed/datamodel": "^0.3.1",
+    "@glazed/tile-loader": "^0.2.1"
   },
   "devDependencies": {
     "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
