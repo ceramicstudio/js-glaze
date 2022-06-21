@@ -10,10 +10,14 @@ const { readFile, readJSON, writeFile, writeJSON } = fs
 
 import type { PathInput } from './types.js'
 
+/** @internal */
 export function getFilePath(path: PathInput): string {
   return path instanceof URL ? path.pathname : resolve(cwd(), path)
 }
 
+/**
+ * Create a Composite from a GraphQL schema path.
+ */
 export async function createComposite(
   ceramic: CeramicClient | string,
   path: PathInput
@@ -23,6 +27,9 @@ export async function createComposite(
   return await Composite.create({ ceramic: client, schema: file.toString() })
 }
 
+/**
+ * Create a Composite from a JSON-encoded definition path.
+ */
 export async function readEncodedComposite(
   ceramic: CeramicClient | string,
   path: PathInput
@@ -33,6 +40,9 @@ export async function readEncodedComposite(
   return Composite.fromJSON({ ceramic: client, definition })
 }
 
+/**
+ * Write a JSON-encoded definition for the given composite to the given file path.
+ */
 export async function writeEncodedComposite(
   composite: Composite,
   path: PathInput
@@ -42,6 +52,9 @@ export async function writeEncodedComposite(
   return file
 }
 
+/**
+ * Write the runtime GraphQL schema from the runtime composite definition.
+ */
 export async function writeGraphQLSchema(
   definition: RuntimeCompositeDefinition,
   path: PathInput,
@@ -52,6 +65,10 @@ export async function writeGraphQLSchema(
   return file
 }
 
+/**
+ * Write the runtime definition for a given path, based on the file extension. Supports `.json`,
+ * `.js` and `.ts` extensions.
+ */
 export async function writeRuntimeDefinition(
   definition: RuntimeCompositeDefinition,
   path: PathInput
@@ -80,6 +97,9 @@ export const definition: RuntimeCompositeDefinition = ${JSON.stringify(definitio
   return file
 }
 
+/**
+ * Write the runtime definition based on the encoded definition path.
+ */
 export async function writeEncodedCompositeRuntime(
   ceramic: CeramicClient | string,
   definitionPath: PathInput,
@@ -94,6 +114,9 @@ export async function writeEncodedCompositeRuntime(
   }
 }
 
+/**
+ * Merge the encoded `source` composite(s) to the `destination` path.
+ */
 export async function mergeEncodedComposites(
   ceramic: CeramicClient | string,
   source: PathInput | Array<PathInput>,

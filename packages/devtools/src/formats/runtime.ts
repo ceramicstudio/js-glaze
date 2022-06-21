@@ -32,19 +32,20 @@ const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
 }
 type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
-export type RuntimeModelBuilderParams = {
+type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
   commonEmbeds?: Array<string>
 }
 
-export type ExtractSchemaParams = {
+type ExtractSchemaParams = {
   parentName?: string
   ownName?: string
   required?: boolean
   localRef?: boolean
 }
 
+/** @internal */
 export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
@@ -221,6 +222,7 @@ export class RuntimeModelBuilder {
   }
 }
 
+/** @internal */
 export function createRuntimeDefinition(
   definition: InternalCompositeDefinition
 ): RuntimeCompositeDefinition {

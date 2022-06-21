@@ -87,8 +87,18 @@ function createCeramicAccountObject(
   return new GraphQLObjectType<string, Context>({ name: 'CeramicAccount', fields })
 }
 
+/**
+ * GraphQL schema creation parameters.
+ */
 export type CreateSchemaParams = {
+  /**
+   * Runtime composite definition, created using the {@linkcode devtools.Composite Composite}
+   * development tools.
+   */
   definition: RuntimeCompositeDefinition
+  /**
+   * Set the schema to read-only, disabling mutations support.
+   */
   readonly?: boolean
 }
 
@@ -496,6 +506,9 @@ class SchemaBuilder {
   }
 }
 
+/**
+ * Create a GraphQL schema from a runtime composite definition
+ */
 export function createGraphQLSchema(params: CreateSchemaParams): GraphQLSchema {
   return new SchemaBuilder(params).build()
 }
