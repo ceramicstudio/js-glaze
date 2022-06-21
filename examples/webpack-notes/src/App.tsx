@@ -8,20 +8,29 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 
-import AuthenticateScreen from './AuthenticateScreen'
+import AuthScreen from './AuthScreen'
 import DraftScreen from './DraftScreen'
+import HomeScreen from './HomeScreen'
 import NoteScreen from './NoteScreen'
 import NotesList from './NotesList'
+import RequireAuth from './RequireAuth'
 import Root from './Root'
-import { useApp } from './state'
+import { useAuth } from './auth'
 import { classes } from './style'
 
 const drawerWidth = 300
 
 export default function App() {
-  const app = useApp()
+  const [authState, _, resetAuth] = useAuth()
+  const navigate = useNavigate()
+
+  const onClickLogout = useCallback(() => {
+    resetAuth()
+    navigate('/')
+  }, [navigate, resetAuth])
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const handleDrawerToggle = () => {
@@ -35,40 +44,9 @@ export default function App() {
           Glaze documentation
         </Button>
       </Toolbar>
-      <NotesList
-        deleteDraft={app.deleteDraft}
-        openDraft={app.openDraft}
-        openNote={app.openNote}
-        state={app.state}
-      />
+      <NotesList />
     </>
   )
-
-  let screen
-  switch (app.state.nav.type) {
-    case 'draft':
-      screen = (
-        <DraftScreen
-          placeholder={app.state.placeholderText}
-          save={app.saveDraft}
-          status={app.state.draftStatus}
-        />
-      )
-      break
-    case 'note':
-      screen = (
-        <NoteScreen
-          key={app.state.nav.docID}
-          note={app.state.notes[app.state.nav.docID]}
-          placeholder={app.state.placeholderText}
-          save={app.saveNote}
-        />
-      )
-      break
-    default:
-      screen = <AuthenticateScreen authenticate={app.authenticate} state={app.state.auth} />
-  }
-
   return (
     <Root>
       <CssBaseline />
@@ -91,18 +69,16 @@ export default function App() {
           <Typography className={classes.title} noWrap variant="h6">
             Glaze demo notes app
           </Typography>
-          {app.state.nav.type === 'default' ? null : (
+          {authState.status === 'done' ? (
             <IconButton
               color="inherit"
               aria-label="reset"
               edge="end"
-              onClick={() => {
-                app.reset()
-              }}
+              onClick={onClickLogout}
               size="large">
               <LogoutIcon />
             </IconButton>
-          )}
+          ) : null}
         </Toolbar>
       </AppBar>
       <Box
@@ -144,7 +120,26 @@ export default function App() {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}>
         <Toolbar />
-        {screen}
+        <Routes>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/authenticate" element={<AuthScreen />} />
+          <Route
+            path="/new"
+            element={
+              <RequireAuth>
+                <DraftScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/notes/:id"
+            element={
+              <RequireAuth>
+                <NoteScreen />
+              </RequireAuth>
+            }
+          />
+        </Routes>
       </Box>
     </Root>
   )

@@ -1,26 +1,20 @@
 import { gql, useQuery } from '@apollo/client'
 import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import ListItemText from '@mui/material/ListItemText'
-import DownloadIcon from '@mui/icons-material/CloudDownload'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import ErrorIcon from '@mui/icons-material/ErrorOutline'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import NoteIcon from '@mui/icons-material/Note'
 import NoteAddIcon from '@mui/icons-material/NoteAdd'
-import UploadIcon from '@mui/icons-material/CloudUpload'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import type { State } from './state'
+import { useAuth } from './auth'
 
 const NOTES_LIST_QUERY = gql`
   query NotesList {
     viewer {
-      noteConnection(last: 20, after: $cursor) {
+      noteConnection(last: 20, before: $cursor) {
         edges {
           node {
             id
@@ -29,87 +23,53 @@ const NOTES_LIST_QUERY = gql`
         }
         pageInfo {
           hasPreviousPage
-          endCursor
+          startCursor
         }
       }
     }
   }
 `
 
-export type NotesListProps = {
-  deleteDraft: () => void
-  openDraft: () => void
-  openNote: (docID: string) => void
-  state: State
-}
+export default function NotesList() {
+  const [authState] = useAuth()
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const { data, loading, fetchMore } = useQuery(NOTES_LIST_QUERY)
 
-export default function NotesList({ deleteDraft, openDraft, openNote, state }: NotesListProps) {
-  let draft
-  if (state.nav.type === 'draft') {
-    let icon
-    switch (state.draftStatus) {
-      case 'failed':
-        icon = <ErrorIcon />
-        break
-      case 'saving':
-        icon = <UploadIcon />
-        break
-      default:
-        icon = <EditIcon />
+  const pageInfo = data?.viewer.noteConnection.pageInfo
+  useEffect(() => {
+    if (!loading && pageInfo?.hasNextPage) {
+      fetchMore({ variables: { cursor: pageInfo.startCursor } })
     }
-    draft = (
-      <ListItem button onClick={() => openDraft()} selected>
-        <ListItemIcon>{icon}</ListItemIcon>
-        <ListItemText primary="Draft note" />
-        <ListItemSecondaryAction>
-          <IconButton edge="end" aria-label="delete" onClick={() => deleteDraft()} size="large">
-            <DeleteIcon />
-          </IconButton>
-        </ListItemSecondaryAction>
-      </ListItem>
-    )
-  } else if (state.auth.status === 'done') {
-    draft = (
-      <ListItem button onClick={() => openDraft()}>
-        <ListItemIcon>
-          <NoteAddIcon />
-        </ListItemIcon>
-        <ListItemText primary="New note" />
-      </ListItem>
-    )
-  } else {
-    draft = (
-      <ListItem>
-        <ListItemIcon>
-          <NoteAddIcon />
-        </ListItemIcon>
-        <ListItemText primary="Authenticate to create note" />
-      </ListItem>
-    )
+  }, [fetchMore, loading, pageInfo])
+
+  const draft = (
+    <ListItem button onClick={() => navigate('/new')}>
+      <ListItemIcon>
+        <NoteAddIcon />
+      </ListItemIcon>
+      <ListItemText
+        primary={authState.status === 'done' ? 'New note' : 'Authenticate to create note'}
+      />
+    </ListItem>
+  )
+
+  if (data == null) {
+    return <List>{draft}</List>
   }
 
-  const notes = Object.entries(state.notes).map(([docID, note]) => {
-    const isSelected = state.nav.type === 'note' && state.nav.docID === docID
-
-    let icon
-    switch (note.status) {
-      case 'loading failed':
-      case 'saving failed':
-        icon = <ErrorIcon />
-        break
-      case 'loading':
-        icon = <DownloadIcon />
-        break
-      case 'saving':
-        icon = <UploadIcon />
-        break
-      default:
-        icon = isSelected ? <EditIcon /> : <NoteIcon />
-    }
+  const notes = data.viewer.noteConnection.edges.map((edge) => {
+    const note = edge.node
 
     return (
-      <ListItem button key={docID} onClick={() => openNote(docID)} selected={isSelected}>
-        <ListItemIcon>{icon}</ListItemIcon>
+      <ListItem
+        button
+        key={note.id}
+        onClick={() => navigate(`/notes/${note.id}`)}
+        selected={note.id === id}>
+        <ListItemIcon>
+          <NoteIcon />
+        </ListItemIcon>
         <ListItemText primary={note.title} />
       </ListItem>
     )

@@ -2,10 +2,9 @@ import { ApolloClient, ApolloLink, InMemoryCache, Observable } from '@apollo/cli
 import { relayStylePagination } from '@apollo/client/utilities'
 import { GraphClient } from '@glazed/graph'
 
-export const graph = new GraphClient({
-  ceramic: 'http://localhost:7007',
-  definition: { accountData: {}, models: {}, objects: {} },
-})
+import { definition } from './__generated__/definition'
+
+export const graph = new GraphClient({ ceramic: 'http://localhost:7007', definition })
 
 const cache = new InMemoryCache({
   typePolicies: {

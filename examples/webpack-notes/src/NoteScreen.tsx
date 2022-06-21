@@ -1,40 +1,61 @@
-import type { TileDocument } from '@ceramicnetwork/stream-tile'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import TextareaAutosize from '@mui/material/TextareaAutosize'
 import Typography from '@mui/material/Typography'
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
+import { useParams } from 'react-router-dom'
 
-import type { Note } from './env'
-import type { IndexLoadedNote, StoredNote } from './state'
 import { classes } from './style'
 
-export type NoteScreenProps = {
-  note: IndexLoadedNote | StoredNote
-  placeholder: string
-  save: (doc: TileDocument<Note>, text: string) => void
-}
+const NOTE_QUERY = gql`
+  query Note($id: ID!) {
+    note: node(id: $id) {
+      ... on Note {
+        text
+        title
+      }
+    }
+  }
+`
 
-export default function NoteScreen({ note, placeholder, save }: NoteScreenProps) {
+const UPDATE_NOTE_MUTATION = gql`
+  mutation UpdateNote($input: UpdateNoteInput!) {
+    updateNote(input: $input) {
+      node {
+        id
+      }
+    }
+  }
+`
+
+export default function NoteScreen() {
+  const { id } = useParams()
+  const noteQuery = useQuery(NOTE_QUERY, { variables: { id } })
+  const [updateNote, updateNoteState] = useMutation(UPDATE_NOTE_MUTATION)
+
   const textRef = useRef<HTMLTextAreaElement>(null)
 
-  if (note.status === 'loading failed') {
+  const onSave = useCallback(() => {
+    const content = { title: noteQuery.data.note.title, text: textRef.current?.value ?? '' }
+    updateNote({ variables: { input: { id, content } } })
+  }, [id, noteQuery.data])
+
+  if (noteQuery.error) {
     return <Typography>Failed to load note!</Typography>
   }
 
-  if (note.status === 'init' || note.status === 'loading') {
+  if (noteQuery.loading) {
     return <Typography>Loading note...</Typography>
   }
 
-  const doc = (note as StoredNote).doc
   return (
     <>
       <Paper elevation={5}>
         <TextareaAutosize
           className={classes.noteTextarea}
-          disabled={note.status === 'saving'}
-          defaultValue={doc.content.text}
-          placeholder={placeholder}
+          disabled={updateNoteState.loading}
+          defaultValue={noteQuery.data.note.text}
           ref={textRef}
           minRows={10}
           maxRows={20}
@@ -43,8 +64,8 @@ export default function NoteScreen({ note, placeholder, save }: NoteScreenProps)
       <Button
         className={classes.noteSaveButton}
         color="primary"
-        disabled={note.status === 'saving'}
-        onClick={() => save(doc, textRef.current?.value ?? '')}
+        disabled={updateNoteState.loading}
+        onClick={() => onSave()}
         variant="contained">
         Save
       </Button>

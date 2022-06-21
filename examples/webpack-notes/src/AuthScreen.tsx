@@ -1,24 +1,22 @@
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { randomBytes } from '@stablelib/random'
 import React, { useState } from 'react'
-import { fromString, toString } from 'uint8arrays'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import Root from './Root'
-import type { AuthState } from './state'
+import { randomSeed, useAuth } from './auth'
 
-export type AuthenticateProps = {
-  authenticate: (seed: Uint8Array) => void
-  state: AuthState
-}
-
-export default function AuthenticateScreen({ authenticate, state }: AuthenticateProps) {
+export default function AuthScreen() {
+  const [state, authenticate] = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [seed, setSeed] = useState('')
+
   const isLoading = state.status === 'loading'
 
   return state.status === 'done' ? (
-    <Typography>Authenticated with ID {state.store.id}</Typography>
+    <Typography>Authenticated with ID {state.id}</Typography>
   ) : (
     <>
       <Typography>
@@ -41,14 +39,13 @@ export default function AuthenticateScreen({ authenticate, state }: Authenticate
       <Button
         color="primary"
         disabled={seed === '' || isLoading}
-        onClick={() => authenticate(fromString(seed, 'base16'))}
+        onClick={() => {
+          authenticate(seed).then(() => navigate(location.state?.from?.pathname || '/'))
+        }}
         variant="contained">
         Authenticate
       </Button>
-      <Button
-        color="primary"
-        disabled={isLoading}
-        onClick={() => setSeed(toString(randomBytes(32), 'base16'))}>
+      <Button color="primary" disabled={isLoading} onClick={() => setSeed(randomSeed())}>
         Generate random seed
       </Button>
     </>

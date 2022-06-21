@@ -1,3 +1,4 @@
+import { gql, useMutation } from '@apollo/client'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -7,17 +8,23 @@ import Paper from '@mui/material/Paper'
 import TextareaAutosize from '@mui/material/TextareaAutosize'
 import TextField from '@mui/material/TextField'
 import React, { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import type { DraftStatus } from './state'
 import { classes } from './style'
 
-export type DraftScreenProps = {
-  placeholder: string
-  save: (title: string, text: string) => void
-  status: DraftStatus
-}
+const CREATE_NOTE_MUTATION = gql`
+  mutation CreateNote($input: CreateNoteInput!) {
+    createNote(input: $input) {
+      node {
+        id
+      }
+    }
+  }
+`
 
-export default function DraftScreen({ placeholder, save, status }: DraftScreenProps) {
+export default function DraftScreen() {
+  const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION)
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const textRef = useRef<HTMLTextAreaElement>(null)
   const titleRef = useRef<HTMLInputElement>(null)
@@ -34,7 +41,15 @@ export default function DraftScreen({ placeholder, save, status }: DraftScreenPr
     const text = textRef.current?.value
     const title = titleRef.current?.value
     if (text && title) {
-      save(title, text)
+      createNote({ variables: { input: { content: { text, title } } } }).then(
+        (res) => {
+          const id = res.data?.createNote?.node?.id
+          navigate(`/notes/${id}`)
+        },
+        (err) => {
+          console.warn('Failed to create note', err)
+        }
+      )
     }
     setOpen(false)
   }
@@ -67,8 +82,7 @@ export default function DraftScreen({ placeholder, save, status }: DraftScreenPr
       <Paper elevation={5}>
         <TextareaAutosize
           className={classes.noteTextarea}
-          disabled={status === 'saving'}
-          placeholder={placeholder}
+          disabled={loading}
           ref={textRef}
           minRows={10}
           maxRows={20}
@@ -77,7 +91,7 @@ export default function DraftScreen({ placeholder, save, status }: DraftScreenPr
       <Button
         className={classes.noteSaveButton}
         color="primary"
-        disabled={status === 'saving'}
+        disabled={loading}
         onClick={handleOpen}
         variant="contained">
         Save
