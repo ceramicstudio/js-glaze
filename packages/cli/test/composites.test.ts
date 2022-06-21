@@ -72,4 +72,20 @@ describe('composites', () => {
       expect(create.stderr.toString().includes(model2StreamID)).toBe(true)
     }, 60000)
   })
+
+  describe('composite:merge', () => {
+    test('composite merge fails without the list of encoded composite paths', async () => {
+      const create = await execa('glaze', ['composite:merge'])
+      expect(create.stderr.toString().includes('Missing list of composite file paths')).toBe(true)
+    })
+
+    test('composite merge succeeds', async () => {
+      const merge = await execa('glaze', [
+        'composite:merge',
+        'test/mocks/encoded.composite.profiles.json',
+        'test/mocks/encoded.composite.picture.post.json',
+      ])
+      expect(merge.stderr.toString()).toMatchSnapshot()
+    }, 60000)
+  })
 })

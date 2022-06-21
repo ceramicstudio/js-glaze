@@ -34,6 +34,7 @@ glaze COMMAND
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
 - [`glaze composite:create INPUT`](#glaze-compositecreate)
 - [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
+- [`glaze composite:merge PATHS`](#glaze-compositemerge-paths)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
@@ -316,6 +317,22 @@ ARGUMENTS
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:merge`
+
+create an encoded composite definition by merging other composites
+
+```
+USAGE
+  $ glaze composite:merge PATHS
+
+ARGUMENTS
+  PATHS  a list of paths to files containing encoded composites, separated by spaces
+
+OPTIONS
+  -e, --common-embeds  'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
+  -o, --output         a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze model-instance:create MODELSTREAMID CONTENT`
