@@ -58,4 +58,32 @@ describe('model-instances', () => {
       expect(create.stderr.toString().includes('Created model instance with stream id:')).toBe(true)
     }, 60000)
   })
+
+  describe('model-instance:content', () => {
+    test('model instance content display fails without the streamID', async () => {
+      await expect(execa('glaze', ['model-instance:content'])).rejects.toThrow(
+        /streamId {2}ID of the stream/
+      )
+    }, 60000)
+
+    test('model instance content display succeeds', async () => {
+      const key = await execa('glaze', ['did:create'])
+      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const create = await execa('glaze', [
+        'model-instance:create',
+        modelStreamID,
+        MODEL_INSTANCE_JSON,
+        `--key=${seed}`,
+      ])
+
+      const content = await execa('glaze', [
+        `model-instance:content`,
+        create.stderr.toString().split('with stream id: ')[1].replace('.', ''),
+        `--sync=sync-always`,
+      ])
+      const lines = stripAnsi(content.stderr.toString())
+      expect(lines.includes('"stringPropName": "stringPropValue"')).toBe(true)
+    }, 60000)
+  })
 })
