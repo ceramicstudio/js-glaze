@@ -1,6 +1,6 @@
 import { Command, type CommandFlags } from '../../command.js'
 import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
-import { StreamID } from '@ceramicnetwork/streamid';
+import { StreamID } from '@ceramicnetwork/streamid'
 
 export default class CreateModelInstance extends Command<
   CommandFlags,

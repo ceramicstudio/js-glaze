@@ -6,6 +6,8 @@ const MY_MODEL_JSON =
 
 const MODEL_INSTANCE_JSON = '{"stringPropName":"stringPropValue"}'
 
+const REPLACED_MODEL_INSTANCE_JSON = '{"stringPropName":"updatedStringPropValue"}'
+
 describe('model-instances', () => {
   let didSeed: string
   let modelStreamID: string
@@ -56,6 +58,59 @@ describe('model-instances', () => {
         `--key=${seed}`,
       ])
       expect(create.stderr.toString().includes('Created model instance with stream id:')).toBe(true)
+    }, 60000)
+  })
+
+  describe('model-instance:replace', () => {
+    let midControllerSeed: string
+    let midStreamID: string
+
+    beforeAll(async () => {
+      const key = await execa('glaze', ['did:create'])
+      midControllerSeed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+
+      const create = await execa('glaze', [
+        'model-instance:create',
+        modelStreamID,
+        MODEL_INSTANCE_JSON,
+        `--key=${midControllerSeed}`,
+      ])
+      midStreamID = create.stderr.toString().split('Created model instance with stream id: ')[1]
+    })
+
+    test('model instance replace fails without the streamID', async () => {
+      await expect(execa('glaze', ['model-instance:replace'])).rejects.toThrow(
+        /streamId {2}ID of the stream/
+      )
+    }, 60000)
+
+    test('model instance replace fails without the content param', async () => {
+      await expect(execa('glaze', ['model-instance:replace'])).rejects.toThrow(
+        /New content of the model instance \(JSON encoded as string\)/
+      )
+    }, 60000)
+
+    test('model instance replace fails without the did-key param', async () => {
+      const replace = await execa('glaze', [
+        'model-instance:replace',
+        midStreamID,
+        REPLACED_MODEL_INSTANCE_JSON,
+      ])
+      const lines = replace.stderr.toString().split('\n')
+      expect(lines[1].includes('No DID provided')).toBe(true)
+    }, 60000)
+
+    test('model instance replace succeeds', async () => {
+      const replace = await execa('glaze', [
+        'model-instance:replace',
+        midStreamID,
+        REPLACED_MODEL_INSTANCE_JSON,
+        `--key=${midControllerSeed}`,
+      ])
+
+      expect(
+        replace.stderr.toString().includes('Replaced content in model instance with stream id:')
+      ).toBe(true)
     }, 60000)
   })
 

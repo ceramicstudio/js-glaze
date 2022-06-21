@@ -34,6 +34,7 @@ glaze COMMAND
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
 - [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
+- [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
@@ -312,6 +313,22 @@ USAGE
 ARGUMENTS
   MODELSTREAMID  streamID of the model whose instance is being created
   CONTENT        contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze model-instance:replace STREAMID CONTENT`
+
+replace content in a model instance stream with given streamID
+
+```
+USAGE
+  $ glaze model-instance:replace STREAMID CONTENT
+
+ARGUMENTS
+  STREAMID  streamID of the model instance whose content is being replaced
+  CONTENT   new contents of the model instance encoded as JSON
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
