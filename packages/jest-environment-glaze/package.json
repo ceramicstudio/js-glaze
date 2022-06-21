@@ -22,10 +22,10 @@
     "lint": "eslint index.js --fix"
   },
   "dependencies": {
-    "dids": "^3.0.0",
+    "dids": "^3.2.0",
     "jest-environment-ceramic": "^0.16.0",
     "key-did-provider-ed25519": "^2.0.0",
-    "key-did-resolver": "^2.0.0",
+    "key-did-resolver": "^2.0.4",
     "uint8arrays": "^3.0.0"
   }
 }
