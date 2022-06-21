@@ -212,11 +212,11 @@ export class RuntimeModelBuilder {
     for (const [key, view] of Object.entries(views)) {
       switch (view.type) {
         case 'documentAccount':
-        case 'documentVersion':
+          // case 'documentVersion':
           object[key] = { type: 'view', viewType: view.type }
           continue
         default:
-          throw new Error(`Unsupported view type: ${view.type}`)
+          throw new Error(`Unsupported view type: ${view.type as string}`)
       }
     }
   }

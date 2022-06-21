@@ -379,10 +379,10 @@ export class Composite {
       if (def.aliases[id] != null) {
         nextAliases[id] = def.aliases[id]
       }
-      if (def.views.models[id] != null) {
-        // TODO: check relations to other models, ensure there's no missing model in the subset
-        nextViews.models[id] = def.views.models[id]
-      }
+      // TODO: check relations to other models, ensure there's no missing model in the subset
+      // if (def.views.models[id] != null) {
+      //   nextViews.models[id] = def.views.models[id]
+      // }
       // TODO: account and root views
     }
 

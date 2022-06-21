@@ -24,8 +24,8 @@ import { Composite } from '@glazed/devtools'
 
 #### Parameters
 
-| Name     | Type                                                        |
-| :------- | :---------------------------------------------------------- |
+| Name | Type |
+| :------ | :------ |
 | `params` | [`CompositeParams`](../modules/devtools.md#compositeparams) |
 
 ## Properties
@@ -58,15 +58,15 @@ Copy a given set of Models identified by their stream ID, name or alias into a n
 
 #### Parameters
 
-| Name     | Type       |
-| :------- | :--------- |
+| Name | Type |
+| :------ | :------ |
 | `models` | `string`[] |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### equals
 
@@ -76,15 +76,15 @@ Check if the composite is equal to the other one provided as input.
 
 #### Parameters
 
-| Name    | Type                                                      |
-| :------ | :-------------------------------------------------------- |
+| Name | Type |
+| :------ | :------ |
 | `other` | [`CompositeInput`](../modules/devtools.md#compositeinput) |
 
 #### Returns
 
 `boolean`
 
----
+___
 
 ### merge
 
@@ -94,16 +94,16 @@ Merge the composite with the other one(s) into a new Composite.
 
 #### Parameters
 
-| Name      | Type                                                                                                                     |
-| :-------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `other`   | [`CompositeInput`](../modules/devtools.md#compositeinput) \| [`CompositeInput`](../modules/devtools.md#compositeinput)[] |
-| `options` | [`CompositeOptions`](../modules/devtools.md#compositeoptions)                                                            |
+| Name | Type |
+| :------ | :------ |
+| `other` | [`CompositeInput`](../modules/devtools.md#compositeinput) \| [`CompositeInput`](../modules/devtools.md#compositeinput)[] |
+| `options` | [`CompositeOptions`](../modules/devtools.md#compositeoptions) |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### setAliases
 
@@ -114,16 +114,16 @@ Set aliases for the Models in the composite, merging with existing ones unless `
 
 #### Parameters
 
-| Name      | Type                          | Default value |
-| :-------- | :---------------------------- | :------------ |
-| `aliases` | `Record`<`string`, `string`\> | `undefined`   |
-| `replace` | `boolean`                     | `false`       |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `aliases` | `Record`<`string`, `string`\> | `undefined` |
+| `replace` | `boolean` | `false` |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### setCommonEmbeds
 
@@ -134,16 +134,16 @@ is `true`, and return a new Composite.
 
 #### Parameters
 
-| Name      | Type                  | Default value |
-| :-------- | :-------------------- | :------------ |
-| `names`   | `Iterable`<`string`\> | `undefined`   |
-| `replace` | `boolean`             | `false`       |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `names` | `Iterable`<`string`\> | `undefined` |
+| `replace` | `boolean` | `false` |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### setViews
 
@@ -154,16 +154,16 @@ Set views for the Models in the composite, merging with existing ones unless `re
 
 #### Parameters
 
-| Name      | Type                       | Default value |
-| :-------- | :------------------------- | :------------ |
-| `views`   | `CompositeViewsDefinition` | `undefined`   |
-| `replace` | `boolean`                  | `false`       |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `views` | `CompositeViewsDefinition` | `undefined` |
+| `replace` | `boolean` | `false` |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### toJSON
 
@@ -176,7 +176,7 @@ structure that can be shared and reused.
 
 `EncodedCompositeDefinition`
 
----
+___
 
 ### toParams
 
@@ -188,7 +188,7 @@ Return a deep clone of the internal [`CompositeParams`](../modules/devtools.md#c
 
 [`CompositeParams`](../modules/devtools.md#compositeparams)
 
----
+___
 
 ### toRuntime
 
@@ -201,7 +201,7 @@ at runtime by the [`GraphClient`](graph.GraphClient.md).
 
 `RuntimeCompositeDefinition`
 
----
+___
 
 ### create
 
@@ -212,15 +212,15 @@ wrapped in a Composite instance.
 
 #### Parameters
 
-| Name     | Type                                                  |
-| :------- | :---------------------------------------------------- |
+| Name | Type |
+| :------ | :------ |
 | `params` | [`CreateParams`](../modules/devtools.md#createparams) |
 
 #### Returns
 
 `Promise`<[`Composite`](devtools.Composite.md)\>
 
----
+___
 
 ### from
 
@@ -230,16 +230,16 @@ Create a Composite instance by merging existing composites.
 
 #### Parameters
 
-| Name         | Type                                                                   |
-| :----------- | :--------------------------------------------------------------------- |
+| Name | Type |
+| :------ | :------ |
 | `composites` | `Iterable`<[`CompositeInput`](../modules/devtools.md#compositeinput)\> |
-| `options?`   | [`CompositeOptions`](../modules/devtools.md#compositeoptions)          |
+| `options?` | [`CompositeOptions`](../modules/devtools.md#compositeoptions) |
 
 #### Returns
 
 [`Composite`](devtools.Composite.md)
 
----
+___
 
 ### fromJSON
 
@@ -250,15 +250,15 @@ Create a Composite instance from a JSON-encoded
 
 #### Parameters
 
-| Name     | Type                                                      |
-| :------- | :-------------------------------------------------------- |
+| Name | Type |
+| :------ | :------ |
 | `params` | [`FromJSONParams`](../modules/devtools.md#fromjsonparams) |
 
 #### Returns
 
 `Promise`<[`Composite`](devtools.Composite.md)\>
 
----
+___
 
 ### fromModels
 
@@ -268,8 +268,8 @@ Create a Composite instance from a set of Model streams already present on a Cer
 
 #### Parameters
 
-| Name     | Type                                                          |
-| :------- | :------------------------------------------------------------ |
+| Name | Type |
+| :------ | :------ |
 | `params` | [`FromModelsParams`](../modules/devtools.md#frommodelsparams) |
 
 #### Returns

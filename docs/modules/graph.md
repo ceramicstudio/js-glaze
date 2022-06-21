@@ -10,9 +10,23 @@ npm install @glazed/graph
 
 ## Classes
 
+- [Context](../classes/graph.Context.md)
 - [GraphClient](../classes/graph.GraphClient.md)
 
 ## Type Aliases
+
+### ContextParams
+
+Ƭ **ContextParams**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `cache?` | [`DocumentCache`](graph.md#documentcache) \| `boolean` | Optional cache for documents. |
+| `ceramic` | `CeramicApi` | Ceramic client instance. |
+
+___
 
 ### DocumentCache
 

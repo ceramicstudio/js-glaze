@@ -28,13 +28,13 @@ import { GraphClient } from '@glazed/graph'
 
 ### context
 
-• `get` **context**(): `Context`
+• `get` **context**(): [`Context`](graph.Context.md)
 
 Context instance used internally.
 
 #### Returns
 
-`Context`
+[`Context`](graph.Context.md)
 
 ___
 
