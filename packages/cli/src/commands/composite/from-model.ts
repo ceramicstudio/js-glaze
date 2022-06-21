@@ -1,5 +1,5 @@
 import { Composite } from '@glazed/devtools'
-import { Command, type CommandFlags } from '../../command.js'
+import {Command, type CommandFlags, getArrayArg} from '../../command.js'
 import { Flags } from '@oclif/core'
 import fs from 'fs-extra'
 
@@ -21,13 +21,7 @@ export default class CompositeFromModel extends Command<Flags> {
   }
 
   async run(): Promise<void> {
-    const modelStreamIDs = this.argv.filter((arg) => {
-      return !['-o', '--output', '-k', '--key', '-c', '--ceramic']
-        .concat(Object.values(this.flags) as Array<string>)
-        .some((forbidden) => {
-          return arg.startsWith(forbidden)
-        })
-    })
+    const modelStreamIDs = getArrayArg(this.argv, this.flags)
 
     if (modelStreamIDs.length === 0) {
       this.spinner.fail('Missing list of model streamIDs')
