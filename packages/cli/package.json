@@ -73,9 +73,9 @@
     ]
   },
   "dependencies": {
-    "@ceramicnetwork/3id-did-resolver": "^2.1.1",
-    "@ceramicnetwork/http-client": "^2.2.0",
-    "@ceramicnetwork/stream-tile": "^2.2.1",
+    "@ceramicnetwork/3id-did-resolver": "^2.1.2",
+    "@ceramicnetwork/http-client": "^2.2.1",
+    "@ceramicnetwork/stream-tile": "^2.2.2",
     "@ceramicnetwork/streamid": "^2.1.0",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/devtools": "^0.2.0",
@@ -99,9 +99,9 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/cli": "^2.3.0",
-    "@ceramicnetwork/common": "^2.2.0",
-    "@ceramicnetwork/core": "^2.5.0",
+    "@ceramicnetwork/cli": "^2.3.1",
+    "@ceramicnetwork/common": "^2.2.1",
+    "@ceramicnetwork/core": "^2.5.1",
     "@glazed/types": "^0.2.0",
     "@swc-node/register": "^1.5.1",
     "@types/fs-extra": "^9.0.13",
