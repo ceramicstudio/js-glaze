@@ -50,7 +50,18 @@ export const SYNC_OPTION_FLAG = Flags.integer({
   },
 })
 
-const FLAGS = ['-o', '--output', '-k', '--key', '-c', '--ceramic', '-e', '--common-embeds']
+const FLAGS = [
+  '-o',
+  '--output',
+  '-k',
+  '--key',
+  '-c',
+  '--ceramic',
+  '-e',
+  '--common-embeds',
+  '--id-only',
+  '--table',
+]
 
 export function getArrayArg(argv: Array<string>, flags: CommandFlags): Array<string> {
   return argv.filter((arg) => {
