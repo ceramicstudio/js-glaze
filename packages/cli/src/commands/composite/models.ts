@@ -2,6 +2,7 @@ import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import fs from 'fs-extra'
+import Table from 'cli-table3'
 
 type CompositeModelInfo = {
   id: string
@@ -47,7 +48,22 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
       if (this.flags['id-only'] === true) {
         this.spinner.succeed(JSON.stringify(Object.keys(composite.toParams().definition.models)))
       } else if (this.flags.table === true) {
-        throw new Error('not implemented')
+        const table = new Table({
+          head: ['Name', 'ID', 'Alias', 'Description'],
+          colWidths: [32, 65, 32, 100],
+        })
+        const internalDefinition = composite.toParams().definition
+        Object.entries(internalDefinition.models).map(([modelStreamID, modelDefinition]) => {
+          table.push([
+            modelDefinition.name,
+            modelStreamID,
+            internalDefinition.aliases && internalDefinition.aliases[modelStreamID]
+              ? internalDefinition.aliases[modelStreamID]
+              : '(none)',
+            modelDefinition.description || '',
+          ])
+        })
+        this.spinner.succeed(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
         const internalDefinition = composite.toParams().definition
