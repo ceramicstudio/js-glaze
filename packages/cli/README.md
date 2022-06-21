@@ -33,6 +33,7 @@ glaze COMMAND
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
 - [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
+- [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -297,6 +298,22 @@ ARGUMENTS
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze model-instance:create MODELSTREAMID CONTENT`
+
+create a model instance stream with given content
+
+```
+USAGE
+  $ glaze model-instance:create MODELSTREAMID CONTENT
+
+ARGUMENTS
+  MODELSTREAMID  streamID of the model whose instance is being created
+  CONTENT        contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
 ```
 
 ### `glaze pin:add STREAMID`
