@@ -18,7 +18,7 @@ describe('model-instances', () => {
 
     const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${didSeed}`])
     modelStreamID = create.stderr.toString().split('Created MyModel with streamID ')[1]
-  })
+  }, 60000)
 
   describe('model-instance:create', () => {
     test('model instance creation fails without the content param', async () => {
@@ -76,7 +76,7 @@ describe('model-instances', () => {
         `--key=${midControllerSeed}`,
       ])
       midStreamID = create.stderr.toString().split('Created model instance with stream id: ')[1]
-    })
+    }, 60000)
 
     test('model instance replace fails without the streamID', async () => {
       await expect(execa('glaze', ['model-instance:replace'])).rejects.toThrow(
