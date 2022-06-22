@@ -2,7 +2,7 @@
 
 exports[`composites composite:merge composite merge succeeds 1`] = `
 "- Creating the composite...
-[32m✔[39m {
+✔ {
   \\"version\\": \\"1.0\\",
   \\"models\\": {
     \\"kjzl6hvfrbw6c87pfzkyo9luogpvxinjep6s9aer0cbz53fij3osymi9olmhsrk\\": [
