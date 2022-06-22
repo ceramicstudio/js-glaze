@@ -1,6 +1,11 @@
 {
   "extends": "./tsconfig.build.json",
-  "include": ["./packages/devtools/src", "./packages/graphql/src", "./packages/types/src"],
+  "include": [
+    "./packages/devtools/src",
+    "./packages/devtools-node/src",
+    "./packages/graph/src",
+    "./packages/types/src"
+  ],
   "compilerOptions": {
     "jsx": "preserve",
     "lib": ["DOM", "ES2020"],
@@ -12,6 +17,7 @@
     "entryDocument": "overview.md",
     "entryPoints": [
       "./packages/devtools/src/index.ts",
+      "./packages/devtools-node/src/index.ts",
       "./packages/graph/src/index.ts",
       "./packages/types/src/index.ts"
     ],

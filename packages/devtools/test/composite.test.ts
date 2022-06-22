@@ -51,7 +51,7 @@ describe('composite', () => {
         },
       })
       const hash = source.hash
-      const clone = source.clone()
+      const clone = new Composite(source.toParams())
       expect(clone.hash).toBe(hash)
       expect(source.hash).toBe(hash)
     })
@@ -78,7 +78,8 @@ describe('composite', () => {
       })
 
       test('with Composite instance', () => {
-        expect(source.equals(source.clone())).toBe(true)
+        const clone = new Composite(source.toParams())
+        expect(source.equals(clone)).toBe(true)
         expect(source.equals(source.setAliases({ fooID: 'Test' }))).toBe(true)
         expect(source.equals(source.setAliases({ bazID: 'Baz' }))).toBe(false)
       })
@@ -100,13 +101,6 @@ describe('composite', () => {
       const composite = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
       const runtime = composite.toRuntime()
       expect(runtime).toMatchSnapshot()
-    })
-
-    test('clone() returns a cloned Composite instance', () => {
-      const source = new Composite({ commits: {}, definition: { version: '1.0', models: {} } })
-      const sourceParams = source.toParams()
-      const clone = source.clone()
-      expect(clone.toParams()).toEqual(sourceParams)
     })
 
     describe('copy() creates a copy of the composite with only selected models', () => {

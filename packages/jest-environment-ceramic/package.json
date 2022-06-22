@@ -21,7 +21,7 @@
     "lint": "eslint index.js --fix"
   },
   "dependencies": {
-    "@ceramicnetwork/core": "^2.5.0",
+    "@ceramicnetwork/core": "^2.5.1",
     "ipfs-core": "^0.14.3",
     "jest-environment-node": "^28.1.1",
     "tmp-promise": "^3.0.3"

@@ -1,7 +1,9 @@
 import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
-import fs from 'mz/fs.js'
+import fs from 'fs-extra'
+
+import { resolvePath, write } from '../../fs.js'
 
 type Flags = CommandFlags & {
   output?: string
@@ -30,18 +32,12 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
   async run(): Promise<void> {
     this.spinner.start('Creating the composite...')
     try {
-      const schema = await fs.readFile(this.args.schemaFilePath, { encoding: 'utf-8' })
-      const composite = await Composite.create({
-        ceramic: this.ceramic,
-        schema: schema,
-        metadata: {
-          controller: this.authenticatedDID.id,
-        },
-      })
+      const schema = await fs.readFile(resolvePath(this.args.schemaFilePath), { encoding: 'utf-8' })
+      const composite = await Composite.create({ ceramic: this.ceramic, schema })
       const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 4)
       if (this.flags.output !== undefined) {
         const output = this.flags.output
-        await fs.writeFile(output, encodedAsJSON)
+        await write(output, encodedAsJSON)
         this.spinner.succeed(
           `Composite was created and its encoded representation was saved in ${output}`
         )

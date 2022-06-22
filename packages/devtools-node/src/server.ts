@@ -9,33 +9,55 @@ import getPort from 'get-port'
 import { readEncodedComposite } from './fs.js'
 import type { PathInput } from './types.js'
 
-export type ServerInfo = {
+export type ServerHandler = {
+  /**
+   * URL of the local GraphQL endpoint.
+   */
   url: string
-  stop: () => void
+  /**
+   * Stop the server.
+   */
+  stop: (callback?: (err?: Error | undefined) => void) => void
 }
 
 export type ServeParams = {
+  /**
+   * URL of the Ceramic node.
+   */
   ceramicURL: string
+  /**
+   * Optional DID instance attached to the Ceramic client.
+   */
   did?: DID
+  /**
+   * Enable GraphiQL on the server.
+   */
   graphiql?: boolean
+  /**
+   * Port to use, if available.
+   */
   port?: number | Array<number>
 }
 
 export type ServeDefinitionParams = ServeParams & {
+  /**
+   * Path of the encoded composite definition used to generate the GraphQL schema.
+   */
   path: PathInput
 }
 
 export type ServeGraphQLParams = ServeParams & {
+  /**
+   * Runtime composite definition used to generate the GraphQL schema.
+   */
   definition: RuntimeCompositeDefinition
 }
 
-export async function serveGraphQL({
-  ceramicURL,
-  definition,
-  did,
-  graphiql,
-  port,
-}: ServeGraphQLParams): Promise<ServerInfo> {
+/**
+ * Create a local GraphQL server to interact with a runtime composite definition.
+ */
+export async function serveGraphQL(params: ServeGraphQLParams): Promise<ServerHandler> {
+  const { ceramicURL, definition, did, graphiql, port } = params
   const ceramic = new CeramicClient(ceramicURL)
   if (did != null) {
     ceramic.did = did
@@ -56,21 +78,25 @@ export async function serveGraphQL({
 
   return await new Promise((resolve, reject) => {
     const server = app.listen(serverPort, () => {
-      resolve({
+      const handler: ServerHandler = {
         url: `http://localhost:${serverPort}/graphql`,
-        stop: (callback?: (err?: Error | undefined) => void) => {
+        stop: (callback) => {
           server.close(callback)
         },
-      })
+      }
+      resolve(handler)
     })
     server.once('error', reject)
   })
 }
 
-export async function serveEncodedDefinition({
-  path,
-  ...params
-}: ServeDefinitionParams): Promise<ServerInfo> {
+/**
+ * Create a local GraphQL server to interact with an encoded composite definition.
+ */
+export async function serveEncodedDefinition(
+  params: ServeDefinitionParams
+): Promise<ServerHandler> {
+  const { path, ...rest } = params
   const composite = await readEncodedComposite(params.ceramicURL, path)
-  return await serveGraphQL({ ...params, definition: composite.toRuntime() })
+  return await serveGraphQL({ ...rest, definition: composite.toRuntime() })
 }

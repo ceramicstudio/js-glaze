@@ -1,6 +1,12 @@
 /**
  * Development tools library.
  *
+ * ## Installation
+ *
+ * ```sh
+ * npm install --dev @glazed/devtools
+ * ```
+ *
  * @module devtools
  */
 
