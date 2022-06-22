@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
+exports[`schema parseCompositeSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
 Object {
   "commonEmbeds": Array [
     "ImageSources",

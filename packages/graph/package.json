@@ -48,6 +48,7 @@
   "devDependencies": {
     "@ceramicnetwork/common": "^2.2.1",
     "@glazed/devtools": "^0.2.0",
+    "@glazed/test-schemas": "^0.1.0",
     "@glazed/types": "^0.2.0",
     "dids": "^3.2.0",
     "jest-environment-glaze": "^0.3.0"

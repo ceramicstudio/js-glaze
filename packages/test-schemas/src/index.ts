@@ -1,4 +1,4 @@
-export const compositeSchemaWithProfiles = `
+export const ImageMetadataType = `
 type ImageMetadata {
   src: String! @length(max: 150)
   mimeType: String! @length(max: 50)
@@ -6,6 +6,10 @@ type ImageMetadata {
   height: Int! @intRange(min: 1)
   size: Int @intRange(min: 1)
 }
+`
+
+export const profilesSchema = `
+${ImageMetadataType}
 
 type ImageSources {
   original: ImageMetadata!
