@@ -48,7 +48,7 @@ describe('composites', () => {
       const model2Create = await execa('glaze', ['model:create', MODEL2_JSON, `--key=${seed}`])
       model1StreamID = model1Create.stderr.toString().split('with streamID ')[1]
       model2StreamID = model2Create.stderr.toString().split('with streamID ')[1]
-    })
+    }, 60000)
 
     test('composite from model fails without the list of models', async () => {
       const create = await execa('glaze', ['composite:from-model'])
