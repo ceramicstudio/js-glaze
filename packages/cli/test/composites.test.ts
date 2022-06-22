@@ -53,7 +53,7 @@ describe('composites', () => {
     test('composite from model fails without the list of models', async () => {
       const create = await execa('glaze', ['composite:from-model'])
       expect(create.stderr.toString().includes('Missing list of model streamIDs')).toBe(true)
-    })
+    }, 60000)
 
     test('composite from model succeeds', async () => {
       const key = await execa('glaze', ['did:create'])
@@ -77,7 +77,7 @@ describe('composites', () => {
     test('composite merge fails without the list of encoded composite paths', async () => {
       const create = await execa('glaze', ['composite:merge'])
       expect(create.stderr.toString().includes('Missing list of composite file paths')).toBe(true)
-    })
+    }, 60000)
 
     test('composite merge succeeds', async () => {
       const merge = await execa('glaze', [
