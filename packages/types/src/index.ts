@@ -121,7 +121,7 @@ export type RuntimeStringScalar = RuntimeScalarCommon & {
 }
 
 /** Ceramic-specific runtime scalar types. */
-export type CustomRuntimeScalarType = 'did' | 'id' | 'streamref'
+export type CustomRuntimeScalarType = 'did' | 'id' // | 'streamref'
 
 type RuntimeStringScalarType<Type extends CustomRuntimeScalarType> = RuntimeScalarCommon & {
   type: Type
@@ -136,7 +136,7 @@ export type RuntimeScalar =
   | RuntimeStringScalar
   | RuntimeStringScalarType<'did'>
   | RuntimeStringScalarType<'id'>
-  | RuntimeStringScalarType<'streamref'>
+// | RuntimeStringScalarType<'streamref'>
 
 /** Runtime scalar types. */
 export type RuntimeScalarType = RuntimeScalar['type']

@@ -37,7 +37,7 @@ import {
 import { GraphQLDID } from 'graphql-scalars'
 
 import type { Context } from './context.js'
-import { CeramicStreamReference } from './scalars.js'
+// import { CeramicStreamReference } from './scalars.js'
 
 const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   boolean: GraphQLBoolean,
@@ -45,7 +45,7 @@ const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   float: GraphQLFloat,
   id: GraphQLID,
   integer: GraphQLInt,
-  streamref: CeramicStreamReference,
+  // streamref: CeramicStreamReference,
   string: GraphQLString,
 }
 const SCALAR_FIELDS = Object.keys(SCALARS)

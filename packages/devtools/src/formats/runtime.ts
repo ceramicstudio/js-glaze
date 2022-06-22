@@ -26,7 +26,7 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
 const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
-  CeramicStreamReference: 'streamref',
+  // CeramicStreamReference: 'streamref',
   GraphQLDID: 'did',
   GraphQLID: 'id',
 }

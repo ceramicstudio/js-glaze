@@ -38,7 +38,7 @@ ___
 
 ### CustomRuntimeScalarType
 
-Ƭ **CustomRuntimeScalarType**: ``"did"`` \| ``"id"`` \| ``"streamref"``
+Ƭ **CustomRuntimeScalarType**: ``"did"`` \| ``"id"``
 
 Ceramic-specific runtime scalar types.
 
@@ -212,7 +212,7 @@ ___
 
 ### RuntimeScalar
 
-Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\> \| `RuntimeStringScalarType`<``"streamref"``\>
+Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
 
 Runtime scalar representations.
 

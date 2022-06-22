@@ -1,19 +1,23 @@
 import { createRuntimeDefinition, parseCompositeSchema } from '@glazed/devtools'
 import { profilesSchema } from '@glazed/test-schemas'
+import type { RuntimeCompositeDefinition } from '@glazed/types'
 
 import { printGraphQLSchema } from '../src'
 
+function createSchemaDefinition(schema: string): RuntimeCompositeDefinition {
+  const { models, commonEmbeds } = parseCompositeSchema(schema)
+  return createRuntimeDefinition({
+    version: '1.0',
+    commonEmbeds,
+    models: models.reduce((acc, model) => {
+      acc[`${model.name}ID`] = model
+      return acc
+    }, {}),
+  })
+}
+
 describe('schema', () => {
   test('printGraphQLSchema()', () => {
-    const { models, commonEmbeds } = parseCompositeSchema(profilesSchema)
-    const definition = createRuntimeDefinition({
-      version: '1.0',
-      commonEmbeds,
-      models: models.reduce((acc, model) => {
-        acc[`${model.name}ID`] = model
-        return acc
-      }, {}),
-    })
-    expect(printGraphQLSchema(definition)).toMatchSnapshot()
+    expect(printGraphQLSchema(createSchemaDefinition(profilesSchema))).toMatchSnapshot()
   })
 })

@@ -8,13 +8,25 @@ type ImageMetadata {
 }
 `
 
-export const profilesSchema = `
+export const ImageSourcesType = `
 ${ImageMetadataType}
 
 type ImageSources {
   original: ImageMetadata!
   alternatives: [ImageMetadata]
 }
+`
+
+export const noteSchema = `
+type Note @model(accountRelation: LIST, description: "Simple text note") {
+  author: DID! @documentAccount
+  title: String! @length(min: 10, max: 100)
+  text: String! @length(max: 2000)
+}
+`
+
+export const profilesSchema = `
+${ImageSourcesType}
 
 type GenericProfile @model(
   accountRelation: SINGLE,
