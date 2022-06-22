@@ -1,5 +1,5 @@
 import { Composite } from '@glazed/devtools'
-import {Command, type CommandFlags, getArrayArg} from '../../command.js'
+import { Command, type CommandFlags, getArrayArg } from '../../command.js'
 import { Flags } from '@oclif/core'
 import fs from 'fs-extra'
 
