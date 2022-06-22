@@ -76,6 +76,7 @@
     "@ceramicnetwork/3id-did-resolver": "^2.1.2",
     "@ceramicnetwork/http-client": "^2.2.1",
     "@ceramicnetwork/stream-tile": "^2.2.2",
+    "@ceramicnetwork/stream-model": "^0.2.1",
     "@ceramicnetwork/streamid": "^2.1.0",
     "@glazed/datamodel": "^0.3.0",
     "@glazed/devtools": "^0.2.0",
