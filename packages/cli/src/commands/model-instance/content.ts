@@ -8,7 +8,8 @@ type ModelContentFlags = QueryCommandFlags & {
 }
 
 export default class ModelInstanceContent extends Command<ModelContentFlags, { streamId: string }> {
-  static description = 'load a model stream with a given stream id and display its contents'
+  static description =
+    'load a model stream instance with a given stream id and display its contents'
 
   static args = [STREAM_ID_ARG]
 
@@ -16,21 +17,21 @@ export default class ModelInstanceContent extends Command<ModelContentFlags, { s
     ...Command.flags,
     output: Flags.string({
       char: 'o',
-      description: 'path to the file where the composite representation should be saved',
+      description: 'path to the file where the model instance content should be saved',
     }),
 
     sync: SYNC_OPTION_FLAG,
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Loading the model...')
+    this.spinner.start('Loading the model instance...')
     try {
       const mid = await ModelInstanceDocument.load(this.ceramic, this.args.streamId)
       const midContentAsJSON = JSON.stringify(mid.content, null, 2)
       if (this.flags.output !== undefined) {
         const output = this.flags.output
         await fs.writeFile(output, midContentAsJSON)
-        this.spinner.succeed(`Model's content was loaded and saved in ${output}`)
+        this.spinner.succeed(`Model instance's content was loaded and saved in ${output}`)
       } else {
         this.spinner.succeed(midContentAsJSON)
       }

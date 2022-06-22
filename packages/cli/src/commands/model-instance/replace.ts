@@ -5,7 +5,7 @@ export default class ModelInstanceReplace extends Command<
   CommandFlags,
   { streamId: string; content: string }
 > {
-  static description = 'create a model instance stream from content encoded as JSON'
+  static description = 'replace content in a model instance stream'
 
   static args = [
     STREAM_ID_ARG,
