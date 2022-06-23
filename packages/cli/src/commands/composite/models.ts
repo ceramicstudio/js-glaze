@@ -26,19 +26,16 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
     ...Command.flags,
     'id-only': Flags.boolean({
       description: `display only model streamIDs`,
+      exclusive: ['table'],
     }),
     table: Flags.boolean({
       description: 'display results in a table',
+      exclusive: ['id-only'],
     }),
   }
 
   async run(): Promise<void> {
     try {
-      if (this.flags['id-only'] === true && this.flags.table === true) {
-        this.spinner.fail(`--id-only and --table cannot be used together`)
-        return
-      }
-
       const encoded = await fs.readFile(this.args.compositePath, { encoding: 'utf-8' })
       const composite = await Composite.fromJSON({
         ceramic: this.ceramic,
