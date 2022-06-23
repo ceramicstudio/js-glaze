@@ -34,6 +34,11 @@ export default class CompositeMerge extends Command<Flags> {
         return token.input
       })
 
+    if (compositePaths.length === 0) {
+      this.spinner.fail('Missing list of composite file paths')
+      return
+    }
+
     try {
       const composites = await Promise.all(
         compositePaths.map(async (path) => await readEncodedComposite(this.ceramic, path))

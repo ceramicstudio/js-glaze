@@ -18,7 +18,7 @@ describe('composites', () => {
     test('composite creation fails without the did-key param', async () => {
       const create = await execa('glaze', ['composite:create', 'test/mocks/composite.schema'])
       const lines = create.stderr.toString().split('\n')
-      expect(lines[1].includes('No controller specified')).toBe(true)
+      expect(lines[0].includes('No controller specified')).toBe(true)
     }, 60000)
 
     test('composite creation succeeds', async () => {
@@ -30,9 +30,9 @@ describe('composites', () => {
         'test/mocks/composite.schema',
         `--key=${seed}`,
       ])
-      expect(create.stderr.toString().includes('"version": "1.0",')).toBe(true)
-      expect(create.stderr.toString().includes('"aliases":')).toBe(true)
-      expect(create.stderr.toString().includes('"views":')).toBe(true)
+      expect(create.stdout.toString().includes('"version": "1.0",')).toBe(true)
+      expect(create.stdout.toString().includes('"aliases":')).toBe(true)
+      expect(create.stdout.toString().includes('"views":')).toBe(true)
     }, 60000)
   })
 
@@ -65,11 +65,11 @@ describe('composites', () => {
         model2StreamID,
         `--key=${seed}`,
       ])
-      expect(create.stderr.toString().includes('"version": "1.0",')).toBe(true)
-      expect(create.stderr.toString().includes('"aliases":')).toBe(true)
-      expect(create.stderr.toString().includes('"views":')).toBe(true)
-      expect(create.stderr.toString().includes(model1StreamID)).toBe(true)
-      expect(create.stderr.toString().includes(model2StreamID)).toBe(true)
+      expect(create.stdout.toString().includes('"version": "1.0",')).toBe(true)
+      expect(create.stdout.toString().includes('"aliases":')).toBe(true)
+      expect(create.stdout.toString().includes('"views":')).toBe(true)
+      expect(create.stdout.toString().includes(model1StreamID)).toBe(true)
+      expect(create.stdout.toString().includes(model2StreamID)).toBe(true)
     }, 60000)
   })
 
