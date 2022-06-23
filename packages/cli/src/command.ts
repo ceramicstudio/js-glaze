@@ -50,27 +50,6 @@ export const SYNC_OPTION_FLAG = Flags.integer({
   },
 })
 
-const FLAGS = [
-  '-o',
-  '--output',
-  '-k',
-  '--key',
-  '-c',
-  '--ceramic',
-  '-e',
-  '--common-embeds',
-  '--id-only',
-  '--table',
-]
-
-export function getArrayArg(argv: Array<string>, flags: CommandFlags): Array<string> {
-  return argv.filter((arg) => {
-    return !FLAGS.concat(Object.values(flags) as Array<string>).some((forbidden) => {
-      return arg.startsWith(forbidden)
-    })
-  })
-}
-
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
   Args extends StringRecord = StringRecord

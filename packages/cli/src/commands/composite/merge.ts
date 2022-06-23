@@ -1,5 +1,5 @@
 import { Composite, CompositeOptions } from '@glazed/devtools'
-import { Command, type CommandFlags, getArrayArg } from '../../command.js'
+import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import { readEncodedComposite, writeEncodedComposite } from '@glazed/devtools-node'
 
@@ -25,12 +25,14 @@ export default class CompositeMerge extends Command<Flags> {
   }
 
   async run(): Promise<void> {
-    const compositePaths = getArrayArg(this.argv, this.flags)
-
-    if (compositePaths.length === 0) {
-      this.spinner.fail('Missing list of composite file paths')
-      return
-    }
+    const parsed = await this.parse(CompositeMerge)
+    const compositePaths = parsed.raw
+      .filter((token) => {
+        return token.type === 'arg'
+      })
+      .map((token) => {
+        return token.input
+      })
 
     try {
       const composites = await Promise.all(
