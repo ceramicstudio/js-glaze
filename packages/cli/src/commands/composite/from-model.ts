@@ -1,7 +1,7 @@
 import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags, getArrayArg } from '../../command.js'
 import { Flags } from '@oclif/core'
-import fs from 'fs-extra'
+import { writeEncodedComposite } from '@glazed/devtools-node'
 
 type Flags = CommandFlags & {
   output?: string
@@ -33,16 +33,15 @@ export default class CompositeFromModel extends Command<Flags> {
         ceramic: this.ceramic,
         models: modelStreamIDs,
       })
-      const encodedAsJSON = JSON.stringify(composite.toJSON(), null, 2)
       if (this.flags.output !== undefined) {
         const output = this.flags.output
-        await fs.writeFile(output, encodedAsJSON)
+        await writeEncodedComposite(composite, output)
         this.spinner.succeed(
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(encodedAsJSON)
+        console.log(JSON.stringify(composite.toJSON(), null, 2))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

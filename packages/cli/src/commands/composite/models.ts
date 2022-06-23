@@ -1,8 +1,7 @@
-import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
-import fs from 'fs-extra'
 import Table from 'cli-table3'
+import { readEncodedComposite } from '@glazed/devtools-node'
 
 type CompositeModelInfo = {
   id: string
@@ -36,11 +35,7 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
 
   async run(): Promise<void> {
     try {
-      const encoded = await fs.readFile(this.args.compositePath, { encoding: 'utf-8' })
-      const composite = await Composite.fromJSON({
-        ceramic: this.ceramic,
-        definition: JSON.parse(encoded),
-      })
+      const composite = await readEncodedComposite(this.ceramic, this.args.compositePath)
       if (this.flags['id-only'] === true) {
         this.spinner.succeed(JSON.stringify(Object.keys(composite.toParams().definition.models)))
       } else if (this.flags.table === true) {

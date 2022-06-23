@@ -1,7 +1,7 @@
 import { Composite, CompositeOptions } from '@glazed/devtools'
 import { Command, type CommandFlags, getArrayArg } from '../../command.js'
 import { Flags } from '@oclif/core'
-import fs from 'fs-extra'
+import { readEncodedComposite, writeEncodedComposite } from '@glazed/devtools-node'
 
 type Flags = CommandFlags & {
   output?: string
@@ -34,14 +34,9 @@ export default class CompositeMerge extends Command<Flags> {
 
     try {
       const composites = await Promise.all(
-        compositePaths.map(async (compositePath) => {
-          const encoded = await fs.readFile(compositePath, { encoding: 'utf-8' })
-          return Composite.fromJSON({
-            ceramic: this.ceramic,
-            definition: JSON.parse(encoded),
-          })
-        })
+        compositePaths.map(async (path) => await readEncodedComposite(this.ceramic, path))
       )
+
       const commonEmbedsFlag = this.flags['common-embeds'] as string | undefined
       let compositeOptions: CompositeOptions = {}
       if (commonEmbedsFlag) {
@@ -53,16 +48,15 @@ export default class CompositeMerge extends Command<Flags> {
       }
 
       const mergedComposite = Composite.from(composites, compositeOptions)
-      const encodedAsJSON = JSON.stringify(mergedComposite.toJSON(), null, 2)
       if (this.flags.output !== undefined) {
         const output = this.flags.output
-        await fs.writeFile(output, encodedAsJSON)
+        await writeEncodedComposite(Composite.from(composites), output)
         this.spinner.succeed(
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(encodedAsJSON)
+        console.log(JSON.stringify(mergedComposite.toJSON(), null, 2))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
