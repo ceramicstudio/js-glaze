@@ -32,7 +32,6 @@ export default class CompositeMerge extends Command<Flags> {
       return
     }
 
-    this.spinner.start('Creating the composite...')
     try {
       const composites = await Promise.all(
         compositePaths.map(async (compositePath) => {
@@ -62,7 +61,8 @@ export default class CompositeMerge extends Command<Flags> {
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
-        this.spinner.succeed(encodedAsJSON)
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        console.log(encodedAsJSON)
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

@@ -28,7 +28,6 @@ export default class CompositeFromModel extends Command<Flags> {
       return
     }
 
-    this.spinner.start('Creating the composite...')
     try {
       const composite = await Composite.fromModels({
         ceramic: this.ceramic,
@@ -42,7 +41,8 @@ export default class CompositeFromModel extends Command<Flags> {
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
-        this.spinner.succeed(encodedAsJSON)
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        console.log(encodedAsJSON)
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

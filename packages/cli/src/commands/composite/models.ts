@@ -33,7 +33,6 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Loading the composite...')
     try {
       if (this.flags['id-only'] === true && this.flags.table === true) {
         this.spinner.fail(`--id-only and --table cannot be used together`)
@@ -63,7 +62,7 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
             modelDefinition.description || '',
           ])
         })
-        this.spinner.succeed(table.toString())
+        console.log(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
         const internalDefinition = composite.toParams().definition
@@ -81,7 +80,8 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
           }
           result.push(modelInfo)
         })
-        this.spinner.succeed(JSON.stringify(result, null, 2))
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        console.log(JSON.stringify(result, null, 2))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

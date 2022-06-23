@@ -30,7 +30,6 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Creating the composite...')
     try {
       const schema = await fs.readFile(resolvePath(this.args.schemaFilePath), { encoding: 'utf-8' })
       const composite = await Composite.create({ ceramic: this.ceramic, schema })
@@ -42,7 +41,8 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
-        this.spinner.succeed(encodedAsJSON)
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        console.log(JSON.stringify(composite.toJSON(), null, 2))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
