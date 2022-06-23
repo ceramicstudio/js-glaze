@@ -17,9 +17,9 @@ Object {
     },
   },
   "models": Object {
-    "GenericProfile": "genericProfileID",
-    "PersonProfile": "personProfileID",
-    "SocialProfile": "socialProfileID",
+    "GenericProfile": "GenericProfileID",
+    "PersonProfile": "PersonProfileID",
+    "SocialProfile": "SocialProfileID",
   },
   "objects": Object {
     "GenericProfile": Object {

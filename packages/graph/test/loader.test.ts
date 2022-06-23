@@ -1,4 +1,4 @@
-import type { CeramicApi, CeramicSigner, GenesisCommit } from '@ceramicnetwork/common'
+import type { CeramicApi } from '@ceramicnetwork/common'
 import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 import { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import { jest } from '@jest/globals'

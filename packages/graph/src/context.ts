@@ -15,6 +15,10 @@ export type ContextParams = {
    * Ceramic client instance.
    */
   ceramic: CeramicApi
+  /**
+   * @internal
+   */
+  loader?: DocumentLoader
 }
 
 /**
@@ -31,7 +35,7 @@ export class Context {
   constructor(params: ContextParams) {
     const { cache, ceramic } = params
     this.#ceramic = ceramic
-    this.#loader = new DocumentLoader({ ceramic, cache })
+    this.#loader = params.loader ?? new DocumentLoader({ ceramic, cache })
   }
 
   /**
@@ -92,7 +96,7 @@ export class Context {
   async updateDoc<Content = Record<string, any>>(
     id: string | StreamID,
     content: Content
-  ): Promise<ModelInstanceDocument<Content | null>> {
+  ): Promise<ModelInstanceDocument<Content>> {
     return await this.#loader.update(id, content)
   }
 

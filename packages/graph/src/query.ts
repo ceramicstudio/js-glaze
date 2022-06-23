@@ -52,14 +52,14 @@ export class RunningState implements RunningStateLike {
   }
 }
 
-function createModelInstance(state: StreamState): ModelInstanceDocument {
+export function createModelInstance(state: StreamState): ModelInstanceDocument {
   if (state.type !== ModelInstanceDocument.STREAM_TYPE_ID) {
     throw new Error(`Unexpected stream type: ${state.type}`)
   }
   return new ModelInstanceDocument(new RunningState(state), {})
 }
 
-function toIndexQuery(query: ConnectionQuery): IndexQuery {
+export function toIndexQuery(query: ConnectionQuery): IndexQuery {
   const { after, before, first, last, ...rest } = query
   if (first != null) {
     return { first, after: after ?? undefined, ...rest }
@@ -70,7 +70,7 @@ function toIndexQuery(query: ConnectionQuery): IndexQuery {
   throw new Error('Missing "first" or "last" connection argument')
 }
 
-function toRelayPageInfo(info: QueryPageInfo): RelayPageInfo {
+export function toRelayPageInfo(info: QueryPageInfo): RelayPageInfo {
   return { ...info, startCursor: info.startCursor ?? null, endCursor: info.endCursor ?? null }
 }
 
