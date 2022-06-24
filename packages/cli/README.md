@@ -36,6 +36,7 @@ glaze COMMAND
 - [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
 - [`glaze composite:merge PATHS`](#glaze-compositemerge-paths)
 - [`glaze composite:models PATH`](#glaze-compositemodels-path)
+- [`glaze composite:deploy PATH`](#glaze-compositedeploy-path)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
@@ -350,6 +351,18 @@ ARGUMENTS
 OPTIONS
   --id-only   display only the stream IDs of models included in the composite (exclusive to --table)
   --table     display the models in a table (excusive to --id-only)
+```
+
+### `glaze composite:deploy`
+
+deploy models included in the composite on connected ceramic node
+
+```
+USAGE
+  $ glaze composite:deploy PATH
+
+ARGUMENTS
+  PATH  a path to a file containing a composite's encoded definition
 ```
 
 ### `glaze model-instance:create MODELSTREAMID CONTENT`

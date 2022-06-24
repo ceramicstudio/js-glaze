@@ -1,5 +1,9 @@
 import { execa } from 'execa'
 import stripAnsi from 'strip-ansi'
+import { Model } from '@ceramicnetwork/stream-model'
+import { CeramicClient } from '@ceramicnetwork/http-client'
+import undeployedComposite from './mocks/encoded.composite.undeployed.json'
+import { EncodedCompositeDefinition } from '@glazed/types'
 
 const MODEL1_JSON =
   '{"name":"Model1","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
@@ -33,6 +37,49 @@ describe('composites', () => {
       expect(create.stdout.toString().includes('"version": "1.0",')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
       expect(create.stdout.toString().includes('"views":')).toBe(true)
+    }, 60000)
+  })
+
+  describe('composite:deploy', () => {
+    let wasModelLoaded: boolean
+    const waitForModelToLoad = async (
+      ceramic: CeramicClient,
+      modelStreamID: string,
+      timeout: number
+    ) => {
+      await Promise.race([
+        new Promise((resolve) =>
+          setTimeout(() => {
+            resolve(true)
+          }, timeout)
+        ),
+        Model.load(ceramic, modelStreamID).then((model) => {
+          wasModelLoaded = true
+          return model
+        }),
+      ])
+    }
+    test('composite deployment succeeds', async () => {
+      wasModelLoaded = false
+      const nonExistentModelStreamID = Object.keys(
+        (undeployedComposite as EncodedCompositeDefinition).models
+      )[0]
+      const ceramic = new CeramicClient()
+      await waitForModelToLoad(ceramic, nonExistentModelStreamID, 5000)
+      expect(wasModelLoaded).toBeFalsy()
+
+      const deploy = await execa('glaze', [
+        'composite:deploy',
+        'test/mocks/encoded.composite.undeployed.json',
+      ])
+      expect(
+        deploy.stderr
+          .toString()
+          .includes(`Deployed composite's models with streamIDs: ["${nonExistentModelStreamID}"]`)
+      ).toBe(true)
+
+      await waitForModelToLoad(ceramic, nonExistentModelStreamID, 5000)
+      expect(wasModelLoaded).toBeTruthy()
     }, 60000)
   })
 
