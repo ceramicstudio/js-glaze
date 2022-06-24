@@ -3,7 +3,7 @@ import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 
 export default class ModelInstanceReplace extends Command<
   CommandFlags,
-  { streamId: string; content: string }
+  { streamId: string; content: any }
 > {
   static description = 'replace content in a model instance stream'
 
@@ -13,6 +13,7 @@ export default class ModelInstanceReplace extends Command<
       name: 'content',
       required: true,
       description: 'New content of the model instance (JSON encoded as string)',
+      parse: JSON.parse,
     },
   ]
 
@@ -20,7 +21,7 @@ export default class ModelInstanceReplace extends Command<
     this.spinner.start('Replacing content in the model instance...')
     try {
       const mid = await ModelInstanceDocument.load(this.ceramic, this.args.streamId)
-      await mid.replace(JSON.parse(this.args.content))
+      await mid.replace(this.args.content)
       this.spinner.succeed(
         `Replaced content in model instance with stream id: ${mid.id.toString()}`
       )

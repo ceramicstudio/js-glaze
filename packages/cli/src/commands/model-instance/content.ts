@@ -1,7 +1,7 @@
 import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 import { Command, type QueryCommandFlags, STREAM_ID_ARG, SYNC_OPTION_FLAG } from '../../command.js'
 import { Flags } from '@oclif/core'
-import fs from 'fs-extra'
+import { write } from '../../fs.js'
 
 type ModelContentFlags = QueryCommandFlags & {
   output?: string
@@ -29,7 +29,7 @@ export default class ModelInstanceContent extends Command<ModelContentFlags, { s
       const midContentAsJSON = JSON.stringify(mid.content)
       if (this.flags.output != null) {
         const output = this.flags.output
-        await fs.writeFile(output, midContentAsJSON)
+        await write(output, midContentAsJSON)
         this.spinner.succeed(`Model instance's content was loaded and saved in ${output}`)
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O

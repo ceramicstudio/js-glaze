@@ -4,7 +4,7 @@ import { StreamID } from '@ceramicnetwork/streamid'
 
 export default class CreateModelInstance extends Command<
   CommandFlags,
-  { model: string; content: string }
+  { model: StreamID; content: any }
 > {
   static description = 'create a model instance stream from content encoded as JSON'
 
@@ -13,20 +13,22 @@ export default class CreateModelInstance extends Command<
       name: 'model',
       required: true,
       description: 'StreamID of the model whose instance is being created',
+      parse: StreamID.fromString,
     },
     {
       name: 'content',
       required: true,
       description: 'Content of the created model instance (JSON encoded as string)',
+      parse: JSON.parse,
     },
   ]
 
   async run(): Promise<void> {
     this.spinner.start('Creating the model instance...')
     try {
-      const mid = await ModelInstanceDocument.create(this.ceramic, JSON.parse(this.args.content), {
+      const mid = await ModelInstanceDocument.create(this.ceramic, this.args.content, {
         controller: this.authenticatedDID.id,
-        model: StreamID.fromString(this.args.model),
+        model: this.args.model,
       })
       this.spinner.succeed(`Created model instance with stream id: ${mid.id.toString()}`)
     } catch (e) {
