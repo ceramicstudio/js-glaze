@@ -137,7 +137,7 @@ describe('model-instances', () => {
         create.stderr.toString().split('with stream id: ')[1].replace('.', ''),
         `--sync=sync-always`,
       ])
-      expect(content.stdout.toString().includes('"stringPropName": "stringPropValue"')).toBe(true)
+      expect(content.stdout.toString().includes('"stringPropName":"stringPropValue"')).toBe(true)
     }, 60000)
   })
 })
