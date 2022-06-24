@@ -24,7 +24,6 @@ export default class ModelInstanceContent extends Command<ModelContentFlags, { s
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Loading the model instance...')
     try {
       const mid = await ModelInstanceDocument.load(this.ceramic, this.args.streamId)
       const midContentAsJSON = JSON.stringify(mid.content, null, 2)
@@ -33,7 +32,8 @@ export default class ModelInstanceContent extends Command<ModelContentFlags, { s
         await fs.writeFile(output, midContentAsJSON)
         this.spinner.succeed(`Model instance's content was loaded and saved in ${output}`)
       } else {
-        this.spinner.succeed(midContentAsJSON)
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        console.log(midContentAsJSON)
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
