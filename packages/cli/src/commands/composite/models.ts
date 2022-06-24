@@ -54,7 +54,7 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
             modelDefinition.description || '',
           ])
         })
-        console.log(table.toString())
+        this.log(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
         const internalDefinition = composite.toParams().definition
@@ -73,7 +73,7 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
           result.push(modelInfo)
         })
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(JSON.stringify(result, null, 2))
+        this.log(JSON.stringify(result))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

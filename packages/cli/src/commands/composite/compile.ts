@@ -26,8 +26,7 @@ export default class CompositeCompile extends Command<Flags> {
       return
     }
     try {
-      const compositePath = allArgs[0]
-      const outputPaths = allArgs.splice(1)
+      const [compositePath, ...outputPaths] = allArgs
       const composite = await readEncodedComposite(this.ceramic, compositePath)
       const runtimeDefinition = composite.toRuntime()
       outputPaths.map(async (outputPath) => {

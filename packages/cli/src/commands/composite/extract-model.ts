@@ -34,13 +34,12 @@ export default class CompositeExtractModel extends Command<Flags> {
       return
     }
     try {
-      const compositePath = allArgs[0]
-      const modelsToExtract = allArgs.splice(1)
+      const [compositePath, ...modelsToExtract] = allArgs
 
       const composite = await readEncodedComposite(this.ceramic, compositePath)
       const newComposite = composite.copy(modelsToExtract)
 
-      if (this.flags.output !== undefined) {
+      if (this.flags.output != null) {
         const output = this.flags.output
         await writeEncodedComposite(newComposite, output)
         this.spinner.succeed(
@@ -48,7 +47,7 @@ export default class CompositeExtractModel extends Command<Flags> {
         )
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(JSON.stringify(newComposite.toJSON(), null, 2))
+        this.log(JSON.stringify(newComposite.toJSON()))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

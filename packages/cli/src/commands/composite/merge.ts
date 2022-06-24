@@ -55,15 +55,15 @@ export default class CompositeMerge extends Command<Flags> {
       }
 
       const mergedComposite = Composite.from(composites, compositeOptions)
-      if (this.flags.output !== undefined) {
+      if (this.flags.output != null) {
         const output = this.flags.output
-        await writeEncodedComposite(Composite.from(composites), output)
+        await writeEncodedComposite(mergedComposite, output)
         this.spinner.succeed(
           `Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(JSON.stringify(mergedComposite.toJSON(), null, 2))
+        this.log(JSON.stringify(mergedComposite.toJSON()))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)

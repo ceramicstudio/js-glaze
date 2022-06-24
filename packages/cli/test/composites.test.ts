@@ -37,39 +37,38 @@ describe('composites', () => {
         'test/mocks/composite.schema',
         `--key=${seed}`,
       ])
-      expect(create.stdout.toString().includes('"version": "1.0",')).toBe(true)
+      expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
       expect(create.stdout.toString().includes('"views":')).toBe(true)
     }, 60000)
   })
 
   describe('composite:deploy', () => {
-    let wasModelLoaded: boolean
-    const waitForModelToLoad = async (
+    const checkIfModelExist = async (
       ceramic: CeramicClient,
       modelStreamID: string,
-      timeout: number
-    ) => {
+    ): Promise<boolean> => {
+      let wasModelLoaded = false
       await Promise.race([
         new Promise((resolve) =>
           setTimeout(() => {
             resolve(true)
-          }, timeout)
+          }, 5000)
         ),
         Model.load(ceramic, modelStreamID).then((model) => {
           wasModelLoaded = true
           return model
         }),
       ])
+      return wasModelLoaded
     }
     test('composite deployment succeeds', async () => {
-      wasModelLoaded = false
       const nonExistentModelStreamID = Object.keys(
         (undeployedComposite as EncodedCompositeDefinition).models
       )[0]
       const ceramic = new CeramicClient()
-      await waitForModelToLoad(ceramic, nonExistentModelStreamID, 5000)
-      expect(wasModelLoaded).toBeFalsy()
+      const doesModelExist = await checkIfModelExist(ceramic, nonExistentModelStreamID)
+      expect(doesModelExist).toBeFalsy()
 
       const deploy = await execa('glaze', [
         'composite:deploy',
@@ -81,8 +80,8 @@ describe('composites', () => {
           .includes(`Deployed composite's models with streamIDs: ["${nonExistentModelStreamID}"]`)
       ).toBe(true)
 
-      await waitForModelToLoad(ceramic, nonExistentModelStreamID, 5000)
-      expect(wasModelLoaded).toBeTruthy()
+      const doesModelExistNow = await checkIfModelExist(ceramic, nonExistentModelStreamID)
+      expect(doesModelExistNow).toBeTruthy()
     }, 60000)
   })
 
@@ -115,7 +114,7 @@ describe('composites', () => {
         model2StreamID,
         `--key=${seed}`,
       ])
-      expect(create.stdout.toString().includes('"version": "1.0",')).toBe(true)
+      expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
       expect(create.stdout.toString().includes('"views":')).toBe(true)
       expect(create.stdout.toString().includes(model1StreamID)).toBe(true)

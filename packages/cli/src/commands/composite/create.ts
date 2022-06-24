@@ -29,7 +29,7 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
   async run(): Promise<void> {
     try {
       const composite = await createComposite(this.ceramic, this.args.schemaFilePath)
-      if (this.flags.output !== undefined) {
+      if (this.flags.output != null) {
         const output = this.flags.output
         await writeEncodedComposite(composite, output)
         this.spinner.succeed(
@@ -37,7 +37,7 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
         )
       } else {
         // Not using the spinner here, so that the output can be piped using standard I/O
-        console.log(JSON.stringify(composite.toJSON(), null, 2))
+        this.log(JSON.stringify(composite.toJSON()))
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
