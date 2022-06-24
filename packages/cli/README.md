@@ -38,6 +38,7 @@ glaze COMMAND
 - [`glaze composite:merge PATHS`](#glaze-compositemerge-paths)
 - [`glaze composite:models PATH`](#glaze-compositemodels-path)
 - [`glaze composite:deploy PATH`](#glaze-compositedeploy-path)
+- [`glaze composite:compile PATH OUTPUTPATHS`](#glaze-compositecompile-path-outputpaths)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
@@ -380,6 +381,19 @@ USAGE
 
 ARGUMENTS
   PATH  a path to a file containing a composite's encoded definition
+```
+
+### `glaze composite:compile`
+
+creates a runtime representation of the composite and saves it in given path(s)
+
+```
+USAGE
+  $ glaze composite:compile PATH OUTPUTPATHS
+
+ARGUMENTS
+  PATH          a path to a file containing a composite's encoded definition
+  OUTPUTPATHS   one or more paths to save runtime representation in. Supported extensions: .json, .js and .ts
 ```
 
 ### `glaze model-instance:create MODELSTREAMID CONTENT`

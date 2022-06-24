@@ -6,6 +6,7 @@ import undeployedComposite from './mocks/encoded.composite.undeployed.json'
 import encodedProfilesComposite from './mocks/encoded.composite.profiles.json'
 import { EncodedCompositeDefinition } from '@glazed/types'
 import { Composite } from '@glazed/devtools'
+import fs from 'fs-extra'
 
 const MODEL1_JSON =
   '{"name":"Model1","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
@@ -134,7 +135,7 @@ describe('composites', () => {
         'test/mocks/encoded.composite.profiles.json',
         'test/mocks/encoded.composite.picture.post.json',
       ])
-      expect(merge.stderr.toString()).toMatchSnapshot()
+      expect(merge.stdout.toString()).toMatchSnapshot()
     }, 60000)
   })
 
@@ -207,6 +208,52 @@ describe('composites', () => {
       expect(newModelNames.length).toEqual(2)
       expect(newModelNames.includes(modelNames[0])).toBeTruthy()
       expect(newModelNames.includes(modelNames[1])).toBeTruthy()
+    }, 60000)
+  })
+
+  describe('composite:compile', () => {
+    test('composite compilation fails without the composite path and at least one output path param', async () => {
+      const compileWithNoParams = await execa('glaze', ['composite:compile'])
+      expect(
+        compileWithNoParams.stderr
+          .toString()
+          .includes('Missing composite path and at output path')
+      ).toBe(true)
+
+      const compileWithJustCompositePath = await execa('glaze', [
+        'composite:compile',
+        'test/mocks/encoded.composite.profiles.json',
+      ])
+      expect(
+        compileWithJustCompositePath.stderr
+          .toString()
+          .includes('Missing composite path and at output path')
+      ).toBe(true)
+    }, 60000)
+
+    test('composite compilation succeeds', async () => {
+      const dirpath = 'test/test_output_files'
+      const filename = 'runtime.composite.profiles'
+      const compileWithJustCompositePath = await execa('glaze', [
+        'composite:compile',
+        'test/mocks/encoded.composite.profiles.json',
+        `${dirpath}/${filename}.json`,
+        `${dirpath}/${filename}.js`,
+        `${dirpath}/${filename}.ts`,
+      ])
+      expect(
+        compileWithJustCompositePath.stderr
+          .toString()
+          .includes('Successfully saved compiled composite into given path(s)')
+      ).toBe(true)
+
+      const jsonRepresentation = await fs.readFile(`${dirpath}/${filename}.json`)
+      const jsRepresentation = await fs.readFile(`${dirpath}/${filename}.js`)
+      const tsRepresentation = await fs.readFile(`${dirpath}/${filename}.ts`)
+
+      expect(jsonRepresentation).toMatchSnapshot()
+      expect(jsRepresentation).toMatchSnapshot()
+      expect(tsRepresentation).toMatchSnapshot()
     }, 60000)
   })
 })
