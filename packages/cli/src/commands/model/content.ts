@@ -38,6 +38,5 @@ export default class ModelContent extends Command<ModelContentFlags, { streamId:
       this.spinner.fail((e as Error).message)
       return
     }
-    
   }
 }

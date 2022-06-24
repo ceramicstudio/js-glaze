@@ -31,13 +31,9 @@ export type ModelsWithEmbeds = {
 }
 
 /** @internal */
-export function compositeModelsAndCommonEmbedsFromGraphQLSchema(
-  schema: string | GraphQLSchema
-): ModelsWithEmbeds {
+export function parseCompositeSchema(schema: string | GraphQLSchema): ModelsWithEmbeds {
   if (typeof schema === 'string') {
-    schema = makeExecutableSchema({
-      typeDefs: [compositeDirectivesAndScalarsSchema, schema],
-    })
+    schema = makeExecutableSchema({ typeDefs: [compositeDirectivesAndScalarsSchema, schema] })
   }
 
   // Throw an error, if there are any unsupported types in the schema

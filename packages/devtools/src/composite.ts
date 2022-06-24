@@ -1,4 +1,5 @@
 import type { CeramicApi, SignedCommit } from '@ceramicnetwork/common'
+import { Model } from '@ceramicnetwork/stream-model'
 import type {
   CompositeViewsDefinition,
   EncodedCompositeDefinition,
@@ -13,8 +14,7 @@ import createObjectHash from 'object-hash'
 
 import { decodeSignedMap, encodeSignedMap } from './formats/json.js'
 import { createRuntimeDefinition } from './formats/runtime.js'
-import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from './schema.js'
-import { Model } from '@ceramicnetwork/stream-model'
+import { parseCompositeSchema } from './schema.js'
 
 const MODEL_GENESIS_OPTS = {
   anchor: true,
@@ -237,11 +237,12 @@ export class Composite {
    * wrapped in a Composite instance.
    */
   static async create(params: CreateParams): Promise<Composite> {
-    const { models } = compositeModelsAndCommonEmbedsFromGraphQLSchema(params.schema)
+    const { models, commonEmbeds } = parseCompositeSchema(params.schema)
 
     const definition: InternalCompositeDefinition = {
       version: Composite.VERSION,
       models: {},
+      commonEmbeds,
     }
     const commits: Record<string, any> = {}
     await Promise.all(
