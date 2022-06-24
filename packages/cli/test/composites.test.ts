@@ -3,7 +3,9 @@ import stripAnsi from 'strip-ansi'
 import { Model } from '@ceramicnetwork/stream-model'
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import undeployedComposite from './mocks/encoded.composite.undeployed.json'
+import encodedProfilesComposite from './mocks/encoded.composite.profiles.json'
 import { EncodedCompositeDefinition } from '@glazed/types'
+import { Composite } from '@glazed/devtools'
 
 const MODEL1_JSON =
   '{"name":"Model1","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
@@ -133,6 +135,78 @@ describe('composites', () => {
         'test/mocks/encoded.composite.picture.post.json',
       ])
       expect(merge.stderr.toString()).toMatchSnapshot()
+    }, 60000)
+  })
+
+  describe('composite:extract-model', () => {
+    test('composite by extracting models fails without the composite path and at least one model param', async () => {
+      const extractModelWithNoParams = await execa('glaze', ['composite:extract-model'])
+      expect(
+        extractModelWithNoParams.stderr
+          .toString()
+          .includes('Missing composite path and at least one model to extract')
+      ).toBe(true)
+
+      const extractModelWithJustCompositePath = await execa('glaze', [
+        'composite:extract-model',
+        'test/mocks/encoded.composite.picture.post.json',
+      ])
+      expect(
+        extractModelWithJustCompositePath.stderr
+          .toString()
+          .includes('Missing composite path and at least one model to extract')
+      ).toBe(true)
+    }, 60000)
+
+    test('composite by extracting models given by streamID succeeds', async () => {
+      const encodedComposite = encodedProfilesComposite as EncodedCompositeDefinition
+      expect(Object.keys(encodedComposite.models).length).toEqual(3)
+      const streamIDs = Object.keys(encodedComposite.models).sort()
+
+      const extractModel = await execa('glaze', [
+        'composite:extract-model',
+        'test/mocks/encoded.composite.profiles.json',
+        streamIDs[0],
+        streamIDs[1],
+      ])
+      const newEncodedComposite = JSON.parse(extractModel.stdout.toString()) as EncodedCompositeDefinition
+      expect(Object.keys(newEncodedComposite.models).length).toEqual(2)
+      expect(Object.keys(newEncodedComposite.models).includes(streamIDs[0])).toBeTruthy()
+      expect(Object.keys(newEncodedComposite.models).includes(streamIDs[1])).toBeTruthy()
+    }, 60000)
+
+    test('composite by extracting models given by name succeeds', async () => {
+      const encodedComposite = encodedProfilesComposite as EncodedCompositeDefinition
+      expect(Object.keys(encodedComposite.models).length).toEqual(3)
+      const ceramicClient = new CeramicClient()
+      const composite = await Composite.fromJSON({
+        ceramic: ceramicClient,
+        definition: encodedComposite,
+      })
+      const modelNames = Object.values(composite.toParams().definition.models).map((modelDefinition) => {
+          return modelDefinition.name
+        }
+      )
+      const extractModel = await execa('glaze', [
+        'composite:extract-model',
+        'test/mocks/encoded.composite.profiles.json',
+        modelNames[0],
+        modelNames[1],
+      ])
+      const newEncodedComposite = JSON.parse(
+        extractModel.stdout.toString()
+      ) as EncodedCompositeDefinition
+      const newComposite = await Composite.fromJSON({
+        ceramic: ceramicClient,
+        definition: newEncodedComposite,
+      })
+      expect(Object.keys(newEncodedComposite.models).length).toEqual(2)
+      const newModelNames = Object.values(newComposite.toParams().definition.models).map((modelDefinition) => {
+          return modelDefinition.name
+      })
+      expect(newModelNames.length).toEqual(2)
+      expect(newModelNames.includes(modelNames[0])).toBeTruthy()
+      expect(newModelNames.includes(modelNames[1])).toBeTruthy()
     }, 60000)
   })
 })

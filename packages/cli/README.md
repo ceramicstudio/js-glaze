@@ -34,6 +34,7 @@ glaze COMMAND
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
 - [`glaze composite:create INPUT`](#glaze-compositecreate)
 - [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
+- [`glaze composite:extract-model PATH MODELS`](#glaze-compositeextractmodel-path-models)
 - [`glaze composite:merge PATHS`](#glaze-compositemerge-paths)
 - [`glaze composite:models PATH`](#glaze-compositemodels-path)
 - [`glaze composite:deploy PATH`](#glaze-compositedeploy-path)
@@ -309,6 +310,22 @@ OPTIONS
 ### `glaze composite:from-model`
 
 create an encoded composite definition from a list of model stream ids
+
+```
+USAGE
+  $ glaze composite:from-model PATH MODELS
+
+ARGUMENTS
+  PATH    a path to an encoded composite definition file
+  MODELS  a list of models (identified by names of stream IDs) to extract from the given composite
+
+OPTIONS
+  -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:extract-model`
+
+create an encoded composite definition from another one by extracting given models
 
 ```
 USAGE
