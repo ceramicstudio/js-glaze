@@ -21,7 +21,8 @@ glaze COMMAND
 - [`glaze config:reset KEY`](#glaze-configreset-key)
 - [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
 - [`glaze config:show`](#glaze-configshow)
-- [`glaze did:generate-seed`](#glaze-didgenerateseed)
+- [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
+- [`glaze did:from-seed`](#glaze-didfromseed)
 - [`glaze did:create`](#glaze-didcreate)
 - [`glaze did:get MODEL ALIAS`](#glaze-didget-model-alias)
 - [`glaze did:inspect`](#glaze-didinspect)
@@ -109,6 +110,18 @@ generate a new random 32 byte seed and return its base 16 representation
 ```
 USAGE
   $ glaze did:generate-seed
+```
+
+### `glaze did:from-seed`
+
+create a new DID from seed passed either as an argument or as a value of the flag
+
+```
+USAGE
+  $ glaze did:from-seed SEED
+  
+OPTIONS
+  --did-key-seed  A random 32 byte seed represented as a base16 string (pass only if not passed as positional argument)
 ```
 
 ### `glaze did:create`
