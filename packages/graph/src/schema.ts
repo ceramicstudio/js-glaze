@@ -37,15 +37,16 @@ import {
 import { GraphQLDID } from 'graphql-scalars'
 
 import type { Context } from './context.js'
-// import { CeramicStreamReference } from './scalars.js'
+import type { UpdateDocOptions } from './loader.js'
+import { CeramicCommitID } from './scalars.js'
 
 const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
   boolean: GraphQLBoolean,
+  commitid: CeramicCommitID,
   did: GraphQLDID,
   float: GraphQLFloat,
   id: GraphQLID,
   integer: GraphQLInt,
-  // streamref: CeramicStreamReference,
   string: GraphQLString,
 }
 const SCALAR_FIELDS = Object.keys(SCALARS)
@@ -86,6 +87,14 @@ function createCeramicAccountObject(
   }
   return new GraphQLObjectType<string, Context>({ name: 'CeramicAccount', fields })
 }
+
+const UpdateOptionsInput = new GraphQLInputObjectType({
+  name: 'UpdateOptionsInput',
+  fields: {
+    replace: { type: GraphQLBoolean },
+    version: { type: CeramicCommitID },
+  },
+})
 
 /**
  * GraphQL schema creation parameters.
@@ -334,7 +343,7 @@ class SchemaBuilder {
     }
     if (field.viewType === 'documentVersion') {
       return {
-        type: new GraphQLNonNull(GraphQLString),
+        type: new GraphQLNonNull(CeramicCommitID),
         resolve: (doc): string => doc.commitId.toString(),
       }
     }
@@ -444,18 +453,19 @@ class SchemaBuilder {
       inputFields: () => ({
         id: { type: new GraphQLNonNull(GraphQLID) },
         content: { type: new GraphQLNonNull(this.#inputObjects[name]) },
+        options: { type: UpdateOptionsInput },
       }),
       outputFields: () => ({
         node: { type: new GraphQLNonNull(this.#types[name]) },
       }),
       mutateAndGetPayload: async (
-        input: { id: string; content: Record<string, any> },
+        input: { id: string; content: Record<string, any>; options?: UpdateDocOptions },
         ctx: Context
       ) => {
         if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
           throw new Error('Ceramic instance is not authenticated')
         }
-        return { node: await ctx.updateDoc(input.id, input.content) }
+        return { node: await ctx.updateDoc(input.id, input.content, input.options) }
       },
     })
   }

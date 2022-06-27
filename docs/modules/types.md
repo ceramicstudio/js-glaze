@@ -34,11 +34,19 @@ ___
 
 Composite-level views definition.
 
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `account?` | `Record`<`string`, `unknown`\> |
+| `models?` | `Record`<`string`, [`ModelViewsDefinition`](types.md#modelviewsdefinition)\> |
+| `root?` | `Record`<`string`, `unknown`\> |
+
 ___
 
 ### CustomRuntimeScalarType
 
-Ƭ **CustomRuntimeScalarType**: ``"did"`` \| ``"id"``
+Ƭ **CustomRuntimeScalarType**: ``"commitid"`` \| ``"did"`` \| ``"id"``
 
 Ceramic-specific runtime scalar types.
 
@@ -102,15 +110,9 @@ ___
 
 ### ModelViewDefinition
 
-Ƭ **ModelViewDefinition**: `Object`
+Ƭ **ModelViewDefinition**: { `type`: ``"documentAccount"``  } \| { `type`: ``"documentVersion"``  }
 
 Definition for a model view, a read-only property.
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `type` | ``"documentAccount"`` |
 
 ___
 
@@ -212,7 +214,7 @@ ___
 
 ### RuntimeScalar
 
-Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
+Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"commitid"``\> \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
 
 Runtime scalar representations.
 
@@ -288,7 +290,7 @@ ___
 
 ### RuntimeViewType
 
-Ƭ **RuntimeViewType**: ``"documentAccount"``
+Ƭ **RuntimeViewType**: ``"documentAccount"`` \| ``"documentVersion"``
 
 Runtime view types.
 

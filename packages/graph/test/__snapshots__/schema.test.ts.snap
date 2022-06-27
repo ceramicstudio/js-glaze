@@ -116,8 +116,17 @@ type UpdateGenericProfilePayload {
 input UpdateGenericProfileInput {
   id: ID!
   content: GenericProfileInput!
+  options: UpdateOptionsInput
   clientMutationId: String
 }
+
+input UpdateOptionsInput {
+  replace: Boolean
+  version: CeramicCommitID
+}
+
+\\"\\"\\"A Ceramic Commit ID\\"\\"\\"
+scalar CeramicCommitID
 
 type CreateSocialProfilePayload {
   node: SocialProfile!
@@ -144,6 +153,7 @@ type UpdateSocialProfilePayload {
 input UpdateSocialProfileInput {
   id: ID!
   content: SocialProfileInput!
+  options: UpdateOptionsInput
   clientMutationId: String
 }
 
@@ -174,6 +184,7 @@ type UpdatePersonProfilePayload {
 input UpdatePersonProfileInput {
   id: ID!
   content: PersonProfileInput!
+  options: UpdateOptionsInput
   clientMutationId: String
 }"
 `;

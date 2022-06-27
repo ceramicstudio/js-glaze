@@ -159,7 +159,7 @@ ___
 
 ### updateDoc
 
-▸ **updateDoc**<`Content`\>(`id`, `content`): `Promise`<`ModelInstanceDocument`<``null`` \| `Content`\>\>
+▸ **updateDoc**<`Content`\>(`id`, `content`, `options?`): `Promise`<`ModelInstanceDocument`<`Content`\>\>
 
 Update an existing document.
 
@@ -175,7 +175,8 @@ Update an existing document.
 | :------ | :------ |
 | `id` | `string` \| `StreamID` |
 | `content` | `Content` |
+| `options?` | `UpdateDocOptions` |
 
 #### Returns
 
-`Promise`<`ModelInstanceDocument`<``null`` \| `Content`\>\>
+`Promise`<`ModelInstanceDocument`<`Content`\>\>

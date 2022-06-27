@@ -26,7 +26,7 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
 const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
-  // CeramicStreamReference: 'streamref',
+  CeramicCommitID: 'commitid',
   GraphQLDID: 'did',
   GraphQLID: 'id',
 }
@@ -36,6 +36,7 @@ type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
   commonEmbeds?: Array<string>
+  views?: ModelViewsDefinition
 }
 
 type ExtractSchemaParams = {
@@ -50,21 +51,21 @@ export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
   #modelSchema: JSONSchema.Object
-  #modelViews: ModelViewsDefinition = {}
+  #modelViews: ModelViewsDefinition
   #objects: Record<string, RuntimeObjectFields> = {}
 
   constructor(params: RuntimeModelBuilderParams) {
     this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
-    // Post-MVP logic
-    // this.#modelViews = params.definition.views ?? {}
+    // TODO: merge params.definition.views when supported in ModelDefinition
+    this.#modelViews = params.views ?? {}
   }
 
   build(): Record<string, RuntimeObjectFields> {
     const modelObject = this._buildObject(this.#modelSchema)
     this.#objects[this.#modelName] = modelObject
-    // TODO: build relations
+    // TODO (post-MVP): build relations
     this._buildViews(modelObject, this.#modelViews)
     return this.#objects
   }
@@ -212,10 +213,11 @@ export class RuntimeModelBuilder {
     for (const [key, view] of Object.entries(views)) {
       switch (view.type) {
         case 'documentAccount':
-          // case 'documentVersion':
+        case 'documentVersion':
           object[key] = { type: 'view', viewType: view.type }
           continue
         default:
+          // @ts-ignore unexpected view type
           throw new Error(`Unsupported view type: ${view.type as string}`)
       }
     }
@@ -241,6 +243,7 @@ export function createRuntimeDefinition(
       commonEmbeds: definition.commonEmbeds,
       name: modelName,
       definition: modelDefinition,
+      views: definition.views?.models?.[modelID],
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type
@@ -260,7 +263,7 @@ export function createRuntimeDefinition(
     }
   }
 
-  // TODO: handle definition.views for additional models, accountData and root view
+  // TODO: handle definition.views for models relations, accountData and root view
 
   return runtime
 }

@@ -88,7 +88,7 @@ describe('context', () => {
 
     const content = {}
     await expect(context.updateDoc('testID', content)).resolves.toBe(expectedDoc)
-    expect(update).toBeCalledWith('testID', content)
+    expect(update).toBeCalledWith('testID', content, undefined)
   })
 
   test('queryConnection()', async () => {

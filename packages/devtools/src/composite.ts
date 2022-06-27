@@ -29,12 +29,9 @@ function isSignedCommit(input: Record<string, any>): input is SignedCommit {
 }
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
-  return {
-    aliases: {},
-    commonEmbeds: [],
-    views: { account: {}, root: {}, models: {} },
-    ...definition,
-  }
+  const emptyViews = { account: {}, root: {}, models: {} }
+  const views = definition.views ? { ...emptyViews, ...definition.views } : emptyViews
+  return { aliases: {}, commonEmbeds: [], ...definition, views }
 }
 
 function isSupportedVersion(supported: string, check: string): boolean {

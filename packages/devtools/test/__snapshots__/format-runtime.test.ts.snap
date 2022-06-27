@@ -131,3 +131,139 @@ Object {
   },
 }
 `;
+
+exports[`Runtime format Profile definition with added model view 1`] = `
+Object {
+  "accountData": Object {
+    "genericProfile": Object {
+      "name": "GenericProfile",
+      "type": "model",
+    },
+    "personProfile": Object {
+      "name": "PersonProfile",
+      "type": "model",
+    },
+    "socialProfile": Object {
+      "name": "SocialProfile",
+      "type": "model",
+    },
+  },
+  "models": Object {
+    "GenericProfile": "GenericProfileID",
+    "PersonProfile": "PersonProfileID",
+    "SocialProfile": "SocialProfileID",
+  },
+  "objects": Object {
+    "GenericProfile": Object {
+      "image": Object {
+        "refName": "ImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "name": Object {
+        "required": false,
+        "type": "string",
+      },
+      "version": Object {
+        "type": "view",
+        "viewType": "documentVersion",
+      },
+    },
+    "ImageMetadata": Object {
+      "height": Object {
+        "required": true,
+        "type": "integer",
+      },
+      "mimeType": Object {
+        "required": true,
+        "type": "string",
+      },
+      "size": Object {
+        "required": false,
+        "type": "integer",
+      },
+      "src": Object {
+        "required": true,
+        "type": "string",
+      },
+      "width": Object {
+        "required": true,
+        "type": "integer",
+      },
+    },
+    "ImageSources": Object {
+      "alternatives": Object {
+        "item": Object {
+          "refName": "ImageMetadata",
+          "refType": "object",
+          "required": false,
+          "type": "reference",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "original": Object {
+        "refName": "ImageMetadata",
+        "refType": "object",
+        "required": true,
+        "type": "reference",
+      },
+    },
+    "PersonProfile": Object {
+      "affiliations": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "birthDate": Object {
+        "required": false,
+        "type": "string",
+      },
+      "gender": Object {
+        "required": false,
+        "type": "string",
+      },
+      "homeLocation": Object {
+        "required": false,
+        "type": "string",
+      },
+      "nationalities": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "residenceCountry": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+    "SocialProfile": Object {
+      "background": Object {
+        "refName": "ImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "description": Object {
+        "required": false,
+        "type": "string",
+      },
+      "emoji": Object {
+        "required": false,
+        "type": "string",
+      },
+      "url": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+  },
+}
+`;
