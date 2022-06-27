@@ -1,11 +1,9 @@
 import { execa } from 'execa'
-import stripAnsi from 'strip-ansi'
 
 describe('streams', () => {
-  test('lists stream commits', async () => {
-    const key = await execa('glaze', ['did:create'])
-    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+  const seed = '062cfec570dbf9b6edfa17ab89b0cb61d6b88d4234796a95f7a1f5c29087187d'
 
+  test('lists stream commits', async () => {
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
     const commits = await execa('glaze', [
       'stream:commits',
@@ -15,9 +13,6 @@ describe('streams', () => {
   }, 60000)
 
   test('displays stream state', async () => {
-    const key = await execa('glaze', ['did:create'])
-    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
     const tileOutput = tile.stderr.toString()
 

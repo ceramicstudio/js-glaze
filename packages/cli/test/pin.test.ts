@@ -1,11 +1,9 @@
 import { execa } from 'execa'
-import stripAnsi from 'strip-ansi'
 
 describe('pins', () => {
-  test('stream is pinned', async () => {
-    const key = await execa('glaze', ['did:create'])
-    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+  const seed = '833b0a17492d5a9f0a8c08220877050c3d5ad5f0ea93acd062ed73d0346da63c'
 
+  test('stream is pinned', async () => {
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
     const pin = await execa('glaze', [
       'pin:add',
@@ -15,9 +13,6 @@ describe('pins', () => {
   }, 60000)
 
   test('stream removed', async () => {
-    const key = await execa('glaze', ['did:create'])
-    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
     await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])
 
@@ -29,9 +24,6 @@ describe('pins', () => {
   }, 60000)
 
   test('list pins', async () => {
-    const key = await execa('glaze', ['did:create'])
-    const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
     const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
     await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])
 

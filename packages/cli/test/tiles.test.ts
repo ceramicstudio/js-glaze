@@ -2,6 +2,8 @@ import { execa } from 'execa'
 import stripAnsi from 'strip-ansi'
 
 describe('tiles', () => {
+  const seed = 'e3bf5acd1f5f9ec004757ff22a47e4c07c8ef396a8cc81b4ade2f5664aca39d4'
+
   describe('tile:create', () => {
     test('tile creation fails', async () => {
       const create = await execa('glaze', ['tile:create'])
@@ -15,9 +17,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('tile creation succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
@@ -29,9 +28,6 @@ describe('tiles', () => {
 
   describe('tile:content', () => {
     test('displays tile content with syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       const content = await execa('glaze', [
         `tile:content`,
@@ -43,9 +39,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('displays tile content without syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       const content = await execa('glaze', [
         `tile:content`,
@@ -57,9 +50,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('fails when unsupported syncing option is passed', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       await expect(
         execa('glaze', [
@@ -73,9 +63,6 @@ describe('tiles', () => {
 
   describe('tile:show', () => {
     test('displays tile content with syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       const content = await execa('glaze', [
         `tile:show`,
@@ -87,9 +74,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('displays tile content without syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       const content = await execa('glaze', [
         `tile:show`,
@@ -101,9 +85,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('fails when unsupported syncing option is passed', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
       await expect(
         execa('glaze', [
@@ -117,9 +98,6 @@ describe('tiles', () => {
 
   describe('tile:update', () => {
     test('successfully updates tile', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
@@ -136,10 +114,9 @@ describe('tiles', () => {
   })
 
   describe('tile:deterministic', () => {
-    test('does not create a deterministic tile', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
+    const did = 'did:key:z6MknwirpC4SjiesG1p63ZbQ2D2yanpVxxqXUHdgnE4L4qQ5'
 
+    test('does not create a deterministic tile', async () => {
       const tile = await execa('glaze', ['tile:deterministic', '{}', `--key=${seed}`])
       expect(
         tile.stderr
@@ -149,9 +126,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('creates deterministic tile with syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
-
       const tile = await execa('glaze', [
         'tile:deterministic',
         JSON.stringify({
@@ -167,9 +141,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('creates deterministic tile without syncing option argument', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
-
       const tile = await execa('glaze', [
         'tile:deterministic',
         JSON.stringify({
@@ -185,9 +156,6 @@ describe('tiles', () => {
     }, 60000)
 
     test('fails when unsupported syncing option is passed', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const [did, seed] = stripAnsi(key.stderr.split('Created DID ')[1]).split(' with seed ')
-
       await expect(
         execa('glaze', [
           'tile:deterministic',
