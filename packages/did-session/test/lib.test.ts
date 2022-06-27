@@ -9,6 +9,9 @@ import { Wallet as EthereumWallet } from '@ethersproject/wallet'
 import { fromString, toString } from 'uint8arrays'
 import { DIDSession } from '../src'
 import { jest } from '@jest/globals'
+import { Wallet } from '@ethersproject/wallet'
+import { SiweMessage, Cacao } from 'ceramic-cacao'
+
 
 class EthereumProvider extends EventEmitter {
   wallet: EthereumWallet
@@ -42,6 +45,18 @@ function createEthereumAuthProvider(mnemonic?: string): Promise<EthereumAuthProv
   return Promise.resolve(new EthereumAuthProvider(provider, wallet.address))
 }
 
+const bytes32 = [
+  64, 168, 135,  95, 204, 113,  52,  90,
+  66, 192, 219, 241,  34, 128, 184, 176,
+  36, 249, 191, 223, 108, 240,   6, 119,
+ 226,   7,  81, 210,  31, 128, 182, 139
+]
+
+const testResources = [
+  '`ceramic://*?model=k2t6wyfsu4pfz0fnidk6tz3gak7tr8n5w34ah1c31w5vq98b62hir1pnn3j2ty',
+  '`ceramic://*?model=k2t6wyfsu4pgz0ftx664veuaf2qib95zj8je2x7pf89v6g5p7xa7n9eo45g64a',
+]
+
 declare global {
   const ceramic: CeramicApi
 }
@@ -54,6 +69,11 @@ describe('did-session', () => {
   beforeAll(async () => {
     authProvider = await createEthereumAuthProvider()
   })
+
+  const wallet = Wallet.fromMnemonic(
+    'despair voyage estate pizza main slice acquire mesh polar short desk lyrics'
+  )
+  const address = wallet.address
 
   test('creates did-session', () => {
     const session = new DIDSession({ authProvider })
@@ -102,5 +122,124 @@ describe('did-session', () => {
 
     await doc.update({ foo: 'boo' })
     expect(doc.content).toEqual({ foo: 'boo' })
+  })
+
+  test('isAuthorized/isExpired, with valid session and resources', async () => {
+    const session = new DIDSession({ authProvider, resources: testResources })
+    const did = await session.authorize({ domain: 'myApp' })
+    // Any session authorized and valid, true
+    expect(session.isAuthorized()).toBe(true)
+    expect(session.isExpired).toBe(false)
+    // Authorized for given resources, true
+    expect(session.isAuthorized(testResources)).toBe(true)
+    // Authorized for wildcard resource, false
+    expect(session.isAuthorized([`ceramic://*`])).toBe(false)
+  })
+
+  test('isAuthorized/isExpired, with expired session', async () => {
+    // Expired 5 min ago
+    const msg = new SiweMessage({
+      domain: 'service.org',
+      address: address,
+      statement: 'I accept the ServiceOrg Terms of Service: https://service.org/tos',
+      uri: 'did:key:z6MkrBdNdwUPnXDVD1DCxedzVVBpaGi8aSmoXFAeKNgtAer8',
+      version: '1',
+      nonce: '32891757',
+      issuedAt: '2021-09-30T16:25:24.000Z',
+      expirationTime: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+      chainId: '1',
+      resources: testResources,
+    })
+  
+    const signature = await wallet.signMessage(msg.toMessage())
+    msg.signature = signature
+    const cacao = Cacao.fromSiweMessage(msg)
+
+    const session = new DIDSession({ authProvider, cacao, keySeed: new Uint8Array(bytes32) })
+    expect(session.isExpired).toBe(true)
+    expect(session.isAuthorized()).toBe(false)
+  })
+
+  test('expiresInSecs, when session valid', async () => {
+    // Expires in 5 mins
+    const msg = new SiweMessage({
+      domain: 'service.org',
+      address: address,
+      statement: 'I accept the ServiceOrg Terms of Service: https://service.org/tos',
+      uri: 'did:key:z6MkrBdNdwUPnXDVD1DCxedzVVBpaGi8aSmoXFAeKNgtAer8',
+      version: '1',
+      nonce: '32891757',
+      issuedAt: '2021-09-30T16:25:24.000Z',
+      expirationTime: new Date(Date.now() + 1000 * 60 * 5).toISOString(),
+      chainId: '1',
+      resources: testResources,
+    })
+  
+    const signature = await wallet.signMessage(msg.toMessage())
+    msg.signature = signature
+    const cacao = Cacao.fromSiweMessage(msg)
+
+    const session = new DIDSession({ authProvider, cacao, keySeed: new Uint8Array(bytes32) })
+
+    // 5 sec buffer 
+    expect(session.expireInSecs).toBeGreaterThan( 60 * 5 - 5)
+    expect(session.expireInSecs).toBeLessThan( 60 * 5 + 5)
+  })
+
+  test('expiresInSecs, when session expired', async () => {
+    // Expired 5 min ago
+    const msg = new SiweMessage({
+      domain: 'service.org',
+      address: address,
+      statement: 'I accept the ServiceOrg Terms of Service: https://service.org/tos',
+      uri: 'did:key:z6MkrBdNdwUPnXDVD1DCxedzVVBpaGi8aSmoXFAeKNgtAer8',
+      version: '1',
+      nonce: '32891757',
+      issuedAt: '2021-09-30T16:25:24.000Z',
+      expirationTime: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+      chainId: '1',
+      resources: testResources,
+    })
+  
+    const signature = await wallet.signMessage(msg.toMessage())
+    msg.signature = signature
+    const cacao = Cacao.fromSiweMessage(msg)
+
+    const session = new DIDSession({ authProvider, cacao, keySeed: new Uint8Array(bytes32) })
+
+    expect(session.expireInSecs).toEqual(0)
+  })
+  
+  describe('Manage session state', () => {
+    test('serializes', async () => {
+      const msg = new SiweMessage({
+        domain: 'service.org',
+        address: address,
+        statement: 'I accept the ServiceOrg Terms of Service: https://service.org/tos',
+        uri: 'did:key:z6MkrBdNdwUPnXDVD1DCxedzVVBpaGi8aSmoXFAeKNgtAer8',
+        version: '1',
+        nonce: '32891757',
+        issuedAt: '2021-09-30T16:25:24.000Z',
+        chainId: '1',
+        resources: testResources,
+      })
+    
+      const signature = await wallet.signMessage(msg.toMessage())
+      msg.signature = signature
+      const cacao = Cacao.fromSiweMessage(msg)
+
+      const session = new DIDSession({ authProvider, cacao, keySeed: new Uint8Array(bytes32) })
+      const sessionStr = session.serialize()
+      expect(sessionStr).toMatchSnapshot()
+    })
+
+    test('roundtrip serialization, fromSession', async () => {
+      const session = new DIDSession({ authProvider })
+      const did = await session.authorize(opts)
+      const sessionStr = session.serialize()
+      const session2 = DIDSession.fromSession(sessionStr, authProvider)
+      const sessionStr2 = session2.serialize()
+      expect(sessionStr).toEqual(sessionStr2)
+    })
   })
 })

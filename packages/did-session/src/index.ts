@@ -45,12 +45,17 @@ import KeyDidResolver from 'key-did-resolver'
 import { randomBytes } from '@stablelib/random'
 import { DID } from 'dids'
 import type { EthereumAuthProvider, CapabilityOpts } from '@ceramicnetwork/blockchain-utils-linking'
+import type { Cacao } from 'ceramic-cacao'
+import * as u8a from 'uint8arrays'
 
 export type SessionParams = {
   /**
    * An authProvider for the chain you wish to support, only ETH supported at moment
    */
   authProvider: EthereumAuthProvider
+  resources?: Array<string>
+  keySeed?: Uint8Array
+  cacao?: Cacao
 }
 
 export async function createDIDKey(seed?: Uint8Array): Promise<DID> {
@@ -63,6 +68,23 @@ export async function createDIDKey(seed?: Uint8Array): Promise<DID> {
   return didKey
 }
 
+export function JSONToBase64url(object: Record<string, any>): string {
+  return u8a.toString(u8a.fromString(JSON.stringify(object)), 'base64url')
+}
+
+export function base64urlToJSON(s: string): Record<string, any> {
+  return JSON.parse(u8a.toString(u8a.fromString(s, 'base64url'))) as Record<string, any>
+}
+
+export function bytesToBase64(b: Uint8Array): string {
+  return u8a.toString(b, 'base64pad')
+}
+
+export function base64ToBytes(s: string): Uint8Array {
+  return u8a.fromString(s, 'base64pad')
+}
+
+
 /**
  * DID Session
  *
@@ -72,10 +94,16 @@ export async function createDIDKey(seed?: Uint8Array): Promise<DID> {
  */
 export class DIDSession {
   #authProvider: EthereumAuthProvider
+  #resources: Array<string>
   #did?: DID
+  #keySeed?: Uint8Array
+  #cacao?: Cacao
 
-  constructor(params: SessionParams) {
+  constructor(params: SessionParams ) {
     this.#authProvider = params.authProvider
+    this.#keySeed = params.keySeed
+    this.#cacao = params.cacao
+    this.#resources = params.resources ?? [`ceramic://*`]
   }
 
   /**
@@ -89,11 +117,12 @@ export class DIDSession {
    * Request authorization for session
    */
   async authorize(capabilityOpts: CapabilityOpts = {}): Promise<DID> {
-    const didKey = await createDIDKey()
+    this.#keySeed = randomBytes(32)
+    const didKey = await createDIDKey(this.#keySeed)
     // Pass through opts resources instead, resource arg does not support anything but streamids at moment
-    const opts = Object.assign({ resources: [`ceramic://*`] }, capabilityOpts)
-    const cacao = await this.#authProvider.requestCapability(didKey.id, [], opts)
-    const didWithCap = didKey.withCapability(cacao)
+    const opts = Object.assign({ resources: this.#resources }, capabilityOpts)
+    this.#cacao = await this.#authProvider.requestCapability(didKey.id, [], opts)
+    const didWithCap = didKey.withCapability(this.#cacao)
     await didWithCap.authenticate()
     this.#did = didWithCap
     return didWithCap
@@ -107,6 +136,72 @@ export class DIDSession {
       throw new Error('DID not available, has not authorized')
     }
     return this.#did
+  }
+
+  /**
+   * Serialize session into string, can store and initalize the same session again while valid
+   */
+  serialize(): string {
+    if (!this.#keySeed || !this.#cacao) throw new Error('No session to seralize')
+    const session = {
+      sessionKeySeed: bytesToBase64(this.#keySeed), 
+      cacao: this.#cacao
+    }
+    return JSONToBase64url(session)
+  }
+
+  /**
+   * Initialize a session from a serialized session string
+   */
+  static fromSession(session:string, authProvider: EthereumAuthProvider) {
+    const { sessionKeySeed, cacao } = base64urlToJSON(session)
+    return new DIDSession({ authProvider, cacao, keySeed: base64ToBytes(sessionKeySeed)})
+  }
+
+  /**
+   * Determine if a session is expired or not 
+   */
+  get isExpired(): boolean {
+    if (!this.#cacao) throw new Error('No session available')
+    const expTime = this.#cacao.p.exp
+    if (!expTime) return false
+    return Date.parse(expTime) < Date.now()
+  }
+
+  /**
+   * Number of seconds until a session expires 
+   */
+  get expireInSecs(): number {
+    if (!this.#cacao) throw new Error('No session available')
+    const expTime = this.#cacao.p.exp
+    if (!expTime) throw new Error('Session does not expire')
+    const timeDiff = Date.parse(expTime) - Date.now()
+    console.log(timeDiff)
+    return timeDiff < 0 ? 0 : timeDiff / 1000
+  }
+
+  /**
+   * Get the list of resources a session is authorized for
+   */
+  get authorizations(): Array<string> {
+    return this.#cacao?.p.resources ?? []
+  }
+
+  /**
+   * Get the session CACAO
+   */
+  get cacao(): Cacao {
+    if (!this.#cacao) throw new Error('No session available')
+    return this.#cacao
+  }
+
+  /**
+   * Determine if session is available and optionally if authorized for given resources 
+   */
+  isAuthorized(resources?: Array<string>): boolean {
+    if (!this.#did || this.isExpired) return false
+    if (!resources) return true
+    return resources.every(val => this.authorizations.includes(val))
   }
 
   /** DID string associated to the session instance. session.id == session.getDID().parent */
