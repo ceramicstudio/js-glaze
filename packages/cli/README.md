@@ -21,6 +21,7 @@ glaze COMMAND
 - [`glaze config:reset KEY`](#glaze-configreset-key)
 - [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
 - [`glaze config:show`](#glaze-configshow)
+- [`glaze did:generate-seed`](#glaze-didgenerateseed)
 - [`glaze did:create`](#glaze-didcreate)
 - [`glaze did:get MODEL ALIAS`](#glaze-didget-model-alias)
 - [`glaze did:inspect`](#glaze-didinspect)
@@ -99,6 +100,15 @@ USAGE
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze did:generate-seed`
+
+generate a new random 32 byte seed and return its base 16 representation
+
+```
+USAGE
+  $ glaze did:generate-seed
 ```
 
 ### `glaze did:create`
