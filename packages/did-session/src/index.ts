@@ -2,7 +2,7 @@
  * Manages user account and DID in web based environments.
  *
  * ## Purpose
- * 
+ *
  * Manages, creates and authorizes a DID session key for a user. Returns an authenticated DIDs instance
  * to be used in other Ceramic libraries. Supports did:pkh for blockchain accounts with Sign-In with
  * Ethereum and CACAO for authorization.
@@ -15,7 +15,7 @@
  *
  * ## Usage
  *
- * Create an instance, authorize and use DIDs where needed. At the moment, only Ethereum accounts 
+ * Create an instance, authorize and use DIDs where needed. At the moment, only Ethereum accounts
  * are supported with the EthereumAuthProvider. Additional accounts will be supported in the future.
  *
  * ```ts
@@ -32,7 +32,7 @@
  * // Uses DIDs in ceramic & glaze libraries, ie
  * const ceramic = new CeramicClient()
  * ceramic.did = did
- * 
+ *
  * // pass ceramic instance where needed
  *
  * ```
@@ -56,6 +56,11 @@ export type SessionParams = {
   resources?: Array<string>
   keySeed?: Uint8Array
   cacao?: Cacao
+}
+
+type SessionObj = {
+  sessionKeySeed: string
+  cacao: Cacao
 }
 
 export async function createDIDKey(seed?: Uint8Array): Promise<DID> {
@@ -84,7 +89,6 @@ export function base64ToBytes(s: string): Uint8Array {
   return u8a.fromString(s, 'base64pad')
 }
 
-
 /**
  * DID Session
  *
@@ -99,7 +103,7 @@ export class DIDSession {
   #keySeed?: Uint8Array
   #cacao?: Cacao
 
-  constructor(params: SessionParams ) {
+  constructor(params: SessionParams) {
     this.#authProvider = params.authProvider
     this.#keySeed = params.keySeed
     this.#cacao = params.cacao
@@ -144,8 +148,8 @@ export class DIDSession {
   serialize(): string {
     if (!this.#keySeed || !this.#cacao) throw new Error('No session to seralize')
     const session = {
-      sessionKeySeed: bytesToBase64(this.#keySeed), 
-      cacao: this.#cacao
+      sessionKeySeed: bytesToBase64(this.#keySeed),
+      cacao: this.#cacao,
     }
     return JSONToBase64url(session)
   }
@@ -153,13 +157,13 @@ export class DIDSession {
   /**
    * Initialize a session from a serialized session string
    */
-  static fromSession(session:string, authProvider: EthereumAuthProvider) {
-    const { sessionKeySeed, cacao } = base64urlToJSON(session)
-    return new DIDSession({ authProvider, cacao, keySeed: base64ToBytes(sessionKeySeed)})
+  static fromSession(session: string, authProvider: EthereumAuthProvider) {
+    const { sessionKeySeed, cacao } = base64urlToJSON(session) as SessionObj
+    return new DIDSession({ authProvider, cacao, keySeed: base64ToBytes(sessionKeySeed) })
   }
 
   /**
-   * Determine if a session is expired or not 
+   * Determine if a session is expired or not
    */
   get isExpired(): boolean {
     if (!this.#cacao) throw new Error('No session available')
@@ -169,7 +173,7 @@ export class DIDSession {
   }
 
   /**
-   * Number of seconds until a session expires 
+   * Number of seconds until a session expires
    */
   get expireInSecs(): number {
     if (!this.#cacao) throw new Error('No session available')
@@ -196,12 +200,12 @@ export class DIDSession {
   }
 
   /**
-   * Determine if session is available and optionally if authorized for given resources 
+   * Determine if session is available and optionally if authorized for given resources
    */
   isAuthorized(resources?: Array<string>): boolean {
     if (!this.#did || this.isExpired) return false
     if (!resources) return true
-    return resources.every(val => this.authorizations.includes(val))
+    return resources.every((val) => this.authorizations.includes(val))
   }
 
   /** DID string associated to the session instance. session.id == session.getDID().parent */

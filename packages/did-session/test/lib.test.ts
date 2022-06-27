@@ -11,7 +11,31 @@ import { DIDSession } from '../src'
 import { jest } from '@jest/globals'
 import { Wallet } from '@ethersproject/wallet'
 import { SiweMessage, Cacao } from 'ceramic-cacao'
+import { Model, ModelAccountRelation, ModelDefinition } from '@ceramicnetwork/stream-model'
+import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 
+const getModelDef = (name: string): ModelDefinition => ({
+  name: name,
+  accountRelation: ModelAccountRelation.LIST,
+  schema: {
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      myData: {
+        type: 'integer',
+        maximum: 10000,
+        minimum: 0,
+      },
+    },
+    required: ['myData'],
+  },
+})
+
+const CONTENT0 = { myData: 0 }
+const CONTENT1 = { myData: 1 }
+
+const MODEL_DEFINITION = getModelDef('MyModel')
 
 class EthereumProvider extends EventEmitter {
   wallet: EthereumWallet
@@ -46,10 +70,8 @@ function createEthereumAuthProvider(mnemonic?: string): Promise<EthereumAuthProv
 }
 
 const bytes32 = [
-  64, 168, 135,  95, 204, 113,  52,  90,
-  66, 192, 219, 241,  34, 128, 184, 176,
-  36, 249, 191, 223, 108, 240,   6, 119,
- 226,   7,  81, 210,  31, 128, 182, 139
+  64, 168, 135, 95, 204, 113, 52, 90, 66, 192, 219, 241, 34, 128, 184, 176, 36, 249, 191, 223, 108,
+  240, 6, 119, 226, 7, 81, 210, 31, 128, 182, 139,
 ]
 
 const testResources = [
@@ -65,9 +87,11 @@ describe('did-session', () => {
   let authProvider: EthereumAuthProvider
   jest.setTimeout(20000)
   const opts = { domain: 'myApp' }
+  let model: Model
 
   beforeAll(async () => {
     authProvider = await createEthereumAuthProvider()
+    model = await Model.create(ceramic, MODEL_DEFINITION)
   })
 
   const wallet = Wallet.fromMnemonic(
@@ -124,9 +148,26 @@ describe('did-session', () => {
     expect(doc.content).toEqual({ foo: 'boo' })
   })
 
+  // Enable with next release
+  test.skip('can create and update model instance stream', async () => {
+    const session = new DIDSession({ authProvider, resources: [model.id.toString()] })
+    const did = await session.authorize(opts)
+    ceramic.did = did
+
+    const doc = await ModelInstanceDocument.create(ceramic, CONTENT0, {
+      model: model.id,
+    })
+
+    expect(doc.content).toEqual(CONTENT0)
+    expect(doc.metadata.model.toString()).toEqual(model.id.toString())
+
+    await doc.replace(CONTENT1)
+    expect(doc.content).toEqual(CONTENT1)
+  })
+
   test('isAuthorized/isExpired, with valid session and resources', async () => {
     const session = new DIDSession({ authProvider, resources: testResources })
-    const did = await session.authorize({ domain: 'myApp' })
+    await session.authorize({ domain: 'myApp' })
     // Any session authorized and valid, true
     expect(session.isAuthorized()).toBe(true)
     expect(session.isExpired).toBe(false)
@@ -150,7 +191,7 @@ describe('did-session', () => {
       chainId: '1',
       resources: testResources,
     })
-  
+
     const signature = await wallet.signMessage(msg.toMessage())
     msg.signature = signature
     const cacao = Cacao.fromSiweMessage(msg)
@@ -174,16 +215,16 @@ describe('did-session', () => {
       chainId: '1',
       resources: testResources,
     })
-  
+
     const signature = await wallet.signMessage(msg.toMessage())
     msg.signature = signature
     const cacao = Cacao.fromSiweMessage(msg)
 
     const session = new DIDSession({ authProvider, cacao, keySeed: new Uint8Array(bytes32) })
 
-    // 5 sec buffer 
-    expect(session.expireInSecs).toBeGreaterThan( 60 * 5 - 5)
-    expect(session.expireInSecs).toBeLessThan( 60 * 5 + 5)
+    // 5 sec buffer
+    expect(session.expireInSecs).toBeGreaterThan(60 * 5 - 5)
+    expect(session.expireInSecs).toBeLessThan(60 * 5 + 5)
   })
 
   test('expiresInSecs, when session expired', async () => {
@@ -200,7 +241,7 @@ describe('did-session', () => {
       chainId: '1',
       resources: testResources,
     })
-  
+
     const signature = await wallet.signMessage(msg.toMessage())
     msg.signature = signature
     const cacao = Cacao.fromSiweMessage(msg)
@@ -209,7 +250,7 @@ describe('did-session', () => {
 
     expect(session.expireInSecs).toEqual(0)
   })
-  
+
   describe('Manage session state', () => {
     test('serializes', async () => {
       const msg = new SiweMessage({
@@ -223,7 +264,7 @@ describe('did-session', () => {
         chainId: '1',
         resources: testResources,
       })
-    
+
       const signature = await wallet.signMessage(msg.toMessage())
       msg.signature = signature
       const cacao = Cacao.fromSiweMessage(msg)
@@ -235,7 +276,7 @@ describe('did-session', () => {
 
     test('roundtrip serialization, fromSession', async () => {
       const session = new DIDSession({ authProvider })
-      const did = await session.authorize(opts)
+      await session.authorize(opts)
       const sessionStr = session.serialize()
       const session2 = DIDSession.fromSession(sessionStr, authProvider)
       const sessionStr2 = session2.serialize()
