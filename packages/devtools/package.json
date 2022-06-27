@@ -38,9 +38,9 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
-    "@ceramicnetwork/stream-tile": "^2.0.0",
-    "@ceramicnetwork/streamid": "^2.0.0",
+    "@ceramicnetwork/common": "^2.2.1",
+    "@ceramicnetwork/stream-tile": "^2.2.2",
+    "@ceramicnetwork/streamid": "^2.1.0",
     "@glazed/constants": "^0.2.0",
     "@glazed/did-datastore-model": "^0.2.0",
     "ajv": "^8.10.0",
@@ -51,7 +51,7 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/http-client": "^2.0.0",
+    "@ceramicnetwork/http-client": "^2.2.1",
     "@glazed/graphql-types": "^0.2.0",
     "@glazed/types": "^0.2.0",
     "@types/jest": "^27.4.1",

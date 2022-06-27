@@ -37,13 +37,13 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^2.0.0",
-    "@ceramicnetwork/streamid": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.2.2",
+    "@ceramicnetwork/streamid": "^2.1.0",
     "@glazed/constants": "^0.2.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
+    "@ceramicnetwork/common": "^2.2.1",
     "@glazed/types": "^0.2.0",
     "jest-environment-glaze": "^0.3.0"
   },

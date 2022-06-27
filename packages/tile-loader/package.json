@@ -1,6 +1,6 @@
 {
   "name": "@glazed/tile-loader",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "3Box Labs",
   "license": "(Apache-2.0 OR MIT)",
   "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
@@ -38,12 +38,12 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-tile": "^2.0.0",
+    "@ceramicnetwork/stream-tile": "^2.2.2",
     "dataloader": "^2.1.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.0.0",
-    "@ceramicnetwork/streamid": "^2.0.0"
+    "@ceramicnetwork/common": "^2.2.1",
+    "@ceramicnetwork/streamid": "^2.1.0"
   },
   "jest": {
     "extensionsToTreatAsEsm": [
