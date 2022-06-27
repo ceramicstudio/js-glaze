@@ -4,6 +4,7 @@ import { Flags } from '@oclif/core'
 import { Command, CommandFlags } from '../../command.js'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
+import { fromString } from 'uint8arrays'
 
 type Flags = CommandFlags & {
   didKeySeed?: string
@@ -43,7 +44,7 @@ export default class DIDFromSeed extends Command<Flags, { didKeySeed: string }> 
     }
     try {
       const hexString = this.args.didKeySeed || (this.flags['did-key-seed'] as string) || ''
-      const seed = Uint8Array.from(Buffer.from(hexString, 'hex'))
+      const seed = fromString(hexString, 'base16')
       const did = new DID({ provider: new Ed25519Provider(seed), resolver: this.resolverRegistry })
       await did.authenticate()
       this.spinner.succeed(`Created DID ${chalk.cyan(did.id)}`)
