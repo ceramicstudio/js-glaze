@@ -114,6 +114,34 @@ describe('composites', () => {
     }, 60000)
   })
 
+  describe('composite:models', () => {
+    test('composite model listing succeeds without formatting params', async () => {
+      const models = await execa('glaze', [
+        'composite:models',
+        'test/mocks/encoded.composite.profiles.json',
+      ])
+      expect(models.stdout.toString()).toMatchSnapshot()
+    }, 60000)
+
+    test('composite model listing succeeds with --id-only param', async () => {
+      const models = await execa('glaze', [
+        'composite:models',
+        'test/mocks/encoded.composite.profiles.json',
+        '--id-only',
+      ])
+      expect(models.stdout.toString()).toMatchSnapshot()
+    }, 60000)
+
+    test('composite model listing succeeds with --table', async () => {
+      const models = await execa('glaze', [
+        'composite:models',
+        'test/mocks/encoded.composite.profiles.json',
+        '--table',
+      ])
+      expect(models.stdout.toString()).toMatchSnapshot()
+    }, 60000)
+  })
+
   describe('composite:merge', () => {
     test('composite merge fails without the list of encoded composite paths', async () => {
       const create = await execa('glaze', ['composite:merge'])

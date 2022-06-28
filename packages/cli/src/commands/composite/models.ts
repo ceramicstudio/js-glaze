@@ -37,7 +37,8 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
     try {
       const composite = await readEncodedComposite(this.ceramic, this.args.compositePath)
       if (this.flags['id-only'] === true) {
-        this.spinner.succeed(JSON.stringify(Object.keys(composite.toParams().definition.models)))
+        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.log(JSON.stringify(Object.keys(composite.toParams().definition.models)))
       } else if (this.flags.table === true) {
         const table = new Table({
           head: ['Name', 'ID', 'Alias', 'Description'],
@@ -54,6 +55,7 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
             modelDefinition.description || '',
           ])
         })
+        // Not using the spinner here, so that the table is laid out properly
         this.log(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
