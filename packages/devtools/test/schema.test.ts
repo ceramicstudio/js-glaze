@@ -129,8 +129,8 @@ describe('schema', () => {
     expect(compositeDefinition.models.length).toEqual(1)
     const properties = compositeDefinition.models[0].schema.properties
     expect(properties).not.toBeFalsy()
-    expect(Object.keys(properties).length).toEqual(1)
-    expect(Object.keys(properties)[0]).toEqual('floatProp')
+    expect(Object.keys(properties || {}).length).toEqual(1)
+    expect(Object.keys(properties || {})[0]).toEqual('floatProp')
   })
 
   it('StreamReference scalar is supported and properly converted to ICD', () => {
@@ -198,8 +198,8 @@ describe('schema', () => {
     expect(compositeDefinition.models.length).toEqual(1)
     const properties = compositeDefinition.models[0].schema.properties
     expect(properties).not.toBeFalsy()
-    expect(Object.keys(properties).length).toEqual(1)
-    expect(Object.keys(properties)[0]).toEqual('numberProp')
+    expect(Object.keys(properties || {}).length).toEqual(1)
+    expect(Object.keys(properties || {})[0]).toEqual('numberProp')
   })
 
   it('Boolean scalar is supported and properly converted to ICD', () => {
