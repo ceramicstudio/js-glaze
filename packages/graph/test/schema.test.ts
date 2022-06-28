@@ -1,5 +1,5 @@
 import { createRuntimeDefinition, parseCompositeSchema } from '@glazed/devtools'
-import { profilesSchema } from '@glazed/test-schemas'
+import { noteSchema, profilesSchema } from '@glazed/test-schemas'
 import type { RuntimeCompositeDefinition } from '@glazed/types'
 
 import { printGraphQLSchema } from '../src'
@@ -19,5 +19,6 @@ function createSchemaDefinition(schema: string): RuntimeCompositeDefinition {
 describe('schema', () => {
   test('printGraphQLSchema()', () => {
     expect(printGraphQLSchema(createSchemaDefinition(profilesSchema))).toMatchSnapshot()
+    expect(printGraphQLSchema(createSchemaDefinition(noteSchema))).toMatchSnapshot()
   })
 })

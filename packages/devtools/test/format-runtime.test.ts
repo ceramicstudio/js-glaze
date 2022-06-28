@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { profilesSchema } from '@glazed/test-schemas'
+import { noteSchema, profilesSchema } from '@glazed/test-schemas'
 
 import { createRuntimeDefinition, getName, parseCompositeSchema } from '../src'
 
@@ -41,6 +41,18 @@ describe('Runtime format', () => {
     const runtime = createRuntimeDefinition({
       ...profilesDefinition,
       views: { models: { GenericProfileID: { version: { type: 'documentVersion' } } } },
+    })
+    expect(runtime).toMatchSnapshot()
+  })
+
+  test('Note model definition with views', () => {
+    const { models } = parseCompositeSchema(noteSchema)
+    const runtime = createRuntimeDefinition({
+      version: '1.0',
+      models: models.reduce((acc, model) => {
+        acc[`${model.name}ID`] = model
+        return acc
+      }, {}),
     })
     expect(runtime).toMatchSnapshot()
   })

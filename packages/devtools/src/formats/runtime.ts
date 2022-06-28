@@ -1,10 +1,12 @@
-import { ModelAccountRelation } from '@ceramicnetwork/stream-model'
+import {
+  ModelAccountRelation,
+  type ModelDefinition,
+  type ModelViewsDefinition,
+} from '@ceramicnetwork/stream-model'
 import type {
   CustomRuntimeScalarType,
   InternalCompositeDefinition,
   JSONSchema,
-  ModelDefinition,
-  ModelViewsDefinition,
   RuntimeCompositeDefinition,
   RuntimeList,
   RuntimeObjectField,
@@ -239,11 +241,13 @@ export function createRuntimeDefinition(
     // Add name to model ID mapping
     runtime.models[modelName] = modelID
     // Extract objects from model schema, relations and views
+    const modelViews = modelDefinition.views ?? {}
+    const compositeModelViews = definition.views?.models?.[modelID] ?? {}
     const modelBuilder = new RuntimeModelBuilder({
       commonEmbeds: definition.commonEmbeds,
       name: modelName,
       definition: modelDefinition,
-      views: definition.views?.models?.[modelID],
+      views: { ...modelViews, ...compositeModelViews },
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type

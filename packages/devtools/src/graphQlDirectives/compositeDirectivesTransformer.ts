@@ -1,4 +1,4 @@
-import type { ModelAccountRelation } from '@glazed/types'
+import type { ModelAccountRelation, ModelViewDefinition } from '@ceramicnetwork/stream-model'
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
 import {
   GraphQLSchema,
@@ -14,7 +14,8 @@ import {
   GraphQLFloat,
 } from 'graphql'
 import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './streamReference.scalar.js'
+
+import { CeramicCommitID } from './commitid.scalar.js'
 
 const MODEL_DIRECTIVE_NAME = 'model'
 const DOCUMENT_ACCOUNT_DIRECTIVE_NAME = 'documentAccount'
@@ -24,14 +25,16 @@ const LENGTH_DIRECTIVE_NAME = 'length'
 const INT_RANGE_DIRECTIVE_NAME = 'intRange'
 const FLOAT_RANGE_DIRECTIVE_NAME = 'floatRange'
 
+const VIEW_DIRECTIVE_NAMES = [DOCUMENT_ACCOUNT_DIRECTIVE_NAME, DOCUMENT_VERSION_DIRECTIVE_NAME]
+
 export type ModelDirective = {
   accountRelation: ModelAccountRelation
   description: string
 }
 
-export type DirectiveWithoutParams = {
-  type: string
-}
+export type ViewDirective = ModelViewDefinition
+
+export type DirectiveWithoutParams = ViewDirective
 
 export type LengthDirective = {
   min?: number
@@ -45,12 +48,11 @@ export type RangeDirective = {
 
 export type CeramicGraphQLTypeExtensions = {
   [MODEL_DIRECTIVE_NAME]?: ModelDirective
-  [DOCUMENT_ACCOUNT_DIRECTIVE_NAME]?: DirectiveWithoutParams
-  [DOCUMENT_VERSION_DIRECTIVE_NAME]?: DirectiveWithoutParams
   [ARRAY_LENGTH_DIRECTIVE_NAME]?: LengthDirective
   [LENGTH_DIRECTIVE_NAME]?: LengthDirective
   [INT_RANGE_DIRECTIVE_NAME]?: RangeDirective
   [FLOAT_RANGE_DIRECTIVE_NAME]?: RangeDirective
+  view?: ViewDirective
 }
 
 /** @internal */
@@ -134,9 +136,16 @@ function parseDirectiveWithoutParams(
       throw new Error(`@${directiveName} can only be applied to ${allowedType.toString()}s`)
     }
 
-    ceramicExtensions = {
-      ...ceramicExtensions,
-      [directiveName]: { type: directiveName },
+    if (VIEW_DIRECTIVE_NAMES.includes(directiveName)) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        view: { type: directiveName } as ViewDirective,
+      }
+    } else {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        [directiveName]: { type: directiveName },
+      }
     }
   }
   return ceramicExtensions
@@ -307,7 +316,7 @@ function fieldConfigMapperFactory(
     )
     ceramicExtensions = parseDirectiveWithoutParams(
       DOCUMENT_VERSION_DIRECTIVE_NAME,
-      GraphQLStreamReference,
+      CeramicCommitID,
       schema,
       fieldConfig,
       ceramicExtensions

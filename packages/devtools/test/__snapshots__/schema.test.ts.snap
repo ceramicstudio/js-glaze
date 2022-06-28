@@ -83,6 +83,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
     Object {
       "accountRelation": "single",
@@ -170,6 +171,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
     Object {
       "accountRelation": "single",
@@ -220,6 +222,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
   ],
 }

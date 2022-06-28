@@ -55,9 +55,7 @@ describe('models', () => {
       expect(lines.includes('"type":"object",')).toBe(true)
       expect(lines.includes('"properties":{')).toBe(true)
       expect(lines.includes('"accountRelation":"list"')).toBe(true)
-      expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(
-        true
-      )
+      expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(true)
     }, 60000)
   })
 

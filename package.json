@@ -20,6 +20,12 @@
     "build": "lerna run build:types && yarn turbo run build:js",
     "prepare": "yarn build"
   },
+  "resolutions": {
+    "@ceramicnetwork/common": "^2.2.2-rc.0",
+    "@ceramicnetwork/http-client": "^2.2.2-rc.0",
+    "@ceramicnetwork/stream-model-instance": "^0.2.2-rc.0",
+    "@ceramicnetwork/stream-model": "^0.2.2-rc.0"
+  },
   "devDependencies": {
     "@skypack/package-check": "^0.2.2",
     "@swc/cli": "^0.1.57",

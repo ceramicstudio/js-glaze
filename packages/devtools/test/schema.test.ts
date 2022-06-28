@@ -85,14 +85,14 @@ describe('schema', () => {
                 title: 'GraphQLDID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
-                maxLength: 80,
+                maxLength: 100,
               },
               requiredDidValue: {
                 type: 'string',
                 title: 'GraphQLDID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
-                maxLength: 80,
+                maxLength: 100,
               },
             },
             additionalProperties: false,
@@ -127,52 +127,52 @@ describe('schema', () => {
       }
       `)
     expect(compositeDefinition.models.length).toEqual(1)
-    const properties = compositeDefinition.models[0].schema.properties
+    const properties = compositeDefinition.models[0].schema.properties ?? {}
     expect(properties).not.toBeFalsy()
     expect(Object.keys(properties).length).toEqual(1)
     expect(Object.keys(properties)[0]).toEqual('floatProp')
   })
 
-  it('StreamReference scalar is supported and properly converted to ICD', () => {
+  it('CommitID scalar is supported and properly converted to ICD', () => {
     expect(
       parseCompositeSchema(`
-      type ModelWithStreamReferenceProp @model(
+      type ModelWithCommitIDProp @model(
         accountRelation: SINGLE,
         description: "Test model with stream reference properties"
       ) {
-        streamReferenceValue: StreamReference
-        requiredStreamReferenceValue: StreamReference!
+        commitIDValue: CommitID
+        requiredCommitIDValue: CommitID!
       }
       `)
     ).toMatchObject({
       models: [
         {
-          name: 'ModelWithStreamReferenceProp',
+          name: 'ModelWithCommitIDProp',
           accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
-              streamReferenceValue: {
+              commitIDValue: {
                 type: 'string',
-                title: 'CeramicStreamReference',
-                maxLength: 80,
+                title: 'CeramicCommitID',
+                maxLength: 200,
               },
-              requiredStreamReferenceValue: {
+              requiredCommitIDValue: {
                 type: 'string',
-                title: 'CeramicStreamReference',
-                maxLength: 80,
+                title: 'CeramicCommitID',
+                maxLength: 200,
               },
             },
             additionalProperties: false,
-            required: ['requiredStreamReferenceValue'],
+            required: ['requiredCommitIDValue'],
           },
         },
       ],
     })
   })
 
-  it('@documentVersion is only valid for StreamReferences', () => {
+  it('@documentVersion is only valid for CommitIDs', () => {
     expect(() => {
       parseCompositeSchema(`
       type ModelWithInvalidDocumentVersionProp @model(
@@ -182,7 +182,7 @@ describe('schema', () => {
         nonDIDValue: Int @documentVersion
       }
       `)
-    }).toThrow('@documentVersion can only be applied to StreamReferences')
+    }).toThrow('@documentVersion can only be applied to CommitIDs')
   })
 
   it('fields annotated with @documentVersion are not added to the resulting schema', () => {
@@ -192,11 +192,11 @@ describe('schema', () => {
         description: "Test model with a @documentVersion directive"
       ) {
         numberProp: Int!
-        version: StreamReference @documentVersion
+        version: CommitID @documentVersion
       }
       `)
     expect(compositeDefinition.models.length).toEqual(1)
-    const properties = compositeDefinition.models[0].schema.properties
+    const properties = compositeDefinition.models[0].schema.properties ?? {}
     expect(properties).not.toBeFalsy()
     expect(Object.keys(properties).length).toEqual(1)
     expect(Object.keys(properties)[0]).toEqual('numberProp')

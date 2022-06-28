@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Runtime format Note model definition with views 1`] = `
+Object {
+  "accountData": Object {
+    "noteCollection": Object {
+      "name": "Note",
+      "type": "collection",
+    },
+  },
+  "models": Object {
+    "Note": "NoteID",
+  },
+  "objects": Object {
+    "Note": Object {
+      "author": Object {
+        "type": "view",
+        "viewType": "documentAccount",
+      },
+      "text": Object {
+        "required": true,
+        "type": "string",
+      },
+      "title": Object {
+        "required": true,
+        "type": "string",
+      },
+      "version": Object {
+        "type": "view",
+        "viewType": "documentVersion",
+      },
+    },
+  },
+}
+`;
+
 exports[`Runtime format Profile - multiples models with common local references 1`] = `
 Object {
   "accountData": Object {

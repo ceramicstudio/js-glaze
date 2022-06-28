@@ -188,3 +188,96 @@ input UpdatePersonProfileInput {
   clientMutationId: String
 }"
 `;
+
+exports[`schema printGraphQLSchema() 2`] = `
+"type Query {
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  account(id: DID!): CeramicAccount!
+  viewer: CeramicAccount
+}
+
+\\"\\"\\"An object with an ID\\"\\"\\"
+interface Node {
+  \\"\\"\\"The id of the object.\\"\\"\\"
+  id: ID!
+}
+
+type CeramicAccount {
+  id: DID!
+  isViewer: Boolean!
+  data: CeramicAccountData!
+}
+
+\\"\\"\\"
+A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
+\\"\\"\\"
+scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
+
+type CeramicAccountData {
+  noteCollection(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): Note
+}
+
+type Note implements Node {
+  id: ID!
+  title: String!
+  text: String!
+  author: CeramicAccount!
+  version: CeramicCommitID!
+}
+
+\\"\\"\\"A Ceramic Commit ID\\"\\"\\"
+scalar CeramicCommitID
+
+type Mutation {
+  createNote(input: CreateNoteInput!): CreateNotePayload
+  updateNote(input: UpdateNoteInput!): UpdateNotePayload
+}
+
+type CreateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input CreateNoteInput {
+  content: NoteInput!
+  clientMutationId: String
+}
+
+input NoteInput {
+  title: String!
+  text: String!
+}
+
+type UpdateNotePayload {
+  node: Note!
+  clientMutationId: String
+}
+
+input UpdateNoteInput {
+  id: ID!
+  content: NoteInput!
+  options: UpdateOptionsInput
+  clientMutationId: String
+}
+
+input UpdateOptionsInput {
+  replace: Boolean
+  version: CeramicCommitID
+}"
+`;

@@ -213,7 +213,7 @@ class SchemaBuilder {
         const config: GraphQLFieldConfigMap<ModelInstanceDocument, Context> = {}
         if (modelID != null) {
           config.id = {
-            // Use GraphQLID rather than CeramicStreamReference here for Relay compliance
+            // Use GraphQLID here for Relay compliance
             type: new GraphQLNonNull(GraphQLID),
             resolve: (doc) => doc.id.toString(),
           }

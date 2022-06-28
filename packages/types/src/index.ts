@@ -4,10 +4,10 @@
  * @module types
  */
 
-import type { ModelDefinition } from '@ceramicnetwork/stream-model'
+import type { ModelDefinition, ModelViewsDefinition } from '@ceramicnetwork/stream-model'
 import type { DagJWSResult, JWSSignature } from 'dids'
 
-export type { Model, ModelAccountRelation, ModelDefinition } from '@ceramicnetwork/stream-model'
+export type { Model, ModelDefinition } from '@ceramicnetwork/stream-model'
 export type { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 export type { JSONSchema } from 'json-schema-typed/draft-2020-12'
 
@@ -36,13 +36,6 @@ export type EncodedStreamCommits = Array<EncodedDagJWSResult>
 //   | { type: 'setIndex' }
 
 // export type ModelRelationsDefinition = Record<string, ModelRelationDefinition>
-
-/** Definition for a model view, a read-only property. */
-export type ModelViewDefinition = { type: 'documentAccount' } | { type: 'documentVersion' }
-// | { type: 'referencedBy'; property: string }
-
-/** Mapping of names to types of read-only properties. */
-export type ModelViewsDefinition = Record<string, ModelViewDefinition>
 
 // export type ReferencedFromViewDefinition = {
 //   type: 'ReferencedFrom'

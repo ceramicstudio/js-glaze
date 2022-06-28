@@ -424,10 +424,10 @@
     typedjson "^1.8.0"
     uint8arrays "^3.0.0"
 
-"@ceramicnetwork/common@^2.0.0-rc.0", "@ceramicnetwork/common@^2.0.4", "@ceramicnetwork/common@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@ceramicnetwork/common/-/common-2.2.1.tgz#cb485bf88d1037914b98ce315240cbad517c0d85"
-  integrity sha512-1+R4CegurQ9T+DqE8jF3+RUfomblVJfx0DDqbX8qGgUhRlUdjmcOEcCaEmSS3W143e0NxbDM5NtJDdjkW/aybQ==
+"@ceramicnetwork/common@^2.0.0-rc.0", "@ceramicnetwork/common@^2.0.4", "@ceramicnetwork/common@^2.2.1", "@ceramicnetwork/common@^2.2.2-rc.0":
+  version "2.2.2-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/common/-/common-2.2.2-rc.0.tgz#99de1a5ad40a34302ba4b3113b4bf916a835e888"
+  integrity sha512-pTX8W3FPR17/Av50qXAEhWUSi6b+soINTg3ZOFFn7jiX1jNUuWP3XMqldtXVMU8ttUiOCxcT5CN2euQ2HrTt6Q==
   dependencies:
     "@ceramicnetwork/streamid" "^2.1.0"
     "@opentelemetry/exporter-prometheus" "^0.28.0"
@@ -482,16 +482,16 @@
     sqlite3 "^5.0.8"
     uint8arrays "^3.0.0"
 
-"@ceramicnetwork/http-client@^2.0.4", "@ceramicnetwork/http-client@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@ceramicnetwork/http-client/-/http-client-2.2.1.tgz#de24435da7e28208d6ebf9c3d0fa786dc0705ca0"
-  integrity sha512-C7jjWYtlsd8EmL6/NdKlhtTsafPh406WxBF6w4t+amhX4j2EBNXHBRMI7Qc5rOPrBhv0pH6C3J3ssi4xWUiV5Q==
+"@ceramicnetwork/http-client@^2.0.4", "@ceramicnetwork/http-client@^2.2.1", "@ceramicnetwork/http-client@^2.2.2-rc.0":
+  version "2.2.2-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/http-client/-/http-client-2.2.2-rc.0.tgz#87b573214a2d3e1ec7492c3f577b7c1c498d8227"
+  integrity sha512-S3hghDgl4eudwS3F9ntNrZHnqv7YFncsi3EQ4Y3m+xim+bpvcJruk9iVRZ78q834W0F8cI8qqsoWo5TUWGoW0w==
   dependencies:
-    "@ceramicnetwork/common" "^2.2.1"
-    "@ceramicnetwork/stream-caip10-link" "^2.0.7"
-    "@ceramicnetwork/stream-model" "^0.2.1"
-    "@ceramicnetwork/stream-model-instance" "^0.2.1"
-    "@ceramicnetwork/stream-tile" "^2.2.2"
+    "@ceramicnetwork/common" "^2.2.2-rc.0"
+    "@ceramicnetwork/stream-caip10-link" "^2.0.8-rc.0"
+    "@ceramicnetwork/stream-model" "^0.2.2-rc.0"
+    "@ceramicnetwork/stream-model-instance" "^0.2.2-rc.0"
+    "@ceramicnetwork/stream-tile" "^2.2.3-rc.0"
     "@ceramicnetwork/streamid" "^2.1.0"
     query-string "^7.1.0"
     rxjs "^7.5.2"
@@ -573,6 +573,16 @@
     caip "~1.1.0"
     did-resolver "^3.1.5"
 
+"@ceramicnetwork/stream-caip10-link@^2.0.8-rc.0":
+  version "2.0.8-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-caip10-link/-/stream-caip10-link-2.0.8-rc.0.tgz#94808f8c038cc33c743f206cc4dc598d42ae43fc"
+  integrity sha512-8AnWN3yK+qQmjNMThTTQ5BMFhc1pVqhR2Ecg8GenS5NLio+IKwz3QbAdqaIvqbeVHiTDCWOgYsRdb3zXlGVVfg==
+  dependencies:
+    "@ceramicnetwork/common" "^2.2.2-rc.0"
+    "@ceramicnetwork/streamid" "^2.1.0"
+    caip "~1.1.0"
+    did-resolver "^3.1.5"
+
 "@ceramicnetwork/stream-model-handler@^0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-model-handler/-/stream-model-handler-0.2.1.tgz#c0fa89c780b7888545748394b2cbfb5824bef66d"
@@ -601,24 +611,24 @@
     lodash.clonedeep "^4.5.0"
     uint8arrays "^3.0.0"
 
-"@ceramicnetwork/stream-model-instance@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-model-instance/-/stream-model-instance-0.2.1.tgz#a4c2ec6e60a2c560e42cbd933fb7e0f65c538202"
-  integrity sha512-dAjnzgToVrWeK2R04DFuXtMAQeduBW0cGH/iQtDyWFwNo9SJVJvdLK1DJY11/R71bY1XZE/qh0CG9rH/03FTGg==
+"@ceramicnetwork/stream-model-instance@^0.2.1", "@ceramicnetwork/stream-model-instance@^0.2.2-rc.0":
+  version "0.2.2-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-model-instance/-/stream-model-instance-0.2.2-rc.0.tgz#dfdde430406c21573166cb0e6b1472f8112e1d56"
+  integrity sha512-Ol++dg4NGrViRDywYkHwpOf+SipIT2tw+EeEUjEjGFLvY0bEnA6vuCnP3a8DxiPxALVF3yqwQr0XQfq/XZ7j/A==
   dependencies:
-    "@ceramicnetwork/common" "^2.2.1"
+    "@ceramicnetwork/common" "^2.2.2-rc.0"
     "@ceramicnetwork/streamid" "^2.1.0"
     "@ipld/dag-cbor" "^7.0.0"
     "@stablelib/random" "^1.0.1"
     fast-json-patch "^3.1.0"
     uint8arrays "^3.0.0"
 
-"@ceramicnetwork/stream-model@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-model/-/stream-model-0.2.1.tgz#0f5419c4dbaa2e274e998c31802c484f87265b79"
-  integrity sha512-WSJdF/gV5zw1gYHy3peRfmHvq0aV47qHeBJKYkQDqP6VvkE5BszborfaIdzXGxY5xPEESpgPVCxFIjjS2kQ9tg==
+"@ceramicnetwork/stream-model@^0.2.1", "@ceramicnetwork/stream-model@^0.2.2-rc.0":
+  version "0.2.2-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-model/-/stream-model-0.2.2-rc.0.tgz#22a4a0cd9c19ad07d414170fd952d6bd6ba8d5a6"
+  integrity sha512-3ZEFnpX66yInp4qrrTMSJ/OkUlIGjsJn1ZpVdzKo/6+H4rcOFzcL4q574y8Klw++99bKyX61LUQgs9N8p6JLlg==
   dependencies:
-    "@ceramicnetwork/common" "^2.2.1"
+    "@ceramicnetwork/common" "^2.2.2-rc.0"
     "@ceramicnetwork/streamid" "^2.1.0"
     "@ipld/dag-cbor" "^7.0.0"
     "@stablelib/random" "^1.0.1"
@@ -646,6 +656,18 @@
   integrity sha512-HYRD5cOlpLBP14nkngdfQ1OOHxl2I5OPE2jHuhDfI5NfPdb4+tpYAcng1Dr3yWSYoC7lQ+WyVnJLWbjY/sSUeQ==
   dependencies:
     "@ceramicnetwork/common" "^2.2.1"
+    "@ceramicnetwork/streamid" "^2.1.0"
+    "@ipld/dag-cbor" "^7.0.0"
+    "@stablelib/random" "^1.0.1"
+    fast-json-patch "^3.1.0"
+    uint8arrays "^3.0.0"
+
+"@ceramicnetwork/stream-tile@^2.2.3-rc.0":
+  version "2.2.3-rc.0"
+  resolved "https://registry.yarnpkg.com/@ceramicnetwork/stream-tile/-/stream-tile-2.2.3-rc.0.tgz#8298c4920aac3be55ab8a82780bdd7502eccdf80"
+  integrity sha512-f7rRXD4/i3psb27AtJpLEKoqU2FxhTYDCrMwwmfUZEU3LpZUKeRd6jt0FJTRA9s2JLb7rMVwV3JjXxoB0ERg6w==
+  dependencies:
+    "@ceramicnetwork/common" "^2.2.2-rc.0"
     "@ceramicnetwork/streamid" "^2.1.0"
     "@ipld/dag-cbor" "^7.0.0"
     "@stablelib/random" "^1.0.1"
@@ -3031,7 +3053,7 @@
     widest-line "^3.1.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^1.9.5":
+"@oclif/core@^1.9.3":
   version "1.9.5"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.9.5.tgz#4dd00f35fceb89906245da791b14bd503103771a"
   integrity sha512-C605Cr4RhHTMXYApLxdVt/PL6IA5cguN6MPvsMjxkvBppk2Fvcsj05dtRdDqShskRpZzHtu65emG1tHy8TWPWQ==
@@ -13654,10 +13676,10 @@ ora@^5.4.1:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-ora@^6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/ora/-/ora-6.1.1.tgz#71e729509b4a782f62e17aba01ae07c8bdb77763"
-  integrity sha512-MTvBeGEswwM6CjyuidTH4nKdmG8YudnsZZRMdpj4YFfm7qDnvOSTKU2biA3dqdnL5m5CT3R9bWk+M3A8fqtEZw==
+ora@^6.1.0:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/ora/-/ora-6.1.2.tgz#7b3c1356b42fd90fb1dad043d5dbe649388a0bf5"
+  integrity sha512-EJQ3NiP5Xo94wJXIzAyOtSb0QEIAUu7m8t6UZ9krbz0vAJqr92JpcK/lEXg91q6B9pEGqrykkd2EQplnifDSBw==
   dependencies:
     bl "^5.0.0"
     chalk "^5.0.0"
