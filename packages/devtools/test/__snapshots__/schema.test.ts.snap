@@ -55,6 +55,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -131,6 +132,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -183,6 +185,7 @@ Object {
               "minLength": 0,
               "type": "string",
             },
+            "maxItems": 20,
             "type": "array",
           },
           "birthDate": Object {
@@ -202,10 +205,11 @@ Object {
           },
           "nationalities": Object {
             "items": Object {
+              "maxLength": 2,
+              "minLength": 0,
               "type": "string",
             },
             "maxItems": 5,
-            "minItems": 1,
             "type": "array",
           },
           "residenceCountry": Object {
