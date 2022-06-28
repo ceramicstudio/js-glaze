@@ -12,8 +12,11 @@ const NOTE_QUERY = gql`
   query Note($id: ID!) {
     note: node(id: $id) {
       ... on Note {
+        __typename
+        id
         text
         title
+        version
       }
     }
   }
@@ -23,7 +26,9 @@ const UPDATE_NOTE_MUTATION = gql`
   mutation UpdateNote($input: UpdateNoteInput!) {
     updateNote(input: $input) {
       node {
+        __typename
         id
+        version
       }
     }
   }
@@ -38,7 +43,9 @@ export default function NoteScreen() {
 
   const onSave = useCallback(() => {
     const content = { title: noteQuery.data.note.title, text: textRef.current?.value ?? '' }
-    updateNote({ variables: { input: { id, content } } })
+    updateNote({
+      variables: { input: { id, content, options: { version: noteQuery.data.note.version } } },
+    })
   }, [id, noteQuery.data])
 
   if (noteQuery.error) {

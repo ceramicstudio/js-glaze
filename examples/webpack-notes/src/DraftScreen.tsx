@@ -23,7 +23,9 @@ const CREATE_NOTE_MUTATION = gql`
 `
 
 export default function DraftScreen() {
-  const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION)
+  const [createNote, { loading }] = useMutation(CREATE_NOTE_MUTATION, {
+    refetchQueries: ['NotesList'],
+  })
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const textRef = useRef<HTMLTextAreaElement>(null)
