@@ -56,6 +56,7 @@ export default function NoteScreen() {
           className={classes.noteTextarea}
           disabled={updateNoteState.loading}
           defaultValue={noteQuery.data.note.text}
+          key={id}
           ref={textRef}
           minRows={10}
           maxRows={20}

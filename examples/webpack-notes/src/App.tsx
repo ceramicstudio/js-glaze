@@ -44,7 +44,7 @@ export default function App() {
           Glaze documentation
         </Button>
       </Toolbar>
-      <NotesList />
+      <NotesList key={authState.status === 'done' ? authState.id : 'empty'} />
     </>
   )
   return (

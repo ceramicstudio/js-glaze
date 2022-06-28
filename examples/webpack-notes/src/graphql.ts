@@ -8,9 +8,9 @@ export const graph = new GraphClient({ ceramic: 'http://localhost:7007', definit
 
 const cache = new InMemoryCache({
   typePolicies: {
-    CeramicAccount: {
+    CeramicAccountData: {
       fields: {
-        noteConnection: relayStylePagination(),
+        noteCollection: relayStylePagination(),
       },
     },
   },
@@ -18,12 +18,15 @@ const cache = new InMemoryCache({
 
 const link = new ApolloLink((operation) => {
   return new Observable((observer) => {
+    console.log('execute query', operation)
     graph.execute(operation.query, operation.variables).then(
       (result) => {
+        console.log('query result', result)
         observer.next(result)
         observer.complete()
       },
       (error) => {
+        console.log('query error', error)
         observer.error(error)
       }
     )

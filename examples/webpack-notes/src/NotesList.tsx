@@ -12,18 +12,20 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from './auth'
 
 const NOTES_LIST_QUERY = gql`
-  query NotesList {
+  query NotesList($cursor: String) {
     viewer {
-      noteConnection(last: 20, before: $cursor) {
-        edges {
-          node {
-            id
-            title
+      data {
+        noteCollection(last: 20, before: $cursor) {
+          edges {
+            node {
+              id
+              title
+            }
           }
-        }
-        pageInfo {
-          hasPreviousPage
-          startCursor
+          pageInfo {
+            hasPreviousPage
+            startCursor
+          }
         }
       }
     }
@@ -34,9 +36,11 @@ export default function NotesList() {
   const [authState] = useAuth()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data, loading, fetchMore } = useQuery(NOTES_LIST_QUERY)
+  const { data, loading, fetchMore } = useQuery(NOTES_LIST_QUERY, {
+    skip: authState.status !== 'done',
+  })
 
-  const pageInfo = data?.viewer.noteConnection.pageInfo
+  const pageInfo = data?.viewer.data.noteCollection.pageInfo
   useEffect(() => {
     if (!loading && pageInfo?.hasNextPage) {
       fetchMore({ variables: { cursor: pageInfo.startCursor } })
@@ -58,7 +62,7 @@ export default function NotesList() {
     return <List>{draft}</List>
   }
 
-  const notes = data.viewer.noteConnection.edges.map((edge) => {
+  const notes = data.viewer.data.noteCollection.edges.map((edge) => {
     const note = edge.node
 
     return (

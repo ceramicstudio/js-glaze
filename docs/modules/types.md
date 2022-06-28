@@ -39,7 +39,7 @@ Composite-level views definition.
 | Name | Type |
 | :------ | :------ |
 | `account?` | `Record`<`string`, `unknown`\> |
-| `models?` | `Record`<`string`, [`ModelViewsDefinition`](types.md#modelviewsdefinition)\> |
+| `models?` | `Record`<`string`, `ModelViewsDefinition`\> |
 | `root?` | `Record`<`string`, `unknown`\> |
 
 ___
@@ -105,22 +105,6 @@ ___
 
 Composite definition used internally by the [`Composite`](../classes/devtools.Composite.md)
 development tools.
-
-___
-
-### ModelViewDefinition
-
-Ƭ **ModelViewDefinition**: { `type`: ``"documentAccount"``  } \| { `type`: ``"documentVersion"``  }
-
-Definition for a model view, a read-only property.
-
-___
-
-### ModelViewsDefinition
-
-Ƭ **ModelViewsDefinition**: `Record`<`string`, [`ModelViewDefinition`](types.md#modelviewdefinition)\>
-
-Mapping of names to types of read-only properties.
 
 ___
 
