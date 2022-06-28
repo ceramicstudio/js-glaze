@@ -1,5 +1,4 @@
 import { execa } from 'execa'
-import stripAnsi from 'strip-ansi'
 import { Model } from '@ceramicnetwork/stream-model'
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import undeployedComposite from './mocks/encoded.composite.undeployed.json'
@@ -15,6 +14,8 @@ const MODEL2_JSON =
   '{"name":"Model2","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
 
 describe('composites', () => {
+  const seed = '3a6de55a5ef33d110a5a37438704b0f0cb77ca5977131775a70ffd1c23779c8c'
+
   describe('composite:create', () => {
     test('composite creation fails without the schemaFilePath param', async () => {
       await expect(execa('glaze', ['composite:create'])).rejects.toThrow(
@@ -29,9 +30,6 @@ describe('composites', () => {
     }, 60000)
 
     test('composite creation succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         'composite:create',
         'test/mocks/composite.schema',
@@ -46,7 +44,7 @@ describe('composites', () => {
   describe('composite:deploy', () => {
     const checkIfModelExist = async (
       ceramic: CeramicClient,
-      modelStreamID: string,
+      modelStreamID: string
     ): Promise<boolean> => {
       let wasModelLoaded = false
       await Promise.race([
@@ -90,9 +88,6 @@ describe('composites', () => {
     let model2StreamID: string
 
     beforeAll(async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const model1Create = await execa('glaze', ['model:create', MODEL1_JSON, `--key=${seed}`])
       const model2Create = await execa('glaze', ['model:create', MODEL2_JSON, `--key=${seed}`])
       model1StreamID = model1Create.stderr.toString().split('with streamID ')[1]
@@ -105,9 +100,6 @@ describe('composites', () => {
     }, 60000)
 
     test('composite from model succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         'composite:from-model',
         model1StreamID,
@@ -169,7 +161,9 @@ describe('composites', () => {
         streamIDs[0],
         streamIDs[1],
       ])
-      const newEncodedComposite = JSON.parse(extractModel.stdout.toString()) as EncodedCompositeDefinition
+      const newEncodedComposite = JSON.parse(
+        extractModel.stdout.toString()
+      ) as EncodedCompositeDefinition
       expect(Object.keys(newEncodedComposite.models).length).toEqual(2)
       expect(Object.keys(newEncodedComposite.models).includes(streamIDs[0])).toBeTruthy()
       expect(Object.keys(newEncodedComposite.models).includes(streamIDs[1])).toBeTruthy()
@@ -183,7 +177,8 @@ describe('composites', () => {
         ceramic: ceramicClient,
         definition: encodedComposite,
       })
-      const modelNames = Object.values(composite.toParams().definition.models).map((modelDefinition) => {
+      const modelNames = Object.values(composite.toParams().definition.models).map(
+        (modelDefinition) => {
           return modelDefinition.name
         }
       )
@@ -201,9 +196,11 @@ describe('composites', () => {
         definition: newEncodedComposite,
       })
       expect(Object.keys(newEncodedComposite.models).length).toEqual(2)
-      const newModelNames = Object.values(newComposite.toParams().definition.models).map((modelDefinition) => {
+      const newModelNames = Object.values(newComposite.toParams().definition.models).map(
+        (modelDefinition) => {
           return modelDefinition.name
-      })
+        }
+      )
       expect(newModelNames.length).toEqual(2)
       expect(newModelNames.includes(modelNames[0])).toBeTruthy()
       expect(newModelNames.includes(modelNames[1])).toBeTruthy()
@@ -214,9 +211,7 @@ describe('composites', () => {
     test('composite compilation fails without the composite path and at least one output path param', async () => {
       const compileWithNoParams = await execa('glaze', ['composite:compile'])
       expect(
-        compileWithNoParams.stderr
-          .toString()
-          .includes('Missing composite path and at output path')
+        compileWithNoParams.stderr.toString().includes('Missing composite path and at output path')
       ).toBe(true)
 
       const compileWithJustCompositePath = await execa('glaze', [

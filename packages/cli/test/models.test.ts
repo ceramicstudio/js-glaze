@@ -5,6 +5,8 @@ const MY_MODEL_JSON =
   '{"name":"MyModel","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
 
 describe('models', () => {
+  const seed = '0fb8e384cfced0f4c767118a68a66e8992c32d1bb7b02155113af1c7d5179502'
+
   describe('model:create', () => {
     test('model creation fails without the content param', async () => {
       await expect(execa('glaze', ['model:create'])).rejects.toThrow(
@@ -23,9 +25,6 @@ describe('models', () => {
     }, 60000)
 
     test('model creation succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
       expect(create.stderr.toString().includes('Created MyModel with streamID')).toBe(true)
     }, 60000)
@@ -39,9 +38,6 @@ describe('models', () => {
     }, 60000)
 
     test('model content display succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
 
       const content = await execa('glaze', [
@@ -55,9 +51,7 @@ describe('models', () => {
       expect(lines.includes('"type":"object",')).toBe(true)
       expect(lines.includes('"properties":{')).toBe(true)
       expect(lines.includes('"accountRelation":"list"')).toBe(true)
-      expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(
-        true
-      )
+      expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(true)
     }, 60000)
   })
 
@@ -69,12 +63,6 @@ describe('models', () => {
     }, 60000)
 
     test('model controller display succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const did = stripAnsi(key.stderr.toString().split('with seed ')[0])
-        .split('Created DID ')[1]
-        .replace(' ', '')
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
 
       const controller = await execa('glaze', [
@@ -83,7 +71,9 @@ describe('models', () => {
         `--sync=sync-always`,
       ])
 
-      expect(controller.stderr.toString().split("It's controller is ")[1]).toEqual(did)
+      expect(controller.stderr.toString().split("It's controller is ")[1]).toEqual(
+        'did:key:z6MkpRhEWywReoFtQMQGqSmTu5mp9vQVok86Qha2sn6e32Db'
+      )
     }, 60000)
   })
 })

@@ -21,13 +21,8 @@ glaze COMMAND
 - [`glaze config:reset KEY`](#glaze-configreset-key)
 - [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
 - [`glaze config:show`](#glaze-configshow)
-- [`glaze did:create`](#glaze-didcreate)
-- [`glaze did:get MODEL ALIAS`](#glaze-didget-model-alias)
-- [`glaze did:inspect`](#glaze-didinspect)
-- [`glaze did:merge MODEL ALIAS CONTENTS`](#glaze-didmerge-model-alias-contents)
-- [`glaze did:set MODEL ALIAS CONTENTS`](#glaze-didset-model-alias-contents)
-- [`glaze did:sign CONTENTS`](#glaze-didsign-contents)
-- [`glaze did:verify JWS`](#glaze-didverify-jws)
+- [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
+- [`glaze did:from-seed`](#glaze-didfromseed)
 - [`glaze help [COMMAND]`](#glaze-help-command)
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
@@ -101,116 +96,25 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-### `glaze did:create`
+### `glaze did:generate-seed`
 
-create a new DID
-
-```
-USAGE
-  $ glaze did:create
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze did:get MODEL ALIAS`
-
-get the contents of a record in a DID DataStore
+generate a new random 32 byte seed and return its base 16 representation
 
 ```
 USAGE
-  $ glaze did:get MODEL ALIAS
-
-ARGUMENTS
-  MODEL  Model name or path to JSON file
-  ALIAS  Definition alias
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-  --did=did              DID
+  $ glaze did:generate-seed
 ```
 
-### `glaze did:inspect`
+### `glaze did:from-seed`
 
-inspect the contents of a DID DataStore
+create a new DID from seed passed either as an argument or as a value of the flag
 
 ```
 USAGE
-  $ glaze did:inspect
-
+  $ glaze did:from-seed SEED
+  
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-  --did=did              DID
-```
-
-### `glaze did:merge MODEL ALIAS CONTENTS`
-
-merge the contents of a record in a DID DataStore
-
-```
-USAGE
-  $ glaze did:merge MODEL ALIAS CONTENTS
-
-ARGUMENTS
-  MODEL     Model name or path to JSON file
-  ALIAS     Definition alias
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:set MODEL ALIAS CONTENTS`
-
-set the contents of a record in a DID DataStore
-
-```
-USAGE
-  $ glaze did:set MODEL ALIAS CONTENTS
-
-ARGUMENTS
-  MODEL     Model name or path to JSON file
-  ALIAS     Definition alias
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:sign CONTENTS`
-
-create a JSON Web Signature
-
-```
-USAGE
-  $ glaze did:sign CONTENTS
-
-ARGUMENTS
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:verify JWS`
-
-verify a JSON Web Signature
-
-```
-USAGE
-  $ glaze did:verify JWS
-
-ARGUMENTS
-  JWS  JSON Web Signature
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
+  --did-key-seed  A random 32 byte seed represented as a base16 string (pass only if not passed as positional argument)
 ```
 
 ### `glaze help [COMMAND]`

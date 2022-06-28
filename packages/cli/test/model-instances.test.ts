@@ -1,5 +1,4 @@
 import { execa } from 'execa'
-import stripAnsi from 'strip-ansi'
 
 const MY_MODEL_JSON =
   '{"name":"MyModel","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'
@@ -9,14 +8,16 @@ const MODEL_INSTANCE_JSON = '{"stringPropName":"stringPropValue"}'
 const REPLACED_MODEL_INSTANCE_JSON = '{"stringPropName":"updatedStringPropValue"}'
 
 describe('model-instances', () => {
-  let didSeed: string
+  const modelAccountSeed = '476e1fd8124d0c09f0b764b396bfcbf43e8817b2e81a131f88f4bdd35fbdb8b8'
+  const midAccountSeed = '5c51566adf1d050e3048dd79be47c256925f0ea4232084cf064836e68f8316e5'
   let modelStreamID: string
 
   beforeAll(async () => {
-    const key = await execa('glaze', ['did:create'])
-    didSeed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
-    const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${didSeed}`])
+    const create = await execa('glaze', [
+      'model:create',
+      MY_MODEL_JSON,
+      `--key=${modelAccountSeed}`,
+    ])
     modelStreamID = create.stderr.toString().split('Created MyModel with streamID ')[1]
   }, 60000)
 
@@ -48,32 +49,25 @@ describe('model-instances', () => {
     }, 60000)
 
     test('model instance creation succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--key=${seed}`,
+        `--key=${modelAccountSeed}`,
       ])
       expect(create.stderr.toString().includes('Created model instance with stream id:')).toBe(true)
     }, 60000)
   })
 
   describe('model-instance:replace', () => {
-    let midControllerSeed: string
     let midStreamID: string
 
     beforeAll(async () => {
-      const key = await execa('glaze', ['did:create'])
-      midControllerSeed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--key=${midControllerSeed}`,
+        `--key=${midAccountSeed}`,
       ])
       midStreamID = create.stderr.toString().split('Created model instance with stream id: ')[1]
     }, 60000)
@@ -105,7 +99,7 @@ describe('model-instances', () => {
         'model-instance:replace',
         midStreamID,
         REPLACED_MODEL_INSTANCE_JSON,
-        `--key=${midControllerSeed}`,
+        `--key=${midAccountSeed}`,
       ])
 
       expect(
@@ -122,14 +116,11 @@ describe('model-instances', () => {
     }, 60000)
 
     test('model instance content display succeeds', async () => {
-      const key = await execa('glaze', ['did:create'])
-      const seed = stripAnsi(key.stderr.toString().split('with seed ')[1])
-
       const create = await execa('glaze', [
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--key=${seed}`,
+        `--key=${midAccountSeed}`,
       ])
 
       const content = await execa('glaze', [
