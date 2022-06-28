@@ -59,13 +59,26 @@ export function createModelInstance(state: StreamState): ModelInstanceDocument {
   return new ModelInstanceDocument(new RunningState(state), {})
 }
 
-export function toIndexQuery(query: ConnectionQuery): IndexQuery {
-  const { after, before, first, last, ...rest } = query
+export function toIndexQuery(source: ConnectionQuery): IndexQuery {
+  const { after, before, first, last, ...base } = source
+  let query: IndexQuery
   if (first != null) {
-    return { first, after: after ?? undefined, ...rest }
+    query = { ...base, first }
+    if (after != null) {
+      // eslint-disable-next-line
+      // @ts-ignore defined as read-only
+      query.after = after
+    }
+    return query
   }
   if (last != null) {
-    return { last, before: before ?? undefined, ...rest }
+    query = { ...base, last }
+    if (before != null) {
+      // eslint-disable-next-line
+      // @ts-ignore defined as read-only
+      query.before = before
+    }
+    return query
   }
   throw new Error('Missing "first" or "last" connection argument')
 }
@@ -81,7 +94,7 @@ export async function queryConnection(
   const result = await ceramic.index.queryIndex(toIndexQuery(query))
   const edges: Array<Edge<ModelInstanceDocument>> = result.entries.map((state) => {
     const node = createModelInstance(state)
-    return { cursor: node.id.toString(), node }
+    return { node } as Edge<ModelInstanceDocument>
   })
   return { edges, pageInfo: toRelayPageInfo(result.pageInfo) }
 }

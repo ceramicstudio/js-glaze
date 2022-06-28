@@ -26,6 +26,7 @@ A field whose value conforms to the standard DID format as specified in did-core
 scalar DID @specifiedBy(url: "https://www.w3.org/TR/did-core/")
 
 type CeramicAccountData {
+  profile: Profile
   noteCollection(
     """Returns the items in the list that come after the specified cursor."""
     after: String
@@ -39,13 +40,6 @@ type CeramicAccountData {
     """Returns the last n items from the list."""
     last: Int
   ): Note
-  profile: Profile
-}
-
-type Note implements Node {
-  id: ID!
-  text: String!
-  title: String!
 }
 
 type Profile implements Node {
@@ -53,11 +47,53 @@ type Profile implements Node {
   name: String!
 }
 
+type Note implements Node {
+  id: ID!
+  text: String!
+  title: String!
+  author: CeramicAccount!
+  version: CeramicCommitID!
+}
+
+"""A Ceramic Commit ID"""
+scalar CeramicCommitID
+
 type Mutation {
-  createNote(input: CreateNoteInput!): CreateNotePayload
-  updateNote(input: UpdateNoteInput!): UpdateNotePayload
   createProfile(input: CreateProfileInput!): CreateProfilePayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  createNote(input: CreateNoteInput!): CreateNotePayload
+  updateNote(input: UpdateNoteInput!): UpdateNotePayload
+}
+
+type CreateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input CreateProfileInput {
+  content: ProfileInput!
+  clientMutationId: String
+}
+
+input ProfileInput {
+  name: String!
+}
+
+type UpdateProfilePayload {
+  node: Profile!
+  clientMutationId: String
+}
+
+input UpdateProfileInput {
+  id: ID!
+  content: ProfileInput!
+  options: UpdateOptionsInput
+  clientMutationId: String
+}
+
+input UpdateOptionsInput {
+  replace: Boolean
+  version: CeramicCommitID
 }
 
 type CreateNotePayload {
@@ -83,30 +119,6 @@ type UpdateNotePayload {
 input UpdateNoteInput {
   id: ID!
   content: NoteInput!
-  clientMutationId: String
-}
-
-type CreateProfilePayload {
-  node: Profile!
-  clientMutationId: String
-}
-
-input CreateProfileInput {
-  content: ProfileInput!
-  clientMutationId: String
-}
-
-input ProfileInput {
-  name: String!
-}
-
-type UpdateProfilePayload {
-  node: Profile!
-  clientMutationId: String
-}
-
-input UpdateProfileInput {
-  id: ID!
-  content: ProfileInput!
+  options: UpdateOptionsInput
   clientMutationId: String
 }

@@ -31,7 +31,7 @@
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/cli": "^2.3.0",
+    "@ceramicnetwork/cli": "^2.4.0-rc.0",
     "@ceramicnetwork/common": "^2.2.0",
     "@glazed/devtools": "^0.2.0",
     "@glazed/devtools-node": "^0.1.0",

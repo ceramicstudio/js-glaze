@@ -230,7 +230,40 @@ type CeramicAccountData {
 
     \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
     last: Int
-  ): Note
+  ): NoteConnection
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type NoteConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [NoteEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type NoteEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Note
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Note implements Node {

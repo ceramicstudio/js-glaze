@@ -171,7 +171,7 @@ class SchemaBuilder {
             }
           } else if (reference.type === 'collection') {
             config[alias] = {
-              type: this.#types[reference.name],
+              type: this.#types[`${reference.name}Connection`],
               args: connectionArgs,
               resolve: async (
                 account,
@@ -196,11 +196,10 @@ class SchemaBuilder {
     }
   }
 
-  _buildObjects(definitions: SharedDefinitions): Set<string> {
-    const connections = Object.entries(this.#def.objects).flatMap(([name, fields]) => {
+  _buildObjects(definitions: SharedDefinitions): Array<string> {
+    return Object.entries(this.#def.objects).flatMap(([name, fields]) => {
       return this._buildObjectType({ definitions, name, fields })
     })
-    return new Set(connections)
   }
 
   _buildObjectType({ definitions, name, fields }: BuildObjectParams): Array<string> {
@@ -253,7 +252,14 @@ class SchemaBuilder {
     return connections
   }
 
-  _buildConnections(objectNames: Set<string>) {
+  _buildConnections(documentConnections: Array<string>) {
+    const objectNames = new Set(documentConnections)
+    for (const reference of Object.values(this.#def.accountData)) {
+      if (reference.type === 'collection') {
+        objectNames.add(reference.name)
+      }
+    }
+
     for (const objectName of objectNames) {
       const nodeType = this.#types[objectName]
       if (nodeType == null) {

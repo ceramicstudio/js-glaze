@@ -19,6 +19,7 @@ const server = await serveEncodedDefinition({
   did,
   graphiql: true,
   path: new URL('../data/src/composite.json', import.meta.url),
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 5000,
 })
 
 console.log(`Server started on ${server.url}`)
