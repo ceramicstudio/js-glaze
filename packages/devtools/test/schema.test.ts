@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { compositeModelsAndCommonEmbedsFromGraphQLSchema } from '../src/schema'
-import { compositeExample } from './exampleSchemas/compositeExample.schema'
-import { graphQLSchemaWithoutModels } from './exampleSchemas/graphQLSchemaWithoutModels.schema'
+
+import { ImageMetadataType, profilesSchema } from '@glazed/test-schemas'
 import ajv from 'ajv/dist/2020'
 
+import { parseCompositeSchema } from '../src'
+
 describe('schema', () => {
-  it("compositeModelsAndCommonEmbedsFromGraphQLSchema throws when there's no top-level model object", () => {
+  it("parseCompositeSchema throws when there's no top-level model object", () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(graphQLSchemaWithoutModels)
+      parseCompositeSchema(ImageMetadataType)
     }).toThrow('No models found in Composite Definition Schema')
   })
 
-  it("compositeModelsAndCommonEmbedsFromGraphQLSchema doesn't parse unions", () => {
+  it("parseCompositeSchema doesn't parse unions", () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       union IntOrString = Int | String
 
       type ModelWithUnionProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a property that is a union of string and int"
       ) {
         intOrStringValue: IntOrString
@@ -26,15 +27,15 @@ describe('schema', () => {
     }).toThrow('GraphQL unions are not supported')
   })
 
-  it("compositeModelsAndCommonEmbedsFromGraphQLSchema doesn't parse interfaces", () => {
+  it("parseCompositeSchema doesn't parse interfaces", () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       interface GenericProfile {
         name: String @length(max: 150)
       }
        
       type SocialProfile implements GenericProfile @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "A model to store properties that accounts would like to share on social media"
       ) {
         description: String @length(max: 420)
@@ -45,12 +46,12 @@ describe('schema', () => {
     }).toThrow('GraphQL interfaces are not supported')
   })
 
-  it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema', () => {
-    expect(compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeExample)).toMatchSnapshot()
+  it('parseCompositeSchema creates an InternalCompositeDefinition for profiles from schema', () => {
+    expect(parseCompositeSchema(profilesSchema)).toMatchSnapshot()
   })
 
-  it('compositeModelsAndCommonEmbedsFromGraphQLSchema creates models whose schemas conform to JSON Schema standard', () => {
-    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(compositeExample)
+  it('parseCompositeSchema creates models whose schemas conform to JSON Schema standard', () => {
+    const compositeDefinition = parseCompositeSchema(profilesSchema)
     const [genericProfile, socialProfile, personalProfile] = compositeDefinition.models
 
     const validator = new ajv()
@@ -61,9 +62,9 @@ describe('schema', () => {
 
   it('DID scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithDIDProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with DID properties"
       ) {
         didValue: DID
@@ -74,21 +75,21 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithDIDProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               didValue: {
                 type: 'string',
-                title: 'DID',
+                title: 'GraphQLDID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
                 maxLength: 80,
               },
               requiredDidValue: {
                 type: 'string',
-                title: 'DID',
+                title: 'GraphQLDID',
                 pattern:
                   "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
                 maxLength: 80,
@@ -104,9 +105,9 @@ describe('schema', () => {
 
   it('@documentAccount is only valid for DIDs', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithInvalidDocumentAccountProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with an invalid @documentAccount directive"
       ) {
         nonDIDValue: String @documentAccount
@@ -116,9 +117,9 @@ describe('schema', () => {
   })
 
   it('fields annotated with @documentAccount are not added to the resulting schema', () => {
-    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+    const compositeDefinition = parseCompositeSchema(`
       type ModelWithDocumentVersionProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a @documentAccount directive"
       ) {
         floatProp: Float!
@@ -128,15 +129,15 @@ describe('schema', () => {
     expect(compositeDefinition.models.length).toEqual(1)
     const properties = compositeDefinition.models[0].schema.properties
     expect(properties).not.toBeFalsy()
-    expect(Object.keys(properties!).length).toEqual(1)
-    expect(Object.keys(properties!)[0]).toEqual('floatProp')
+    expect(Object.keys(properties).length).toEqual(1)
+    expect(Object.keys(properties)[0]).toEqual('floatProp')
   })
 
   it('StreamReference scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStreamReferenceProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with stream reference properties"
       ) {
         streamReferenceValue: StreamReference
@@ -147,19 +148,19 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithStreamReferenceProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
             properties: {
               streamReferenceValue: {
                 type: 'string',
-                title: 'StreamReference',
+                title: 'CeramicStreamReference',
                 maxLength: 80,
               },
               requiredStreamReferenceValue: {
                 type: 'string',
-                title: 'StreamReference',
+                title: 'CeramicStreamReference',
                 maxLength: 80,
               },
             },
@@ -173,9 +174,9 @@ describe('schema', () => {
 
   it('@documentVersion is only valid for StreamReferences', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithInvalidDocumentVersionProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with an invalid @documentVersion directive"
       ) {
         nonDIDValue: Int @documentVersion
@@ -185,9 +186,9 @@ describe('schema', () => {
   })
 
   it('fields annotated with @documentVersion are not added to the resulting schema', () => {
-    const compositeDefinition = compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+    const compositeDefinition = parseCompositeSchema(`
       type ModelWithDocumentVersionProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a @documentVersion directive"
       ) {
         numberProp: Int!
@@ -197,15 +198,15 @@ describe('schema', () => {
     expect(compositeDefinition.models.length).toEqual(1)
     const properties = compositeDefinition.models[0].schema.properties
     expect(properties).not.toBeFalsy()
-    expect(Object.keys(properties!).length).toEqual(1)
-    expect(Object.keys(properties!)[0]).toEqual('numberProp')
+    expect(Object.keys(properties).length).toEqual(1)
+    expect(Object.keys(properties)[0]).toEqual('numberProp')
   })
 
   it('Boolean scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithBooleanProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with boolean properties"
       ) {
         booleanValue: Boolean
@@ -216,7 +217,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithBooleanProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -238,9 +239,9 @@ describe('schema', () => {
 
   it('Int scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with int properties"
       ) {
         intValue: Int
@@ -251,7 +252,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIntProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -273,9 +274,9 @@ describe('schema', () => {
 
   it('Float scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithFloatProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with float properties"
       ) {
         floatValue: Float
@@ -286,7 +287,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithFloatProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -308,20 +309,20 @@ describe('schema', () => {
 
   it('String scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with string properties"
       ) {
-        stringValue: String @length(max: 100)
-        requiredStringValue: String! @length(max: 100)
+        stringValue: String @length(max: 3)
+        requiredStringValue: String! @length(max: 3)
       }
       `)
     ).toMatchObject({
       models: [
         {
           name: 'ModelWithStringProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -343,9 +344,9 @@ describe('schema', () => {
 
   it('@length is required for Strings', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringPropWithoutLengthDirective @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with string property without @length directive"
       ) {
         stringValue: String
@@ -356,9 +357,9 @@ describe('schema', () => {
 
   it('@length is required for arrays Strings', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringArrayPropWithoutLengthDirective @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with string array property without @length directive"
       ) {
         stringArrayValue: [String] @arrayLength(max: 1)
@@ -369,9 +370,9 @@ describe('schema', () => {
 
   it('ID scalar is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithIDProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with GraphQL ID property"
       ) {
         idValue: ID
@@ -382,7 +383,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIDProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -404,11 +405,52 @@ describe('schema', () => {
     })
   })
 
+  it('Arrays are supported and properly converted to ICD', () => {
+    expect(
+      parseCompositeSchema(`
+      type ModelWithArrayProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with GraphQL ID property"
+      ) {
+        arrayValue: [Int] @arrayLength(max: 3)
+        requiredArrayValue: [Int]! @arrayLength(max: 3)
+      }
+      `)
+    ).toMatchObject({
+      models: [
+        {
+          name: 'ModelWithArrayProp',
+          accountRelation: 'single',
+          schema: {
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
+            type: 'object',
+            properties: {
+              arrayValue: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                },
+              },
+              requiredArrayValue: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                },
+              },
+            },
+            additionalProperties: false,
+            required: ['requiredArrayValue'],
+          },
+        },
+      ],
+    })
+  })
+
   it('@length(min: Int, max: Int) directive is supported for strings and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained string property"
       ) {
         stringValue: String @length(min: 1, max: 140)
@@ -418,7 +460,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithStringProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -438,12 +480,12 @@ describe('schema', () => {
 
   it('@intRange(min: Int, max: Int) can be applied to Int, Int! or [Int] properties', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained string property"
       ) {
-        intValue: String @length(max: 10) @intRange(min: 1)
+        intValue: String @intRange(min: 1)
       }
       `)
     }).toThrow('@intRange can only be applied to integers or arrays of integers')
@@ -451,9 +493,9 @@ describe('schema', () => {
 
   it('@floatRange(min: Int, max: Int) can be applied to Float, Float! or [Float] properties', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained int property"
       ) {
         intValue: Int @floatRange(max: 1)
@@ -464,9 +506,9 @@ describe('schema', () => {
 
   it('@length(min: Int, max: Int) can be applied to strings or arrays of strings', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained array property"
       ) {
         intValue: [Int] @length(min:10, max: 140)
@@ -477,12 +519,12 @@ describe('schema', () => {
 
   it('@arrayLength(min: Int, max: Int) can be applied to arrays', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithStringProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with incorrectly constrained strings property"
       ) {
-        intValue: String @length(max: 10) @arrayLength(max: 140)
+        intValue: String @arrayLength(max: 140)
       }
       `)
     }).toThrow('@arrayLength can only be applied to arrays')
@@ -490,19 +532,19 @@ describe('schema', () => {
 
   it('@arrayLength(min: Int, max: Int) directive is supported for arrays and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained array property"
       ) {
-        arrayValue: [String] @length(max: 10) @arrayLength(min: 10, max: 15)
+        arrayValue: [String] @length(max: 5) @arrayLength(min: 10, max: 15)
       }
       `)
     ).toMatchObject({
       models: [
         {
           name: 'ModelWithArrayProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -525,19 +567,19 @@ describe('schema', () => {
 
   it('@length(min: Int, max: Int) directive is supported for arrays of strings and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithArrayProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with an array property with constrained items"
       ) {
-        arrayValue: [String] @length(min: 4, max: 440) @arrayLength(max: 10)
+        arrayValue: [String] @length(min: 4, max: 440) @arrayLength(max: 5)
       }
       `)
     ).toMatchObject({
       models: [
         {
           name: 'ModelWithArrayProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -560,9 +602,9 @@ describe('schema', () => {
 
   it('@arrayLength is required for arrays', () => {
     expect(() => {
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithArrayPropWithoutArrayLengthDirective @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with an array property without @arrayLength directive"
       ) {
         arrayValue: [Int]
@@ -573,9 +615,9 @@ describe('schema', () => {
 
   it('@intRange(min: Int, max: Int) directive is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithIntProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constreained int property"
       ) {
         intValue: Int @intRange(min: 5, max: 10)
@@ -585,7 +627,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithIntProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',
@@ -605,9 +647,9 @@ describe('schema', () => {
 
   it('@floatRange(min: Float, max: Float) directive is supported and properly converted to ICD', () => {
     expect(
-      compositeModelsAndCommonEmbedsFromGraphQLSchema(`
+      parseCompositeSchema(`
       type ModelWithFloatProp @model(
-        accountRelation: LINK,
+        accountRelation: SINGLE,
         description: "Test model with a constrained float property"
       ) {
         floatValue: Float @floatRange(min: 5.0, max: 10.0)
@@ -617,7 +659,7 @@ describe('schema', () => {
       models: [
         {
           name: 'ModelWithFloatProp',
-          accountRelation: 'link',
+          accountRelation: 'single',
           schema: {
             $schema: 'https://json-schema.org/draft/2020-12/schema',
             type: 'object',

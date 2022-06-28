@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
+exports[`schema parseCompositeSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
 Object {
   "commonEmbeds": Array [
     "ImageSources",
@@ -8,7 +8,7 @@ Object {
   ],
   "models": Array [
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store common profile-related properties",
       "name": "GenericProfile",
       "schema": Object {
@@ -55,7 +55,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
-                "maxItems": 10,
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -85,7 +85,7 @@ Object {
       },
     },
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store properties that accounts would like to share on social media",
       "name": "SocialProfile",
       "schema": Object {
@@ -132,7 +132,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
-                "maxItems": 10,
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -172,7 +172,7 @@ Object {
       },
     },
     Object {
-      "accountRelation": "link",
+      "accountRelation": "single",
       "description": "A model to store accounts' personal data",
       "name": "PersonProfile",
       "schema": Object {
@@ -185,7 +185,7 @@ Object {
               "minLength": 0,
               "type": "string",
             },
-            "maxItems": 100,
+            "maxItems": 20,
             "type": "array",
           },
           "birthDate": Object {
@@ -210,7 +210,6 @@ Object {
               "type": "string",
             },
             "maxItems": 5,
-            "minItems": 1,
             "type": "array",
           },
           "residenceCountry": Object {
@@ -219,84 +218,6 @@ Object {
             "type": "string",
           },
         },
-        "type": "object",
-      },
-    },
-    Object {
-      "accountRelation": "link",
-      "description": "A model to store account's posts",
-      "name": "Post",
-      "schema": Object {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "additionalProperties": false,
-        "properties": Object {
-          "text": Object {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string",
-          },
-        },
-        "required": Array [
-          "text",
-        ],
-        "type": "object",
-      },
-    },
-    Object {
-      "accountRelation": "link",
-      "description": "A model to store account's comments on posts",
-      "name": "PostComment",
-      "schema": Object {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "additionalProperties": false,
-        "properties": Object {
-          "postStreamId": Object {
-            "maxLength": 80,
-            "title": "StreamReference",
-            "type": "string",
-          },
-          "text": Object {
-            "maxLength": 240,
-            "minLength": 0,
-            "type": "string",
-          },
-        },
-        "required": Array [
-          "postStreamId",
-          "text",
-        ],
-        "type": "object",
-      },
-    },
-    Object {
-      "accountRelation": "link",
-      "description": "A model to store account's contacts (understood as other ceramic accounts)",
-      "name": "CeramicContact",
-      "schema": Object {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "additionalProperties": false,
-        "properties": Object {
-          "contact": Object {
-            "maxLength": 80,
-            "pattern": "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+$/",
-            "title": "DID",
-            "type": "string",
-          },
-        },
-        "required": Array [
-          "contact",
-        ],
-        "type": "object",
-      },
-    },
-    Object {
-      "accountRelation": "link",
-      "description": "A model to store text documents",
-      "name": "TextDocument",
-      "schema": Object {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "additionalProperties": false,
-        "properties": Object {},
         "type": "object",
       },
     },

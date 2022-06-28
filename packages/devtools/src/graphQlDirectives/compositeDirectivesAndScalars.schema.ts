@@ -22,7 +22,7 @@ directive @documentVersion on FIELD_DEFINITION
 
 enum ModelAccountRelation {
   LIST # Account to multiple streams - default
-  LINK # Account to single stream (IDX)
+  SINGLE # Account to single stream (IDX)
   NONE # Indexing explicitly disabled
 }
 directive @model(

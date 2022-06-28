@@ -1,3 +1,4 @@
+import { ModelAccountRelation } from '@ceramicnetwork/stream-model'
 import type {
   CustomRuntimeScalarType,
   InternalCompositeDefinition,
@@ -25,25 +26,26 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
 const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
-  CeramicStreamReference: 'streamref',
+  // CeramicStreamReference: 'streamref',
   GraphQLDID: 'did',
   GraphQLID: 'id',
 }
 type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
-export type RuntimeModelBuilderParams = {
+type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
   commonEmbeds?: Array<string>
 }
 
-export type ExtractSchemaParams = {
+type ExtractSchemaParams = {
   parentName?: string
   ownName?: string
   required?: boolean
   localRef?: boolean
 }
 
+/** @internal */
 export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
@@ -210,16 +212,17 @@ export class RuntimeModelBuilder {
     for (const [key, view] of Object.entries(views)) {
       switch (view.type) {
         case 'documentAccount':
-        case 'documentVersion':
+          // case 'documentVersion':
           object[key] = { type: 'view', viewType: view.type }
           continue
         default:
-          throw new Error(`Unsupported view type: ${view.type}`)
+          throw new Error(`Unsupported view type: ${view.type as string}`)
       }
     }
   }
 }
 
+/** @internal */
 export function createRuntimeDefinition(
   definition: InternalCompositeDefinition
 ): RuntimeCompositeDefinition {
@@ -243,10 +246,16 @@ export function createRuntimeDefinition(
     // Attach entry-point to account store based on relation type
     if (modelDefinition.accountRelation != null) {
       const key = camelCase(modelName)
-      if (modelDefinition.accountRelation === 'link') {
+      if (modelDefinition.accountRelation === ModelAccountRelation.SINGLE) {
         runtime.accountData[key] = { type: 'model', name: modelName }
-      } else {
+        // @ts-ignore TS2367, should be unnecessary check based on type definition but more types
+        // could be added later
+      } else if (modelDefinition.accountRelation === ModelAccountRelation.LIST) {
         runtime.accountData[key + 'Collection'] = { type: 'collection', name: modelName }
+      } else {
+        throw new Error(
+          `Unsupported account relation: ${modelDefinition.accountRelation as string}`
+        )
       }
     }
   }

@@ -1,0 +1,64 @@
+{
+  "name": "@glazed/graph-ethereum",
+  "version": "0.1.0",
+  "author": "3Box Labs",
+  "license": "(Apache-2.0 OR MIT)",
+  "homepage": "https://github.com/ceramicstudio/js-glaze#readme",
+  "keywords": [
+    "ceramic",
+    "glaze",
+    "ethereum"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceramicstudio/js-glaze",
+    "directory": "packages/graph-ethereum"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=14.14"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
+    "lint": "eslint src --fix",
+    "-test": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "-test:ci": "yarn test --ci --coverage",
+    "prepare": "yarn build",
+    "prepublishOnly": "package-check"
+  },
+  "dependencies": {
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
+    "@glazed/graph-session": "^0.1.0"
+  },
+  "devDependencies": {
+    "@glazed/graph": "^0.1.0"
+  },
+  "jest": {
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
+    }
+  }
+}
