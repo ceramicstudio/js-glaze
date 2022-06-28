@@ -49,13 +49,13 @@ describe('models', () => {
         create.stderr.toString().split('with streamID ')[1].replace('.', ''),
         `--sync=sync-always`,
       ])
-      const lines = stripAnsi(content.stderr.toString())
-      expect(lines.includes('"name": "MyModel"')).toBe(true)
-      expect(lines.includes('"schema": {')).toBe(true)
-      expect(lines.includes('"type": "object",')).toBe(true)
-      expect(lines.includes('"properties": {')).toBe(true)
-      expect(lines.includes('"accountRelation": "list"')).toBe(true)
-      expect(lines.includes('"$schema": "https://json-schema.org/draft/2020-12/schema",')).toBe(
+      const lines = stripAnsi(content.stdout.toString())
+      expect(lines.includes('"name":"MyModel"')).toBe(true)
+      expect(lines.includes('"schema":{')).toBe(true)
+      expect(lines.includes('"type":"object",')).toBe(true)
+      expect(lines.includes('"properties":{')).toBe(true)
+      expect(lines.includes('"accountRelation":"list"')).toBe(true)
+      expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(
         true
       )
     }, 60000)
