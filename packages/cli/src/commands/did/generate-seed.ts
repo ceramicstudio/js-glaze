@@ -15,7 +15,7 @@ export default class GenerateSeed extends Command {
     try {
       const seed = new Uint8Array(randomBytes(32))
       const base32repr = chalk.red(toString(seed, 'base16'))
-      this.spinner.succeed(`New random seed: ${base32repr}`)
+      this.log(base32repr)
     } catch (err) {
       this.spinner.fail((err as Error).message)
     }
