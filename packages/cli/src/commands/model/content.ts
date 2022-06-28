@@ -26,7 +26,7 @@ export default class ModelContent extends Command<ModelContentFlags, { streamId:
     this.spinner.start('Loading the model...')
     try {
       const model = await Model.load(this.ceramic, this.args.streamId)
-      if (this.flags.output !== undefined) {
+      if (this.flags.output != null) {
         const output = this.flags.output
         await write(output, model.content)
         this.spinner.succeed(`Model's content was loaded and saved in ${output}`)

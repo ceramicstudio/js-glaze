@@ -21,18 +21,19 @@ glaze COMMAND
 - [`glaze config:reset KEY`](#glaze-configreset-key)
 - [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
 - [`glaze config:show`](#glaze-configshow)
-- [`glaze did:create`](#glaze-didcreate)
-- [`glaze did:get MODEL ALIAS`](#glaze-didget-model-alias)
-- [`glaze did:inspect`](#glaze-didinspect)
-- [`glaze did:merge MODEL ALIAS CONTENTS`](#glaze-didmerge-model-alias-contents)
-- [`glaze did:set MODEL ALIAS CONTENTS`](#glaze-didset-model-alias-contents)
-- [`glaze did:sign CONTENTS`](#glaze-didsign-contents)
-- [`glaze did:verify JWS`](#glaze-didverify-jws)
+- [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
+- [`glaze did:from-seed`](#glaze-didfromseed)
 - [`glaze help [COMMAND]`](#glaze-help-command)
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
-- [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
+- [`glaze composite:create INPUT`](#glaze-compositecreate)
+- [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
+- [`glaze composite:extract-model PATH MODELS`](#glaze-compositeextractmodel-path-models)
+- [`glaze composite:merge PATHS`](#glaze-compositemerge-paths)
+- [`glaze composite:models PATH`](#glaze-compositemodels-path)
+- [`glaze composite:deploy PATH`](#glaze-compositedeploy-path)
+- [`glaze composite:compile PATH OUTPUTPATHS`](#glaze-compositecompile-path-outputpaths)
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
@@ -95,116 +96,25 @@ OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-### `glaze did:create`
+### `glaze did:generate-seed`
 
-create a new DID
-
-```
-USAGE
-  $ glaze did:create
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze did:get MODEL ALIAS`
-
-get the contents of a record in a DID DataStore
+generate a new random 32 byte seed and return its base 16 representation
 
 ```
 USAGE
-  $ glaze did:get MODEL ALIAS
-
-ARGUMENTS
-  MODEL  Model name or path to JSON file
-  ALIAS  Definition alias
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-  --did=did              DID
+  $ glaze did:generate-seed
 ```
 
-### `glaze did:inspect`
+### `glaze did:from-seed`
 
-inspect the contents of a DID DataStore
+create a new DID from seed passed either as an argument or as a value of the flag
 
 ```
 USAGE
-  $ glaze did:inspect
-
+  $ glaze did:from-seed SEED
+  
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-  --did=did              DID
-```
-
-### `glaze did:merge MODEL ALIAS CONTENTS`
-
-merge the contents of a record in a DID DataStore
-
-```
-USAGE
-  $ glaze did:merge MODEL ALIAS CONTENTS
-
-ARGUMENTS
-  MODEL     Model name or path to JSON file
-  ALIAS     Definition alias
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:set MODEL ALIAS CONTENTS`
-
-set the contents of a record in a DID DataStore
-
-```
-USAGE
-  $ glaze did:set MODEL ALIAS CONTENTS
-
-ARGUMENTS
-  MODEL     Model name or path to JSON file
-  ALIAS     Definition alias
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:sign CONTENTS`
-
-create a JSON Web Signature
-
-```
-USAGE
-  $ glaze did:sign CONTENTS
-
-ARGUMENTS
-  CONTENTS  String-encoded JSON data
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-```
-
-### `glaze did:verify JWS`
-
-verify a JSON Web Signature
-
-```
-USAGE
-  $ glaze did:verify JWS
-
-ARGUMENTS
-  JWS  JSON Web Signature
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
+  --did-key-seed  A random 32 byte seed represented as a base16 string (pass only if not passed as positional argument)
 ```
 
 ### `glaze help [COMMAND]`
@@ -300,6 +210,95 @@ ARGUMENTS
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:from-model`
+
+create an encoded composite definition from a list of model stream ids
+
+```
+USAGE
+  $ glaze composite:from-model PATH MODELS
+
+ARGUMENTS
+  PATH    a path to an encoded composite definition file
+  MODELS  a list of models (identified by names of stream IDs) to extract from the given composite
+
+OPTIONS
+  -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:extract-model`
+
+create an encoded composite definition from another one by extracting given models
+
+```
+USAGE
+  $ glaze composite:extract-model PATH MODELS
+
+ARGUMENTS
+  PATH      a path to encoded representation of a composite
+  MODELS    one or more models to use when extracting a new composite, identified by name or stream ID
+
+OPTIONS
+  -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:merge`
+
+create an encoded composite definition by merging other composites
+
+```
+USAGE
+  $ glaze composite:merge PATHS
+
+ARGUMENTS
+  PATHS  a list of paths to files containing encoded composites, separated by spaces
+
+OPTIONS
+  -e, --common-embeds  'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
+  -o, --output         a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze composite:models`
+
+display the list of models included in a composite
+
+```
+USAGE
+  $ glaze composite:models PATH
+
+ARGUMENTS
+  PATH  a path to a file containing a composite's encoded definition
+
+OPTIONS
+  --id-only   display only the stream IDs of models included in the composite (exclusive to --table)
+  --table     display the models in a table (excusive to --id-only)
+```
+
+### `glaze composite:deploy`
+
+deploy models included in the composite on connected ceramic node
+
+```
+USAGE
+  $ glaze composite:deploy PATH
+
+ARGUMENTS
+  PATH  a path to a file containing a composite's encoded definition
+```
+
+### `glaze composite:compile`
+
+creates a runtime representation of the composite and saves it in given path(s)
+
+```
+USAGE
+  $ glaze composite:compile PATH OUTPUTPATHS
+
+ARGUMENTS
+  PATH          a path to a file containing a composite's encoded definition
+  OUTPUTPATHS   one or more paths to save runtime representation in. Supported extensions: .json, .js and .ts
 ```
 
 ### `glaze model-instance:create MODELSTREAMID CONTENT`
