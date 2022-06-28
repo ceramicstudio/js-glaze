@@ -103,6 +103,36 @@ describe('schema', () => {
     })
   })
 
+  it('@documentAccount is only valid for DIDs', () => {
+    expect(() => {
+      parseCompositeSchema(`
+      type ModelWithInvalidDocumentAccountProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with an invalid @documentAccount directive"
+      ) {
+        nonDIDValue: String @documentAccount
+      }
+      `)
+    }).toThrow('@documentAccount can only be applied to DIDs')
+  })
+
+  it('fields annotated with @documentAccount are not added to the resulting schema', () => {
+    const compositeDefinition = parseCompositeSchema(`
+      type ModelWithDocumentVersionProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with a @documentAccount directive"
+      ) {
+        floatProp: Float!
+        didProp: DID @documentAccount
+      }
+      `)
+    expect(compositeDefinition.models.length).toEqual(1)
+    const properties = compositeDefinition.models[0].schema.properties
+    expect(properties).not.toBeFalsy()
+    expect(Object.keys(properties).length).toEqual(1)
+    expect(Object.keys(properties)[0]).toEqual('floatProp')
+  })
+
   it('StreamReference scalar is supported and properly converted to ICD', () => {
     expect(
       parseCompositeSchema(`
@@ -126,13 +156,11 @@ describe('schema', () => {
               streamReferenceValue: {
                 type: 'string',
                 title: 'CeramicStreamReference',
-                pattern: '<TBD>',
                 maxLength: 80,
               },
               requiredStreamReferenceValue: {
                 type: 'string',
                 title: 'CeramicStreamReference',
-                pattern: '<TBD>',
                 maxLength: 80,
               },
             },
@@ -142,6 +170,36 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@documentVersion is only valid for StreamReferences', () => {
+    expect(() => {
+      parseCompositeSchema(`
+      type ModelWithInvalidDocumentVersionProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with an invalid @documentVersion directive"
+      ) {
+        nonDIDValue: Int @documentVersion
+      }
+      `)
+    }).toThrow('@documentVersion can only be applied to StreamReferences')
+  })
+
+  it('fields annotated with @documentVersion are not added to the resulting schema', () => {
+    const compositeDefinition = parseCompositeSchema(`
+      type ModelWithDocumentVersionProp @model(
+        accountRelation: SINGLE,
+        description: "Test model with a @documentVersion directive"
+      ) {
+        numberProp: Int!
+        version: StreamReference @documentVersion
+      }
+      `)
+    expect(compositeDefinition.models.length).toEqual(1)
+    const properties = compositeDefinition.models[0].schema.properties
+    expect(properties).not.toBeFalsy()
+    expect(Object.keys(properties).length).toEqual(1)
+    expect(Object.keys(properties)[0]).toEqual('numberProp')
   })
 
   it('Boolean scalar is supported and properly converted to ICD', () => {
@@ -256,8 +314,8 @@ describe('schema', () => {
         accountRelation: SINGLE,
         description: "Test model with string properties"
       ) {
-        stringValue: String
-        requiredStringValue: String!
+        stringValue: String @length(max: 3)
+        requiredStringValue: String! @length(max: 3)
       }
       `)
     ).toMatchObject({
@@ -282,6 +340,32 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@length is required for Strings', () => {
+    expect(() => {
+      parseCompositeSchema(`
+      type ModelWithStringPropWithoutLengthDirective @model(
+        accountRelation: SINGLE,
+        description: "Test model with string property without @length directive"
+      ) {
+        stringValue: String
+      }
+      `)
+    }).toThrow('Missing @length directive')
+  })
+
+  it('@length is required for arrays Strings', () => {
+    expect(() => {
+      parseCompositeSchema(`
+      type ModelWithStringArrayPropWithoutLengthDirective @model(
+        accountRelation: SINGLE,
+        description: "Test model with string array property without @length directive"
+      ) {
+        stringArrayValue: [String] @arrayLength(max: 1)
+      }
+      `)
+    }).toThrow('Missing @length directive')
   })
 
   it('ID scalar is supported and properly converted to ICD', () => {
@@ -328,8 +412,8 @@ describe('schema', () => {
         accountRelation: SINGLE,
         description: "Test model with GraphQL ID property"
       ) {
-        arrayValue: [Int]
-        requiredArrayValue: [Int]!
+        arrayValue: [Int] @arrayLength(max: 3)
+        requiredArrayValue: [Int]! @arrayLength(max: 3)
       }
       `)
     ).toMatchObject({
@@ -453,7 +537,7 @@ describe('schema', () => {
         accountRelation: SINGLE,
         description: "Test model with a constrained array property"
       ) {
-        arrayValue: [String] @arrayLength(min: 10, max: 15)
+        arrayValue: [String] @length(max: 5) @arrayLength(min: 10, max: 15)
       }
       `)
     ).toMatchObject({
@@ -488,7 +572,7 @@ describe('schema', () => {
         accountRelation: SINGLE,
         description: "Test model with an array property with constrained items"
       ) {
-        arrayValue: [String] @length(min: 4, max: 440)
+        arrayValue: [String] @length(min: 4, max: 440) @arrayLength(max: 5)
       }
       `)
     ).toMatchObject({
@@ -514,6 +598,19 @@ describe('schema', () => {
         },
       ],
     })
+  })
+
+  it('@arrayLength is required for arrays', () => {
+    expect(() => {
+      parseCompositeSchema(`
+      type ModelWithArrayPropWithoutArrayLengthDirective @model(
+        accountRelation: SINGLE,
+        description: "Test model with an array property without @arrayLength directive"
+      ) {
+        arrayValue: [Int]
+      }
+      `)
+    }).toThrow('Missing @arrayLength directive')
   })
 
   it('@intRange(min: Int, max: Int) directive is supported and properly converted to ICD', () => {

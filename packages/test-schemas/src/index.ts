@@ -13,7 +13,7 @@ ${ImageMetadataType}
 
 type ImageSources {
   original: ImageMetadata!
-  alternatives: [ImageMetadata]
+  alternatives: [ImageMetadata] @arrayLength(max: 20)
 }
 `
 
@@ -54,7 +54,7 @@ type PersonProfile @model(
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
   residenceCountry: String @length(max: 2)
-  nationalities: [String] @arrayLength(min:1, max: 5)
-  affiliations: [String] @length(max: 140)
+  nationalities: [String] @length(max: 2) @arrayLength(max: 5)
+  affiliations: [String] @length(max: 140) @arrayLength(max: 20)
 }
 `
