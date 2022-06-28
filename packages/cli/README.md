@@ -348,6 +348,54 @@ OPTIONS
   -o, --output           Path to a file where the content should be saved
 ```
 
+### `glaze model-instance:create MODELSTREAMID CONTENT`
+
+create a model instance stream with given content
+
+```
+USAGE
+  $ glaze model-instance:create MODELSTREAMID CONTENT
+
+ARGUMENTS
+  MODELSTREAMID  streamID of the model whose instance is being created
+  CONTENT        contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze model-instance:replace STREAMID CONTENT`
+
+replace content in a model instance stream with given streamID
+
+```
+USAGE
+  $ glaze model-instance:replace STREAMID CONTENT
+
+ARGUMENTS
+  STREAMID  streamID of the model instance whose content is being replaced
+  CONTENT   new contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze model-instance:content STREAMID`
+
+load the contents of a model instance stream with a given ID
+
+```
+USAGE
+  $ glaze model-instance:content STREAMID
+
+ARGUMENTS
+  STREAMID ID of the stream
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -o, --output           Path to a file where the content should be saved
+```
+
 ### `glaze pin:add STREAMID`
 
 pin a stream
