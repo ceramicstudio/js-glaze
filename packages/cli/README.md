@@ -234,10 +234,11 @@ create an encoded composite definition from another one by extracting given mode
 
 ```
 USAGE
-  $ glaze composite:from-model STREAMIDS
+  $ glaze composite:extract-model PATH MODELS
 
 ARGUMENTS
-  STREAMIDS  a list of model stream ids separated by spaces
+  PATH      a path to encoded representation of a composite
+  MODELS    one or more models to use when extracting a new composite, identified by name or stream ID
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
@@ -298,54 +299,6 @@ USAGE
 ARGUMENTS
   PATH          a path to a file containing a composite's encoded definition
   OUTPUTPATHS   one or more paths to save runtime representation in. Supported extensions: .json, .js and .ts
-```
-
-### `glaze model-instance:create MODELSTREAMID CONTENT`
-
-create a model instance stream with given content
-
-```
-USAGE
-  $ glaze model-instance:create MODELSTREAMID CONTENT
-
-ARGUMENTS
-  MODELSTREAMID  streamID of the model whose instance is being created
-  CONTENT        contents of the model instance encoded as JSON
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model-instance:replace STREAMID CONTENT`
-
-replace content in a model instance stream with given streamID
-
-```
-USAGE
-  $ glaze model-instance:replace STREAMID CONTENT
-
-ARGUMENTS
-  STREAMID  streamID of the model instance whose content is being replaced
-  CONTENT   new contents of the model instance encoded as JSON
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model-instance:content STREAMID`
-
-load the contents of a model instance stream with a given ID
-
-```
-USAGE
-  $ glaze model-instance:content STREAMID
-
-ARGUMENTS
-  STREAMID ID of the stream
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -o, --output           Path to a file where the content should be saved
 ```
 
 ### `glaze model-instance:create MODELSTREAMID CONTENT`
