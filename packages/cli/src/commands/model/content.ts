@@ -31,6 +31,7 @@ export default class ModelContent extends Command<ModelContentFlags, { streamId:
         await write(output, model.content)
         this.spinner.succeed(`Model's content was loaded and saved in ${output}`)
       } else {
+        // Not using the spinner here, so that the output can be piped using standard I/O
         this.log(JSON.stringify(model.content))
       }
     } catch (e) {
