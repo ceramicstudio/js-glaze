@@ -37,6 +37,7 @@ glaze COMMAND
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
+- [`glaze graphql:schema PATH`](#glaze-graphqlschema-path)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -347,6 +348,21 @@ ARGUMENTS
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -o, --output           Path to a file where the content should be saved
+```
+
+### `glaze graphql:schema PATH`
+
+load the runtime graphql schema for the composite with given runtime representation
+
+```
+USAGE
+  $ glaze graphql:schema PATH
+
+ARGUMENTS
+  PATH           a path to a runtime representation of a composite encoded as JSON
+
+OPTIONS
+  -o, --output   Path to a file where the schema should be saved
 ```
 
 ### `glaze pin:add STREAMID`
