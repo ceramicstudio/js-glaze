@@ -51,13 +51,14 @@ export type ServeGraphQLParams = ServeParams & {
    * Runtime composite definition used to generate the GraphQL schema.
    */
   definition: RuntimeCompositeDefinition
+  readonly?: boolean
 }
 
 /**
  * Create a local GraphQL server to interact with a runtime composite definition.
  */
 export async function serveGraphQL(params: ServeGraphQLParams): Promise<ServerHandler> {
-  const { ceramicURL, definition, did, graphiql, port } = params
+  const { ceramicURL, definition, readonly, did, graphiql, port } = params
   const ceramic = new CeramicClient(ceramicURL)
   if (did != null) {
     ceramic.did = did
@@ -69,7 +70,7 @@ export async function serveGraphQL(params: ServeGraphQLParams): Promise<ServerHa
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     graphqlHTTP({
       context: new Context({ ceramic }),
-      schema: createGraphQLSchema({ definition }),
+      schema: createGraphQLSchema({ definition, readonly }),
       graphiql,
     })
   )
