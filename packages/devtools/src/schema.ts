@@ -23,7 +23,7 @@ import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTran
 import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
+// import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>
@@ -361,8 +361,8 @@ function defaultFieldSchemaFromFieldDefinition(
 ): JSONSchema | null {
   if (
     ceramicExtensions !== undefined &&
-    (ceramicExtensions.documentAccount !== undefined ||
-      ceramicExtensions.documentVersion !== undefined)
+    /*(*/ ceramicExtensions.documentAccount !==
+      undefined /* || ceramicExtensions.documentVersion !== undefined) */
   ) {
     // Fields marked with @documentAccount or @documentVersion go into model's views, not into the schema
     return null
@@ -380,14 +380,15 @@ function defaultFieldSchemaFromFieldDefinition(
     }
   }
 
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
-    result = {
-      ...result,
-      type: 'string',
-      title: 'CeramicStreamReference',
-      maxLength: 80,
-    }
-  }
+  // if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
+  //   result = {
+  //     ...result,
+  //     type: 'string',
+  //     title: 'CeramicStreamReference',
+  //     maxLength: 80,
+  //     pattern: '<TBD>', //FIXME: define the pattern for StreamReference strings
+  //   }
+  // }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLID)) {
     result = {

@@ -16,7 +16,7 @@ directive @intRange(min: Int, max: Int) on FIELD_DEFINITION
 directive @floatRange(min: Float, max: Float) on FIELD_DEFINITION
 # For runtime interactions
 directive @documentAccount on FIELD_DEFINITION
-directive @documentVersion on FIELD_DEFINITION
+# directive @documentVersion on FIELD_DEFINITION
 
 # Model definition
 

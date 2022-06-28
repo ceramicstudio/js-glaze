@@ -133,74 +133,74 @@ describe('schema', () => {
     expect(Object.keys(properties || {})[0]).toEqual('floatProp')
   })
 
-  it('StreamReference scalar is supported and properly converted to ICD', () => {
-    expect(
-      parseCompositeSchema(`
-      type ModelWithStreamReferenceProp @model(
-        accountRelation: SINGLE,
-        description: "Test model with stream reference properties"
-      ) {
-        streamReferenceValue: StreamReference
-        requiredStreamReferenceValue: StreamReference!
-      }
-      `)
-    ).toMatchObject({
-      models: [
-        {
-          name: 'ModelWithStreamReferenceProp',
-          accountRelation: 'single',
-          schema: {
-            $schema: 'https://json-schema.org/draft/2020-12/schema',
-            type: 'object',
-            properties: {
-              streamReferenceValue: {
-                type: 'string',
-                title: 'CeramicStreamReference',
-                maxLength: 80,
-              },
-              requiredStreamReferenceValue: {
-                type: 'string',
-                title: 'CeramicStreamReference',
-                maxLength: 80,
-              },
-            },
-            additionalProperties: false,
-            required: ['requiredStreamReferenceValue'],
-          },
-        },
-      ],
-    })
-  })
+  // it('StreamReference scalar is supported and properly converted to ICD', () => {
+  //   expect(
+  //     parseCompositeSchema(`
+  //     type ModelWithStreamReferenceProp @model(
+  //       accountRelation: SINGLE,
+  //       description: "Test model with stream reference properties"
+  //     ) {
+  //       streamReferenceValue: StreamReference
+  //       requiredStreamReferenceValue: StreamReference!
+  //     }
+  //     `)
+  //   ).toMatchObject({
+  //     models: [
+  //       {
+  //         name: 'ModelWithStreamReferenceProp',
+  //         accountRelation: 'single',
+  //         schema: {
+  //           $schema: 'https://json-schema.org/draft/2020-12/schema',
+  //           type: 'object',
+  //           properties: {
+  //             streamReferenceValue: {
+  //               type: 'string',
+  //               title: 'CeramicStreamReference',
+  //               maxLength: 80,
+  //             },
+  //             requiredStreamReferenceValue: {
+  //               type: 'string',
+  //               title: 'CeramicStreamReference',
+  //               maxLength: 80,
+  //             },
+  //           },
+  //           additionalProperties: false,
+  //           required: ['requiredStreamReferenceValue'],
+  //         },
+  //       },
+  //     ],
+  //   })
+  // })
 
-  it('@documentVersion is only valid for StreamReferences', () => {
-    expect(() => {
-      parseCompositeSchema(`
-      type ModelWithInvalidDocumentVersionProp @model(
-        accountRelation: SINGLE,
-        description: "Test model with an invalid @documentVersion directive"
-      ) {
-        nonDIDValue: Int @documentVersion
-      }
-      `)
-    }).toThrow('@documentVersion can only be applied to StreamReferences')
-  })
+  // it('@documentVersion is only valid for StreamReferences', () => {
+  //   expect(() => {
+  //     parseCompositeSchema(`
+  //     type ModelWithInvalidDocumentVersionProp @model(
+  //       accountRelation: SINGLE,
+  //       description: "Test model with an invalid @documentVersion directive"
+  //     ) {
+  //       nonDIDValue: Int @documentVersion
+  //     }
+  //     `)
+  //   }).toThrow('@documentVersion can only be applied to StreamReferences')
+  // })
 
-  it('fields annotated with @documentVersion are not added to the resulting schema', () => {
-    const compositeDefinition = parseCompositeSchema(`
-      type ModelWithDocumentVersionProp @model(
-        accountRelation: SINGLE,
-        description: "Test model with a @documentVersion directive"
-      ) {
-        numberProp: Int!
-        version: StreamReference @documentVersion
-      }
-      `)
-    expect(compositeDefinition.models.length).toEqual(1)
-    const properties = compositeDefinition.models[0].schema.properties
-    expect(properties).not.toBeFalsy()
-    expect(Object.keys(properties || {}).length).toEqual(1)
-    expect(Object.keys(properties || {})[0]).toEqual('numberProp')
-  })
+  // it('fields annotated with @documentVersion are not added to the resulting schema', () => {
+  //   const compositeDefinition = parseCompositeSchema(`
+  //     type ModelWithDocumentVersionProp @model(
+  //       accountRelation: SINGLE,
+  //       description: "Test model with a @documentVersion directive"
+  //     ) {
+  //       numberProp: Int!
+  //       version: StreamReference @documentVersion
+  //     }
+  //     `)
+  //   expect(compositeDefinition.models.length).toEqual(1)
+  //   const properties = compositeDefinition.models[0].schema.properties
+  //   expect(properties).not.toBeFalsy()
+  //   expect(Object.keys(properties || {}).length).toEqual(1)
+  //   expect(Object.keys(properties || {})[0]).toEqual('numberProp')
+  // })
 
   it('Boolean scalar is supported and properly converted to ICD', () => {
     expect(

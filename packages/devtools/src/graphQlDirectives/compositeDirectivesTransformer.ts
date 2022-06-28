@@ -14,11 +14,11 @@ import {
   GraphQLFloat,
 } from 'graphql'
 import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './streamReference.scalar.js'
+// import { GraphQLStreamReference } from './streamReference.scalar.js'
 
 const MODEL_DIRECTIVE_NAME = 'model'
 const DOCUMENT_ACCOUNT_DIRECTIVE_NAME = 'documentAccount'
-const DOCUMENT_VERSION_DIRECTIVE_NAME = 'documentVersion'
+// const DOCUMENT_VERSION_DIRECTIVE_NAME = 'documentVersion'
 const ARRAY_LENGTH_DIRECTIVE_NAME = 'arrayLength'
 const LENGTH_DIRECTIVE_NAME = 'length'
 const INT_RANGE_DIRECTIVE_NAME = 'intRange'
@@ -46,7 +46,7 @@ export type RangeDirective = {
 export type CeramicGraphQLTypeExtensions = {
   [MODEL_DIRECTIVE_NAME]?: ModelDirective
   [DOCUMENT_ACCOUNT_DIRECTIVE_NAME]?: DirectiveWithoutParams
-  [DOCUMENT_VERSION_DIRECTIVE_NAME]?: DirectiveWithoutParams
+  // [DOCUMENT_VERSION_DIRECTIVE_NAME]?: DirectiveWithoutParams
   [ARRAY_LENGTH_DIRECTIVE_NAME]?: LengthDirective
   [LENGTH_DIRECTIVE_NAME]?: LengthDirective
   [INT_RANGE_DIRECTIVE_NAME]?: RangeDirective
@@ -305,13 +305,13 @@ function fieldConfigMapperFactory(
       fieldConfig,
       ceramicExtensions
     )
-    ceramicExtensions = parseDirectiveWithoutParams(
-      DOCUMENT_VERSION_DIRECTIVE_NAME,
-      GraphQLStreamReference,
-      schema,
-      fieldConfig,
-      ceramicExtensions
-    )
+    // ceramicExtensions = parseDirectiveWithoutParams(
+    //   DOCUMENT_VERSION_DIRECTIVE_NAME,
+    //   GraphQLStreamReference,
+    //   schema,
+    //   fieldConfig,
+    //   ceramicExtensions
+    // )
     ceramicExtensions = parseArrayLengthDirective(schema, fieldConfig, ceramicExtensions)
     ceramicExtensions = parseLengthDirective(schema, fieldConfig, ceramicExtensions)
     ceramicExtensions = parseIntRangeDirective(schema, fieldConfig, ceramicExtensions)
