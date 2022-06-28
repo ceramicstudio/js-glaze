@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema compositeModelsAndCommonEmbedsFromGraphQLSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
+exports[`schema parseCompositeSchema creates an InternalCompositeDefinition for profiles from schema 1`] = `
 Object {
   "commonEmbeds": Array [
     "ImageSources",
@@ -55,6 +55,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -82,6 +83,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
     Object {
       "accountRelation": "single",
@@ -131,6 +133,7 @@ Object {
                 "items": Object {
                   "$ref": "#/$defs/ImageMetadata",
                 },
+                "maxItems": 20,
                 "type": "array",
               },
               "original": Object {
@@ -168,6 +171,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
     Object {
       "accountRelation": "single",
@@ -183,6 +187,7 @@ Object {
               "minLength": 0,
               "type": "string",
             },
+            "maxItems": 20,
             "type": "array",
           },
           "birthDate": Object {
@@ -202,10 +207,11 @@ Object {
           },
           "nationalities": Object {
             "items": Object {
+              "maxLength": 2,
+              "minLength": 0,
               "type": "string",
             },
             "maxItems": 5,
-            "minItems": 1,
             "type": "array",
           },
           "residenceCountry": Object {
@@ -216,6 +222,7 @@ Object {
         },
         "type": "object",
       },
+      "views": Object {},
     },
   ],
 }

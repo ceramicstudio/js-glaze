@@ -1,10 +1,12 @@
-import { ModelAccountRelation } from '@ceramicnetwork/stream-model'
+import {
+  ModelAccountRelation,
+  type ModelDefinition,
+  type ModelViewsDefinition,
+} from '@ceramicnetwork/stream-model'
 import type {
   CustomRuntimeScalarType,
   InternalCompositeDefinition,
   JSONSchema,
-  ModelDefinition,
-  ModelViewsDefinition,
   RuntimeCompositeDefinition,
   RuntimeList,
   RuntimeObjectField,
@@ -26,44 +28,46 @@ type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number 
 type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
 const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
-  CeramicStreamReference: 'streamref',
+  CeramicCommitID: 'commitid',
   GraphQLDID: 'did',
   GraphQLID: 'id',
 }
 type CustomScalarTitle = keyof typeof CUSTOM_SCALARS_TITLES
 
-export type RuntimeModelBuilderParams = {
+type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
   commonEmbeds?: Array<string>
+  views?: ModelViewsDefinition
 }
 
-export type ExtractSchemaParams = {
+type ExtractSchemaParams = {
   parentName?: string
   ownName?: string
   required?: boolean
   localRef?: boolean
 }
 
+/** @internal */
 export class RuntimeModelBuilder {
   #commonEmbeds: Array<string>
   #modelName: string
   #modelSchema: JSONSchema.Object
-  #modelViews: ModelViewsDefinition = {}
+  #modelViews: ModelViewsDefinition
   #objects: Record<string, RuntimeObjectFields> = {}
 
   constructor(params: RuntimeModelBuilderParams) {
     this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
-    // Post-MVP logic
-    // this.#modelViews = params.definition.views ?? {}
+    // TODO: merge params.definition.views when supported in ModelDefinition
+    this.#modelViews = params.views ?? {}
   }
 
   build(): Record<string, RuntimeObjectFields> {
     const modelObject = this._buildObject(this.#modelSchema)
     this.#objects[this.#modelName] = modelObject
-    // TODO: build relations
+    // TODO (post-MVP): build relations
     this._buildViews(modelObject, this.#modelViews)
     return this.#objects
   }
@@ -215,12 +219,14 @@ export class RuntimeModelBuilder {
           object[key] = { type: 'view', viewType: view.type }
           continue
         default:
-          throw new Error(`Unsupported view type: ${view.type}`)
+          // @ts-ignore unexpected view type
+          throw new Error(`Unsupported view type: ${view.type as string}`)
       }
     }
   }
 }
 
+/** @internal */
 export function createRuntimeDefinition(
   definition: InternalCompositeDefinition
 ): RuntimeCompositeDefinition {
@@ -235,10 +241,13 @@ export function createRuntimeDefinition(
     // Add name to model ID mapping
     runtime.models[modelName] = modelID
     // Extract objects from model schema, relations and views
+    const modelViews = modelDefinition.views ?? {}
+    const compositeModelViews = definition.views?.models?.[modelID] ?? {}
     const modelBuilder = new RuntimeModelBuilder({
       commonEmbeds: definition.commonEmbeds,
       name: modelName,
       definition: modelDefinition,
+      views: { ...modelViews, ...compositeModelViews },
     })
     Object.assign(runtime.objects, modelBuilder.build())
     // Attach entry-point to account store based on relation type
@@ -258,7 +267,7 @@ export function createRuntimeDefinition(
     }
   }
 
-  // TODO: handle definition.views for additional models, accountData and root view
+  // TODO: handle definition.views for models relations, accountData and root view
 
   return runtime
 }

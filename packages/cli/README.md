@@ -1,3 +1,4 @@
+
 # Glaze CLI
 
 ## [Documentation](https://developers.ceramic.network/tools/glaze/development/#cli)
@@ -28,15 +29,13 @@ glaze COMMAND
 - [`glaze did:sign CONTENTS`](#glaze-didsign-contents)
 - [`glaze did:verify JWS`](#glaze-didverify-jws)
 - [`glaze help [COMMAND]`](#glaze-help-command)
-- [`glaze model:add NAME TYPE ALIAS STREAM`](#glaze-modeladd-name-type-alias-stream)
-- [`glaze model:create NAME`](#glaze-modelcreate-name)
-- [`glaze model:delete NAME`](#glaze-modeldelete-name)
-- [`glaze model:deploy NAME [OUTPUT]`](#glaze-modeldeploy-name-output)
-- [`glaze model:export NAME [OUTPUT]`](#glaze-modelexport-name-output)
-- [`glaze model:import LOCALNAME IMPORTNAME`](#glaze-modelimport-localname-importname)
-- [`glaze model:inspect NAME`](#glaze-modelinspect-name)
-- [`glaze model:list`](#glaze-modellist)
+- [`glaze model:create CONTENT`](#glaze-modelcreate-content)
+- [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
+- [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
 - [`glaze composite:create INPUT [OUTPUT]`](#glaze-compositecreate)
+- [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
+- [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
+- [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -242,97 +241,47 @@ OPTIONS
   --schema=schema        tile schema
 ```
 
-### `glaze model:create NAME`
+### `glaze model:create CONTENT`
 
-create a local model
-
-```
-USAGE
-  $ glaze model:create NAME
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model:delete NAME`
-
-delete a local model
+create a model stream with given content
 
 ```
 USAGE
-  $ glaze model:delete NAME
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -f, --force            bypass confirmation prompt
-```
-
-### `glaze model:deploy NAME [OUTPUT]`
-
-deploy a model
-
-```
-USAGE
-  $ glaze model:deploy NAME [OUTPUT]
+  $ glaze model:create CONTENT
 
 ARGUMENTS
-  NAME    local model name or package
-  OUTPUT  JSON file to output the deployed model aliases
+  CONTENT contents of the model encoded as JSON
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
 ```
 
-### `glaze model:export NAME [OUTPUT]`
+### `glaze model:content STREAMID`
 
-export a model
+load the contents of a model stream with a given ID
 
 ```
 USAGE
-  $ glaze model:export NAME [OUTPUT]
+  $ glaze model:content STREAMID
 
 ARGUMENTS
-  NAME    local model name or package
-  OUTPUT  JSON file to output the model to
+  STREAMID ID of the stream
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
+  -o, --output           Path to a file where the content should be saved
 ```
 
-### `glaze model:import LOCALNAME IMPORTNAME`
+### `glaze model:controller STREAMID`
 
-import a model into another one
-
-```
-USAGE
-  $ glaze model:import LOCALNAME IMPORTNAME
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model:inspect NAME`
-
-inspect a model
+load the model stream with a given ID and display its controller DID
 
 ```
 USAGE
-  $ glaze model:inspect NAME
+  $ glaze model:controller STREAMID
 
 ARGUMENTS
-  NAME  local model name or package
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze model:list`
-
-list local models
-
-```
-USAGE
-  $ glaze model:list
+  STREAMID ID of the stream
 
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
@@ -351,6 +300,54 @@ ARGUMENTS
 
 OPTIONS
   -o, --output a path to file where the resulting encoded composite definition should be saved
+```
+
+### `glaze model-instance:create MODELSTREAMID CONTENT`
+
+create a model instance stream with given content
+
+```
+USAGE
+  $ glaze model-instance:create MODELSTREAMID CONTENT
+
+ARGUMENTS
+  MODELSTREAMID  streamID of the model whose instance is being created
+  CONTENT        contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze model-instance:replace STREAMID CONTENT`
+
+replace content in a model instance stream with given streamID
+
+```
+USAGE
+  $ glaze model-instance:replace STREAMID CONTENT
+
+ARGUMENTS
+  STREAMID  streamID of the model instance whose content is being replaced
+  CONTENT   new contents of the model instance encoded as JSON
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+```
+
+### `glaze model-instance:content STREAMID`
+
+load the contents of a model instance stream with a given ID
+
+```
+USAGE
+  $ glaze model-instance:content STREAMID
+
+ARGUMENTS
+  STREAMID ID of the stream
+
+OPTIONS
+  -c, --ceramic=ceramic  Ceramic API URL
+  -o, --output           Path to a file where the content should be saved
 ```
 
 ### `glaze pin:add STREAMID`

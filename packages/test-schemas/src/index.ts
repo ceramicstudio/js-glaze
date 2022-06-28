@@ -1,4 +1,4 @@
-export const compositeSchemaWithProfiles = `
+export const ImageMetadataType = `
 type ImageMetadata {
   src: String! @length(max: 150)
   mimeType: String! @length(max: 50)
@@ -6,11 +6,28 @@ type ImageMetadata {
   height: Int! @intRange(min: 1)
   size: Int @intRange(min: 1)
 }
+`
+
+export const ImageSourcesType = `
+${ImageMetadataType}
 
 type ImageSources {
   original: ImageMetadata!
-  alternatives: [ImageMetadata]
+  alternatives: [ImageMetadata] @arrayLength(max: 20)
 }
+`
+
+export const noteSchema = `
+type Note @model(accountRelation: LIST, description: "Simple text note") {
+  author: DID! @documentAccount
+  version: CommitID! @documentVersion 
+  title: String! @length(min: 10, max: 100)
+  text: String! @length(max: 2000)
+}
+`
+
+export const profilesSchema = `
+${ImageSourcesType}
 
 type GenericProfile @model(
   accountRelation: SINGLE,
@@ -38,7 +55,7 @@ type PersonProfile @model(
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
   residenceCountry: String @length(max: 2)
-  nationalities: [String] @arrayLength(min:1, max: 5)
-  affiliations: [String] @length(max: 140)
+  nationalities: [String] @length(max: 2) @arrayLength(max: 5)
+  affiliations: [String] @length(max: 140) @arrayLength(max: 20)
 }
 `

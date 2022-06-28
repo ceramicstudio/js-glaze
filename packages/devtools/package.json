@@ -38,17 +38,18 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/stream-model": "^0.2.0",
+    "@ceramicnetwork/stream-model": "^0.2.1",
     "change-case": "^4.1.2",
     "graphql-scalars": "^1.17.0",
     "json-ptr": "^3.1.0",
     "lodash-es": "^4.17.21",
-    "multiformats": "^9.6.3",
+    "multiformats": "^9.7.0",
     "object-hash": "^3.0.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.2.0",
+    "@ceramicnetwork/common": "^2.2.1",
+    "@glazed/test-schemas": "^0.1.0",
     "@glazed/types": "^0.2.0",
     "@types/jest": "^28.1.2",
     "@types/lodash-es": "^4.17.6",
@@ -56,7 +57,7 @@
     "dids": "^3.2.0",
     "fs-extra": "^10.0.1",
     "graphql": "^16.5.0",
-    "graphql-tools": "^8.2.12",
+    "graphql-tools": "^8.2.13",
     "jest-environment-glaze": "^0.3.0"
   },
   "jest": {

@@ -2,42 +2,13 @@
 
 Common types used by Glaze packages.
 
-## Interfaces
-
-- [Model](../interfaces/types.Model.md)
-- [ModelInstanceDocument](../interfaces/types.ModelInstanceDocument.md)
-- [QueryAPIs](../interfaces/types.QueryAPIs.md)
-
-## Type aliases
-
-### CollectionRequest
-
-Ƭ **CollectionRequest**: [`PaginationParams`](types.md#paginationparams) & { `account?`: `string` ; `model`: `string`  }
-
-___
-
-### CollectionResponse
-
-Ƭ **CollectionResponse**<`T`\>: `Object`
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | `Record`<`string`, `unknown`\> |
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `results` | [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\>[] |
-| `total` | `number` |
-
-___
+## Type Aliases
 
 ### CompositeDefinitionType
 
 Ƭ **CompositeDefinitionType**<`T`\>: `Object`
+
+Composite definition type factory, used both for encoded and internal composites definitions.
 
 #### Type parameters
 
@@ -47,13 +18,13 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `aliases?` | `Record`<`string`, `string`\> |
-| `commonEmbeds?` | `string`[] |
-| `models` | `Record`<`string`, `T`\> |
-| `version` | `string` |
-| `views?` | [`CompositeViewsDefinition`](types.md#compositeviewsdefinition) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `aliases?` | `Record`<`string`, `string`\> | Optional mapping of model stream ID to alias name. |
+| `commonEmbeds?` | `string`[] | Optional common embeds shared by models in the composite. |
+| `models` | `Record`<`string`, `T`\> | Models defined in the composite, keyed by stream ID. |
+| `version` | `string` | Version of the composite format. |
+| `views?` | [`CompositeViewsDefinition`](types.md#compositeviewsdefinition) | Optional composite-level views. |
 
 ___
 
@@ -61,32 +32,31 @@ ___
 
 Ƭ **CompositeViewsDefinition**: `Object`
 
+Composite-level views definition.
+
 #### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `account` | `any` |
-| `models` | `Record`<`string`, [`ReferencedFromViewDefinitions`](types.md#referencedfromviewdefinitions)\> |
-| `root` | `any` |
+| `account?` | `Record`<`string`, `unknown`\> |
+| `models?` | `Record`<`string`, [`ModelViewsDefinition`](types.md#modelviewsdefinition)\> |
+| `root?` | `Record`<`string`, `unknown`\> |
 
 ___
 
-### DocumentMetadata
+### CustomRuntimeScalarType
 
-Ƭ **DocumentMetadata**: `Object`
+Ƭ **CustomRuntimeScalarType**: ``"commitid"`` \| ``"did"`` \| ``"id"``
 
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `controller` | `string` |
-| `model` | `string` |
+Ceramic-specific runtime scalar types.
 
 ___
 
 ### EncodedCompositeDefinition
 
 Ƭ **EncodedCompositeDefinition**: [`CompositeDefinitionType`](types.md#compositedefinitiontype)<[`EncodedStreamCommits`](types.md#encodedstreamcommits)\>
+
+JSON-encoded composite definition.
 
 ___
 
@@ -125,83 +95,24 @@ ___
 
 Ƭ **EncodedStreamCommits**: [`EncodedDagJWSResult`](types.md#encodeddagjwsresult)[]
 
+JSON-encoded Ceramic stream commits for a given stream.
+
 ___
 
 ### InternalCompositeDefinition
 
-Ƭ **InternalCompositeDefinition**: [`CompositeDefinitionType`](types.md#compositedefinitiontype)<[`ModelDefinition`](types.md#modeldefinition)\>
+Ƭ **InternalCompositeDefinition**: [`CompositeDefinitionType`](types.md#compositedefinitiontype)<`ModelDefinition`\>
 
-___
-
-### LinkRequest
-
-Ƭ **LinkRequest**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `account` | `string` |
-| `model` | `string` |
-
-___
-
-### LinkResponse
-
-Ƭ **LinkResponse**<`T`\>: `Object`
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | `Record`<`string`, `unknown`\> |
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `result` | [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\> \| ``null`` |
-
-___
-
-### ModelAccountRelation
-
-Ƭ **ModelAccountRelation**: ``"list"`` \| ``"set"`` \| ``"link"`` \| ``"none"``
-
-___
-
-### ModelDefinition
-
-Ƭ **ModelDefinition**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `accountRelation` | [`ModelAccountRelation`](types.md#modelaccountrelation) |
-| `description?` | `string` |
-| `name` | `string` |
-| `relations?` | [`ModelRelationsDefinition`](types.md#modelrelationsdefinition) |
-| `schema` | `JSONSchema.Object` |
-| `views?` | [`ModelViewsDefinition`](types.md#modelviewsdefinition) |
-
-___
-
-### ModelRelationDefinition
-
-Ƭ **ModelRelationDefinition**: { `type`: ``"account"``  } \| { `models`: `string`[] ; `type`: ``"document"``  } \| { `type`: ``"setIndex"``  }
-
-___
-
-### ModelRelationsDefinition
-
-Ƭ **ModelRelationsDefinition**: `Record`<`string`, [`ModelRelationDefinition`](types.md#modelrelationdefinition)\>
+Composite definition used internally by the [`Composite`](../classes/devtools.Composite.md)
+development tools.
 
 ___
 
 ### ModelViewDefinition
 
-Ƭ **ModelViewDefinition**: { `type`: ``"documentAccount"``  } \| { `type`: ``"documentVersion"``  } \| { `property`: `string` ; `type`: ``"referencedBy"``  }
+Ƭ **ModelViewDefinition**: { `type`: ``"documentAccount"``  } \| { `type`: ``"documentVersion"``  }
+
+Definition for a model view, a read-only property.
 
 ___
 
@@ -209,71 +120,7 @@ ___
 
 Ƭ **ModelViewsDefinition**: `Record`<`string`, [`ModelViewDefinition`](types.md#modelviewdefinition)\>
 
-___
-
-### MultiLinkRequest
-
-Ƭ **MultiLinkRequest**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `accounts` | `string`[] |
-| `model` | `string` |
-
-___
-
-### MultiLinkResponse
-
-Ƭ **MultiLinkResponse**<`T`\>: `Object`
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | `Record`<`string`, `unknown`\> |
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `results` | `Record`<`string`, [`ModelInstanceDocument`](../interfaces/types.ModelInstanceDocument.md)<`T`\> \| ``null``\> |
-
-___
-
-### PaginationParams
-
-Ƭ **PaginationParams**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `limit` | `number` |
-| `skip?` | `number` |
-| `sort?` | ``"asc"`` \| ``"desc"`` |
-
-___
-
-### ReferencedFromViewDefinition
-
-Ƭ **ReferencedFromViewDefinition**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `collection` | `boolean` |
-| `model` | `string` |
-| `property` | `string` |
-| `type` | ``"ReferencedFrom"`` |
-
-___
-
-### ReferencedFromViewDefinitions
-
-Ƭ **ReferencedFromViewDefinitions**: `Record`<`string`, [`ReferencedFromViewDefinition`](types.md#referencedfromviewdefinition)\>
+Mapping of names to types of read-only properties.
 
 ___
 
@@ -281,26 +128,25 @@ ___
 
 Ƭ **RuntimeBooleanScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"boolean"``  }
 
+Runtime scalar representation for a boolean.
+
 ___
 
 ### RuntimeCompositeDefinition
 
 Ƭ **RuntimeCompositeDefinition**: `Object`
 
+Runtime composite definition, used by the [`GraphClient class`](../classes/graph.GraphClient.md) to
+create a GraphQL schema to interact with.
+
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `accountStore` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> |
-| `models` | `Record`<`string`, `string`\> |
-| `objects` | `Record`<`string`, [`RuntimeObjectFields`](types.md#runtimeobjectfields)\> |
-| `query?` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> |
-
-___
-
-### RuntimeDIDStringScalar
-
-Ƭ **RuntimeDIDStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"did"``  }
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `accountData` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> | Account-based relations. |
+| `models` | `Record`<`string`, `string`\> | Models names to stream IDs mapping. |
+| `objects` | `Record`<`string`, [`RuntimeObjectFields`](types.md#runtimeobjectfields)\> | Objects structures, keyed by name. |
+| `query?` | `Record`<`string`, [`RuntimeViewReference`](types.md#runtimeviewreference)\> | Optional query-level entry-points. |
 
 ___
 
@@ -308,11 +154,15 @@ ___
 
 Ƭ **RuntimeFloatScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"float"``  }
 
+Runtime scalar representation for a float.
+
 ___
 
 ### RuntimeIntegerScalar
 
 Ƭ **RuntimeIntegerScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `type`: ``"integer"``  }
+
+Runtime scalar representation for an integer.
 
 ___
 
@@ -320,11 +170,15 @@ ___
 
 Ƭ **RuntimeList**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `item`: [`RuntimeScalar`](types.md#runtimescalar) \| [`RuntimeReference`](types.md#runtimereference)<``"object"``\> ; `type`: ``"list"``  }
 
+Runtime list representation.
+
 ___
 
 ### RuntimeObjectField
 
 Ƭ **RuntimeObjectField**: [`RuntimeScalar`](types.md#runtimescalar) \| [`RuntimeList`](types.md#runtimelist) \| [`RuntimeReference`](types.md#runtimereference) \| [`RuntimeViewField`](types.md#runtimeviewfield)
+
+Runtime object fields representations.
 
 ___
 
@@ -332,11 +186,15 @@ ___
 
 Ƭ **RuntimeObjectFields**: `Record`<`string`, [`RuntimeObjectField`](types.md#runtimeobjectfield)\>
 
+Runtime object property name to field representation mapping.
+
 ___
 
 ### RuntimeReference
 
 Ƭ **RuntimeReference**<`T`\>: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `refName`: `string` ; `refType`: `T` ; `type`: ``"reference"``  }
+
+Runtime reference representation.
 
 #### Type parameters
 
@@ -350,17 +208,23 @@ ___
 
 Ƭ **RuntimeReferenceType**: ``"connection"`` \| ``"node"`` \| ``"object"``
 
+Runtime references types.
+
 ___
 
 ### RuntimeScalar
 
-Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| [`RuntimeDIDStringScalar`](types.md#runtimedidstringscalar) \| [`RuntimeStreamRefStringScalar`](types.md#runtimestreamrefstringscalar)
+Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"commitid"``\> \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
+
+Runtime scalar representations.
 
 ___
 
 ### RuntimeScalarCommon
 
 Ƭ **RuntimeScalarCommon**: `Object`
+
+Common runtime scalar properties.
 
 #### Type declaration
 
@@ -374,11 +238,7 @@ ___
 
 Ƭ **RuntimeScalarType**: [`RuntimeScalar`](types.md#runtimescalar)[``"type"``]
 
-___
-
-### RuntimeStreamRefStringScalar
-
-Ƭ **RuntimeStreamRefStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"streamref"``  }
+Runtime scalar types.
 
 ___
 
@@ -386,11 +246,15 @@ ___
 
 Ƭ **RuntimeStringScalar**: [`RuntimeScalarCommon`](types.md#runtimescalarcommon) & { `maxLength?`: `number` ; `type`: ``"string"``  }
 
+Runtime scalar representation for a string.
+
 ___
 
 ### RuntimeViewField
 
 Ƭ **RuntimeViewField**: `Object`
+
+Runtime view field representation.
 
 #### Type declaration
 
@@ -405,6 +269,8 @@ ___
 
 Ƭ **RuntimeViewReference**: `Object`
 
+Runtime view reference representation.
+
 #### Type declaration
 
 | Name | Type |
@@ -418,14 +284,20 @@ ___
 
 Ƭ **RuntimeViewReferenceType**: ``"collection"`` \| ``"model"``
 
+Runtime views types.
+
 ___
 
 ### RuntimeViewType
 
 Ƭ **RuntimeViewType**: ``"documentAccount"`` \| ``"documentVersion"``
 
+Runtime view types.
+
 ___
 
 ### StreamCommits
 
 Ƭ **StreamCommits**: `DagJWSResult`[]
+
+Ceramic stream commits for a given stream.

@@ -1,20 +1,26 @@
 export const compositeDirectivesAndScalarsSchema = `
 # From graphql-scalars
+
 scalar DID
 
 # Custom Ceramic scalars
-scalar StreamReference
 
+scalar CommitID
 
 # Field validation directives
 
 # For strings
 directive @length(min: Int = 0, max: Int!) on FIELD_DEFINITION
-# For string and arrays
+# For arrays
 directive @arrayLength(min: Int, max: Int!) on FIELD_DEFINITION
-# For integers and floats
+# For numbers
 directive @intRange(min: Int, max: Int) on FIELD_DEFINITION
 directive @floatRange(min: Float, max: Float) on FIELD_DEFINITION
+
+# Views
+
+directive @documentAccount on FIELD_DEFINITION
+directive @documentVersion on FIELD_DEFINITION
 
 # Model definition
 

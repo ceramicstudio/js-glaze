@@ -38,16 +38,17 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/http-client": "^2.2.0",
-    "@ceramicnetwork/stream-model-instance": "^0.2.0",
+    "@ceramicnetwork/http-client": "^2.2.1",
+    "@ceramicnetwork/stream-model-instance": "^0.2.1",
     "@ceramicnetwork/streamid": "^2.1.0",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0",
     "graphql-scalars": "^1.17.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.2.0",
+    "@ceramicnetwork/common": "^2.2.1",
     "@glazed/devtools": "^0.2.0",
+    "@glazed/test-schemas": "^0.1.0",
     "@glazed/types": "^0.2.0",
     "dids": "^3.2.0",
     "jest-environment-glaze": "^0.3.0"

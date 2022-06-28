@@ -1,3 +1,11 @@
+import type {
+  ModelAccountRelation,
+  ModelDefinition,
+  ModelViewsDefinition,
+} from '@ceramicnetwork/stream-model'
+import type { JSONSchema } from '@glazed/types'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { mapSchema, MapperKind } from '@graphql-tools/utils'
 import {
   GraphQLBoolean,
   GraphQLFloat,
@@ -11,19 +19,17 @@ import {
   GraphQLString,
   GraphQLUnionType,
 } from 'graphql'
-import { mapSchema, MapperKind } from '@graphql-tools/utils'
-import { makeExecutableSchema } from '@graphql-tools/schema'
+import { GraphQLDID } from 'graphql-scalars'
+
+import { CeramicCommitID } from './graphQlDirectives/commitid.scalar.js'
+import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import {
+  type CeramicGraphQLTypeExtensions,
+  type ModelDirective,
   compositeDirectivesTransformer,
   fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
 } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
-import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
-import { GraphQLDID } from 'graphql-scalars'
-import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>
@@ -31,13 +37,9 @@ export type ModelsWithEmbeds = {
 }
 
 /** @internal */
-export function compositeModelsAndCommonEmbedsFromGraphQLSchema(
-  schema: string | GraphQLSchema
-): ModelsWithEmbeds {
+export function parseCompositeSchema(schema: string | GraphQLSchema): ModelsWithEmbeds {
   if (typeof schema === 'string') {
-    schema = makeExecutableSchema({
-      typeDefs: [compositeDirectivesAndScalarsSchema, schema],
-    })
+    schema = makeExecutableSchema({ typeDefs: [compositeDirectivesAndScalarsSchema, schema] })
   }
 
   // Throw an error, if there are any unsupported types in the schema
@@ -148,13 +150,17 @@ function embeddedObjectDefinitionFromObjectConfig(
   const properties: Record<string, JSONSchema> = {}
   const required: Array<string> = []
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
-    properties[fieldName] = fieldSchemaFromFieldDefinition(
+    const fieldSchema = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
       fieldDefinition.type,
       fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
     )
-    if (fieldDefinition.type instanceof GraphQLNonNull) {
-      required.push(fieldName)
+
+    if (fieldSchema) {
+      properties[fieldName] = fieldSchema
+      if (fieldDefinition.type instanceof GraphQLNonNull) {
+        required.push(fieldName)
+      }
     }
   }
 
@@ -186,23 +192,32 @@ function modelFromObjectConfig(
   const modelSchemaProperties: Record<string, JSONSchema> = {}
   const requiredProperties: Array<string> = []
   const definitionsUsedInTheModel: Record<string, JSONSchema.Object> = {}
+  const modelViews: ModelViewsDefinition = {}
 
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
-    modelSchemaProperties[fieldName] = fieldSchemaFromFieldDefinition(
+    const extensions = fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
+    const fieldSchema = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
       fieldDefinition.type,
-      fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
+      extensions
     )
-    if (fieldDefinition.type instanceof GraphQLNonNull) {
-      requiredProperties.push(fieldName)
-    }
 
-    const typeName =
-      (fieldDefinition.type instanceof GraphQLList && fieldDefinition.type.ofType.toString()) ||
-      (fieldDefinition.type instanceof GraphQLNonNull && fieldDefinition.type.ofType.toString()) ||
-      fieldDefinition.type.toString()
-    if (Object.keys(allDefinitions).includes(typeName)) {
-      definitionsUsedInTheModel[typeName] = allDefinitions[typeName]
+    if (fieldSchema) {
+      modelSchemaProperties[fieldName] = fieldSchema
+      if (fieldDefinition.type instanceof GraphQLNonNull) {
+        requiredProperties.push(fieldName)
+      }
+
+      const typeName =
+        (fieldDefinition.type instanceof GraphQLList && fieldDefinition.type.ofType.toString()) ||
+        (fieldDefinition.type instanceof GraphQLNonNull &&
+          fieldDefinition.type.ofType.toString()) ||
+        fieldDefinition.type.toString()
+      if (Object.keys(allDefinitions).includes(typeName)) {
+        definitionsUsedInTheModel[typeName] = allDefinitions[typeName]
+      }
+    } else if (extensions?.view) {
+      modelViews[fieldName] = extensions.view
     }
   }
   /**
@@ -248,12 +263,12 @@ function modelFromObjectConfig(
   if (requiredProperties.length > 0) {
     modelSchema.required = requiredProperties
   }
-
   return {
     name: objectConfig.name,
     accountRelation: modelDirective.accountRelation.toLowerCase() as ModelAccountRelation,
     description: modelDirective.description,
     schema: modelSchema,
+    views: modelViews,
   }
 }
 
@@ -262,7 +277,7 @@ function fieldSchemaFromFieldDefinition(
   fieldName: string,
   fieldType: GraphQLOutputType,
   ceramicExtensions?: CeramicGraphQLTypeExtensions
-): JSONSchema {
+): JSONSchema | null {
   if (fieldType instanceof GraphQLObjectType) {
     const objectSchema = referenceFieldSchemaFromFieldDefinition(fieldType)
     if (!objectSchema) {
@@ -321,13 +336,19 @@ function arrayFieldSchemaFromFieldDefinition(
     return
   }
 
+  const itemsSchema = fieldSchemaFromFieldDefinition(
+    fieldName,
+    fieldType.ofType,
+    ceramicExtensions // ceramicExtensions are applied recursively to array items
+  )
+
+  if (!itemsSchema) {
+    throw new Error('Invalid graphQL schema')
+  }
+
   const result: JSONSchema.Array = {
     type: 'array',
-    items: fieldSchemaFromFieldDefinition(
-      fieldName,
-      fieldType.ofType,
-      ceramicExtensions // ceramicExtensions are applied recursively to array items
-    ),
+    items: itemsSchema,
   }
 
   if (ceramicExtensions) {
@@ -347,10 +368,13 @@ function arrayFieldSchemaFromFieldDefinition(
 function defaultFieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType,
   ceramicExtensions?: CeramicGraphQLTypeExtensions
-): JSONSchema {
-  let result: JSONSchema = {
-    type: fieldType.toString().toLowerCase(),
+): JSONSchema | null {
+  if (ceramicExtensions?.view != null) {
+    // Fields marked with @documentAccount or @documentVersion go into model's views, not into the schema
+    return null
   }
+
+  let result: JSONSchema = {}
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDID)) {
     result = {
@@ -358,17 +382,16 @@ function defaultFieldSchemaFromFieldDefinition(
       type: 'string',
       title: 'GraphQLDID',
       pattern: "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
-      maxLength: 80,
+      maxLength: 100,
     }
   }
 
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, CeramicCommitID)) {
     result = {
       ...result,
       type: 'string',
-      title: 'CeramicStreamReference',
-      pattern: '<TBD>', //FIXME: define the pattern for StreamReference strings
-      maxLength: 80,
+      title: 'CeramicCommitID',
+      maxLength: 200,
     }
   }
 

@@ -1,4 +1,4 @@
-import type { ModelAccountRelation } from '@glazed/types'
+import type { ModelAccountRelation, ModelViewDefinition } from '@ceramicnetwork/stream-model'
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils'
 import {
   GraphQLSchema,
@@ -13,17 +13,28 @@ import {
   GraphQLInt,
   GraphQLFloat,
 } from 'graphql'
+import { GraphQLDID } from 'graphql-scalars'
+
+import { CeramicCommitID } from './commitid.scalar.js'
 
 const MODEL_DIRECTIVE_NAME = 'model'
+const DOCUMENT_ACCOUNT_DIRECTIVE_NAME = 'documentAccount'
+const DOCUMENT_VERSION_DIRECTIVE_NAME = 'documentVersion'
 const ARRAY_LENGTH_DIRECTIVE_NAME = 'arrayLength'
 const LENGTH_DIRECTIVE_NAME = 'length'
 const INT_RANGE_DIRECTIVE_NAME = 'intRange'
 const FLOAT_RANGE_DIRECTIVE_NAME = 'floatRange'
 
+const VIEW_DIRECTIVE_NAMES = [DOCUMENT_ACCOUNT_DIRECTIVE_NAME, DOCUMENT_VERSION_DIRECTIVE_NAME]
+
 export type ModelDirective = {
   accountRelation: ModelAccountRelation
   description: string
 }
+
+export type ViewDirective = ModelViewDefinition
+
+export type DirectiveWithoutParams = ViewDirective
 
 export type LengthDirective = {
   min?: number
@@ -41,6 +52,7 @@ export type CeramicGraphQLTypeExtensions = {
   [LENGTH_DIRECTIVE_NAME]?: LengthDirective
   [INT_RANGE_DIRECTIVE_NAME]?: RangeDirective
   [FLOAT_RANGE_DIRECTIVE_NAME]?: RangeDirective
+  view?: ViewDirective
 }
 
 /** @internal */
@@ -108,6 +120,35 @@ function objectConfigMapperFactory(
     return objectConfig
   }
   return objectConfigMapper
+}
+
+/** @internal */
+function parseDirectiveWithoutParams(
+  directiveName: string,
+  allowedType: GraphQLType,
+  schema: GraphQLSchema,
+  fieldConfig: GraphQLFieldConfig<any, any, any>,
+  ceramicExtensions: CeramicGraphQLTypeExtensions
+): CeramicGraphQLTypeExtensions {
+  const directive = getDirective(schema, fieldConfig, directiveName)?.[0] as DirectiveWithoutParams
+  if (directive) {
+    if (!fieldTypeIsinstanceOfOrWraps(fieldConfig.type, allowedType)) {
+      throw new Error(`@${directiveName} can only be applied to ${allowedType.toString()}s`)
+    }
+
+    if (VIEW_DIRECTIVE_NAMES.includes(directiveName)) {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        view: { type: directiveName } as ViewDirective,
+      }
+    } else {
+      ceramicExtensions = {
+        ...ceramicExtensions,
+        [directiveName]: { type: directiveName },
+      }
+    }
+  }
+  return ceramicExtensions
 }
 
 /** @internal */
@@ -233,6 +274,29 @@ function parseFloatRangeDirective(
   return ceramicExtensions
 }
 
+function validateRequiredDirectivesForFields(
+  fieldConfig: GraphQLFieldConfig<any, any, any>,
+  ceramicExtensions: CeramicGraphQLTypeExtensions
+) {
+  if (
+    fieldTypeIsinstanceOfOrWraps(fieldConfig.type, GraphQLString) ||
+    fieldTypeIsInstanceOfOrWrapsArray(fieldConfig.type, GraphQLString)
+  ) {
+    if (!Object.keys(ceramicExtensions).includes(LENGTH_DIRECTIVE_NAME)) {
+      throw new Error(`Missing @${LENGTH_DIRECTIVE_NAME} directive`)
+    }
+  }
+
+  if (
+    fieldConfig.type instanceof GraphQLList ||
+    (fieldConfig.type instanceof GraphQLNonNull && fieldConfig.type.ofType instanceof GraphQLList)
+  ) {
+    if (!Object.keys(ceramicExtensions).includes(ARRAY_LENGTH_DIRECTIVE_NAME)) {
+      throw new Error(`Missing @${ARRAY_LENGTH_DIRECTIVE_NAME} directive`)
+    }
+  }
+}
+
 /** @internal */
 function fieldConfigMapperFactory(
   schema: GraphQLSchema
@@ -243,10 +307,27 @@ function fieldConfigMapperFactory(
     let ceramicExtensions: CeramicGraphQLTypeExtensions = {}
 
     // Parse and validate custom directives
+    ceramicExtensions = parseDirectiveWithoutParams(
+      DOCUMENT_ACCOUNT_DIRECTIVE_NAME,
+      GraphQLDID,
+      schema,
+      fieldConfig,
+      ceramicExtensions
+    )
+    ceramicExtensions = parseDirectiveWithoutParams(
+      DOCUMENT_VERSION_DIRECTIVE_NAME,
+      CeramicCommitID,
+      schema,
+      fieldConfig,
+      ceramicExtensions
+    )
     ceramicExtensions = parseArrayLengthDirective(schema, fieldConfig, ceramicExtensions)
     ceramicExtensions = parseLengthDirective(schema, fieldConfig, ceramicExtensions)
     ceramicExtensions = parseIntRangeDirective(schema, fieldConfig, ceramicExtensions)
     ceramicExtensions = parseFloatRangeDirective(schema, fieldConfig, ceramicExtensions)
+
+    // Check that certain field types have directives required for them
+    validateRequiredDirectivesForFields(fieldConfig, ceramicExtensions)
 
     // Update field config with custom values from ceramicExtensions,
     // so that they can be processed later, e.g. converted to JSON Schema
@@ -256,6 +337,7 @@ function fieldConfigMapperFactory(
         ceramicExtensions: ceramicExtensions,
       }
     }
+
     return fieldConfig
   }
   return fieldConfigMapper
