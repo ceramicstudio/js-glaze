@@ -40,11 +40,15 @@
   },
   "dependencies": {
     "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
-    "@ceramicnetwork/stream-tile": "^2.2.2"
+    "@ceramicnetwork/stream-tile": "^2.2.2",
+    "ceramic-cacao": "^1.1.1"
   },
   "devDependencies": {
     "@ceramicnetwork/common": "^2.2.1",
     "@ceramicnetwork/streamid": "^2.1.0",
+    "@ceramicnetwork/stream-model-instance": "^0.2.1",
+    "@ceramicnetwork/stream-model": "^0.2.1",
+    "@ethersproject/wallet": "^5.6.2",
     "@types/create-hash": "^1.2.2",
     "@types/secp256k1": "^4.0.3"
   },
