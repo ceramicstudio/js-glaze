@@ -148,6 +148,27 @@ describe('did-session', () => {
     expect(doc.content).toEqual({ foo: 'boo' })
   })
 
+  test('authorize and create/update streams from serialized session', async () => {
+    const session = new DIDSession({ authProvider })
+    await session.authorize(opts)
+    const sessionStr = session.serialize()
+    const session2 = await DIDSession.fromSession(sessionStr, authProvider)
+    ceramic.did = session2.getDID()
+    const doc = await TileDocument.create(
+      ceramic,
+      { foo: 'bar' },
+      {},
+      {
+        anchor: false,
+        publish: false,
+      }
+    )
+    expect(doc.content).toEqual({ foo: 'bar' })
+
+    await doc.update({ foo: 'boo' })
+    expect(doc.content).toEqual({ foo: 'boo' })
+  })
+
   // Enable with next release
   test.skip('can create and update model instance stream', async () => {
     const session = new DIDSession({ authProvider, resources: [model.id.toString()] })
@@ -278,7 +299,7 @@ describe('did-session', () => {
       const session = new DIDSession({ authProvider })
       await session.authorize(opts)
       const sessionStr = session.serialize()
-      const session2 = DIDSession.fromSession(sessionStr, authProvider)
+      const session2 = await DIDSession.fromSession(sessionStr, authProvider)
       const sessionStr2 = session2.serialize()
       expect(sessionStr).toEqual(sessionStr2)
     })

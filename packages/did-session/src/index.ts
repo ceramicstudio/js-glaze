@@ -37,6 +37,39 @@
  *
  * ```
  *
+ * You can serialize a session to store for later and then re-initialize. Currently sessions are valid
+ * for 1 day by default.
+ *
+ *```ts
+ * // Create session as above, store for later
+ * const session = new DIDSession({ authProvider })
+ * const did = await session.authorize()
+ * const sessionString = session.serialize()
+ *
+ * // write/save session string where you want (ie localstorage)
+ * // ...
+ *
+ * // Later re initialize session
+ * const session2 = DIDSession.fromSession(authProvider, sessionString)
+ * const ceramic = new CeramicClient()
+ * ceramic.did = session2.getDID()
+ * ```
+ *
+ * Additional helper functions are available to help you manage a session lifecycle and the user experience.
+ *
+ *  *```ts
+ * // Check if authorized or created from existing session string
+ * didsession.hasSession
+ *
+ * // Check if session expired
+ * didsession.isExpired
+ *
+ * // Get resources session is authorized for
+ * didsession.authorizations
+ *
+ * // Check number of seconds till expiration, may want to re auth user at a time before expiration
+ * didsession.expiresInSecs
+ *
  * @module did-session
  */
 
@@ -126,7 +159,11 @@ export class DIDSession {
     // Pass through opts resources instead, resource arg does not support anything but streamids at moment
     const opts = Object.assign({ resources: this.#resources }, capabilityOpts)
     this.#cacao = await this.#authProvider.requestCapability(didKey.id, [], opts)
-    const didWithCap = didKey.withCapability(this.#cacao)
+    return this.initDID(didKey, this.#cacao)
+  }
+
+  async initDID(didKey: DID, cacao: Cacao): Promise<DID> {
+    const didWithCap = didKey.withCapability(cacao)
     await didWithCap.authenticate()
     this.#did = didWithCap
     return didWithCap
@@ -157,9 +194,19 @@ export class DIDSession {
   /**
    * Initialize a session from a serialized session string
    */
-  static fromSession(session: string, authProvider: EthereumAuthProvider) {
+  static async fromSession(
+    session: string,
+    authProvider: EthereumAuthProvider
+  ): Promise<DIDSession> {
     const { sessionKeySeed, cacao } = base64urlToJSON(session) as SessionObj
-    return new DIDSession({ authProvider, cacao, keySeed: base64ToBytes(sessionKeySeed) })
+    const dsession = new DIDSession({ authProvider, cacao, keySeed: base64ToBytes(sessionKeySeed) })
+    const didKey = await createDIDKey(dsession.#keySeed)
+    await dsession.initDID(didKey, cacao)
+    return dsession
+  }
+
+  get hasSession(): boolean {
+    return !!this.#cacao && !!this.#did
   }
 
   /**
@@ -180,7 +227,6 @@ export class DIDSession {
     const expTime = this.#cacao.p.exp
     if (!expTime) throw new Error('Session does not expire')
     const timeDiff = Date.parse(expTime) - Date.now()
-    console.log(timeDiff)
     return timeDiff < 0 ? 0 : timeDiff / 1000
   }
 
@@ -203,7 +249,7 @@ export class DIDSession {
    * Determine if session is available and optionally if authorized for given resources
    */
   isAuthorized(resources?: Array<string>): boolean {
-    if (!this.#did || this.isExpired) return false
+    if (!this.hasSession || this.isExpired) return false
     if (!resources) return true
     return resources.every((val) => this.authorizations.includes(val))
   }
