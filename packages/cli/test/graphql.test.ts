@@ -23,7 +23,7 @@ describe('graphql', () => {
 
   describe('graphql:server', () => {
     test('graphql server starts', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const serverProcess = execa('glaze', [
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
@@ -36,8 +36,6 @@ describe('graphql', () => {
             output.includes('GraphQL server is listening on http://localhost:62433/graphql')
           ).toBe(true)
           serverProcess.kill()
-        } else if (output.includes('Server stopped')) {
-          expect(output.includes('Server stopped')).toBe(true)
         }
       })
       try {
@@ -48,7 +46,7 @@ describe('graphql', () => {
     }, 60000)
 
     test('graphql server starts with --readonly flag', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const serverProcess = execa('glaze', [
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
@@ -62,8 +60,6 @@ describe('graphql', () => {
             output.includes('GraphQL server is listening on http://localhost:62610/graphql')
           ).toBe(true)
           serverProcess.kill()
-        } else if (output.includes('Server stopped')) {
-          expect(output.includes('Server stopped')).toBe(true)
         }
       })
       try {
