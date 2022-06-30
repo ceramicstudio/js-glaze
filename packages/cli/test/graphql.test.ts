@@ -30,13 +30,10 @@ describe('graphql', () => {
         '--port=62433',
       ])
       serverProcess.stdout?.on('data', (data: Readable) => {
-        const output = data.toString()
-        if (output.includes('GraphQL server is listening on http://localhost:62433/graphql')) {
-          expect(
-            output.includes('GraphQL server is listening on http://localhost:62433/graphql')
-          ).toBe(true)
-          serverProcess.kill()
-        }
+        expect(
+          data.toString().includes('GraphQL server is listening on http://localhost:62433/graphql')
+        ).toBe(true)
+        serverProcess.kill('SIGTERM')
       })
       try {
         await serverProcess
@@ -54,13 +51,10 @@ describe('graphql', () => {
         '--readonly',
       ])
       serverProcess.stdout?.on('data', (data: Readable) => {
-        const output = data.toString()
-        if (output.includes('GraphQL server is listening on http://localhost:62610/graphql')) {
-          expect(
-            output.includes('GraphQL server is listening on http://localhost:62610/graphql')
-          ).toBe(true)
-          serverProcess.kill()
-        }
+        expect(
+          data.toString().includes('GraphQL server is listening on http://localhost:62610/graphql')
+        ).toBe(true)
+        serverProcess.kill('SIGTERM')
       })
       try {
         await serverProcess
