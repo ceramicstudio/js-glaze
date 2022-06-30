@@ -1,4 +1,4 @@
-import { execa, ExecaReturnValue } from 'execa'
+import { execa } from 'execa'
 import { Readable } from 'node:stream'
 
 describe('graphql', () => {
@@ -23,26 +23,27 @@ describe('graphql', () => {
 
   describe('graphql:server', () => {
     test('graphql server starts', async () => {
-      
+      expect.assertions(2)
       const serverProcess = execa('glaze', [
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62433',
       ])
       serverProcess.stdout?.on('data', (data: Readable) => {
-        if (data.toString().includes('GraphQL server is listening')) {
+        const output = data.toString()
+        if (output.includes('GraphQL server is listening on http://localhost:62433/graphql')) {
+          expect(
+            output.includes('GraphQL server is listening on http://localhost:62433/graphql')
+          ).toBe(true)
           serverProcess.kill()
+        } else if (output.includes('Server stopped')) {
+          expect(output.includes('Server stopped')).toBe(true)
         }
       })
-      let result: ExecaReturnValue<string> | null = null
       try {
-        result = await serverProcess
-      } finally {
-        const stdOutString = result?.stdout.toString() || ''
-        expect(
-          stdOutString.includes('GraphQL server is listening on http://localhost:62433/graphql')
-        ).toBe(true)
-        expect(stdOutString.includes('Server stopped')).toBe(true)
+        await serverProcess
+      } catch {
+        //nothing to see here
       }
     }, 60000)
 
@@ -55,19 +56,20 @@ describe('graphql', () => {
         '--readonly',
       ])
       serverProcess.stdout?.on('data', (data: Readable) => {
-        if (data.toString().includes('GraphQL server is listening')) {
+        const output = data.toString()
+        if (output.includes('GraphQL server is listening on http://localhost:62610/graphql')) {
+          expect(
+            output.includes('GraphQL server is listening on http://localhost:62610/graphql')
+          ).toBe(true)
           serverProcess.kill()
+        } else if (output.includes('Server stopped')) {
+          expect(output.includes('Server stopped')).toBe(true)
         }
       })
-      let result: ExecaReturnValue<string> | null = null
       try {
-        result = await serverProcess
-      } finally {
-        const stdOutString = result?.stdout.toString() || ''
-        expect(
-          stdOutString.includes('GraphQL server is listening on http://localhost:62610/graphql')
-        ).toBe(true)
-        expect(stdOutString.includes('Server stopped')).toBe(true)
+        await serverProcess
+      } catch {
+        //nothing to see here
       }
     }, 60000)
   })
