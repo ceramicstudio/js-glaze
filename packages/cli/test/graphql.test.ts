@@ -29,11 +29,17 @@ describe('graphql', () => {
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62433',
       ])
+      let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
-        expect(
-          data.toString().includes('GraphQL server is listening on http://localhost:62433/graphql')
-        ).toBe(true)
-        serverProcess.kill('SIGTERM')
+        if (numChecks < 1) {
+          numChecks++
+          expect(
+            data
+              .toString()
+              .includes('GraphQL server is listening on http://localhost:62433/graphql')
+          ).toBe(true)
+          serverProcess.kill('SIGTERM')
+        }
       })
       try {
         await serverProcess
@@ -50,11 +56,17 @@ describe('graphql', () => {
         '--port=62610',
         '--readonly',
       ])
+      let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
-        expect(
-          data.toString().includes('GraphQL server is listening on http://localhost:62610/graphql')
-        ).toBe(true)
-        serverProcess.kill('SIGTERM')
+        if (numChecks < 1) {
+          numChecks++
+          expect(
+            data
+              .toString()
+              .includes('GraphQL server is listening on http://localhost:62610/graphql')
+          ).toBe(true)
+          serverProcess.kill('SIGTERM')
+        }
       })
       try {
         await serverProcess
