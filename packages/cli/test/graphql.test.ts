@@ -1,4 +1,5 @@
 import { execa } from 'execa'
+import {Readable} from "node:stream";
 
 describe('graphql', () => {
   describe('graphql:schema', () => {
@@ -22,48 +23,44 @@ describe('graphql', () => {
 
   describe('graphql:server', () => {
     test('graphql server starts', async () => {
-      expect.assertions(2)
-      try {
-        await execa(
-          'glaze',
-          ['graphql:server', 'test/mocks/runtime.composite.picture.post.json', '--port=62433'],
-          {
-            timeout: 15000,
-          }
-        )
-      } catch (e) {
-        expect((e as Error).message.includes('Timed out')).toBe(true)
-        expect(
-          (e as Error).message.includes(
-            'GraphQL server is listening on http://localhost:62433/graphql'
-          )
-        ).toBe(true)
-      }
+      const serverProcess = execa('glaze', [
+        'graphql:server',
+        'test/mocks/runtime.composite.picture.post.json',
+        '--port=62610',
+      ])
+      serverProcess.stdout?.on('data', (data: Readable) => {
+        if (data.toString().includes('GraphQL server is listening')) {
+          serverProcess.kill()
+        }
+      })
+      const result = await serverProcess
+      expect(
+        result.stdout
+          .toString()
+          .includes('GraphQL server is listening on http://localhost:62610/graphql')
+      ).toBe(true)
+      expect(result.stdout.toString().includes('Server stopped')).toBe(true)
     }, 60000)
 
     test('graphql server starts with --readonly flag', async () => {
-      expect.assertions(2)
-      try {
-        await execa(
-          'glaze',
-          [
-            'graphql:server',
-            'test/mocks/runtime.composite.picture.post.json',
-            '--port=62610',
-            '--readonly',
-          ],
-          {
-            timeout: 15000,
-          }
-        )
-      } catch (e) {
-        expect((e as Error).message.includes('Timed out')).toBe(true)
-        expect(
-          (e as Error).message.includes(
-            'GraphQL server is listening on http://localhost:62610/graphql'
-          )
-        ).toBe(true)
-      }
+      const serverProcess = execa('glaze', [
+        'graphql:server',
+        'test/mocks/runtime.composite.picture.post.json',
+        '--port=62610',
+        '--readonly',
+      ])
+      serverProcess.stdout?.on('data', (data: Readable) => {
+        if (data.toString().includes('GraphQL server is listening')) {
+          serverProcess.kill()
+        }
+      })
+      const result = await serverProcess
+      expect(
+        result.stdout
+          .toString()
+          .includes('GraphQL server is listening on http://localhost:62610/graphql')
+      ).toBe(true)
+      expect(result.stdout.toString().includes('Server stopped')).toBe(true)
     }, 60000)
   })
 })
