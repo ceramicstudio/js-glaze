@@ -41,11 +41,7 @@ describe('graphql', () => {
           serverProcess.kill('SIGTERM')
         }
       })
-      try {
-        await serverProcess
-      } catch {
-        //nothing to see here
-      }
+      await serverProcess
     }, 60000)
 
     test('graphql server starts with --readonly flag', async () => {
@@ -68,11 +64,7 @@ describe('graphql', () => {
           serverProcess.kill('SIGTERM')
         }
       })
-      try {
-        await serverProcess
-      } catch {
-        //nothing to see here
-      }
+      await serverProcess
     }, 60000)
   })
 })
