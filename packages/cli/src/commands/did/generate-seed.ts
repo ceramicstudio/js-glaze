@@ -11,7 +11,6 @@ export default class GenerateSeed extends Command {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async run(): Promise<void> {
-    this.spinner.start('Generating a seed...')
     try {
       const seed = new Uint8Array(randomBytes(32))
       const base32repr = chalk.red(toString(seed, 'base16'))

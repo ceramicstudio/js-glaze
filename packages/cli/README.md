@@ -17,10 +17,6 @@ glaze COMMAND
 
 <!-- commands -->
 
-- [`glaze config:get KEY`](#glaze-configget-key)
-- [`glaze config:reset KEY`](#glaze-configreset-key)
-- [`glaze config:set KEY VALUE`](#glaze-configset-key-value)
-- [`glaze config:show`](#glaze-configshow)
 - [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
 - [`glaze did:from-seed`](#glaze-didfromseed)
 - [`glaze help [COMMAND]`](#glaze-help-command)
@@ -49,54 +45,6 @@ glaze COMMAND
 - [`glaze tile:content STREAMID`](#glaze-tileshow-streamid)
 - [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
 - [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
-
-### `glaze config:get KEY`
-
-get a config value
-
-```
-USAGE
-  $ glaze config:get KEY
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze config:reset KEY`
-
-reset a config value
-
-```
-USAGE
-  $ glaze config:reset KEY
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze config:set KEY VALUE`
-
-set a config value
-
-```
-USAGE
-  $ glaze config:set KEY VALUE
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
-
-### `glaze config:show`
-
-show the full config
-
-```
-USAGE
-  $ glaze config:show
-
-OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-```
 
 ### `glaze did:generate-seed`
 
@@ -149,8 +97,8 @@ ARGUMENTS
   STREAM  Stream reference or string-encoded JSON content
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  --schema=schema        tile schema
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  --schema=schema            tile schema
 ```
 
 ### `glaze model:create CONTENT`
@@ -165,7 +113,7 @@ ARGUMENTS
   CONTENT contents of the model encoded as JSON
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze model:content STREAMID`
@@ -180,8 +128,8 @@ ARGUMENTS
   STREAMID ID of the stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -o, --output           Path to a file where the content should be saved
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -o, --output               Path to a file where the content should be saved
 ```
 
 ### `glaze model:controller STREAMID`
@@ -196,7 +144,7 @@ ARGUMENTS
   STREAMID ID of the stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze composite:create`
@@ -211,7 +159,8 @@ ARGUMENTS
   INPUT  a path to file containing valid ceramic composite definition in GraphQL Schema Definition Language
 
 OPTIONS
-  -o, --output a path to file where the resulting encoded composite definition should be saved
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -o, --output               a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:from-model`
@@ -316,7 +265,7 @@ ARGUMENTS
   CONTENT        contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze model-instance:replace STREAMID CONTENT`
@@ -332,7 +281,7 @@ ARGUMENTS
   CONTENT   new contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze model-instance:content STREAMID`
@@ -347,8 +296,8 @@ ARGUMENTS
   STREAMID ID of the stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -o, --output           Path to a file where the content should be saved
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -o, --output               Path to a file where the content should be saved
 ```
 
 ### `glaze graphql:schema PATH`
@@ -396,7 +345,7 @@ ARGUMENTS
   STREAMID  ID of stream to be pinned
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze pin:ls [STREAMID]`
@@ -411,7 +360,7 @@ ARGUMENTS
   STREAMID  optional stream ID filter
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze pin:rm STREAMID`
@@ -426,7 +375,7 @@ ARGUMENTS
   STREAMID  ID of stream to be unpinned
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
 ### `glaze stream:commits STREAMID`
@@ -442,7 +391,7 @@ ARGUMENTS
 
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
   -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
@@ -458,7 +407,7 @@ ARGUMENTS
   STREAMID  ID of the Stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic  Ceramic API URL
   -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
@@ -471,10 +420,10 @@ USAGE
   $ glaze tile:create
 
 OPTIONS
-  -b, --content=content    stream contents (JSON encoded as string)
-  -c, --ceramic=ceramic    Ceramic API URL
-  -k, --key=key            DID Private Key
-  -m, --metadata=metadata  stream metadata
+  -b, --content=content        stream contents (JSON encoded as string)
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --key=key                DID Private Key
+  -m, --metadata=metadata      stream metadata
 ```
 
 ### `glaze tile:deterministic METADATA`
@@ -489,9 +438,9 @@ ARGUMENTS
   METADATA  stream metadata
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -k, --key=key          DID Private Key
-  -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --key=key              DID Private Key
+  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:content STREAMID`
@@ -506,8 +455,8 @@ ARGUMENTS
   STREAMID  ID of the stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:update STREAMID`
@@ -522,10 +471,10 @@ ARGUMENTS
   STREAMID  ID of the stream
 
 OPTIONS
-  -b, --content=content    new contents for the stream
-  -c, --ceramic=ceramic    Ceramic API URL
-  -k, --key=key            DID Private Key
-  -m, --metadata=metadata  Optional metadata for the stream
+  -b, --content=content        new contents for the stream
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --key=key                DID Private Key
+  -m, --metadata=metadata      Optional metadata for the stream
 ```
 
 ### `glaze tile:show STREAMID`
@@ -540,8 +489,8 @@ ARGUMENTS
   STREAMID  ID of the stream
 
 OPTIONS
-  -c, --ceramic=ceramic  Ceramic API URL
-  -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  -c, --ceramic-url=ceramic  Ceramic API URL
+  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 <!-- commandsstop -->

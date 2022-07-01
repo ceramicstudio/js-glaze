@@ -13,8 +13,6 @@ import ora from 'ora'
 import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
 
-import { config } from './config.js'
-
 type StringRecord = Record<string, unknown>
 
 // TODO: SYNC_OPTIONS_MAP is also used in js-ceramic/packages/cli. Move this const to '@ceramicnetwork/common'
@@ -25,7 +23,7 @@ export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
 }
 
 export interface CommandFlags {
-  ceramic?: string
+  'ceramic-url': string
   key?: string
   [key: string]: unknown
 }
@@ -55,7 +53,11 @@ export abstract class Command<
   Args extends StringRecord = StringRecord
 > extends CoreCommand {
   static flags = {
-    ceramic: Flags.string({ char: 'c', description: 'Ceramic API URL', env: 'CERAMIC_URL' }),
+    'ceramic-url': Flags.string({
+      char: 'c',
+      description: 'Ceramic API URL',
+      env: 'CERAMIC_URL',
+    }),
     key: Flags.string({ char: 'k', description: 'DID Private Key', env: 'DID_KEY' }),
   }
 
@@ -101,7 +103,7 @@ export abstract class Command<
 
   get ceramic(): CeramicClient {
     if (this.#ceramic == null) {
-      this.#ceramic = new CeramicClient(this.flags.ceramic ?? config.get('user')['ceramic-url'])
+      this.#ceramic = new CeramicClient(this.flags['ceramic-url'])
     }
     return this.#ceramic
   }

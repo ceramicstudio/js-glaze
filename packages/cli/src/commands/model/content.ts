@@ -23,7 +23,6 @@ export default class ModelContent extends Command<ModelContentFlags, { streamId:
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Loading the model...')
     try {
       const model = await Model.load(this.ceramic, this.args.streamId)
       if (this.flags.output != null) {
