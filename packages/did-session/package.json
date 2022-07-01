@@ -39,12 +39,12 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
-    "@ceramicnetwork/stream-tile": "^2.2.2"
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.7-rc.1",
+    "@ceramicnetwork/stream-tile": "^2.3.0-rc.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.2.1",
-    "@ceramicnetwork/streamid": "^2.1.0",
+    "@ceramicnetwork/common": "^2.3.0-rc.0",
+    "@ceramicnetwork/streamid": "^2.2.0-rc.0",
     "@types/create-hash": "^1.2.2",
     "@types/secp256k1": "^4.0.3"
   },

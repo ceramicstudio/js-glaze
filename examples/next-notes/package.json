@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ceramicnetwork/http-client": "^2.2.1",
+    "@ceramicnetwork/http-client": "^2.3.0-rc.0",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@glazed/graph": "^0.1.0",
