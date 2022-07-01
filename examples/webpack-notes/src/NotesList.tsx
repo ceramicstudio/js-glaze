@@ -6,7 +6,7 @@ import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import NoteIcon from '@mui/icons-material/Note'
 import NoteAddIcon from '@mui/icons-material/NoteAdd'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { useAuth } from './auth'
@@ -15,7 +15,7 @@ const NOTES_LIST_QUERY = gql`
   query NotesList($cursor: String) {
     viewer {
       data {
-        noteCollection(last: 20, before: $cursor) {
+        noteCollection(last: 5, before: $cursor) {
           edges {
             node {
               id
@@ -36,16 +36,15 @@ export default function NotesList() {
   const [authState] = useAuth()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data, loading, fetchMore } = useQuery(NOTES_LIST_QUERY, {
+  const { data, fetchMore } = useQuery(NOTES_LIST_QUERY, {
     skip: authState.status !== 'done',
+    onCompleted(pageData) {
+      const pageInfo = pageData?.viewer.data.noteCollection.pageInfo
+      if (pageInfo?.hasPreviousPage) {
+        fetchMore({ variables: { cursor: pageInfo.startCursor } })
+      }
+    },
   })
-
-  const pageInfo = data?.viewer.data.noteCollection.pageInfo
-  useEffect(() => {
-    if (!loading && pageInfo?.hasNextPage) {
-      fetchMore({ variables: { cursor: pageInfo.startCursor } })
-    }
-  }, [fetchMore, loading, pageInfo])
 
   const draft = (
     <ListItem button onClick={() => navigate('/new')}>
@@ -62,9 +61,8 @@ export default function NotesList() {
     return <List>{draft}</List>
   }
 
-  const notes = data.viewer.data.noteCollection.edges.map((edge) => {
+  const noteItems = [...data.viewer.data.noteCollection.edges].reverse().map((edge) => {
     const note = edge.node
-
     return (
       <ListItem
         button
@@ -83,7 +81,7 @@ export default function NotesList() {
     <>
       <List>{draft}</List>
       <Divider />
-      <List>{notes}</List>
+      <List>{noteItems}</List>
     </>
   )
 }

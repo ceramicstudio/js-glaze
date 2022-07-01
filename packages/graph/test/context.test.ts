@@ -92,36 +92,46 @@ describe('context', () => {
   })
 
   test('queryConnection()', async () => {
+    const expectedNode = {}
+    const buildStreamFromState = jest.fn(() => expectedNode)
     const queryIndex = jest.fn(() => ({
-      entries: [testState, testState, testState],
+      edges: [
+        { cursor: 'cursor1', node: testState },
+        { cursor: 'cursor2', node: testState },
+        { cursor: 'cursor3', node: testState },
+      ],
       pageInfo: { hasNextPage: true, hasPreviousPage: false },
     }))
-    const ceramic = { index: { queryIndex } } as unknown as CeramicApi
+    const ceramic = { buildStreamFromState, index: { queryIndex } } as unknown as CeramicApi
     const context = new Context({ ceramic })
 
-    const { edges, pageInfo } = await context.queryConnection({ model: 'test', first: 3 })
-    expect(edges).toHaveLength(3)
-    expect(pageInfo).toEqual({
-      hasNextPage: true,
-      hasPreviousPage: false,
-      startCursor: null,
-      endCursor: null,
+    await expect(context.queryConnection({ model: 'test', first: 3 })).resolves.toEqual({
+      edges: [
+        { cursor: 'cursor1', node: expectedNode },
+        { cursor: 'cursor2', node: expectedNode },
+        { cursor: 'cursor3', node: expectedNode },
+      ],
+      pageInfo: {
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     })
-
     expect(queryIndex).toBeCalledWith({ model: 'test', first: 3, after: undefined })
   })
 
   test('querySingle()', async () => {
+    const expectedNode = {}
+    const buildStreamFromState = jest.fn(() => expectedNode)
     const queryIndex = jest.fn(() => ({
-      entries: [testState],
+      edges: [{ cursor: 'cursor1', node: testState }],
       pageInfo: { hasNextPage: false, hasPreviousPage: false },
     }))
-    const ceramic = { index: { queryIndex } } as unknown as CeramicApi
+    const ceramic = { buildStreamFromState, index: { queryIndex } } as unknown as CeramicApi
     const context = new Context({ ceramic })
 
-    await expect(context.querySingle({ model: 'test' })).resolves.toBeInstanceOf(
-      ModelInstanceDocument
-    )
+    await expect(context.querySingle({ model: 'test' })).resolves.toBe(expectedNode)
     expect(queryIndex).toBeCalledWith({ model: 'test', last: 1 })
   })
 })

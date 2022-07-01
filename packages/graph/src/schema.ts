@@ -143,7 +143,7 @@ class SchemaBuilder {
 
     const nodeDefs = nodeDefinitions(
       async (id: string, ctx: Context) => await ctx.loadDoc(id),
-      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString() as string]
+      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString()]
     )
 
     const accountDataEntries = Object.entries(this.#def.accountData ?? {})
@@ -344,7 +344,7 @@ class SchemaBuilder {
     if (field.viewType === 'documentAccount') {
       return {
         type: new GraphQLNonNull(definitions.accountObject),
-        resolve: (doc): string => doc.metadata.controller as string,
+        resolve: (doc): string => doc.metadata.controller,
       }
     }
     if (field.viewType === 'documentVersion') {

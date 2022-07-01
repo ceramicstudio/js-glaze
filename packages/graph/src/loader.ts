@@ -121,7 +121,7 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
     { controller, ...options }: CreateOptions = {}
   ): Promise<ModelInstanceDocument<T>> {
     const metadata: ModelInstanceDocumentMetadata = {
-      controller,
+      controller: controller ?? (this.#ceramic.did?.id as string),
       model: model instanceof StreamID ? model : StreamID.fromString(model),
     }
     const stream = await ModelInstanceDocument.create<T>(this.#ceramic, content, metadata, options)

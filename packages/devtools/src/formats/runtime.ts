@@ -38,7 +38,7 @@ type RuntimeModelBuilderParams = {
   name: string
   definition: ModelDefinition
   commonEmbeds?: Array<string>
-  views?: ModelViewsDefinition
+  views: ModelViewsDefinition
 }
 
 type ExtractSchemaParams = {
@@ -60,8 +60,7 @@ export class RuntimeModelBuilder {
     this.#commonEmbeds = params.commonEmbeds ?? []
     this.#modelName = params.name
     this.#modelSchema = params.definition.schema
-    // TODO: merge params.definition.views when supported in ModelDefinition
-    this.#modelViews = params.views ?? {}
+    this.#modelViews = params.views
   }
 
   build(): Record<string, RuntimeObjectFields> {
