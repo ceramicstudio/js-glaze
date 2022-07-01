@@ -37,8 +37,6 @@ describe('graphql', () => {
               .includes('GraphQL server is listening on http://localhost:62433/graphql')
           ).toBe(true)
           numChecks++
-        } else if (numChecks === 1) {
-          expect(data.toString().includes('Server stopped')).toBe(true)
         }
       })
       await Promise.race([
@@ -50,6 +48,7 @@ describe('graphql', () => {
         ),
         serverProcess,
       ])
+      expect.assertions(1)
     }, 60000)
 
     test('graphql server starts with --readonly flag', async () => {
@@ -68,8 +67,6 @@ describe('graphql', () => {
               .includes('GraphQL server is listening on http://localhost:62610/graphql')
           ).toBe(true)
           numChecks++
-        } else if (numChecks === 1) {
-          expect(data.toString().includes('Server stopped')).toBe(true)
         }
       })
       await Promise.race([
@@ -81,6 +78,7 @@ describe('graphql', () => {
         ),
         serverProcess,
       ])
+      expect.assertions(1)
     }, 60000)
   })
 })
