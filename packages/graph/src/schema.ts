@@ -379,61 +379,71 @@ class SchemaBuilder {
   }
 
   _buildInputObjectType(name: string, fields: RuntimeObjectFields) {
+    const buildFields = (required: boolean): GraphQLInputFieldConfigMap => {
+      const config: GraphQLInputFieldConfigMap = {}
+      const inputPrefix = required ? 'Required' : ''
+
+      for (const [key, field] of Object.entries(fields)) {
+        let type
+        switch (field.type) {
+          case 'view':
+            // Views can't be set in inputs
+            continue
+          case 'reference':
+            switch (field.refType) {
+              case 'connection':
+                // Ignore connections from inputs, should be derived
+                continue
+              case 'node':
+                type = GraphQLID
+                break
+              case 'object': {
+                type = this.#inputObjects[inputPrefix + field.refName]
+                if (type == null) {
+                  throw new Error(`Missing referenced input type: ${inputPrefix + field.refName}`)
+                }
+              }
+            }
+            break
+          case 'list': {
+            let itemType
+            if (field.item.type === 'reference') {
+              itemType = this.#inputObjects[inputPrefix + field.item.refName]
+              if (itemType == null) {
+                throw new Error(
+                  `Missing referenced input type: ${inputPrefix + field.item.refName}`
+                )
+              }
+            } else if (SCALAR_FIELDS.includes(field.item.type)) {
+              itemType = SCALARS[field.item.type]
+            } else {
+              throw new Error(`Unsupported list item type: ${field.item.type}`)
+            }
+            type = new GraphQLList(itemType)
+            break
+          }
+          default:
+            if (SCALAR_FIELDS.includes(field.type)) {
+              type = SCALARS[field.type]
+            } else {
+              throw new Error(`Unsupported field type ${field.type}`)
+            }
+        }
+
+        if (type != null) {
+          config[key] = { type: required && field.required ? new GraphQLNonNull(type) : type }
+        }
+      }
+      return config
+    }
+
+    this.#inputObjects[`Required${name}`] = new GraphQLInputObjectType({
+      name: `Required${name}Input`,
+      fields: () => buildFields(true),
+    })
     this.#inputObjects[name] = new GraphQLInputObjectType({
       name: `${name}Input`,
-      fields: (): GraphQLInputFieldConfigMap => {
-        const config: GraphQLInputFieldConfigMap = {}
-        for (const [key, field] of Object.entries(fields)) {
-          let type
-          switch (field.type) {
-            case 'view':
-              // Views can't be set in inputs
-              continue
-            case 'reference':
-              switch (field.refType) {
-                case 'connection':
-                  // Ignore connections from inputs, should be derived
-                  continue
-                case 'node':
-                  type = GraphQLID
-                  break
-                case 'object': {
-                  type = this.#inputObjects[field.refName]
-                  if (type == null) {
-                    throw new Error(`Missing referenced input type: ${field.refName}`)
-                  }
-                }
-              }
-              break
-            case 'list': {
-              let itemType
-              if (field.item.type === 'reference') {
-                itemType = this.#inputObjects[field.item.refName]
-                if (itemType == null) {
-                  throw new Error(`Missing referenced input type: ${field.item.refName}`)
-                }
-              } else if (SCALAR_FIELDS.includes(field.item.type)) {
-                itemType = SCALARS[field.item.type]
-              } else {
-                throw new Error(`Unsupported list item type: ${field.item.type}`)
-              }
-              type = new GraphQLList(itemType)
-              break
-            }
-            default:
-              if (SCALAR_FIELDS.includes(field.type)) {
-                type = SCALARS[field.type]
-              } else {
-                throw new Error(`Unsupported field type ${field.type}`)
-              }
-          }
-
-          if (type != null) {
-            config[key] = { type: field.required ? new GraphQLNonNull(type) : type }
-          }
-        }
-        return config
-      },
+      fields: () => buildFields(false),
     })
   }
 
@@ -441,7 +451,7 @@ class SchemaBuilder {
     this.#mutations[`create${name}`] = mutationWithClientMutationId({
       name: `Create${name}`,
       inputFields: () => ({
-        content: { type: new GraphQLNonNull(this.#inputObjects[name]) },
+        content: { type: new GraphQLNonNull(this.#inputObjects[`Required${name}`]) },
       }),
       outputFields: () => ({
         node: { type: new GraphQLNonNull(this.#types[name]) },

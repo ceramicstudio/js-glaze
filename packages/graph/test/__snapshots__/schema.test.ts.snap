@@ -86,21 +86,21 @@ type CreateGenericProfilePayload {
 }
 
 input CreateGenericProfileInput {
-  content: GenericProfileInput!
+  content: RequiredGenericProfileInput!
   clientMutationId: String
 }
 
-input GenericProfileInput {
+input RequiredGenericProfileInput {
   name: String
-  image: ImageSourcesInput
+  image: RequiredImageSourcesInput
 }
 
-input ImageSourcesInput {
-  original: ImageMetadataInput!
-  alternatives: [ImageMetadataInput]
+input RequiredImageSourcesInput {
+  original: RequiredImageMetadataInput!
+  alternatives: [RequiredImageMetadataInput]
 }
 
-input ImageMetadataInput {
+input RequiredImageMetadataInput {
   src: String!
   mimeType: String!
   width: Int!
@@ -120,6 +120,24 @@ input UpdateGenericProfileInput {
   clientMutationId: String
 }
 
+input GenericProfileInput {
+  name: String
+  image: ImageSourcesInput
+}
+
+input ImageSourcesInput {
+  original: ImageMetadataInput
+  alternatives: [ImageMetadataInput]
+}
+
+input ImageMetadataInput {
+  src: String
+  mimeType: String
+  width: Int
+  height: Int
+  size: Int
+}
+
 input UpdateOptionsInput {
   replace: Boolean
   version: CeramicCommitID
@@ -134,14 +152,14 @@ type CreateSocialProfilePayload {
 }
 
 input CreateSocialProfileInput {
-  content: SocialProfileInput!
+  content: RequiredSocialProfileInput!
   clientMutationId: String
 }
 
-input SocialProfileInput {
+input RequiredSocialProfileInput {
   description: String
   emoji: String
-  background: ImageSourcesInput
+  background: RequiredImageSourcesInput
   url: String
 }
 
@@ -157,17 +175,24 @@ input UpdateSocialProfileInput {
   clientMutationId: String
 }
 
+input SocialProfileInput {
+  description: String
+  emoji: String
+  background: ImageSourcesInput
+  url: String
+}
+
 type CreatePersonProfilePayload {
   node: PersonProfile!
   clientMutationId: String
 }
 
 input CreatePersonProfileInput {
-  content: PersonProfileInput!
+  content: RequiredPersonProfileInput!
   clientMutationId: String
 }
 
-input PersonProfileInput {
+input RequiredPersonProfileInput {
   birthDate: String
   gender: String
   homeLocation: String
@@ -186,6 +211,15 @@ input UpdatePersonProfileInput {
   content: PersonProfileInput!
   options: UpdateOptionsInput
   clientMutationId: String
+}
+
+input PersonProfileInput {
+  birthDate: String
+  gender: String
+  homeLocation: String
+  residenceCountry: String
+  nationalities: [String]
+  affiliations: [String]
 }"
 `;
 
@@ -288,11 +322,11 @@ type CreateNotePayload {
 }
 
 input CreateNoteInput {
-  content: NoteInput!
+  content: RequiredNoteInput!
   clientMutationId: String
 }
 
-input NoteInput {
+input RequiredNoteInput {
   title: String!
   text: String!
 }
@@ -307,6 +341,11 @@ input UpdateNoteInput {
   content: NoteInput!
   options: UpdateOptionsInput
   clientMutationId: String
+}
+
+input NoteInput {
+  title: String
+  text: String
 }
 
 input UpdateOptionsInput {
