@@ -37,6 +37,8 @@ glaze COMMAND
 - [`glaze model-instance:create MODELSTREAMID CONTENT`](#glaze-modelinstancecreate-modelstreamid-content)
 - [`glaze model-instance:replace STREAMID CONTENT`](#glaze-modelinstancereplace-streamid-content)
 - [`glaze model-instance:content STREAMID`](#glaze-modelinstancecontent-streamid)
+- [`glaze graphql:schema PATH`](#glaze-graphqlschema-path)
+- [`glaze graphql:server PATH`](#glaze-graphqlserver-path)
 - [`glaze pin:add STREAMID`](#glaze-pinadd-streamid)
 - [`glaze pin:ls [STREAMID]`](#glaze-pinls-streamid)
 - [`glaze pin:rm STREAMID`](#glaze-pinrm-streamid)
@@ -347,6 +349,39 @@ ARGUMENTS
 OPTIONS
   -c, --ceramic=ceramic  Ceramic API URL
   -o, --output           Path to a file where the content should be saved
+```
+
+### `glaze graphql:schema PATH`
+
+load the runtime graphql schema for the composite with given runtime representation
+
+```
+USAGE
+  $ glaze graphql:schema PATH
+
+ARGUMENTS
+  PATH           a path to a runtime representation of a composite encoded as JSON
+
+OPTIONS
+  -o, --output   Path to a file where the schema should be saved
+```
+
+### `glaze graphql:server PATH`
+
+launch a graphQL server supporting the runtime schema of a given composite
+
+```
+USAGE
+  $ glaze graphql:server PATH
+
+ARGUMENTS
+  PATH      a path to a runtime representation of a composite encoded as JSON
+
+OPTIONS
+  --readonly   a boolean indicating whether the server should load the schema without mutations
+  --port       the port that the server should listen on
+  --graphiql   a boolean indicating whether the GraphiQL IDE should be available when opening the server's url in the 
+               browser. See https://github.com/graphql/graphiql for more info on GraphiQL.
 ```
 
 ### `glaze pin:add STREAMID`
