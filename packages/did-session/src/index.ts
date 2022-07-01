@@ -57,7 +57,7 @@
  *
  * Additional helper functions are available to help you manage a session lifecycle and the user experience.
  *
- *  *```ts
+ *```ts
  * // Check if authorized or created from existing session string
  * didsession.hasSession
  *
@@ -69,7 +69,54 @@
  *
  * // Check number of seconds till expiration, may want to re auth user at a time before expiration
  * didsession.expiresInSecs
+ * ```
+ * 
+ * ### Typical usage pattern 
+ * 
+ * A typical pattern is to store a serialized session in local storage and load on use if available. Then 
+ * check that a session is still valid before making writes. 
+ * 
+ * ```ts
+ * import { DIDSession } from '@glazed/did-session'
+ * import { EthereumAuthProvider } from '@ceramicnetwork/blockchain-utils-linking'
  *
+ * const ethProvider = // import/get your web3 eth provider
+ * const addresses = await ethProvider.enable()
+ * const authProvider = new EthereumAuthProvider(ethProvider, addresses[0])
+ * 
+ * const loadSession = async(authProvider: EthereumAuthProvider):Promise<DIDSession> => {
+ *  const sessionStr = localStorage.getItem('didsession')
+ *  let session
+ *  
+ *  if (sessionStr) {
+ *    session = await DIDSession.fromSession(sessionStr, authProvider)
+ *  }
+ *  
+ *  if (!session || (session.hasSession && session.isExpired)) {
+ *    session = new DIDSession({ authProvider })
+ *    session.authorize()
+ *    localStorage.setItem('didsession', session.serialize())
+ *  }
+ *  
+ *  return session
+ * }
+ * 
+ * const session = await loadSession(authProvider)
+ * const ceramic = new CeramicClient()
+ * ceramic.did = session.getDID()
+ * 
+ * // pass ceramic instance where needed, ie glaze 
+ * // ...
+ * 
+ * // before ceramic writes, check if session is still valid, if expired, create new
+ * if (session.isExpired) {
+ *   const session = loadSession(authProvider)
+ *   ceramic.did = session.getDID()
+ * }
+ * 
+ * // continue to write
+ * ```
+ * 
  * @module did-session
  */
 
@@ -106,19 +153,19 @@ export async function createDIDKey(seed?: Uint8Array): Promise<DID> {
   return didKey
 }
 
-export function JSONToBase64url(object: Record<string, any>): string {
+function JSONToBase64url(object: Record<string, any>): string {
   return u8a.toString(u8a.fromString(JSON.stringify(object)), 'base64url')
 }
 
-export function base64urlToJSON(s: string): Record<string, any> {
+function base64urlToJSON(s: string): Record<string, any> {
   return JSON.parse(u8a.toString(u8a.fromString(s, 'base64url'))) as Record<string, any>
 }
 
-export function bytesToBase64(b: Uint8Array): string {
+function bytesToBase64(b: Uint8Array): string {
   return u8a.toString(b, 'base64pad')
 }
 
-export function base64ToBytes(s: string): Uint8Array {
+function base64ToBytes(s: string): Uint8Array {
   return u8a.fromString(s, 'base64pad')
 }
 
