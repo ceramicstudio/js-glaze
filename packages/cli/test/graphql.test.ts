@@ -23,7 +23,6 @@ describe('graphql', () => {
 
   describe('graphql:server', () => {
     test('graphql server starts', async () => {
-      expect.assertions(2)
       const serverProcess = execa('glaze', [
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
@@ -31,21 +30,29 @@ describe('graphql', () => {
       ])
       let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
-        if (numChecks < 1) {
-          numChecks++
+        if (numChecks === 0) {
           expect(
             data
               .toString()
               .includes('GraphQL server is listening on http://localhost:62433/graphql')
           ).toBe(true)
-          expect(serverProcess.kill('SIGTERM')).toBe(true)
+          numChecks++
+        } else if (numChecks === 1) {
+          expect(data.toString().includes('Server stopped')).toBe(true)
         }
       })
-      await serverProcess
+      await Promise.race([
+        new Promise((resolve) =>
+          setTimeout(() => {
+            serverProcess.kill()
+            resolve(true)
+          }, 10000)
+        ),
+        serverProcess,
+      ])
     }, 60000)
 
     test('graphql server starts with --readonly flag', async () => {
-      expect.assertions(2)
       const serverProcess = execa('glaze', [
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
@@ -54,17 +61,26 @@ describe('graphql', () => {
       ])
       let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
-        if (numChecks < 1) {
-          numChecks++
+        if (numChecks === 0) {
           expect(
             data
               .toString()
               .includes('GraphQL server is listening on http://localhost:62610/graphql')
           ).toBe(true)
-          expect(serverProcess.kill('SIGTERM')).toBe(true)
+          numChecks++
+        } else if (numChecks === 1) {
+          expect(data.toString().includes('Server stopped')).toBe(true)
         }
       })
-      await serverProcess
+      await Promise.race([
+        new Promise((resolve) =>
+          setTimeout(() => {
+            serverProcess.kill()
+            resolve(true)
+          }, 10000)
+        ),
+        serverProcess,
+      ])
     }, 60000)
   })
 })
