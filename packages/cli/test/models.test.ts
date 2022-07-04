@@ -76,4 +76,24 @@ describe('models', () => {
       )
     }, 60000)
   })
+
+  describe('model:list', () => {
+    beforeAll(async () => {
+      await execa('glaze', ['composite:deploy', 'test/mocks/encoded.composite.profiles.json'])
+    }, 60000)
+
+    test('model list succeeds', async () => {
+      const models = await execa('glaze', ['model:list'])
+      expect(stripAnsi(models.stdout.toString()).includes('GenericProfile')).toBe(true)
+      expect(stripAnsi(models.stdout.toString()).includes('SocialProfile')).toBe(true)
+      expect(stripAnsi(models.stdout.toString()).includes('PersonProfile')).toBe(true)
+    }, 60000)
+
+    test('model list succeeds with --table argument', async () => {
+      const models = await execa('glaze', ['model:list', '--table'])
+      expect(stripAnsi(models.stdout.toString()).includes('GenericProfile')).toBe(true)
+      expect(stripAnsi(models.stdout.toString()).includes('SocialProfile')).toBe(true)
+      expect(stripAnsi(models.stdout.toString()).includes('PersonProfile')).toBe(true)
+    }, 60000)
+  })
 })
