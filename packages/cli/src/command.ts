@@ -24,7 +24,7 @@ export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
 
 export interface CommandFlags {
   'ceramic-url': string
-  key?: string
+  'did-key-seed': string
   [key: string]: unknown
 }
 
@@ -39,7 +39,6 @@ export const STREAM_ID_ARG = {
 }
 
 export const SYNC_OPTION_FLAG = Flags.integer({
-  char: 's',
   required: false,
   options: Object.keys(SYNC_OPTIONS_MAP),
   description: `Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.`,
@@ -58,7 +57,7 @@ export abstract class Command<
       description: 'Ceramic API URL',
       env: 'CERAMIC_URL',
     }),
-    key: Flags.string({ char: 'k', description: 'DID Private Key', env: 'DID_KEY' }),
+    'did-key-seed': Flags.string({ char: 's', description: 'DID key seed', env: 'DID_KEY_SEED' }),
   }
 
   #authenticatedDID: DID | null = null
@@ -79,7 +78,7 @@ export abstract class Command<
 
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags.key != null) {
-      const did = await this.getAuthenticatedDID(this.flags.key)
+      const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])
       this.spinner.info(`Using DID ${chalk.cyan(did.id)}`)
       this.#authenticatedDID = did
       this.ceramic.did = did
