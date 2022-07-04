@@ -23,6 +23,7 @@ glaze COMMAND
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
 - [`glaze model:controller STREAMID`](#glaze-modelcontroller-streamid)
+- [`glaze model:list`](#glaze-modellist)
 - [`glaze composite:create INPUT`](#glaze-compositecreate)
 - [`glaze composite:from-model STREAMIDS`](#glaze-compositefrommodel-streamids)
 - [`glaze composite:extract-model PATH MODELS`](#glaze-compositeextractmodel-path-models)
@@ -144,6 +145,19 @@ ARGUMENTS
   STREAMID ID of the stream
 
 OPTIONS
+  -c, --ceramic-url=ceramic  Ceramic API URL
+```
+
+### `glaze model:list`
+
+display a paginated list of models indexed on the connected ceramic node
+
+```
+USAGE
+  $ glaze model:list
+
+OPTIONS
+  --table                    display results as a table rather than as formatted JSON
   -c, --ceramic-url=ceramic  Ceramic API URL
 ```
 
