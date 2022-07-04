@@ -16,7 +16,7 @@ export default class ModelController extends Command<QueryCommandFlags, { stream
     try {
       const model = await Model.load(this.ceramic, this.args.streamId)
       this.spinner.succeed(
-        `Model's content was loaded. It's controller is ${model.metadata.controllers[0].toString()}`
+        `Model's content was loaded. It's controller is ${model.metadata.controller.toString()}`
       )
     } catch (e) {
       this.spinner.fail((e as Error).message)

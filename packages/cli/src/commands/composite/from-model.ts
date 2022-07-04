@@ -1,22 +1,16 @@
+import { Composite } from '@glazed/devtools'
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
-import { createComposite, writeEncodedComposite } from '@glazed/devtools-node'
+import { writeEncodedComposite } from '@glazed/devtools-node'
 
 type Flags = CommandFlags & {
   output?: string
 }
 
-export default class CreateComposite extends Command<Flags, { schemaFilePath: string }> {
-  static description =
-    'create a Composite (a list of Model Streams) from a graphQL Schema Definition Language definition'
+export default class CompositeFromModel extends Command<Flags> {
+  static strict = false
 
-  static args = [
-    {
-      name: 'schemaFilePath',
-      required: true,
-      description: 'A graphQL SDL definition of the Composite encoded as a string',
-    },
-  ]
+  static description = 'create a Composite from a list of model streams'
 
   static flags = {
     ...Command.flags,
@@ -27,8 +21,25 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
   }
 
   async run(): Promise<void> {
+    const parsed = await this.parse(CompositeFromModel)
+    const modelStreamIDs = parsed.raw
+      .filter((token) => {
+        return token.type === 'arg'
+      })
+      .map((token) => {
+        return token.input
+      })
+
+    if (modelStreamIDs.length === 0) {
+      this.spinner.fail('Missing list of model streamIDs')
+      return
+    }
+
     try {
-      const composite = await createComposite(this.ceramic, this.args.schemaFilePath)
+      const composite = await Composite.fromModels({
+        ceramic: this.ceramic,
+        models: modelStreamIDs,
+      })
       if (this.flags.output != null) {
         const output = this.flags.output
         await writeEncodedComposite(composite, output)

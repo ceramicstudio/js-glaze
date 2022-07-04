@@ -4,6 +4,7 @@
   "parserOptions": {
     "project": ["tsconfig.lint.json"]
   },
+  "ignorePatterns": ["test/*/*.js", "test/*/*.ts"],
   "rules": {
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
