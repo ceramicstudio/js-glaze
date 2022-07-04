@@ -1,9 +1,8 @@
 import { Command, type QueryCommandFlags } from '../../command.js'
-import { Flags } from '@oclif/core'
-import { CliUx } from '@oclif/core'
+import { Flags, CliUx } from '@oclif/core'
 import { Model } from '@ceramicnetwork/stream-model'
 import Table from 'cli-table3'
-import { Edge, Page, PageInfo, StreamState} from '@ceramicnetwork/common'
+import { Edge, Page, PageInfo, StreamState } from '@ceramicnetwork/common'
 
 type PartialModelDefinition = {
   id: string

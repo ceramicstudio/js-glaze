@@ -70,7 +70,7 @@ describe('models', () => {
         create.stderr.toString().split('with streamID ')[1].replace('.', ''),
         `--sync=sync-always`,
       ])
-      console.log('STDERR', controller.stderr.toString())
+
       expect(controller.stderr.toString().split("It's controller is ")[1]).toEqual(
         'did:key:z6MkpRhEWywReoFtQMQGqSmTu5mp9vQVok86Qha2sn6e32Db'
       )

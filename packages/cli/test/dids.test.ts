@@ -38,7 +38,6 @@ describe('dids', () => {
       expect(
         lines[1].includes('Created DID did:key:z6MkmgGP9QZuAV76Dwz2mnsX71HknLjNmw4E8wmwCYoZdX4b')
       ).toBe(true)
-
     }, 60000)
 
     test('did creation succeeds with seed as flag argument', async () => {
