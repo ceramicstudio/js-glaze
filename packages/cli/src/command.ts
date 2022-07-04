@@ -47,6 +47,26 @@ export const SYNC_OPTION_FLAG = Flags.integer({
   },
 })
 
+const readPipe: () => Promise<string | undefined> = () => {
+  return new Promise((resolve) => {
+    const stdin = process.openStdin()
+    stdin.setEncoding('utf-8')
+
+    let data = ''
+    stdin.on('data', (chunk) => {
+      data += chunk
+    })
+
+    stdin.on('end', () => {
+      resolve(data)
+    })
+
+    if (stdin.isTTY) {
+      resolve('')
+    }
+  })
+}
+
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
   Args extends StringRecord = StringRecord
@@ -66,6 +86,7 @@ export abstract class Command<
 
   args!: Args
   flags!: Flags
+  stdin!: string | undefined
   spinner!: Ora
 
   async init(): Promise<void> {
@@ -74,8 +95,9 @@ export abstract class Command<
     const { args, flags } = await this.parse(this.constructor)
     this.args = args as Args
     this.flags = flags as Flags
+    this.stdin = await readPipe()
     this.spinner = ora()
-
+    console.log('PIPED IN STDIN', this.stdin)
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags.key != null) {
       const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])
