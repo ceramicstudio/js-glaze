@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5b8aeaeb275ca51bcc8b939c9fe060ce>>
+ * @generated SignedSource<<2c9576b920e4e7c7d26dec59231e8bc6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,28 +11,32 @@
 import { ConcreteRequest, Mutation } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type UpdateNoteInput = {
-  id: string;
-  content: NoteInput;
   clientMutationId?: string | null;
+  content: NoteInput;
+  id: string;
+  options?: UpdateOptionsInput | null;
 };
 export type NoteInput = {
-  date?: string | null;
   text?: string | null;
   title?: string | null;
+};
+export type UpdateOptionsInput = {
+  replace?: boolean | null;
+  version?: any | null;
 };
 export type UpdateNoteMutation$variables = {
   input: UpdateNoteInput;
 };
 export type UpdateNoteMutation$data = {
   readonly updateNote: {
-    readonly node: {
+    readonly document: {
       readonly " $fragmentSpreads": FragmentRefs<"DisplayNote">;
     };
   } | null;
 };
 export type UpdateNoteMutation = {
-  variables: UpdateNoteMutation$variables;
   response: UpdateNoteMutation$data;
+  variables: UpdateNoteMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -49,7 +53,14 @@ v1 = [
     "name": "input",
     "variableName": "input"
   }
-];
+],
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -70,7 +81,7 @@ return {
             "args": null,
             "concreteType": "Note",
             "kind": "LinkedField",
-            "name": "node",
+            "name": "document",
             "plural": false,
             "selections": [
               {
@@ -107,16 +118,10 @@ return {
             "args": null,
             "concreteType": "Note",
             "kind": "LinkedField",
-            "name": "node",
+            "name": "document",
             "plural": false,
             "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "id",
-                "storageKey": null
-              },
+              (v2/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -134,18 +139,19 @@ return {
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "CeramicMetadata",
+                "concreteType": "CeramicAccount",
                 "kind": "LinkedField",
-                "name": "_ceramic",
+                "name": "author",
                 "plural": false,
                 "selections": [
                   {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
-                    "name": "viewerIsController",
+                    "name": "isViewer",
                     "storageKey": null
-                  }
+                  },
+                  (v2/*: any*/)
                 ],
                 "storageKey": null
               }
@@ -158,16 +164,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "de9754e392ec28bdc4252bdaa3e8fd71",
+    "cacheID": "27f8a559e664c36571f92c8654bad0e7",
     "id": null,
     "metadata": {},
     "name": "UpdateNoteMutation",
     "operationKind": "mutation",
-    "text": "mutation UpdateNoteMutation(\n  $input: UpdateNoteInput!\n) {\n  updateNote(input: $input) {\n    node {\n      ...DisplayNote\n      id\n    }\n  }\n}\n\nfragment DisplayNote on Note {\n  ...UpdateNote\n  _ceramic {\n    viewerIsController\n  }\n  id\n  title\n  text\n}\n\nfragment UpdateNote on Note {\n  id\n  title\n  text\n}\n"
+    "text": "mutation UpdateNoteMutation(\n  $input: UpdateNoteInput!\n) {\n  updateNote(input: $input) {\n    document {\n      ...DisplayNote\n      id\n    }\n  }\n}\n\nfragment DisplayNote on Note {\n  ...UpdateNote\n  author {\n    isViewer\n    id\n  }\n  id\n  title\n  text\n}\n\nfragment UpdateNote on Note {\n  id\n  title\n  text\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a19c21848b6733df7bcbac5b3a6e81c2";
+(node as any).hash = "3f6899a06f3a1740cb3aa4a43e277316";
 
 export default node;

@@ -27,7 +27,7 @@ export default function UpdateNote({ note, onClose }: Props) {
   const [commit, isInFlight] = useMutation<UpdateNoteMutation>(graphql`
     mutation UpdateNoteMutation($input: UpdateNoteInput!) {
       updateNote(input: $input) {
-        node {
+        document {
           ...DisplayNote
         }
       }

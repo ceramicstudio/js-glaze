@@ -36,7 +36,7 @@
     "@glazed/devtools": "^0.2.0",
     "@glazed/devtools-node": "^0.1.0",
     "@swc/core": "^1.2.207",
-    "@types/node": "^18.0.0",
+    "@types/node": "^18.0.1",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
     "css-loader": "^6.6.0",

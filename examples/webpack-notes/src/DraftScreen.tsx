@@ -15,7 +15,7 @@ import { classes } from './style'
 const CREATE_NOTE_MUTATION = gql`
   mutation CreateNote($input: CreateNoteInput!) {
     createNote(input: $input) {
-      node {
+      document {
         id
       }
     }
@@ -45,7 +45,7 @@ export default function DraftScreen() {
     if (text && title) {
       createNote({ variables: { input: { content: { text, title } } } }).then(
         (res) => {
-          const id = res.data?.createNote?.node?.id
+          const id = res.data?.createNote?.document?.id
           navigate(`/notes/${id}`)
         },
         (err) => {

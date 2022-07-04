@@ -266,7 +266,7 @@ ___
 
 ### RuntimeViewReferenceType
 
-Ƭ **RuntimeViewReferenceType**: ``"collection"`` \| ``"model"``
+Ƭ **RuntimeViewReferenceType**: ``"connection"`` \| ``"node"``
 
 Runtime views types.
 

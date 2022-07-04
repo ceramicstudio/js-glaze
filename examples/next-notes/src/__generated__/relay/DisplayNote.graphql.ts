@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a24f41224300597e121ae100c9c0efbc>>
+ * @generated SignedSource<<0e1a073cd2652d0afdfa45f0c3d99761>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,12 +11,12 @@
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type DisplayNote$data = {
-  readonly _ceramic: {
-    readonly viewerIsController: boolean;
+  readonly author: {
+    readonly isViewer: boolean;
   };
   readonly id: string;
-  readonly title: string | null;
-  readonly text: string | null;
+  readonly text: string;
+  readonly title: string;
   readonly " $fragmentSpreads": FragmentRefs<"UpdateNote">;
   readonly " $fragmentType": "DisplayNote";
 };
@@ -39,16 +39,16 @@ const node: ReaderFragment = {
     {
       "alias": null,
       "args": null,
-      "concreteType": "CeramicMetadata",
+      "concreteType": "CeramicAccount",
       "kind": "LinkedField",
-      "name": "_ceramic",
+      "name": "author",
       "plural": false,
       "selections": [
         {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
-          "name": "viewerIsController",
+          "name": "isViewer",
           "storageKey": null
         }
       ],
@@ -80,6 +80,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "9bcd24e0fb74ed4e8c3e55408fdaac59";
+(node as any).hash = "6072b79d7d774034051f17451068c60c";
 
 export default node;

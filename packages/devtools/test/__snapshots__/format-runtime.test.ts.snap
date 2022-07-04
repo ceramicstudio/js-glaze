@@ -3,9 +3,9 @@
 exports[`Runtime format Note model definition with views 1`] = `
 Object {
   "accountData": Object {
-    "noteCollection": Object {
+    "noteList": Object {
       "name": "Note",
-      "type": "collection",
+      "type": "connection",
     },
   },
   "models": Object {
@@ -39,15 +39,15 @@ Object {
   "accountData": Object {
     "genericProfile": Object {
       "name": "GenericProfile",
-      "type": "model",
+      "type": "node",
     },
     "personProfile": Object {
       "name": "PersonProfile",
-      "type": "model",
+      "type": "node",
     },
     "socialProfile": Object {
       "name": "SocialProfile",
-      "type": "model",
+      "type": "node",
     },
   },
   "models": Object {
@@ -171,15 +171,15 @@ Object {
   "accountData": Object {
     "genericProfile": Object {
       "name": "GenericProfile",
-      "type": "model",
+      "type": "node",
     },
     "personProfile": Object {
       "name": "PersonProfile",
-      "type": "model",
+      "type": "node",
     },
     "socialProfile": Object {
       "name": "SocialProfile",
-      "type": "model",
+      "type": "node",
     },
   },
   "models": Object {

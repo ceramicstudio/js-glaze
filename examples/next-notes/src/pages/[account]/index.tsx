@@ -9,25 +9,21 @@ import NotesList from '../../components/NotesList'
 
 const query = graphql`
   query AccountNotesPageQuery($did: ID!) {
-    account(id: $did) {
-      store {
-        notePad {
-          ...NotesList_notesList
-        }
+    account: node(id: $did) {
+      ... on CeramicAccount {
+        ...NotesList_account
       }
     }
   }
 `
 
 type ListProps = {
-  did: string
   queryRef: PreloadedQuery<AccountNotesPageQuery>
 }
 
-function AccountNotesList({ did, queryRef }: ListProps) {
+function AccountNotesList({ queryRef }: ListProps) {
   const data = usePreloadedQuery<AccountNotesPageQuery>(query, queryRef)
-  const notePad = data.account?.store?.notePad
-  return notePad ? <NotesList did={did} list={notePad} /> : null
+  return data.account ? <NotesList account={data.account} /> : null
 }
 
 type Props = {
@@ -57,7 +53,7 @@ export default function AccountNotesPage({ did }: Props) {
   ) : (
     <Suspense fallback={loading}>
       <Box sx={{ display: 'flex', width: 300 }}>
-        <AccountNotesList did={did} queryRef={queryRef} />
+        <AccountNotesList queryRef={queryRef} />
       </Box>
     </Suspense>
   )

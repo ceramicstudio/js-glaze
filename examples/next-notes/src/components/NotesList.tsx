@@ -1,36 +1,34 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
-import Typography from '@mui/material/Typography'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { graphql, usePaginationFragment } from 'react-relay'
 
-import type { NotesList_notesList$key } from '../__generated__/relay/NotesList_notesList.graphql'
+import type { NotesList_account$key } from '../__generated__/relay/NotesList_account.graphql'
 import type { NotesListPaginationQuery } from '../__generated__/relay/NotesListPaginationQuery.graphql'
 
 type Note = { id: string; title: string }
 
 type Props = {
+  account: NotesList_account$key
   active?: string
-  did: string
-  list: NotesList_notesList$key
 }
 
-export default function NotesList({ active, did, list }: Props) {
+export default function NotesList({ account, active }: Props) {
   const { data, hasPrevious, loadPrevious, isLoadingPrevious } = usePaginationFragment<
     NotesListPaginationQuery,
-    NotesList_notesList$key
+    NotesList_account$key
   >(
     graphql`
-      fragment NotesList_notesList on NotesList
+      fragment NotesList_account on CeramicAccount
       @argumentDefinitions(
         count: { type: Int, defaultValue: 20 }
         cursor: { type: String, defaultValue: null }
       )
       @refetchable(queryName: "NotesListPaginationQuery") {
-        notesConnection(last: $count, before: $cursor)
-          @connection(key: "NotesList__notesConnection") {
+        id
+        noteList(last: $count, before: $cursor) @connection(key: "NotesList_noteList") {
           edges {
             cursor
             node {
@@ -41,7 +39,7 @@ export default function NotesList({ active, did, list }: Props) {
         }
       }
     `,
-    list
+    account
   )
 
   useEffect(() => {
@@ -50,12 +48,10 @@ export default function NotesList({ active, did, list }: Props) {
     }
   }, [hasPrevious, isLoadingPrevious, loadPrevious])
 
-  const notes = (data?.notesConnection?.edges ?? [])
-    .map((e) => e?.node)
-    .filter(Boolean) as Array<Note>
+  const notes = (data?.noteList?.edges ?? []).map((e) => e?.node).filter(Boolean) as Array<Note>
   const links = notes.map((note) => {
     const link = (
-      <Link href={`/${did}/${note.id}`} passHref>
+      <Link href={`/${data?.id}/${note.id}`} passHref>
         <Button disabled={note.id === active} sx={{ flex: 1, padding: 2, justifyContent: 'left' }}>
           {note.title}
         </Button>

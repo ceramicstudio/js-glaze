@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<30e92a48d298d21cceaf2cf541cffa09>>
+ * @generated SignedSource<<4dd4597f732dd7da18bd6ae6f6988535>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,32 +10,29 @@
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type NotesListPaginationQuery$variables = {
-  count?: number | null;
-  cursor?: string | null;
+export type NotePageQuery$variables = {
+  did: string;
   id: string;
 };
-export type NotesListPaginationQuery$data = {
-  readonly node: {
-    readonly " $fragmentSpreads": FragmentRefs<"NotesList_notesList">;
+export type NotePageQuery$data = {
+  readonly account: {
+    readonly " $fragmentSpreads": FragmentRefs<"NotesList_account">;
+  } | null;
+  readonly note: {
+    readonly " $fragmentSpreads": FragmentRefs<"DisplayNote">;
   } | null;
 };
-export type NotesListPaginationQuery = {
-  variables: NotesListPaginationQuery$variables;
-  response: NotesListPaginationQuery$data;
+export type NotePageQuery = {
+  response: NotePageQuery$data;
+  variables: NotePageQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
 var v0 = [
   {
-    "defaultValue": 20,
-    "kind": "LocalArgument",
-    "name": "count"
-  },
-  {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "cursor"
+    "name": "did"
   },
   {
     "defaultValue": null,
@@ -47,44 +44,53 @@ v1 = [
   {
     "kind": "Variable",
     "name": "id",
+    "variableName": "did"
+  }
+],
+v2 = [
+  {
+    "kind": "Variable",
+    "name": "id",
     "variableName": "id"
   }
 ],
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v3 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v4 = [
+v5 = [
   {
-    "kind": "Variable",
-    "name": "before",
-    "variableName": "cursor"
-  },
-  {
-    "kind": "Variable",
+    "kind": "Literal",
     "name": "last",
-    "variableName": "count"
+    "value": 20
   }
-];
+],
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "title",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "NotesListPaginationQuery",
+    "name": "NotePageQuery",
     "selections": [
       {
-        "alias": null,
+        "alias": "account",
         "args": (v1/*: any*/),
         "concreteType": null,
         "kind": "LinkedField",
@@ -92,20 +98,39 @@ return {
         "plural": false,
         "selections": [
           {
-            "args": [
+            "kind": "InlineFragment",
+            "selections": [
               {
-                "kind": "Variable",
-                "name": "count",
-                "variableName": "count"
-              },
-              {
-                "kind": "Variable",
-                "name": "cursor",
-                "variableName": "cursor"
+                "args": null,
+                "kind": "FragmentSpread",
+                "name": "NotesList_account"
               }
             ],
-            "kind": "FragmentSpread",
-            "name": "NotesList_notesList"
+            "type": "CeramicAccount",
+            "abstractKey": null
+          }
+        ],
+        "storageKey": null
+      },
+      {
+        "alias": "note",
+        "args": (v2/*: any*/),
+        "concreteType": null,
+        "kind": "LinkedField",
+        "name": "node",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "InlineFragment",
+            "selections": [
+              {
+                "args": null,
+                "kind": "FragmentSpread",
+                "name": "DisplayNote"
+              }
+            ],
+            "type": "Note",
+            "abstractKey": null
           }
         ],
         "storageKey": null
@@ -118,27 +143,27 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "NotesListPaginationQuery",
+    "name": "NotePageQuery",
     "selections": [
       {
-        "alias": null,
+        "alias": "account",
         "args": (v1/*: any*/),
         "concreteType": null,
         "kind": "LinkedField",
         "name": "node",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
           (v3/*: any*/),
+          (v4/*: any*/),
           {
             "kind": "InlineFragment",
             "selections": [
               {
                 "alias": null,
-                "args": (v4/*: any*/),
+                "args": (v5/*: any*/),
                 "concreteType": "NoteConnection",
                 "kind": "LinkedField",
-                "name": "notesConnection",
+                "name": "noteList",
                 "plural": false,
                 "selections": [
                   {
@@ -164,15 +189,9 @@ return {
                         "name": "node",
                         "plural": false,
                         "selections": [
-                          (v3/*: any*/),
-                          {
-                            "alias": null,
-                            "args": null,
-                            "kind": "ScalarField",
-                            "name": "title",
-                            "storageKey": null
-                          },
-                          (v2/*: any*/)
+                          (v4/*: any*/),
+                          (v6/*: any*/),
+                          (v3/*: any*/)
                         ],
                         "storageKey": null
                       }
@@ -205,19 +224,66 @@ return {
                     "storageKey": null
                   }
                 ],
+                "storageKey": "noteList(last:20)"
+              },
+              {
+                "alias": null,
+                "args": (v5/*: any*/),
+                "filters": null,
+                "handle": "connection",
+                "key": "NotesList_noteList",
+                "kind": "LinkedHandle",
+                "name": "noteList"
+              }
+            ],
+            "type": "CeramicAccount",
+            "abstractKey": null
+          }
+        ],
+        "storageKey": null
+      },
+      {
+        "alias": "note",
+        "args": (v2/*: any*/),
+        "concreteType": null,
+        "kind": "LinkedField",
+        "name": "node",
+        "plural": false,
+        "selections": [
+          (v3/*: any*/),
+          (v4/*: any*/),
+          {
+            "kind": "InlineFragment",
+            "selections": [
+              (v6/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "text",
                 "storageKey": null
               },
               {
                 "alias": null,
-                "args": (v4/*: any*/),
-                "filters": null,
-                "handle": "connection",
-                "key": "NotesList__notesConnection",
-                "kind": "LinkedHandle",
-                "name": "notesConnection"
+                "args": null,
+                "concreteType": "CeramicAccount",
+                "kind": "LinkedField",
+                "name": "author",
+                "plural": false,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "isViewer",
+                    "storageKey": null
+                  },
+                  (v4/*: any*/)
+                ],
+                "storageKey": null
               }
             ],
-            "type": "NotesList",
+            "type": "Note",
             "abstractKey": null
           }
         ],
@@ -226,16 +292,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "d66a3dedaac34361fa964f21eb07b3b4",
+    "cacheID": "f123ed25ae1607e9f06fa808caaa7c3d",
     "id": null,
     "metadata": {},
-    "name": "NotesListPaginationQuery",
+    "name": "NotePageQuery",
     "operationKind": "query",
-    "text": "query NotesListPaginationQuery(\n  $count: Int = 20\n  $cursor: String = null\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...NotesList_notesList_1G22uz\n    id\n  }\n}\n\nfragment NotesList_notesList_1G22uz on NotesList {\n  notesConnection(last: $count, before: $cursor) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        __typename\n      }\n    }\n    pageInfo {\n      hasPreviousPage\n      startCursor\n    }\n  }\n  id\n}\n"
+    "text": "query NotePageQuery(\n  $did: ID!\n  $id: ID!\n) {\n  account: node(id: $did) {\n    __typename\n    ... on CeramicAccount {\n      ...NotesList_account\n    }\n    id\n  }\n  note: node(id: $id) {\n    __typename\n    ... on Note {\n      ...DisplayNote\n    }\n    id\n  }\n}\n\nfragment DisplayNote on Note {\n  ...UpdateNote\n  author {\n    isViewer\n    id\n  }\n  id\n  title\n  text\n}\n\nfragment NotesList_account on CeramicAccount {\n  id\n  noteList(last: 20) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        __typename\n      }\n    }\n    pageInfo {\n      hasPreviousPage\n      startCursor\n    }\n  }\n}\n\nfragment UpdateNote on Note {\n  id\n  title\n  text\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d552b310e9666cdf9def45a14fd10638";
+(node as any).hash = "81fe66a00951bed417aafdacb55aba83";
 
 export default node;

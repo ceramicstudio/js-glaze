@@ -25,7 +25,7 @@ const NOTE_QUERY = gql`
 const UPDATE_NOTE_MUTATION = gql`
   mutation UpdateNote($input: UpdateNoteInput!) {
     updateNote(input: $input) {
-      node {
+      document {
         __typename
         id
         version

@@ -19,8 +19,8 @@ export default function DisplayNote({ note }: Props) {
     graphql`
       fragment DisplayNote on Note {
         ...UpdateNote
-        _ceramic {
-          viewerIsController
+        author {
+          isViewer
         }
         id
         title
@@ -39,7 +39,7 @@ export default function DisplayNote({ note }: Props) {
   if (isEditing) {
     content = <UpdateNote note={data} onClose={onClose} />
   } else {
-    const editButton = data._ceramic.viewerIsController ? (
+    const editButton = data.author.isViewer ? (
       <Button onClick={() => setEditing(true)} variant="outlined">
         Edit
       </Button>

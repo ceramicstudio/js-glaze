@@ -14,18 +14,16 @@ import { useAuth } from './auth'
 const NOTES_LIST_QUERY = gql`
   query NotesList($cursor: String) {
     viewer {
-      data {
-        noteCollection(last: 5, before: $cursor) {
-          edges {
-            node {
-              id
-              title
-            }
+      noteList(last: 5, before: $cursor) {
+        edges {
+          node {
+            id
+            title
           }
-          pageInfo {
-            hasPreviousPage
-            startCursor
-          }
+        }
+        pageInfo {
+          hasPreviousPage
+          startCursor
         }
       }
     }
@@ -39,7 +37,7 @@ export default function NotesList() {
   const { data, fetchMore } = useQuery(NOTES_LIST_QUERY, {
     skip: authState.status !== 'done',
     onCompleted(pageData) {
-      const pageInfo = pageData?.viewer.data.noteCollection.pageInfo
+      const pageInfo = pageData?.viewer.noteList.pageInfo
       if (pageInfo?.hasPreviousPage) {
         fetchMore({ variables: { cursor: pageInfo.startCursor } })
       }
@@ -61,7 +59,7 @@ export default function NotesList() {
     return <List>{draft}</List>
   }
 
-  const noteItems = [...data.viewer.data.noteCollection.edges].reverse().map((edge) => {
+  const noteItems = [...data.viewer.noteList.edges].reverse().map((edge) => {
     const note = edge.node
     return (
       <ListItem

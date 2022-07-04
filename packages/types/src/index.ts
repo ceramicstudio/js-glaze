@@ -166,7 +166,7 @@ export type RuntimeObjectField = RuntimeScalar | RuntimeList | RuntimeReference 
 export type RuntimeObjectFields = Record<string, RuntimeObjectField>
 
 /** Runtime views types. */
-export type RuntimeViewReferenceType = 'collection' | 'model'
+export type RuntimeViewReferenceType = 'connection' | 'node'
 /** Runtime view reference representation. */
 export type RuntimeViewReference = { type: RuntimeViewReferenceType; name: string }
 

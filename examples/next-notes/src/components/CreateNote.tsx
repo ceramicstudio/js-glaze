@@ -15,13 +15,11 @@ export default function CreateNote({ did }: Props) {
   const router = useRouter()
 
   const [commit, isInFlight] = useMutation<CreateNoteMutation>(graphql`
-    mutation CreateNoteMutation($input: AddNotePadNotesListNotesEdgeInput!) {
-      addNotePadNotesListNotesEdge(input: $input) {
-        edge {
-          node {
-            ...DisplayNote
-            id
-          }
+    mutation CreateNoteMutation($input: CreateNoteInput!) {
+      createNote(input: $input) {
+        document {
+          ...DisplayNote
+          id
         }
       }
     }
@@ -37,7 +35,7 @@ export default function CreateNote({ did }: Props) {
         },
         onCompleted: (res) => {
           console.log('mutation completed')
-          const id = res.addNotePadNotesListNotesEdge?.edge.node?.id
+          const id = res.createNote.node?.id
           router.push(id ? `/${did}/${id}` : `/${did}`)
         },
       })

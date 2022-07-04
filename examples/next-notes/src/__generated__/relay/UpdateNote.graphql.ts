@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b18295639c83e75c7510cc78f0a3fae5>>
+ * @generated SignedSource<<91c642b1a8f95478852a5c95df356096>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,8 +12,8 @@ import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type UpdateNote$data = {
   readonly id: string;
-  readonly title: string | null;
-  readonly text: string | null;
+  readonly text: string;
+  readonly title: string;
   readonly " $fragmentType": "UpdateNote";
 };
 export type UpdateNote$key = {

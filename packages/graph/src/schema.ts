@@ -58,34 +58,13 @@ type GraphQLNodeDefinitions = {
 }
 type SharedDefinitions = GraphQLNodeDefinitions & {
   accountObject: GraphQLObjectType<string, Context>
+  queryFields: GraphQLFieldConfigMap<unknown, Context>
 }
 
 type BuildObjectParams = {
   name: string
   fields: RuntimeObjectFields
   definitions: SharedDefinitions
-}
-
-function createCeramicAccountObject(
-  accountDataObject?: GraphQLObjectType
-): GraphQLObjectType<string, Context> {
-  const fields: GraphQLFieldConfigMap<string, Context> = {
-    id: {
-      type: new GraphQLNonNull(GraphQLDID),
-      resolve: (did) => did,
-    },
-    isViewer: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-      resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
-    },
-  }
-  if (accountDataObject != null) {
-    fields.data = {
-      type: new GraphQLNonNull(accountDataObject),
-      resolve: (did) => did,
-    }
-  }
-  return new GraphQLObjectType<string, Context>({ name: 'CeramicAccount', fields })
 }
 
 const UpdateOptionsInput = new GraphQLInputObjectType({
@@ -128,8 +107,8 @@ class SchemaBuilder {
 
   build(): GraphQLSchema {
     const definitions = this._createSharedDefinitions()
-    const connections = this._buildObjects(definitions)
-    this._buildConnections(connections)
+    this._buildObjects(definitions)
+    this._buildConnections()
     const schema = this._createSchema(definitions)
     assertValidSchema(schema)
     return schema
@@ -142,34 +121,44 @@ class SchemaBuilder {
     }, {} as Record<string, string>)
 
     const nodeDefs = nodeDefinitions(
-      async (id: string, ctx: Context) => await ctx.loadDoc(id),
-      (doc: ModelInstanceDocument) => modelAliases[doc.metadata.model?.toString()]
+      async (id: string, ctx: Context) => {
+        return id.startsWith('did:') ? id : await ctx.loadDoc(id)
+      },
+      (didOrDoc: string | ModelInstanceDocument) => {
+        return typeof didOrDoc === 'string'
+          ? 'CeramicAccount'
+          : modelAliases[didOrDoc.metadata.model?.toString()]
+      }
     )
 
-    const accountDataEntries = Object.entries(this.#def.accountData ?? {})
-    if (accountDataEntries.length === 0) {
-      return { ...nodeDefs, accountObject: createCeramicAccountObject() }
-    }
-
-    // AccountData object is model-specific and needed to generate object using it
-    const accountDataObject = new GraphQLObjectType({
-      name: 'CeramicAccountData',
+    const accountObject = new GraphQLObjectType<string, Context>({
+      name: 'CeramicAccount',
+      interfaces: [nodeDefs.nodeInterface],
       fields: () => {
-        const config: GraphQLFieldConfigMap<string, Context> = {}
-        for (const [alias, reference] of accountDataEntries) {
+        const config: GraphQLFieldConfigMap<string, Context> = {
+          id: {
+            type: new GraphQLNonNull(GraphQLID),
+            resolve: (did) => did,
+          },
+          isViewer: {
+            type: new GraphQLNonNull(GraphQLBoolean),
+            resolve: (did, _, ctx) => ctx.authenticated && ctx.viewerID === did,
+          },
+        }
+        for (const [alias, reference] of Object.entries(this.#def.accountData ?? {})) {
           const model = this.#def.models[reference.name]
           if (model == null) {
             throw new Error(`Missing model for reference name: ${reference.name}`)
           }
 
-          if (reference.type === 'model') {
+          if (reference.type === 'node') {
             config[alias] = {
               type: this.#types[reference.name],
               resolve: async (account, _, ctx): Promise<ModelInstanceDocument | null> => {
                 return await ctx.querySingle({ account, model })
               },
             }
-          } else if (reference.type === 'collection') {
+          } else if (reference.type === 'connection') {
             config[alias] = {
               type: this.#types[`${reference.name}Connection`],
               args: connectionArgs,
@@ -190,19 +179,24 @@ class SchemaBuilder {
       },
     })
 
-    return {
-      ...nodeDefs,
-      accountObject: createCeramicAccountObject(accountDataObject),
+    const queryFields: GraphQLFieldConfigMap<unknown, Context> = {
+      node: nodeDefs.nodeField,
+      viewer: {
+        type: accountObject,
+        resolve: (_self, _args, ctx): string | null => ctx.viewerID,
+      },
+    }
+
+    return { ...nodeDefs, accountObject, queryFields }
+  }
+
+  _buildObjects(definitions: SharedDefinitions) {
+    for (const [name, fields] of Object.entries(this.#def.objects)) {
+      this._buildObjectType({ definitions, name, fields })
     }
   }
 
-  _buildObjects(definitions: SharedDefinitions): Array<string> {
-    return Object.entries(this.#def.objects).flatMap(([name, fields]) => {
-      return this._buildObjectType({ definitions, name, fields })
-    })
-  }
-
-  _buildObjectType({ definitions, name, fields }: BuildObjectParams): Array<string> {
+  _buildObjectType({ definitions, name, fields }: BuildObjectParams) {
     const modelID = this.#def.models[name]
 
     this.#types[name] = new GraphQLObjectType<ModelInstanceDocument>({
@@ -239,28 +233,13 @@ class SchemaBuilder {
     if (!this.#isReadonly) {
       this._buildInputObjectType(name, fields)
       if (modelID != null) {
-        this._buildNodeMutations(name, modelID)
+        this._buildNodeMutations(definitions.queryFields, name, modelID)
       }
     }
-
-    const connections: Array<string> = []
-    for (const field of Object.values(fields)) {
-      if (field.type === 'reference' && field.refType === 'connection') {
-        connections.push(field.refName)
-      }
-    }
-    return connections
   }
 
-  _buildConnections(documentConnections: Array<string>) {
-    const objectNames = new Set(documentConnections)
-    for (const reference of Object.values(this.#def.accountData)) {
-      if (reference.type === 'collection') {
-        objectNames.add(reference.name)
-      }
-    }
-
-    for (const objectName of objectNames) {
+  _buildConnections() {
+    for (const objectName of Object.keys(this.#def.models)) {
       const nodeType = this.#types[objectName]
       if (nodeType == null) {
         throw new Error(`Missing object type for connection: ${objectName}`)
@@ -447,20 +426,25 @@ class SchemaBuilder {
     })
   }
 
-  _buildNodeMutations(name: string, modelID: string) {
+  _buildNodeMutations(
+    queryFields: GraphQLFieldConfigMap<unknown, Context>,
+    name: string,
+    modelID: string
+  ) {
     this.#mutations[`create${name}`] = mutationWithClientMutationId({
       name: `Create${name}`,
       inputFields: () => ({
         content: { type: new GraphQLNonNull(this.#inputObjects[`Required${name}`]) },
       }),
       outputFields: () => ({
-        node: { type: new GraphQLNonNull(this.#types[name]) },
+        ...queryFields,
+        document: { type: new GraphQLNonNull(this.#types[name]) },
       }),
       mutateAndGetPayload: async (input: { content: Record<string, any> }, ctx: Context) => {
         if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
           throw new Error('Ceramic instance is not authenticated')
         }
-        return { node: await ctx.createDoc(modelID, input.content) }
+        return { document: await ctx.createDoc(modelID, input.content) }
       },
     })
 
@@ -472,7 +456,8 @@ class SchemaBuilder {
         options: { type: UpdateOptionsInput },
       }),
       outputFields: () => ({
-        node: { type: new GraphQLNonNull(this.#types[name]) },
+        ...queryFields,
+        document: { type: new GraphQLNonNull(this.#types[name]) },
       }),
       mutateAndGetPayload: async (
         input: { id: string; content: Record<string, any>; options?: UpdateDocOptions },
@@ -481,43 +466,23 @@ class SchemaBuilder {
         if (ctx.ceramic.did == null || !ctx.ceramic.did.authenticated) {
           throw new Error('Ceramic instance is not authenticated')
         }
-        return { node: await ctx.updateDoc(input.id, input.content, input.options) }
+        return { document: await ctx.updateDoc(input.id, input.content, input.options) }
       },
     })
   }
 
   _createSchema(definitions: SharedDefinitions) {
-    const queryFields: GraphQLFieldConfigMap<any, Context> = {
-      node: definitions.nodeField,
-      account: {
-        type: new GraphQLNonNull(definitions.accountObject),
-        args: {
-          id: { type: new GraphQLNonNull(GraphQLDID) },
+    const queryFields = { ...definitions.queryFields }
+
+    for (const [alias, model] of Object.entries(this.#def.models)) {
+      const first = alias[0].toLowerCase()
+      const rest = alias.slice(1)
+      queryFields[`${first}${rest}Index`] = {
+        type: this.#types[`${alias}Connection`],
+        args: connectionArgs,
+        resolve: async (_, args: ConnectionArguments, ctx): Promise<Connection<any> | null> => {
+          return await ctx.queryConnection({ ...args, model })
         },
-        resolve: (_, args: { id: string }): string => args.id,
-      },
-      viewer: {
-        type: definitions.accountObject,
-        resolve: (_self, _args, ctx): string | null => ctx.viewerID,
-      },
-    }
-
-    for (const [alias, reference] of Object.entries(this.#def.query ?? {})) {
-      const model = this.#def.models[reference.name]
-      if (model == null) {
-        throw new Error(`Missing model for reference name: ${reference.name}`)
-      }
-
-      if (reference.type === 'collection') {
-        queryFields[alias] = {
-          type: this.#types[reference.name],
-          args: connectionArgs,
-          resolve: async (_, args: ConnectionArguments, ctx): Promise<Connection<any> | null> => {
-            return await ctx.queryConnection({ ...args, model })
-          },
-        }
-      } else {
-        throw new Error(`Unsupported reference type: ${reference.type}`)
       }
     }
 

@@ -7,8 +7,46 @@ exports[`schema printGraphQLSchema() 1`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  genericProfileIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): GenericProfileConnection
+  socialProfileIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): SocialProfileConnection
+  personProfileIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PersonProfileConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -17,18 +55,9 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
   genericProfile: GenericProfile
   socialProfile: SocialProfile
   personProfile: PersonProfile
@@ -71,6 +100,75 @@ type PersonProfile implements Node {
   affiliations: [String]
 }
 
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type GenericProfileConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [GenericProfileEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type GenericProfileEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: GenericProfile
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type SocialProfileConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [SocialProfileEdge]
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type SocialProfileEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: SocialProfile
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type PersonProfileConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [PersonProfileEdge]
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type PersonProfileEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: PersonProfile
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
+}
+
 type Mutation {
   createGenericProfile(input: CreateGenericProfileInput!): CreateGenericProfilePayload
   updateGenericProfile(input: UpdateGenericProfileInput!): UpdateGenericProfilePayload
@@ -81,7 +179,13 @@ type Mutation {
 }
 
 type CreateGenericProfilePayload {
-  node: GenericProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: GenericProfile!
   clientMutationId: String
 }
 
@@ -109,7 +213,13 @@ input RequiredImageMetadataInput {
 }
 
 type UpdateGenericProfilePayload {
-  node: GenericProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: GenericProfile!
   clientMutationId: String
 }
 
@@ -147,7 +257,13 @@ input UpdateOptionsInput {
 scalar CeramicCommitID
 
 type CreateSocialProfilePayload {
-  node: SocialProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: SocialProfile!
   clientMutationId: String
 }
 
@@ -164,7 +280,13 @@ input RequiredSocialProfileInput {
 }
 
 type UpdateSocialProfilePayload {
-  node: SocialProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: SocialProfile!
   clientMutationId: String
 }
 
@@ -183,7 +305,13 @@ input SocialProfileInput {
 }
 
 type CreatePersonProfilePayload {
-  node: PersonProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: PersonProfile!
   clientMutationId: String
 }
 
@@ -202,7 +330,13 @@ input RequiredPersonProfileInput {
 }
 
 type UpdatePersonProfilePayload {
-  node: PersonProfile!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: PersonProfile!
   clientMutationId: String
 }
 
@@ -230,8 +364,20 @@ exports[`schema printGraphQLSchema() 2`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  noteIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): NoteConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -240,19 +386,10 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
-  noteCollection(
+  noteList(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
 
@@ -317,7 +454,13 @@ type Mutation {
 }
 
 type CreateNotePayload {
-  node: Note!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Note!
   clientMutationId: String
 }
 
@@ -332,7 +475,13 @@ input RequiredNoteInput {
 }
 
 type UpdateNotePayload {
-  node: Note!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Note!
   clientMutationId: String
 }
 

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1920e19215f005f3ca721c3071d09cfa>>
+ * @generated SignedSource<<4968507967223f4534ecd6a3608937f5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,27 +10,27 @@
 
 import { ReaderFragment, RefetchableFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type NotesList_notesList$data = {
-  readonly notesConnection: {
+export type NotesList_account$data = {
+  readonly id: string;
+  readonly noteList: {
     readonly edges: ReadonlyArray<{
       readonly cursor: string;
       readonly node: {
         readonly id: string;
-        readonly title: string | null;
+        readonly title: string;
       } | null;
     } | null> | null;
   } | null;
-  readonly id: string;
-  readonly " $fragmentType": "NotesList_notesList";
+  readonly " $fragmentType": "NotesList_account";
 };
-export type NotesList_notesList$key = {
-  readonly " $data"?: NotesList_notesList$data;
-  readonly " $fragmentSpreads": FragmentRefs<"NotesList_notesList">;
+export type NotesList_account$key = {
+  readonly " $data"?: NotesList_account$data;
+  readonly " $fragmentSpreads": FragmentRefs<"NotesList_account">;
 };
 
 const node: ReaderFragment = (function(){
 var v0 = [
-  "notesConnection"
+  "noteList"
 ],
 v1 = {
   "alias": null,
@@ -78,14 +78,15 @@ return {
       "identifierField": "id"
     }
   },
-  "name": "NotesList_notesList",
+  "name": "NotesList_account",
   "selections": [
+    (v1/*: any*/),
     {
-      "alias": "notesConnection",
+      "alias": "noteList",
       "args": null,
       "concreteType": "NoteConnection",
       "kind": "LinkedField",
-      "name": "__NotesList__notesConnection_connection",
+      "name": "__NotesList_noteList_connection",
       "plural": false,
       "selections": [
         {
@@ -159,14 +160,13 @@ return {
         }
       ],
       "storageKey": null
-    },
-    (v1/*: any*/)
+    }
   ],
-  "type": "NotesList",
+  "type": "CeramicAccount",
   "abstractKey": null
 };
 })();
 
-(node as any).hash = "d552b310e9666cdf9def45a14fd10638";
+(node as any).hash = "45380f80f704b98f9bd56ff637fec47b";
 
 export default node;

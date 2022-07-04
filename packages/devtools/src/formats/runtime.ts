@@ -253,11 +253,11 @@ export function createRuntimeDefinition(
     if (modelDefinition.accountRelation != null) {
       const key = camelCase(modelName)
       if (modelDefinition.accountRelation === ModelAccountRelation.SINGLE) {
-        runtime.accountData[key] = { type: 'model', name: modelName }
+        runtime.accountData[key] = { type: 'node', name: modelName }
         // @ts-ignore TS2367, should be unnecessary check based on type definition but more types
         // could be added later
       } else if (modelDefinition.accountRelation === ModelAccountRelation.LIST) {
-        runtime.accountData[key + 'Collection'] = { type: 'collection', name: modelName }
+        runtime.accountData[key + 'List'] = { type: 'connection', name: modelName }
       } else {
         throw new Error(
           `Unsupported account relation: ${modelDefinition.accountRelation as string}`

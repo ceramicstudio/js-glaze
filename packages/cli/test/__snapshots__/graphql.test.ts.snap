@@ -7,8 +7,33 @@ exports[`graphql graphql:schema printing graphql schema succeeds 1`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  pictureIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PictureConnection
+  postIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PostConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -17,18 +42,9 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
   pictureCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
@@ -126,7 +142,13 @@ type Mutation {
 }
 
 type CreatePicturePayload {
-  node: Picture!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Picture!
   clientMutationId: String
 }
 
@@ -140,7 +162,13 @@ input RequiredPictureInput {
 }
 
 type UpdatePicturePayload {
-  node: Picture!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Picture!
   clientMutationId: String
 }
 
@@ -164,7 +192,13 @@ input UpdateOptionsInput {
 scalar CeramicCommitID
 
 type CreatePostPayload {
-  node: Post!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Post!
   clientMutationId: String
 }
 
@@ -178,7 +212,13 @@ input RequiredPostInput {
 }
 
 type UpdatePostPayload {
-  node: Post!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Post!
   clientMutationId: String
 }
 
@@ -201,8 +241,33 @@ exports[`graphql graphql:schema printing graphql schema succeeds with --readonly
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  pictureIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PictureConnection
+  postIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PostConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -211,18 +276,9 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
   pictureCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
