@@ -54,7 +54,7 @@ describe('models', () => {
       expect(lines.includes('"$schema":"https://json-schema.org/draft/2020-12/schema",')).toBe(true)
     }, 60000)
   })
-  
+
   describe('model:controller', () => {
     test('model controller display fails without the streamID', async () => {
       await expect(execa('glaze', ['model:controller'])).rejects.toThrow(
