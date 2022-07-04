@@ -1,11 +1,13 @@
+import { extraScalars } from './scalars.js'
+
+const scarlarDefinitions = Object.keys(extraScalars)
+  .map((name) => `scalar ${name}`)
+  .join('\n')
+
 export const compositeDirectivesAndScalarsSchema = `
-# From graphql-scalars
+# Added scalars
 
-scalar DID
-
-# Custom Ceramic scalars
-
-scalar CommitID
+${scarlarDefinitions}
 
 # Field validation directives
 

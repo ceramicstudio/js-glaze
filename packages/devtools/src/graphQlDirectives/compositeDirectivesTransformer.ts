@@ -13,9 +13,6 @@ import {
   GraphQLInt,
   GraphQLFloat,
 } from 'graphql'
-import { GraphQLDID } from 'graphql-scalars'
-
-import { CeramicCommitID } from './commitid.scalar.js'
 
 const MODEL_DIRECTIVE_NAME = 'model'
 const DOCUMENT_ACCOUNT_DIRECTIVE_NAME = 'documentAccount'
@@ -64,7 +61,7 @@ export function getCeramicModelDirective(
 }
 
 /** @internal */
-export function fieldTypeIsinstanceOfOrWraps(
+function fieldTypeIsinstanceOfOrWraps(
   fieldType: GraphQLOutputType,
   type: GraphQLType
 ): fieldType is GraphQLScalarType {
@@ -74,6 +71,17 @@ export function fieldTypeIsinstanceOfOrWraps(
     (fieldType instanceof GraphQLNonNull &&
       fieldType.ofType.toString().toLowerCase() === type.toString().toLowerCase())
   )
+}
+
+/** @internal */
+export function getScalarType(fieldType: GraphQLOutputType): GraphQLScalarType | null {
+  if (fieldType instanceof GraphQLScalarType) {
+    return fieldType
+  }
+  if (fieldType instanceof GraphQLNonNull || fieldType instanceof GraphQLList) {
+    return getScalarType(fieldType.ofType)
+  }
+  return null
 }
 
 /** @internal */
@@ -125,15 +133,16 @@ function objectConfigMapperFactory(
 /** @internal */
 function parseDirectiveWithoutParams(
   directiveName: string,
-  allowedType: GraphQLType,
+  allowedType: string,
   schema: GraphQLSchema,
   fieldConfig: GraphQLFieldConfig<any, any, any>,
   ceramicExtensions: CeramicGraphQLTypeExtensions
 ): CeramicGraphQLTypeExtensions {
   const directive = getDirective(schema, fieldConfig, directiveName)?.[0] as DirectiveWithoutParams
   if (directive) {
-    if (!fieldTypeIsinstanceOfOrWraps(fieldConfig.type, allowedType)) {
-      throw new Error(`@${directiveName} can only be applied to ${allowedType.toString()}s`)
+    const scalar = getScalarType(fieldConfig.type)
+    if (scalar?.name !== allowedType) {
+      throw new Error(`@${directiveName} can only be applied to ${allowedType}s`)
     }
 
     if (VIEW_DIRECTIVE_NAMES.includes(directiveName)) {
@@ -309,14 +318,14 @@ function fieldConfigMapperFactory(
     // Parse and validate custom directives
     ceramicExtensions = parseDirectiveWithoutParams(
       DOCUMENT_ACCOUNT_DIRECTIVE_NAME,
-      GraphQLDID,
+      'DID',
       schema,
       fieldConfig,
       ceramicExtensions
     )
     ceramicExtensions = parseDirectiveWithoutParams(
       DOCUMENT_VERSION_DIRECTIVE_NAME,
-      CeramicCommitID,
+      'CommitID',
       schema,
       fieldConfig,
       ceramicExtensions

@@ -1,3 +1,4 @@
+import { CeramicCommitID, getScalar } from '@glazed/graphql-scalars'
 import type {
   ModelInstanceDocument,
   RuntimeCompositeDefinition,
@@ -5,7 +6,6 @@ import type {
   RuntimeObjectFields,
   RuntimeReference,
   RuntimeScalar,
-  RuntimeScalarType,
   RuntimeViewField,
 } from '@glazed/types'
 import {
@@ -13,17 +13,13 @@ import {
   type GraphQLFieldConfig,
   type GraphQLFieldConfigMap,
   type GraphQLInputFieldConfigMap,
-  GraphQLFloat,
   GraphQLID,
   GraphQLInputObjectType,
-  GraphQLInt,
   GraphQLInterfaceType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
-  type GraphQLScalarType,
   GraphQLSchema,
-  GraphQLString,
   assertValidSchema,
 } from 'graphql'
 import {
@@ -34,22 +30,9 @@ import {
   mutationWithClientMutationId,
   nodeDefinitions,
 } from 'graphql-relay'
-import { GraphQLDID } from 'graphql-scalars'
 
 import type { Context } from './context.js'
 import type { UpdateDocOptions } from './loader.js'
-import { CeramicCommitID } from './scalars.js'
-
-const SCALARS: Record<RuntimeScalarType, GraphQLScalarType> = {
-  boolean: GraphQLBoolean,
-  commitid: CeramicCommitID,
-  did: GraphQLDID,
-  float: GraphQLFloat,
-  id: GraphQLID,
-  integer: GraphQLInt,
-  string: GraphQLString,
-}
-const SCALAR_FIELDS = Object.keys(SCALARS)
 
 type GraphQLNodeDefinitions = {
   nodeInterface: GraphQLInterfaceType
@@ -299,10 +282,8 @@ class SchemaBuilder {
       }
     } else if (field.item.type === 'did') {
       itemType = definitions.accountObject
-    } else if (SCALAR_FIELDS.includes(field.item.type)) {
-      itemType = SCALARS[field.item.type]
     } else {
-      throw new Error(`Unsupported list item type: ${field.item.type}`)
+      itemType = getScalar(field.item.type)
     }
 
     if (field.item.required) {
@@ -342,15 +323,7 @@ class SchemaBuilder {
     key: string,
     field: RuntimeScalar
   ): GraphQLFieldConfig<ModelInstanceDocument, Context> {
-    let type
-    if (field.type === 'did') {
-      type = definitions.accountObject
-    } else if (SCALAR_FIELDS.includes(field.type)) {
-      type = SCALARS[field.type]
-    } else {
-      throw new Error(`Unsupported scalar type: ${field.type}`)
-    }
-
+    const type = field.type === 'did' ? definitions.accountObject : getScalar(field.type)
     return {
       type: field.required ? new GraphQLNonNull(type) : type,
       resolve: (doc): unknown => doc.content?.[key],
@@ -393,26 +366,18 @@ class SchemaBuilder {
                   `Missing referenced input type: ${inputPrefix + field.item.refName}`
                 )
               }
-            } else if (SCALAR_FIELDS.includes(field.item.type)) {
-              itemType = SCALARS[field.item.type]
             } else {
-              throw new Error(`Unsupported list item type: ${field.item.type}`)
+              itemType = getScalar(field.item.type)
             }
             type = new GraphQLList(itemType)
             break
           }
           default:
-            if (SCALAR_FIELDS.includes(field.type)) {
-              type = SCALARS[field.type]
-            } else {
-              throw new Error(`Unsupported field type ${field.type}`)
-            }
+            type = getScalar(field.type)
         }
-
-        if (type != null) {
-          config[key] = { type: required && field.required ? new GraphQLNonNull(type) : type }
-        }
+        config[key] = { type: required && field.required ? new GraphQLNonNull(type) : type }
       }
+
       return config
     }
 

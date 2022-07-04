@@ -17,15 +17,13 @@ import type {
 import { camelCase, pascalCase } from 'change-case'
 import { JsonReference } from 'json-ptr'
 
+import type { AnySchema, ScalarSchema } from '../types.js'
+
 /** @internal */
 export function getName(base: string, prefix = ''): string {
   const withCase = pascalCase(base)
   return withCase.startsWith(prefix) ? withCase : prefix + withCase
 }
-
-type ScalarSchema = JSONSchema.Boolean | JSONSchema.Integer | JSONSchema.Number | JSONSchema.String
-
-type AnySchema = ScalarSchema | JSONSchema.Array | JSONSchema.Object
 
 const CUSTOM_SCALARS_TITLES: Record<string, CustomRuntimeScalarType> = {
   CeramicCommitID: 'commitid',
