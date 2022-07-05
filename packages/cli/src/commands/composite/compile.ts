@@ -32,7 +32,18 @@ export default class CompositeCompile extends Command<Flags> {
       outputPaths.map(async (outputPath) => {
         await writeRuntimeDefinition(runtimeDefinition, outputPath)
       })
-      this.spinner.succeed('Successfully saved compiled composite into given path(s)')
+      let logged = false
+      outputPaths.forEach((path) => {
+        if (path.endsWith('.json')) {
+          // log the first .json path so that it can be piped e.g. to graphql:server
+          this.log(path)
+          logged = true
+          return
+        }
+      })
+      if (!logged) {
+        this.log('Runtime representation(s) saved')
+      }
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return
