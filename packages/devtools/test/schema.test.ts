@@ -83,15 +83,13 @@ describe('schema', () => {
               didValue: {
                 type: 'string',
                 title: 'GraphQLDID',
-                pattern:
-                  "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
+                pattern: "^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$",
                 maxLength: 100,
               },
               requiredDidValue: {
                 type: 'string',
                 title: 'GraphQLDID',
-                pattern:
-                  "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
+                pattern: "^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$",
                 maxLength: 100,
               },
             },

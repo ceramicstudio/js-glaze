@@ -51,11 +51,11 @@ type PersonProfile @model(
   accountRelation: SINGLE,
   description: "A model to store accounts' personal data"
 ) {
-  birthDate: String @length(max: 10)
+  birthDate: Date
   gender: String @length(max: 42)
   homeLocation: String @length(max: 140)
-  residenceCountry: String @length(max: 2)
-  nationalities: [String] @length(max: 2) @arrayLength(max: 5)
+  residenceCountry: CountryCode
+  nationalities: [CountryCode] @arrayLength(max: 5)
   affiliations: [String] @length(max: 140) @arrayLength(max: 20)
 }
 `
