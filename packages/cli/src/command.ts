@@ -49,20 +49,24 @@ export const SYNC_OPTION_FLAG = Flags.integer({
 
 const readPipe: () => Promise<string | undefined> = () => {
   return new Promise((resolve) => {
-    const stdin = process.openStdin()
-    stdin.setEncoding('utf-8')
-
     let data = ''
+    const stdin = process.openStdin()
+    const finish = () => {
+      resolve(data.trim())
+      stdin.pause()
+    }
+
+    stdin.setEncoding('utf-8')
     stdin.on('data', (chunk) => {
       data += chunk
     })
 
     stdin.on('end', () => {
-      resolve(data)
+      finish()
     })
 
     if (stdin.isTTY) {
-      resolve('')
+      finish()
     }
   })
 }
@@ -90,14 +94,16 @@ export abstract class Command<
   spinner!: Ora
 
   async init(): Promise<void> {
+    this.stdin = await readPipe()
+    if (this.stdin) {
+      this.argv = [this.stdin].concat(this.argv)
+    }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore constructor type
     const { args, flags } = await this.parse(this.constructor)
     this.args = args as Args
     this.flags = flags as Flags
-    this.stdin = await readPipe()
     this.spinner = ora()
-    console.log('PIPED IN STDIN', this.stdin)
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags.key != null) {
       const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])
