@@ -7,8 +7,33 @@ exports[`graphql graphql:schema printing graphql schema succeeds 1`] = `
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  pictureIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PictureConnection
+  postIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PostConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -17,18 +42,9 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
   pictureCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
@@ -41,7 +57,7 @@ type CeramicAccountData {
 
     \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
     last: Int
-  ): Picture
+  ): PictureConnection
   postCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
@@ -54,12 +70,63 @@ type CeramicAccountData {
 
     \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
     last: Int
-  ): Post
+  ): PostConnection
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type PictureConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [PictureEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type PictureEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Picture
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Picture implements Node {
   id: ID!
   url: String!
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type PostConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [PostEdge]
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type PostEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Post
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Post implements Node {
@@ -75,53 +142,95 @@ type Mutation {
 }
 
 type CreatePicturePayload {
-  node: Picture!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Picture!
   clientMutationId: String
 }
 
 input CreatePictureInput {
-  content: PictureInput!
+  content: RequiredPictureInput!
   clientMutationId: String
 }
 
-input PictureInput {
+input RequiredPictureInput {
   url: String!
 }
 
 type UpdatePicturePayload {
-  node: Picture!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Picture!
   clientMutationId: String
 }
 
 input UpdatePictureInput {
   id: ID!
   content: PictureInput!
+  options: UpdateOptionsInput
   clientMutationId: String
 }
 
+input PictureInput {
+  url: String
+}
+
+input UpdateOptionsInput {
+  replace: Boolean
+  version: CeramicCommitID
+}
+
+\\"\\"\\"A Ceramic Commit ID\\"\\"\\"
+scalar CeramicCommitID
+
 type CreatePostPayload {
-  node: Post!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Post!
   clientMutationId: String
 }
 
 input CreatePostInput {
-  content: PostInput!
+  content: RequiredPostInput!
   clientMutationId: String
 }
 
-input PostInput {
+input RequiredPostInput {
   text: String!
 }
 
 type UpdatePostPayload {
-  node: Post!
+  \\"\\"\\"Fetches an object given its ID\\"\\"\\"
+  node(
+    \\"\\"\\"The ID of an object\\"\\"\\"
+    id: ID!
+  ): Node
+  viewer: CeramicAccount
+  document: Post!
   clientMutationId: String
 }
 
 input UpdatePostInput {
   id: ID!
   content: PostInput!
+  options: UpdateOptionsInput
   clientMutationId: String
+}
+
+input PostInput {
+  text: String
 }"
 `;
 
@@ -132,8 +241,33 @@ exports[`graphql graphql:schema printing graphql schema succeeds with --readonly
     \\"\\"\\"The ID of an object\\"\\"\\"
     id: ID!
   ): Node
-  account(id: DID!): CeramicAccount!
   viewer: CeramicAccount
+  pictureIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PictureConnection
+  postIndex(
+    \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
+    after: String
+
+    \\"\\"\\"Returns the first n items from the list.\\"\\"\\"
+    first: Int
+
+    \\"\\"\\"Returns the items in the list that come before the specified cursor.\\"\\"\\"
+    before: String
+
+    \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
+    last: Int
+  ): PostConnection
 }
 
 \\"\\"\\"An object with an ID\\"\\"\\"
@@ -142,18 +276,9 @@ interface Node {
   id: ID!
 }
 
-type CeramicAccount {
-  id: DID!
+type CeramicAccount implements Node {
+  id: ID!
   isViewer: Boolean!
-  data: CeramicAccountData!
-}
-
-\\"\\"\\"
-A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/.
-\\"\\"\\"
-scalar DID @specifiedBy(url: \\"https://www.w3.org/TR/did-core/\\")
-
-type CeramicAccountData {
   pictureCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
@@ -166,7 +291,7 @@ type CeramicAccountData {
 
     \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
     last: Int
-  ): Picture
+  ): PictureConnection
   postCollection(
     \\"\\"\\"Returns the items in the list that come after the specified cursor.\\"\\"\\"
     after: String
@@ -179,12 +304,63 @@ type CeramicAccountData {
 
     \\"\\"\\"Returns the last n items from the list.\\"\\"\\"
     last: Int
-  ): Post
+  ): PostConnection
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type PictureConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [PictureEdge]
+}
+
+\\"\\"\\"Information about pagination in a connection.\\"\\"\\"
+type PageInfo {
+  \\"\\"\\"When paginating forwards, are there more items?\\"\\"\\"
+  hasNextPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, are there more items?\\"\\"\\"
+  hasPreviousPage: Boolean!
+
+  \\"\\"\\"When paginating backwards, the cursor to continue.\\"\\"\\"
+  startCursor: String
+
+  \\"\\"\\"When paginating forwards, the cursor to continue.\\"\\"\\"
+  endCursor: String
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type PictureEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Picture
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Picture implements Node {
   id: ID!
   url: String!
+}
+
+\\"\\"\\"A connection to a list of items.\\"\\"\\"
+type PostConnection {
+  \\"\\"\\"Information to aid in pagination.\\"\\"\\"
+  pageInfo: PageInfo!
+
+  \\"\\"\\"A list of edges.\\"\\"\\"
+  edges: [PostEdge]
+}
+
+\\"\\"\\"An edge in a connection.\\"\\"\\"
+type PostEdge {
+  \\"\\"\\"The item at the end of the edge\\"\\"\\"
+  node: Post
+
+  \\"\\"\\"A cursor for use in pagination\\"\\"\\"
+  cursor: String!
 }
 
 type Post implements Node {

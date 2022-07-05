@@ -184,41 +184,78 @@ describe('loader', () => {
       expect(multiQuery).not.toBeCalled()
     })
 
-    test('update() method removes the stream from the cache before loading and updating', async () => {
-      const cacheMap = new Map<string, Promise<ModelInstanceDocument>>()
-      const cacheDelete = jest.fn((key: string) => cacheMap.delete(key))
-      const cacheSet = jest.fn(
-        (key: string, value: Promise<ModelInstanceDocument<Record<string, any>>>) => {
-          return cacheMap.set(key, value)
+    describe('update() method', () => {
+      test('removes the stream from the cache before loading and updating', async () => {
+        const cacheMap = new Map<string, Promise<ModelInstanceDocument>>()
+        const cacheDelete = jest.fn((key: string) => cacheMap.delete(key))
+        const cacheSet = jest.fn(
+          (key: string, value: Promise<ModelInstanceDocument<Record<string, any>>>) => {
+            return cacheMap.set(key, value)
+          }
+        )
+        const cache: DocumentCache = {
+          clear: () => cacheMap.clear(),
+          get: (key) => cacheMap.get(key),
+          delete: cacheDelete,
+          set: cacheSet,
         }
-      )
-      const cache: DocumentCache = {
-        clear: () => cacheMap.clear(),
-        get: (key) => cacheMap.get(key),
-        delete: cacheDelete,
-        set: cacheSet,
-      }
 
-      const replace = jest.fn()
-      const multiQuery = jest.fn(() => ({
-        [testID1]: { content: { foo: 'bar', test: false }, replace },
-      }))
+        const replace = jest.fn()
+        const multiQuery = jest.fn(() => ({
+          [testID1]: { content: { foo: 'bar', test: false }, replace },
+        }))
 
-      const loader = new DocumentLoader({
-        cache,
-        ceramic: { multiQuery } as unknown as CeramicApi,
+        const loader = new DocumentLoader({
+          cache,
+          ceramic: { multiQuery } as unknown as CeramicApi,
+        })
+
+        await loader.load(testID1)
+        expect(cacheDelete).not.toBeCalled()
+        expect(cacheMap.has(testID1)).toBe(true)
+        expect(cacheSet).toBeCalledTimes(1)
+
+        await loader.update(testID1, { test: true }, { pin: true })
+        expect(replace).toBeCalledWith({ foo: 'bar', test: true }, { pin: true })
+        expect(cacheDelete).toBeCalledWith(testID1)
+        expect(cacheMap.has(testID1)).toBe(true)
+        expect(cacheSet).toBeCalledTimes(2)
       })
 
-      await loader.load(testID1)
-      expect(cacheDelete).not.toBeCalled()
-      expect(cacheMap.has(testID1)).toBe(true)
-      expect(cacheSet).toBeCalledTimes(1)
+      test('fails if the provided version does not match the loaded one', async () => {
+        const replace = jest.fn()
+        const multiQuery = jest.fn(() => ({
+          [testID1]: { commitId: testCommitID, replace },
+        }))
 
-      await loader.update(testID1, { test: true }, { pin: true })
-      expect(replace).toBeCalledWith({ foo: 'bar', test: true }, { pin: true })
-      expect(cacheDelete).toBeCalledWith(testID1)
-      expect(cacheMap.has(testID1)).toBe(true)
-      expect(cacheSet).toBeCalledTimes(2)
+        const loader = new DocumentLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
+        await expect(loader.update(testID1, { test: true }, { version: 'test' })).rejects.toThrow(
+          'Stream version mismatch'
+        )
+        expect(replace).not.toBeCalled()
+      })
+
+      test('applies the update if the provided version matches the loaded one', async () => {
+        const replace = jest.fn()
+        const multiQuery = jest.fn(() => ({
+          [testID1]: { commitId: testCommitID, content: { foo: 'bar', test: false }, replace },
+        }))
+
+        const loader = new DocumentLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
+        await loader.update(testID1, { test: true }, { version: testCommitID.toString() })
+        expect(replace).toBeCalledWith({ foo: 'bar', test: true }, {})
+      })
+
+      test('performs a full replacement if the option is set', async () => {
+        const replace = jest.fn()
+        const multiQuery = jest.fn(() => ({
+          [testID1]: { commitId: testCommitID, content: { foo: 'bar', test: false }, replace },
+        }))
+
+        const loader = new DocumentLoader({ ceramic: { multiQuery } as unknown as CeramicApi })
+        await loader.update(testID1, { test: true }, { replace: true })
+        expect(replace).toBeCalledWith({ test: true }, {})
+      })
     })
   })
 })

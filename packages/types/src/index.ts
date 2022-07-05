@@ -4,10 +4,10 @@
  * @module types
  */
 
-import type { ModelDefinition } from '@ceramicnetwork/stream-model'
+import type { ModelDefinition, ModelViewsDefinition } from '@ceramicnetwork/stream-model'
 import type { DagJWSResult, JWSSignature } from 'dids'
 
-export type { Model, ModelAccountRelation, ModelDefinition } from '@ceramicnetwork/stream-model'
+export type { Model, ModelDefinition } from '@ceramicnetwork/stream-model'
 export type { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 export type { JSONSchema } from 'json-schema-typed/draft-2020-12'
 
@@ -37,14 +37,6 @@ export type EncodedStreamCommits = Array<EncodedDagJWSResult>
 
 // export type ModelRelationsDefinition = Record<string, ModelRelationDefinition>
 
-/** Definition for a model view, a read-only property. */
-export type ModelViewDefinition = { type: 'documentAccount' }
-// | { type: 'documentVersion' }
-// | { type: 'referencedBy'; property: string }
-
-/** Mapping of names to types of read-only properties. */
-export type ModelViewsDefinition = Record<string, ModelViewDefinition>
-
 // export type ReferencedFromViewDefinition = {
 //   type: 'ReferencedFrom'
 //   model: string
@@ -57,10 +49,10 @@ export type ModelViewsDefinition = Record<string, ModelViewDefinition>
 /** Composite-level views definition. */
 export type CompositeViewsDefinition = {
   // TODO: Account-based views
-  // account: any
+  account?: Record<string, unknown>
   // TODO: Query-level views
-  // root: any
-  // models: Record<string, ReferencedFromViewDefinitions>
+  root?: Record<string, unknown>
+  models?: Record<string, ModelViewsDefinition>
 }
 
 /**
@@ -121,7 +113,7 @@ export type RuntimeStringScalar = RuntimeScalarCommon & {
 }
 
 /** Ceramic-specific runtime scalar types. */
-export type CustomRuntimeScalarType = 'did' | 'id' // | 'streamref'
+export type CustomRuntimeScalarType = 'commitid' | 'did' | 'id'
 
 type RuntimeStringScalarType<Type extends CustomRuntimeScalarType> = RuntimeScalarCommon & {
   type: Type
@@ -134,6 +126,7 @@ export type RuntimeScalar =
   | RuntimeIntegerScalar
   | RuntimeFloatScalar
   | RuntimeStringScalar
+  | RuntimeStringScalarType<'commitid'>
   | RuntimeStringScalarType<'did'>
   | RuntimeStringScalarType<'id'>
 // | RuntimeStringScalarType<'streamref'>
@@ -163,7 +156,7 @@ export type RuntimeList = RuntimeScalarCommon & {
 }
 
 /** Runtime view types. */
-export type RuntimeViewType = 'documentAccount' // | 'documentVersion'
+export type RuntimeViewType = 'documentAccount' | 'documentVersion'
 /** Runtime view field representation. */
 export type RuntimeViewField = { type: 'view'; viewType: RuntimeViewType }
 
@@ -173,7 +166,7 @@ export type RuntimeObjectField = RuntimeScalar | RuntimeList | RuntimeReference 
 export type RuntimeObjectFields = Record<string, RuntimeObjectField>
 
 /** Runtime views types. */
-export type RuntimeViewReferenceType = 'collection' | 'model'
+export type RuntimeViewReferenceType = 'connection' | 'node'
 /** Runtime view reference representation. */
 export type RuntimeViewReference = { type: RuntimeViewReferenceType; name: string }
 

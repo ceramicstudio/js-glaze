@@ -13,6 +13,13 @@ export type CreateOptions = CreateOpts & {
   controller?: string
 }
 
+export type UpdateDocOptions = {
+  replace?: boolean
+  version?: string
+}
+
+export type UpdateOptions = UpdateOpts & UpdateDocOptions
+
 // Implements CacheMap from dataloader, copied here to generate docs
 export type DocumentCache = {
   /**
@@ -114,7 +121,7 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
     { controller, ...options }: CreateOptions = {}
   ): Promise<ModelInstanceDocument<T>> {
     const metadata: ModelInstanceDocumentMetadata = {
-      controller,
+      controller: controller ?? (this.#ceramic.did?.id as string),
       model: model instanceof StreamID ? model : StreamID.fromString(model),
     }
     const stream = await ModelInstanceDocument.create<T>(this.#ceramic, content, metadata, options)
@@ -137,12 +144,16 @@ export class DocumentLoader extends DataLoader<DocID, ModelInstanceDocument> {
   async update<T extends Record<string, any> = Record<string, any>>(
     streamID: string | StreamID,
     content: T,
-    options?: UpdateOpts
+    { replace, version, ...options }: UpdateOptions = {}
   ): Promise<ModelInstanceDocument<T>> {
     const id = idToString(streamID)
     this.clear(id)
     const stream = await this.load<T>(id)
-    await stream.replace({ ...stream.content, ...content }, options)
+    if (version != null && stream.commitId.toString() !== version) {
+      throw new Error('Stream version mismatch')
+    }
+    const newContent = replace ? content : { ...stream.content, ...content }
+    await stream.replace(newContent, options)
     return stream
   }
 }

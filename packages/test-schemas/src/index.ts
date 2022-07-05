@@ -20,6 +20,7 @@ type ImageSources {
 export const noteSchema = `
 type Note @model(accountRelation: LIST, description: "Simple text note") {
   author: DID! @documentAccount
+  version: CommitID! @documentVersion 
   title: String! @length(min: 10, max: 100)
   text: String! @length(max: 2000)
 }

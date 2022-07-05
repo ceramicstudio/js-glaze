@@ -4,7 +4,7 @@ import type { CommitID, StreamID } from '@ceramicnetwork/streamid'
 import type { Connection } from 'graphql-relay'
 
 import { type ConnectionQuery, queryConnection, querySingle } from './query.js'
-import { type DocumentCache, DocumentLoader } from './loader.js'
+import { type DocumentCache, DocumentLoader, type UpdateDocOptions } from './loader.js'
 
 export type ContextParams = {
   /**
@@ -95,9 +95,10 @@ export class Context {
    */
   async updateDoc<Content = Record<string, any>>(
     id: string | StreamID,
-    content: Content
+    content: Content,
+    options?: UpdateDocOptions
   ): Promise<ModelInstanceDocument<Content>> {
-    return await this.#loader.update(id, content)
+    return await this.#loader.update(id, content, options)
   }
 
   /**

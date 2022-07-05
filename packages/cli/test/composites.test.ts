@@ -6,7 +6,7 @@ import encodedProfilesComposite from './mocks/encoded.composite.profiles.json'
 import { EncodedCompositeDefinition } from '@glazed/types'
 import { Composite } from '@glazed/devtools'
 import fs from 'fs-extra'
-import stripAnsi from "strip-ansi";
+import stripAnsi from 'strip-ansi'
 
 const MODEL1_JSON =
   '{"name":"Model1","accountRelation":"list","schema":{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"stringPropName":{"type":"string","maxLength":80}},"additionalProperties":false,"required":["stringPropName"]}}'

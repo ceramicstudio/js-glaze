@@ -29,12 +29,9 @@ function isSignedCommit(input: Record<string, any>): input is SignedCommit {
 }
 
 function toStrictDefinition(definition: InternalCompositeDefinition): StrictCompositeDefinition {
-  return {
-    aliases: {},
-    commonEmbeds: [],
-    views: { account: {}, root: {}, models: {} },
-    ...definition,
-  }
+  const emptyViews = { account: {}, root: {}, models: {} }
+  const views = definition.views ? { ...emptyViews, ...definition.views } : emptyViews
+  return { aliases: {}, commonEmbeds: [], ...definition, views }
 }
 
 function isSupportedVersion(supported: string, check: string): boolean {
@@ -249,12 +246,7 @@ export class Composite {
       // For each model definition...
       models.map(async (modelDefinition) => {
         // create the model stream,
-        const model = await Model.create(params.ceramic, {
-          name: modelDefinition.name,
-          description: modelDefinition.description,
-          schema: modelDefinition.schema,
-          accountRelation: modelDefinition.accountRelation,
-        })
+        const model = await Model.create(params.ceramic, modelDefinition)
         const id = model.id.toString()
         definition.models[id] = modelDefinition
 

@@ -1,19 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Runtime format Note model definition with views 1`] = `
+Object {
+  "accountData": Object {
+    "noteList": Object {
+      "name": "Note",
+      "type": "connection",
+    },
+  },
+  "models": Object {
+    "Note": "NoteID",
+  },
+  "objects": Object {
+    "Note": Object {
+      "author": Object {
+        "type": "view",
+        "viewType": "documentAccount",
+      },
+      "text": Object {
+        "required": true,
+        "type": "string",
+      },
+      "title": Object {
+        "required": true,
+        "type": "string",
+      },
+      "version": Object {
+        "type": "view",
+        "viewType": "documentVersion",
+      },
+    },
+  },
+}
+`;
+
 exports[`Runtime format Profile - multiples models with common local references 1`] = `
 Object {
   "accountData": Object {
     "genericProfile": Object {
       "name": "GenericProfile",
-      "type": "model",
+      "type": "node",
     },
     "personProfile": Object {
       "name": "PersonProfile",
-      "type": "model",
+      "type": "node",
     },
     "socialProfile": Object {
       "name": "SocialProfile",
-      "type": "model",
+      "type": "node",
     },
   },
   "models": Object {
@@ -32,6 +66,142 @@ Object {
       "name": Object {
         "required": false,
         "type": "string",
+      },
+    },
+    "ImageMetadata": Object {
+      "height": Object {
+        "required": true,
+        "type": "integer",
+      },
+      "mimeType": Object {
+        "required": true,
+        "type": "string",
+      },
+      "size": Object {
+        "required": false,
+        "type": "integer",
+      },
+      "src": Object {
+        "required": true,
+        "type": "string",
+      },
+      "width": Object {
+        "required": true,
+        "type": "integer",
+      },
+    },
+    "ImageSources": Object {
+      "alternatives": Object {
+        "item": Object {
+          "refName": "ImageMetadata",
+          "refType": "object",
+          "required": false,
+          "type": "reference",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "original": Object {
+        "refName": "ImageMetadata",
+        "refType": "object",
+        "required": true,
+        "type": "reference",
+      },
+    },
+    "PersonProfile": Object {
+      "affiliations": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "birthDate": Object {
+        "required": false,
+        "type": "string",
+      },
+      "gender": Object {
+        "required": false,
+        "type": "string",
+      },
+      "homeLocation": Object {
+        "required": false,
+        "type": "string",
+      },
+      "nationalities": Object {
+        "item": Object {
+          "required": false,
+          "type": "string",
+        },
+        "required": false,
+        "type": "list",
+      },
+      "residenceCountry": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+    "SocialProfile": Object {
+      "background": Object {
+        "refName": "ImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "description": Object {
+        "required": false,
+        "type": "string",
+      },
+      "emoji": Object {
+        "required": false,
+        "type": "string",
+      },
+      "url": Object {
+        "required": false,
+        "type": "string",
+      },
+    },
+  },
+}
+`;
+
+exports[`Runtime format Profile definition with added model view 1`] = `
+Object {
+  "accountData": Object {
+    "genericProfile": Object {
+      "name": "GenericProfile",
+      "type": "node",
+    },
+    "personProfile": Object {
+      "name": "PersonProfile",
+      "type": "node",
+    },
+    "socialProfile": Object {
+      "name": "SocialProfile",
+      "type": "node",
+    },
+  },
+  "models": Object {
+    "GenericProfile": "GenericProfileID",
+    "PersonProfile": "PersonProfileID",
+    "SocialProfile": "SocialProfileID",
+  },
+  "objects": Object {
+    "GenericProfile": Object {
+      "image": Object {
+        "refName": "ImageSources",
+        "refType": "object",
+        "required": false,
+        "type": "reference",
+      },
+      "name": Object {
+        "required": false,
+        "type": "string",
+      },
+      "version": Object {
+        "type": "view",
+        "viewType": "documentVersion",
       },
     },
     "ImageMetadata": Object {

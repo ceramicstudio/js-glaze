@@ -1,32 +1,10 @@
 import type { CeramicApi, StreamState } from '@ceramicnetwork/common'
-import { ModelInstanceDocument } from '@ceramicnetwork/stream-model-instance'
 import { jest } from '@jest/globals'
 
-import {
-  createModelInstance,
-  queryConnection,
-  querySingle,
-  toIndexQuery,
-  toRelayPageInfo,
-} from '../src/query'
+import { queryConnection, querySingle, toIndexQuery, toRelayConnection } from '../src/query'
 
 describe('query', () => {
-  const testState = {
-    type: ModelInstanceDocument.STREAM_TYPE_ID,
-    log: [{ cid: 'bagcqcerakszw2vsovxznyp5gfnpdj4cqm2xiv76yd24wkjewhhykovorwo6a' }],
-  } as unknown as StreamState
-
-  describe('createModelInstance()', () => {
-    test('throws if the type does not match ModelInstanceDocument', () => {
-      expect(() => {
-        createModelInstance({ type: 0 } as unknown as StreamState)
-      }).toThrow('Unexpected stream type: 0')
-    })
-
-    test('creates a ModelInstanceDocument instance', () => {
-      expect(createModelInstance(testState)).toBeInstanceOf(ModelInstanceDocument)
-    })
-  })
+  const testState = {} as unknown as StreamState
 
   describe('toIndexQuery()', () => {
     test('throws if invalid parameters are provided', () => {
@@ -53,51 +31,78 @@ describe('query', () => {
     })
   })
 
-  test('toRelayPageInfo()', () => {
-    expect(toRelayPageInfo({ hasNextPage: true, hasPreviousPage: false })).toEqual({
-      hasNextPage: true,
-      hasPreviousPage: false,
-      startCursor: null,
-      endCursor: null,
+  test('toRelayConnection()', () => {
+    const expectedNode = {}
+    const buildStreamFromState = jest.fn(() => expectedNode)
+    expect(
+      toRelayConnection({ buildStreamFromState } as unknown as CeramicApi, {
+        edges: [
+          { cursor: 'cursor1', node: testState },
+          { cursor: 'cursor2', node: testState },
+        ],
+        pageInfo: { hasNextPage: true, hasPreviousPage: false },
+      })
+    ).toEqual({
+      edges: [
+        { cursor: 'cursor1', node: expectedNode },
+        { cursor: 'cursor2', node: expectedNode },
+      ],
+      pageInfo: {
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     })
+    expect(buildStreamFromState).toBeCalledTimes(2)
   })
 
   test('queryConnection()', async () => {
+    const expectedNode = {}
+    const buildStreamFromState = jest.fn(() => expectedNode)
     const queryIndex = jest.fn(() => ({
-      entries: [testState, testState, testState],
+      edges: [
+        { cursor: 'cursor1', node: testState },
+        { cursor: 'cursor2', node: testState },
+        { cursor: 'cursor3', node: testState },
+      ],
       pageInfo: { hasNextPage: true, hasPreviousPage: false },
     }))
-    const ceramic = { index: { queryIndex } } as unknown as CeramicApi
+    const ceramic = { buildStreamFromState, index: { queryIndex } } as unknown as CeramicApi
 
-    const { edges, pageInfo } = await queryConnection(ceramic, { model: 'test', first: 3 })
-    expect(edges).toHaveLength(3)
-    expect(pageInfo).toEqual({
-      hasNextPage: true,
-      hasPreviousPage: false,
-      startCursor: null,
-      endCursor: null,
+    await expect(queryConnection(ceramic, { model: 'test', first: 3 })).resolves.toEqual({
+      edges: [
+        { cursor: 'cursor1', node: expectedNode },
+        { cursor: 'cursor2', node: expectedNode },
+        { cursor: 'cursor3', node: expectedNode },
+      ],
+      pageInfo: {
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     })
-
     expect(queryIndex).toBeCalledWith({ model: 'test', first: 3, after: undefined })
   })
 
   describe('querySingle()', () => {
     test('with result', async () => {
+      const expectedNode = {}
+      const buildStreamFromState = jest.fn(() => expectedNode)
       const queryIndex = jest.fn(() => ({
-        entries: [testState],
+        edges: [{ cursor: 'cursor1', node: testState }],
         pageInfo: { hasNextPage: false, hasPreviousPage: false },
       }))
-      const ceramic = { index: { queryIndex } } as unknown as CeramicApi
+      const ceramic = { buildStreamFromState, index: { queryIndex } } as unknown as CeramicApi
 
-      await expect(querySingle(ceramic, { model: 'test' })).resolves.toBeInstanceOf(
-        ModelInstanceDocument
-      )
+      await expect(querySingle(ceramic, { model: 'test' })).resolves.toBe(expectedNode)
       expect(queryIndex).toBeCalledWith({ model: 'test', last: 1 })
     })
 
     test('with no result', async () => {
       const queryIndex = jest.fn(() => ({
-        entries: [],
+        edges: [],
         pageInfo: { hasNextPage: false, hasPreviousPage: false },
       }))
       const ceramic = { index: { queryIndex } } as unknown as CeramicApi

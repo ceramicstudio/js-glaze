@@ -1,19 +1,19 @@
-import { StreamRef } from '@ceramicnetwork/streamid'
+import { CommitID } from '@ceramicnetwork/streamid'
 import { GraphQLError, GraphQLScalarType, Kind } from 'graphql'
 
-function validateStreamRef(input: unknown): string {
-  return StreamRef.from(input as string).toString()
+function validateCommitID(input: unknown): string {
+  return CommitID.fromString(input as string).toString()
 }
 
-export const CeramicStreamReference = new GraphQLScalarType({
-  name: 'CeramicStreamReference',
-  description: 'A Ceramic Stream reference (Stream or Commit ID)',
-  serialize: validateStreamRef,
-  parseValue: validateStreamRef,
+export const CeramicCommitID = new GraphQLScalarType({
+  name: 'CeramicCommitID',
+  description: 'A Ceramic Commit ID',
+  serialize: validateCommitID,
+  parseValue: validateCommitID,
   parseLiteral(ast) {
     if (ast.kind !== Kind.STRING) {
-      throw new GraphQLError(`Can only validate strings as StreamRef but got a: ${ast.kind}`)
+      throw new GraphQLError(`Can only validate strings as CommitID but got a: ${ast.kind}`)
     }
-    return validateStreamRef(ast.value)
+    return validateCommitID(ast.value)
   },
 })

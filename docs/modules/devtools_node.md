@@ -18,7 +18,7 @@ ___
 
 ### ServeGraphQLParams
 
-Ƭ **ServeGraphQLParams**: [`ServeParams`](devtools_node.md#serveparams) & { `definition`: `RuntimeCompositeDefinition`  }
+Ƭ **ServeGraphQLParams**: [`ServeParams`](devtools_node.md#serveparams) & { `definition`: `RuntimeCompositeDefinition` ; `readonly?`: `boolean`  }
 
 ___
 
@@ -45,8 +45,8 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `url` | `string` | URL of the local GraphQL endpoint. |
 | `stop` | (`callback?`: (`err?`: `Error`) => `void`) => `void` | Stop the server. |
+| `url` | `string` | URL of the local GraphQL endpoint. |
 
 ## Functions
 

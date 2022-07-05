@@ -1,0 +1,43 @@
+{
+  "name": "next-notes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "relay": "relay-compiler",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^2.2.1",
+    "@emotion/react": "^11.8.1",
+    "@emotion/styled": "^11.8.1",
+    "@glazed/graph": "^0.1.0",
+    "@mui/icons-material": "^5.8.2",
+    "@mui/material": "^5.8.2",
+    "@mui/styles": "^5.8.0",
+    "dids": "^3.2.0",
+    "jotai": "^1.7.3",
+    "key-did-provider-ed25519": "^2.0.0",
+    "key-did-resolver": "^2.0.4",
+    "next": "^12.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-relay": "^14.0.0",
+    "relay-runtime": "^14.0.0",
+    "uint8arrays": "^3.0.0"
+  },
+  "devDependencies": {
+    "@glazed/devtools": "^0.2.0",
+    "@glazed/devtools-node": "^0.1.0",
+    "@types/node": "^18.0.1",
+    "@types/react": "^18.0.14",
+    "@types/react-relay": "^13.0.1",
+    "@types/relay-runtime": "^13.0.2",
+    "eslint": "^8.19.0",
+    "eslint-config-next": "^12.2.0",
+    "relay-compiler": "^14.0.0",
+    "typescript": "^4.7.4"
+  }
+}

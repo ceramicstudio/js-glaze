@@ -55,7 +55,6 @@ export default class GraphQLServer extends Command<
         })
       })
     } catch (e) {
-
       this.spinner.fail((e as Error).message)
       return
     }

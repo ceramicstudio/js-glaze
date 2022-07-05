@@ -34,11 +34,19 @@ ___
 
 Composite-level views definition.
 
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `account?` | `Record`<`string`, `unknown`\> |
+| `models?` | `Record`<`string`, `ModelViewsDefinition`\> |
+| `root?` | `Record`<`string`, `unknown`\> |
+
 ___
 
 ### CustomRuntimeScalarType
 
-Ƭ **CustomRuntimeScalarType**: ``"did"`` \| ``"id"``
+Ƭ **CustomRuntimeScalarType**: ``"commitid"`` \| ``"did"`` \| ``"id"``
 
 Ceramic-specific runtime scalar types.
 
@@ -97,28 +105,6 @@ ___
 
 Composite definition used internally by the [`Composite`](../classes/devtools.Composite.md)
 development tools.
-
-___
-
-### ModelViewDefinition
-
-Ƭ **ModelViewDefinition**: `Object`
-
-Definition for a model view, a read-only property.
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `type` | ``"documentAccount"`` |
-
-___
-
-### ModelViewsDefinition
-
-Ƭ **ModelViewsDefinition**: `Record`<`string`, [`ModelViewDefinition`](types.md#modelviewdefinition)\>
-
-Mapping of names to types of read-only properties.
 
 ___
 
@@ -212,7 +198,7 @@ ___
 
 ### RuntimeScalar
 
-Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
+Ƭ **RuntimeScalar**: [`RuntimeBooleanScalar`](types.md#runtimebooleanscalar) \| [`RuntimeIntegerScalar`](types.md#runtimeintegerscalar) \| [`RuntimeFloatScalar`](types.md#runtimefloatscalar) \| [`RuntimeStringScalar`](types.md#runtimestringscalar) \| `RuntimeStringScalarType`<``"commitid"``\> \| `RuntimeStringScalarType`<``"did"``\> \| `RuntimeStringScalarType`<``"id"``\>
 
 Runtime scalar representations.
 
@@ -280,7 +266,7 @@ ___
 
 ### RuntimeViewReferenceType
 
-Ƭ **RuntimeViewReferenceType**: ``"collection"`` \| ``"model"``
+Ƭ **RuntimeViewReferenceType**: ``"connection"`` \| ``"node"``
 
 Runtime views types.
 
@@ -288,7 +274,7 @@ ___
 
 ### RuntimeViewType
 
-Ƭ **RuntimeViewType**: ``"documentAccount"``
+Ƭ **RuntimeViewType**: ``"documentAccount"`` \| ``"documentVersion"``
 
 Runtime view types.
 

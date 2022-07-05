@@ -1,3 +1,11 @@
+import type {
+  ModelAccountRelation,
+  ModelDefinition,
+  ModelViewsDefinition,
+} from '@ceramicnetwork/stream-model'
+import type { JSONSchema } from '@glazed/types'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { mapSchema, MapperKind } from '@graphql-tools/utils'
 import {
   GraphQLBoolean,
   GraphQLFloat,
@@ -11,19 +19,17 @@ import {
   GraphQLString,
   GraphQLUnionType,
 } from 'graphql'
-import { mapSchema, MapperKind } from '@graphql-tools/utils'
-import { makeExecutableSchema } from '@graphql-tools/schema'
+import { GraphQLDID } from 'graphql-scalars'
+
+import { CeramicCommitID } from './graphQlDirectives/commitid.scalar.js'
+import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import {
+  type CeramicGraphQLTypeExtensions,
+  type ModelDirective,
   compositeDirectivesTransformer,
   fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
 } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { CeramicGraphQLTypeExtensions } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { ModelDirective } from './graphQlDirectives/compositeDirectivesTransformer.js'
-import type { JSONSchema, ModelAccountRelation, ModelDefinition } from '@glazed/types'
-import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
-import { GraphQLDID } from 'graphql-scalars'
-// import { GraphQLStreamReference } from './graphQlDirectives/streamReference.scalar.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>
@@ -186,12 +192,14 @@ function modelFromObjectConfig(
   const modelSchemaProperties: Record<string, JSONSchema> = {}
   const requiredProperties: Array<string> = []
   const definitionsUsedInTheModel: Record<string, JSONSchema.Object> = {}
+  const modelViews: ModelViewsDefinition = {}
 
   for (const [fieldName, fieldDefinition] of Object.entries(objectConfig.getFields())) {
+    const extensions = fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
     const fieldSchema = fieldSchemaFromFieldDefinition(
       fieldDefinition.name,
       fieldDefinition.type,
-      fieldDefinition.extensions?.ceramicExtensions as CeramicGraphQLTypeExtensions
+      extensions
     )
 
     if (fieldSchema) {
@@ -208,6 +216,8 @@ function modelFromObjectConfig(
       if (Object.keys(allDefinitions).includes(typeName)) {
         definitionsUsedInTheModel[typeName] = allDefinitions[typeName]
       }
+    } else if (extensions?.view) {
+      modelViews[fieldName] = extensions.view
     }
   }
   /**
@@ -258,7 +268,7 @@ function modelFromObjectConfig(
     accountRelation: modelDirective.accountRelation.toLowerCase() as ModelAccountRelation,
     description: modelDirective.description,
     schema: modelSchema,
-    // TODO: add this property when it's added to ModelDefinition in ceramic views?: ModelViewsDefinition
+    views: modelViews,
   }
 }
 
@@ -359,11 +369,7 @@ function defaultFieldSchemaFromFieldDefinition(
   fieldType: GraphQLOutputType,
   ceramicExtensions?: CeramicGraphQLTypeExtensions
 ): JSONSchema | null {
-  if (
-    ceramicExtensions !== undefined &&
-    /*(*/ ceramicExtensions.documentAccount !==
-      undefined /* || ceramicExtensions.documentVersion !== undefined) */
-  ) {
+  if (ceramicExtensions?.view != null) {
     // Fields marked with @documentAccount or @documentVersion go into model's views, not into the schema
     return null
   }
@@ -376,19 +382,18 @@ function defaultFieldSchemaFromFieldDefinition(
       type: 'string',
       title: 'GraphQLDID',
       pattern: "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
-      maxLength: 80,
+      maxLength: 100,
     }
   }
 
-  // if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLStreamReference)) {
-  //   result = {
-  //     ...result,
-  //     type: 'string',
-  //     title: 'CeramicStreamReference',
-  //     maxLength: 80,
-  //     pattern: '<TBD>', //FIXME: define the pattern for StreamReference strings
-  //   }
-  // }
+  if (fieldTypeIsinstanceOfOrWraps(fieldType, CeramicCommitID)) {
+    result = {
+      ...result,
+      type: 'string',
+      title: 'CeramicCommitID',
+      maxLength: 200,
+    }
+  }
 
   if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLID)) {
     result = {
