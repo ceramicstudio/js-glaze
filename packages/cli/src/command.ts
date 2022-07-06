@@ -105,7 +105,7 @@ export abstract class Command<
     this.flags = flags as Flags
     this.spinner = ora()
     // Authenticate the Ceramic instance whenever a key is provided
-    if (this.flags.key != null) {
+    if (this.flags['did-key-seed'] != null) {
       const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])
       this.spinner.info(`Using DID ${chalk.cyan(did.id)}`)
       this.#authenticatedDID = did
@@ -122,7 +122,7 @@ export abstract class Command<
   get authenticatedDID(): DID {
     if (this.#authenticatedDID == null) {
       throw new Error(
-        'DID is not authenticated, make sure to provide a seed using the "did-key" flag'
+        'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
       )
     }
     return this.#authenticatedDID
