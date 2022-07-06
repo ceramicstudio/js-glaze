@@ -7,29 +7,23 @@ import type { JSONSchema } from '@glazed/types'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { mapSchema, MapperKind } from '@graphql-tools/utils'
 import {
-  GraphQLBoolean,
-  GraphQLFloat,
-  GraphQLID,
-  GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLOutputType,
   GraphQLSchema,
-  GraphQLString,
   GraphQLUnionType,
 } from 'graphql'
-import { GraphQLDID } from 'graphql-scalars'
 
-import { CeramicCommitID } from './graphQlDirectives/commitid.scalar.js'
 import { compositeDirectivesAndScalarsSchema } from './graphQlDirectives/compositeDirectivesAndScalars.schema.js'
 import {
   type CeramicGraphQLTypeExtensions,
   type ModelDirective,
   compositeDirectivesTransformer,
-  fieldTypeIsinstanceOfOrWraps,
   getCeramicModelDirective,
+  getScalarType,
 } from './graphQlDirectives/compositeDirectivesTransformer.js'
+import { getScalarSchema } from './graphQlDirectives/scalars.js'
 
 export type ModelsWithEmbeds = {
   models: Array<ModelDefinition>
@@ -374,83 +368,28 @@ function defaultFieldSchemaFromFieldDefinition(
     return null
   }
 
-  let result: JSONSchema = {}
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLDID)) {
-    result = {
-      ...result,
-      type: 'string',
-      title: 'GraphQLDID',
-      pattern: "/^did:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/",
-      maxLength: 100,
-    }
+  const scalarType = getScalarType(fieldType)
+  if (scalarType == null) {
+    return null
   }
 
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, CeramicCommitID)) {
-    result = {
-      ...result,
-      type: 'string',
-      title: 'CeramicCommitID',
-      maxLength: 200,
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLID)) {
-    result = {
-      ...result,
-      type: 'string',
-      title: 'GraphQLID',
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLInt)) {
-    result = {
-      ...result,
-      type: 'integer',
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLFloat)) {
-    result = {
-      ...result,
-      type: 'number',
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLBoolean)) {
-    result = {
-      ...result,
-      type: 'boolean',
-    }
-  }
-
-  if (fieldTypeIsinstanceOfOrWraps(fieldType, GraphQLString)) {
-    result = {
-      ...result,
-      type: 'string',
-    }
-  }
-
+  const result = getScalarSchema(scalarType)
   if (ceramicExtensions) {
-    if (ceramicExtensions.length !== undefined) {
+    if (result.type === 'string' && ceramicExtensions.length !== undefined) {
       if (ceramicExtensions.length.max !== undefined) {
         result.maxLength = ceramicExtensions.length.max
       }
       if (ceramicExtensions.length.min !== undefined) {
         result.minLength = ceramicExtensions.length.min
       }
-    }
-
-    if (ceramicExtensions.intRange !== undefined) {
+    } else if (result.type === 'integer' && ceramicExtensions.intRange !== undefined) {
       if (ceramicExtensions.intRange.max !== undefined) {
         result.maximum = ceramicExtensions.intRange.max
       }
       if (ceramicExtensions.intRange.min !== undefined) {
         result.minimum = ceramicExtensions.intRange.min
       }
-    }
-
-    if (ceramicExtensions.floatRange !== undefined) {
+    } else if (result.type === 'number' && ceramicExtensions.floatRange !== undefined) {
       if (ceramicExtensions.floatRange.max !== undefined) {
         result.maximum = ceramicExtensions.floatRange.max
       }

@@ -8,7 +8,9 @@
     "paths": {
       "@glazed/cli": ["packages/cli/src"],
       "@glazed/devtools": ["packages/devtools/src"],
-      "@glazed/graphql": ["packages/graphql/src"],
+      "@glazed/devtools-node": ["packages/devtools-node/src"],
+      "@glazed/graph": ["packages/graph/src"],
+      "@glazed/graphql-scalars": ["packages/graphql-scalars/src"],
       "@glazed/types": ["packages/types/src"]
     }
   }
