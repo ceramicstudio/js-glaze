@@ -1,6 +1,8 @@
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import { readEncodedComposite, writeRuntimeDefinition } from '@glazed/devtools-node'
+import { Composite } from '@glazed/devtools'
+import { EncodedCompositeDefinition } from '@glazed/types'
 
 type Flags = CommandFlags & {
   output?: string
@@ -20,27 +22,41 @@ export default class CompositeCompile extends Command<Flags> {
       .map((token) => {
         return token.input
       })
-
-    if (allArgs.length < 2) {
+    if (this.stdin !== undefined && allArgs.length < 1) {
+      this.spinner.fail(
+        'When the composite is passed as JSON in stdin, at least one output path needs to be given as param'
+      )
+      return
+    } else if (this.stdin === undefined && allArgs.length < 2) {
       this.spinner.fail('Missing composite path and at output path')
       return
     }
     try {
-      const [compositePath, ...outputPaths] = allArgs
-      const composite = await readEncodedComposite(this.ceramic, compositePath)
+      let composite: Composite | undefined = undefined
+      let outputPaths: Array<string> = []
+      if (this.stdin !== undefined) {
+        const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
+        composite = await Composite.fromJSON({ ceramic: this.ceramic, definition })
+        outputPaths = allArgs
+      } else {
+        composite = await readEncodedComposite(this.ceramic, allArgs[0])
+        outputPaths = allArgs.splice(1)
+      }
       const runtimeDefinition = composite.toRuntime()
       outputPaths.map(async (outputPath) => {
         await writeRuntimeDefinition(runtimeDefinition, outputPath)
       })
       let logged = false
-      outputPaths.forEach((path) => {
-        if (path.endsWith('.json')) {
-          // log the first .json path so that it can be piped e.g. to graphql:server
-          this.log(path)
-          logged = true
-          return
-        }
-      })
+      if (!this.flags['disable-stdin']) {
+        outputPaths.forEach((path) => {
+          if (path.endsWith('.json')) {
+            // log the first .json path so that it can be piped e.g. to graphql:server
+            this.log(path)
+            logged = true
+            return
+          }
+        })
+      }
       if (!logged) {
         this.log('Runtime representation(s) saved')
       }

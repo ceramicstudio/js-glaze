@@ -7,6 +7,7 @@ describe('graphql', () => {
       const schema = await execa('glaze', [
         'graphql:schema',
         'test/mocks/runtime.composite.picture.post.json',
+        '--disable-stdin',
       ])
       expect(schema.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -16,6 +17,7 @@ describe('graphql', () => {
         'graphql:schema',
         'test/mocks/runtime.composite.picture.post.json',
         '--readonly',
+        '--disable-stdin',
       ])
       expect(schema.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -27,6 +29,7 @@ describe('graphql', () => {
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62433',
+        '--disable-stdin',
       ])
       let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
@@ -57,6 +60,7 @@ describe('graphql', () => {
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62610',
         '--readonly',
+        '--disable-stdin',
       ])
       let numChecks = 0
       serverProcess.stdout?.on('data', (data: Readable) => {
