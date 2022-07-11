@@ -13,7 +13,7 @@ export default class CreateModel extends Command<CommandFlags, { content: string
   ]
 
   async run(): Promise<void> {
-    this.spinner.start('Creating the model...')
+    this.spinner.start('Creating the model...\n')
     try {
       const model = await Model.create(
         this.ceramic,
@@ -22,7 +22,8 @@ export default class CreateModel extends Command<CommandFlags, { content: string
           controller: this.authenticatedDID.id,
         }
       )
-      this.spinner.succeed(`Created ${model.content.name} with streamID ${model.id.toString()}`)
+      this.log(model.id.toString())
+      this.spinner.succeed('Done!')
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return

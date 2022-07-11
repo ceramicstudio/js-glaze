@@ -19,7 +19,7 @@ describe('model-instances', () => {
       `--did-key-seed=${modelAccountSeed}`,
       '--disable-stdin',
     ])
-    modelStreamID = create.stderr.toString().split('Created MyModel with streamID ')[1]
+    modelStreamID = create.stdout.toString().trim()
   }, 60000)
 
   describe('model-instance:create', () => {

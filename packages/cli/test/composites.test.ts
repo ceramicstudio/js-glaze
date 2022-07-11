@@ -66,6 +66,21 @@ describe('composites', () => {
       ])
       return wasModelLoaded
     }
+
+    test('composite deployment fails without composite path param', async () => {
+      const deploy = await execa('glaze', [
+        'composite:deploy',
+        '--disable-stdin',
+      ])
+      expect(
+        deploy.stderr
+          .toString()
+          .includes(
+            `You need to pass the composite definition either in stdin or as the compositePath param`
+          )
+      ).toBe(true)
+    }, 60000)
+
     test('composite deployment succeeds', async () => {
       const nonExistentModelStreamID = Object.keys(
         (undeployedComposite as EncodedCompositeDefinition).models
@@ -107,8 +122,8 @@ describe('composites', () => {
         `--did-key-seed=${seed}`,
         '--disable-stdin',
       ])
-      model1StreamID = model1Create.stderr.toString().split('with streamID ')[1]
-      model2StreamID = model2Create.stderr.toString().split('with streamID ')[1]
+      model1StreamID = model1Create.stdout.toString().trim()
+      model2StreamID = model2Create.stdout.toString().trim()
     }, 60000)
 
     test('composite from model fails without the list of models', async () => {
@@ -133,6 +148,17 @@ describe('composites', () => {
   })
 
   describe('composite:models', () => {
+    test('composite model listing fails without composite path param', async () => {
+      const models = await execa('glaze', ['composite:models', '--disable-stdin'])
+      expect(
+        models.stderr
+          .toString()
+          .includes(
+            'You need to pass a path to encoded composite either via an arg or through stdin'
+          )
+      ).toBe(true)
+    }, 60000)
+
     test('composite model listing succeeds without formatting params', async () => {
       const models = await execa('glaze', [
         'composite:models',

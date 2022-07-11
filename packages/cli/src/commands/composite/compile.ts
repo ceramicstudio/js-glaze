@@ -22,25 +22,24 @@ export default class CompositeCompile extends Command<Flags> {
       .map((token) => {
         return token.input
       })
-    if (this.stdin !== undefined && allArgs.length < 1) {
-      this.spinner.fail(
-        'When the composite is passed as JSON in stdin, at least one output path needs to be given as param'
-      )
-      return
-    } else if (this.stdin === undefined && allArgs.length < 2) {
-      this.spinner.fail('Missing composite path and at output path')
-      return
-    }
     try {
       let composite: Composite | undefined = undefined
       let outputPaths: Array<string> = []
-      if (this.stdin !== undefined) {
+      if (this.stdin !== undefined && allArgs.length >= 1) {
         const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
         composite = await Composite.fromJSON({ ceramic: this.ceramic, definition })
         outputPaths = allArgs
-      } else {
+      } else if (this.stdin === undefined && allArgs.length >= 2) {
         composite = await readEncodedComposite(this.ceramic, allArgs[0])
         outputPaths = allArgs.splice(1)
+      } else if (this.stdin !== undefined && allArgs.length < 1) {
+        this.spinner.fail(
+          'When the composite is passed as JSON in stdin, at least one output path needs to be given as param'
+        )
+        return
+      } else {
+        this.spinner.fail('Missing composite path and at output path')
+        return
       }
       const runtimeDefinition = composite.toRuntime()
       outputPaths.map(async (outputPath) => {

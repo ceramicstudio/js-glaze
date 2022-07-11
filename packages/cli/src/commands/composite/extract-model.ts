@@ -1,6 +1,8 @@
 import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import { readEncodedComposite, writeEncodedComposite } from '@glazed/devtools-node'
+import { Composite } from '@glazed/devtools'
+import { EncodedCompositeDefinition } from '@glazed/types'
 
 type Flags = CommandFlags & {
   output?: string
@@ -28,15 +30,25 @@ export default class CompositeExtractModel extends Command<Flags> {
       .map((token) => {
         return token.input
       })
-
-    if (allArgs.length < 2) {
-      this.spinner.fail('Missing composite path and at least one model to extract')
-      return
-    }
     try {
-      const [compositePath, ...modelsToExtract] = allArgs
-
-      const composite = await readEncodedComposite(this.ceramic, compositePath)
+      let composite: Composite | undefined = undefined
+      let modelsToExtract: Array<string> = []
+      if (this.stdin !== undefined && allArgs.length >= 1) {
+        const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
+        composite = await Composite.fromJSON({ ceramic: this.ceramic, definition })
+        modelsToExtract = allArgs
+      } else if (this.stdin === undefined && allArgs.length >= 2) {
+        composite = await readEncodedComposite(this.ceramic, allArgs[0])
+        modelsToExtract = allArgs.splice(1)
+      } else if (this.stdin !== undefined && allArgs.length < 1) {
+        this.spinner.fail(
+          'When the composite is passed as JSON in stdin, at least one model to extract needs to be passed as param'
+        )
+        return
+      } else {
+        this.spinner.fail('Missing composite path and at least one model to extract')
+        return
+      }
       const newComposite = composite.copy(modelsToExtract)
 
       if (this.flags.output != null) {

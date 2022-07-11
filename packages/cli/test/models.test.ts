@@ -16,11 +16,12 @@ describe('models', () => {
 
     test('model creation fails without the did-key param', async () => {
       const create = await execa('glaze', ['model:create', MY_MODEL_JSON, '--disable-stdin'])
-      const lines = create.stderr.toString().split('\n')
       expect(
-        lines[1].includes(
-          'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
-        )
+        create.stderr
+          .toString()
+          .includes(
+            'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
+          )
       ).toBe(true)
     }, 60000)
 
@@ -31,7 +32,7 @@ describe('models', () => {
         `--did-key-seed=${seed}`,
         '--disable-stdin',
       ])
-      expect(create.stderr.toString().includes('Created MyModel with streamID')).toBe(true)
+      expect(create.stderr.toString().includes('Done')).toBe(true)
     }, 60000)
   })
 
@@ -52,7 +53,7 @@ describe('models', () => {
 
       const content = await execa('glaze', [
         `model:content`,
-        create.stderr.toString().split('with streamID ')[1].replace('.', ''),
+        create.stdout.toString().trim(),
         `--sync=sync-always`,
         '--disable-stdin',
       ])
@@ -83,7 +84,7 @@ describe('models', () => {
 
       const controller = await execa('glaze', [
         `model:controller`,
-        create.stderr.toString().split('with streamID ')[1].replace('.', ''),
+        create.stdout.toString().trim(),
         `--sync=sync-always`,
         '--disable-stdin',
       ])
