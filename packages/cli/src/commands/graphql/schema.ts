@@ -19,7 +19,7 @@ export default class GraphQLSchema extends Command<
   static args = [
     {
       name: 'runtimeDefinitionPath',
-      required: true,
+      required: false,
       description: 'ID of the stream',
     },
   ]
@@ -37,7 +37,14 @@ export default class GraphQLSchema extends Command<
 
   async run(): Promise<void> {
     try {
-      const definitionFile = await fs.readFile(this.args.runtimeDefinitionPath)
+      const definitionPath = this.stdin || this.args.runtimeDefinitionPath
+      if (definitionPath === undefined) {
+        this.spinner.fail(
+          'You need to pass a composite runtime definition path either as an argument or via stdin'
+        )
+        return
+      }
+      const definitionFile = await fs.readFile(definitionPath)
       const runtimeDefinition = JSON.parse(definitionFile.toString()) as RuntimeCompositeDefinition
       if (this.flags.output != null) {
         await writeGraphQLSchema(runtimeDefinition, this.flags.output, this.flags.readonly)

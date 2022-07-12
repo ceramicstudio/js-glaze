@@ -3,6 +3,20 @@ import { Readable } from 'node:stream'
 
 describe('graphql', () => {
   describe('graphql:schema', () => {
+    test('printing graphql schema fails without runtime definition path pram', async () => {
+      const schema = await execa('glaze', [
+        'graphql:schema',
+        '--disable-stdin',
+      ])
+      expect(
+        schema.stderr
+          .toString()
+          .includes(
+            'You need to pass a composite runtime definition path either as an argument or via stdin'
+          )
+      )
+    }, 60000)
+
     test('printing graphql schema succeeds', async () => {
       const schema = await execa('glaze', [
         'graphql:schema',
@@ -24,6 +38,20 @@ describe('graphql', () => {
   })
 
   describe('graphql:server', () => {
+    test('graphql server fails without runtime definition path pram', async () => {
+      const schema = await execa('glaze', [
+        'graphql:server',
+        '--disable-stdin',
+      ])
+      expect(
+        schema.stderr
+          .toString()
+          .includes(
+            'You need to pass a composite runtime definition path either as an argument or via stdin'
+          )
+      )
+    }, 60000)
+
     test('graphql server starts', async () => {
       const serverProcess = execa('glaze', [
         'graphql:server',
