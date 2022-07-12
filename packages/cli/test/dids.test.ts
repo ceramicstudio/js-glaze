@@ -4,7 +4,7 @@ import stripAnsi from 'strip-ansi'
 describe('dids', () => {
   describe('did:generate-seed', () => {
     test('seed generation succeeds', async () => {
-      const generate = await execa('glaze', ['did:generate-seed', '--disable-stdin'])
+      const generate = await execa('glaze', ['did:generate-seed'])
       const seed = stripAnsi(generate.stdout.toString())
       expect(seed.length).toEqual(64)
     }, 60000)
@@ -13,7 +13,7 @@ describe('dids', () => {
     const seed = '4697f122007a464d660df661690a5c7c4a496be24f794c17634bf7c40c01570c'
 
     test('did creation fails without a seed', async () => {
-      const create = await execa('glaze', ['did:from-seed', '--disable-stdin'])
+      const create = await execa('glaze', ['did:from-seed'])
       expect(
         create.stderr
           .toString()
@@ -29,7 +29,6 @@ describe('dids', () => {
         seed,
         '--did-key-seed',
         seed,
-        '--disable-stdin',
       ])
       expect(
         create.stderr
@@ -41,7 +40,7 @@ describe('dids', () => {
     }, 60000)
 
     test('did creation succeeds with seed as positional argument', async () => {
-      const create = await execa('glaze', ['did:from-seed', seed, '--disable-stdin'])
+      const create = await execa('glaze', ['did:from-seed', seed])
       expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)
 
@@ -50,7 +49,6 @@ describe('dids', () => {
         'did:from-seed',
         '--did-key-seed',
         seed,
-        '--disable-stdin',
       ])
       expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)

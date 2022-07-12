@@ -8,12 +8,10 @@ describe('streams', () => {
       `tile:create`,
       `--content={"FOO":"BAR"}`,
       `--did-key-seed=${seed}`,
-      '--disable-stdin',
     ])
     const commits = await execa('glaze', [
       'stream:commits',
       tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-      '--disable-stdin',
     ])
     expect(commits.stderr.toString().includes('Stream commits loaded.')).toBe(true)
   }, 60000)
@@ -23,14 +21,12 @@ describe('streams', () => {
       `tile:create`,
       `--content={"FOO":"BAR"}`,
       `--did-key-seed=${seed}`,
-      '--disable-stdin',
     ])
     const tileOutput = tile.stderr.toString()
 
     const state = await execa('glaze', [
       'stream:state',
       tileOutput.split('Created stream ')[1].replace('.', ''),
-      '--disable-stdin',
     ])
     const stateOutput = state.stderr.toString()
     expect(

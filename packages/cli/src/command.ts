@@ -25,7 +25,6 @@ export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
 export interface CommandFlags {
   'ceramic-url': string
   'did-key-seed': string
-  'disable-stdin': boolean
   [key: string]: unknown
 }
 
@@ -68,6 +67,10 @@ const readPipe: () => Promise<string | undefined> = () => {
 
     if (stdin.isTTY) {
       finish()
+    } else {
+      setTimeout(() => {
+        finish()
+      }, 5000)
     }
   })
 }
@@ -83,10 +86,6 @@ export abstract class Command<
       env: 'CERAMIC_URL',
     }),
     'did-key-seed': Flags.string({ char: 's', description: 'DID key seed', env: 'DID_KEY_SEED' }),
-    'disable-stdin': Flags.boolean({
-      description: `Set to true in tests, if running the command with exec/execa, as stdin piping doesn't work there`,
-      env: 'DISABLE_STDIN',
-    }),
   }
 
   #authenticatedDID: DID | null = null
@@ -105,9 +104,7 @@ export abstract class Command<
     this.args = args as Args
     this.flags = flags as Flags
     this.spinner = ora()
-    if (!this.flags['disable-stdin']) {
-      this.stdin = await readPipe()
-    }
+    this.stdin = await readPipe()
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags['did-key-seed'] != null) {
       const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])

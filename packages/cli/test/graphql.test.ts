@@ -4,10 +4,7 @@ import { Readable } from 'node:stream'
 describe('graphql', () => {
   describe('graphql:schema', () => {
     test('printing graphql schema fails without runtime definition path pram', async () => {
-      const schema = await execa('glaze', [
-        'graphql:schema',
-        '--disable-stdin',
-      ])
+      const schema = await execa('glaze', ['graphql:schema'])
       expect(
         schema.stderr
           .toString()
@@ -21,7 +18,6 @@ describe('graphql', () => {
       const schema = await execa('glaze', [
         'graphql:schema',
         'test/mocks/runtime.composite.picture.post.json',
-        '--disable-stdin',
       ])
       expect(schema.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -31,7 +27,6 @@ describe('graphql', () => {
         'graphql:schema',
         'test/mocks/runtime.composite.picture.post.json',
         '--readonly',
-        '--disable-stdin',
       ])
       expect(schema.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -39,10 +34,7 @@ describe('graphql', () => {
 
   describe('graphql:server', () => {
     test('graphql server fails without runtime definition path pram', async () => {
-      const schema = await execa('glaze', [
-        'graphql:server',
-        '--disable-stdin',
-      ])
+      const schema = await execa('glaze', ['graphql:server'])
       expect(
         schema.stderr
           .toString()
@@ -57,7 +49,6 @@ describe('graphql', () => {
         'graphql:server',
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62433',
-        '--disable-stdin',
       ])
       let numChecks = 0
       serverProcess.stderr?.on('data', (data: Readable) => {
@@ -88,7 +79,6 @@ describe('graphql', () => {
         'test/mocks/runtime.composite.picture.post.json',
         '--port=62610',
         '--readonly',
-        '--disable-stdin',
       ])
       let numChecks = 0
       serverProcess.stderr?.on('data', (data: Readable) => {

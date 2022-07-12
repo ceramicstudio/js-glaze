@@ -6,7 +6,7 @@ describe('tiles', () => {
 
   describe('tile:create', () => {
     test('tile creation fails', async () => {
-      const create = await execa('glaze', ['tile:create', '--disable-stdin'])
+      const create = await execa('glaze', ['tile:create'])
       const lines = create.stderr.toString().split('\n')
 
       expect(
@@ -21,7 +21,6 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(create.stderr.toString().includes('Created stream ')).toBe(true)
     }, 60000)
@@ -33,13 +32,11 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const content = await execa('glaze', [
         `tile:content`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
         `--sync=sync-always`,
-        '--disable-stdin',
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -50,13 +47,10 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
-        '--disable-stdin',
       ])
       const content = await execa('glaze', [
         `tile:content`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-        '--disable-stdin',
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -68,14 +62,12 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       await expect(
         execa('glaze', [
           `tile:content`,
           tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
           `--sync=unsupportedArgument`,
-          '--disable-stdin',
         ])
       ).rejects.toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)
@@ -87,13 +79,11 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const content = await execa('glaze', [
         `tile:show`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
         `--sync=never-sync`,
-        '--disable-stdin',
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -104,12 +94,10 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const content = await execa('glaze', [
         `tile:show`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
-        '--disable-stdin',
       ])
       const lines = stripAnsi(content.stderr.toString())
       expect(lines.includes('Retrieved details of stream')).toBe(true)
@@ -121,14 +109,12 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       await expect(
         execa('glaze', [
           `tile:show`,
           tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
           `--sync=unsupportedArgument`,
-          '--disable-stdin'
         ])
       ).rejects.toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)
@@ -140,14 +126,12 @@ describe('tiles', () => {
         `tile:create`,
         `--content={"FOO":"BAR"}`,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const update = await execa('glaze', [
         'tile:update',
         create.stderr.toString().split('Created stream ')[1].replace('.', ''),
         '--content={"FOO":"BAZ"}',
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(update.stderr.toString().includes('Updated stream')).toBe(true)
     }, 60000)
@@ -161,7 +145,6 @@ describe('tiles', () => {
         'tile:deterministic',
         '{}',
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(
         tile.stderr
@@ -180,7 +163,6 @@ describe('tiles', () => {
         }),
         `--did-key-seed=${seed}`,
         `--sync=never-sync`,
-        '--disable-stdin',
       ])
       const stdOut = tile.stderr.toString()
       expect(stdOut.includes('Loaded tile')).toBe(true)
@@ -195,7 +177,6 @@ describe('tiles', () => {
           family: ['test'],
         }),
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const stdOut = tile.stderr.toString()
       expect(stdOut.includes('Loaded tile')).toBe(true)
@@ -213,7 +194,6 @@ describe('tiles', () => {
           }),
           `--did-key-seed=${seed}`,
           `--sync=unsupportedArgument`,
-          '--disable-stdin',
         ])
       ).rejects.toThrow('Expected --sync=unsupportedArgument to be one of:')
     }, 60000)

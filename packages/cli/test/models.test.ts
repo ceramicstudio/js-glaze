@@ -9,13 +9,13 @@ describe('models', () => {
 
   describe('model:create', () => {
     test('model creation fails without the content param', async () => {
-      await expect(execa('glaze', ['model:create', '--disable-stdin'])).rejects.toThrow(
+      await expect(execa('glaze', ['model:create'])).rejects.toThrow(
         /Model content \(JSON encoded as string\)/
       )
     }, 60000)
 
     test('model creation fails without the did-key param', async () => {
-      const create = await execa('glaze', ['model:create', MY_MODEL_JSON, '--disable-stdin'])
+      const create = await execa('glaze', ['model:create', MY_MODEL_JSON])
       expect(
         create.stderr
           .toString()
@@ -30,7 +30,6 @@ describe('models', () => {
         'model:create',
         MY_MODEL_JSON,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(create.stderr.toString().includes('Done')).toBe(true)
     }, 60000)
@@ -38,7 +37,7 @@ describe('models', () => {
 
   describe('model:content', () => {
     test('model content display fails without the streamID', async () => {
-      await expect(execa('glaze', ['model:content', '--disable-stdin'])).rejects.toThrow(
+      await expect(execa('glaze', ['model:content'])).rejects.toThrow(
         /streamId {2}ID of the stream/
       )
     }, 60000)
@@ -48,14 +47,12 @@ describe('models', () => {
         'model:create',
         MY_MODEL_JSON,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
 
       const content = await execa('glaze', [
         `model:content`,
         create.stdout.toString().trim(),
         `--sync=sync-always`,
-        '--disable-stdin',
       ])
       const lines = stripAnsi(content.stdout.toString())
       expect(lines.includes('"name":"MyModel"')).toBe(true)
@@ -69,7 +66,7 @@ describe('models', () => {
 
   describe('model:controller', () => {
     test('model controller display fails without the streamID', async () => {
-      await expect(execa('glaze', ['model:controller', '--disable-stdin'])).rejects.toThrow(
+      await expect(execa('glaze', ['model:controller'])).rejects.toThrow(
         /streamId {2}ID of the stream/
       )
     }, 60000)
@@ -79,14 +76,12 @@ describe('models', () => {
         'model:create',
         MY_MODEL_JSON,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
 
       const controller = await execa('glaze', [
         `model:controller`,
         create.stdout.toString().trim(),
         `--sync=sync-always`,
-        '--disable-stdin',
       ])
 
       expect(controller.stderr.toString().includes('Loading the model... Done!')).toBe(true)
@@ -101,19 +96,18 @@ describe('models', () => {
       await execa('glaze', [
         'composite:deploy',
         'test/mocks/encoded.composite.profiles.json',
-        '--disable-stdin',
       ])
     }, 60000)
 
     test('model list succeeds', async () => {
-      const models = await execa('glaze', ['model:list', '--disable-stdin'])
+      const models = await execa('glaze', ['model:list'])
       expect(stripAnsi(models.stdout.toString()).includes('GenericProfile')).toBe(true)
       expect(stripAnsi(models.stdout.toString()).includes('SocialProfile')).toBe(true)
       expect(stripAnsi(models.stdout.toString()).includes('PersonProfile')).toBe(true)
     }, 60000)
 
     test('model list succeeds with --table argument', async () => {
-      const models = await execa('glaze', ['model:list', '--table', '--disable-stdin'])
+      const models = await execa('glaze', ['model:list', '--table'])
       expect(stripAnsi(models.stdout.toString()).includes('GenericProfile')).toBe(true)
       expect(stripAnsi(models.stdout.toString()).includes('SocialProfile')).toBe(true)
       expect(stripAnsi(models.stdout.toString()).includes('PersonProfile')).toBe(true)

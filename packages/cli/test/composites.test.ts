@@ -19,7 +19,7 @@ describe('composites', () => {
 
   describe('composite:create', () => {
     test('composite creation fails without the schemaFilePath param', async () => {
-      await expect(execa('glaze', ['composite:create', '--disable-stdin'])).rejects.toThrow(
+      await expect(execa('glaze', ['composite:create'])).rejects.toThrow(
         RegExp('schemaFilePath {2}A graphQL SDL definition of the Composite encoded as a')
       )
     }, 60000)
@@ -28,7 +28,6 @@ describe('composites', () => {
       const create = await execa('glaze', [
         'composite:create',
         'test/mocks/composite.schema',
-        '--disable-stdin',
       ])
 
       expect(create.stderr.toString().includes('No controller specified')).toBe(true)
@@ -39,7 +38,6 @@ describe('composites', () => {
         'composite:create',
         'test/mocks/composite.schema',
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -70,7 +68,6 @@ describe('composites', () => {
     test('composite deployment fails without composite path param', async () => {
       const deploy = await execa('glaze', [
         'composite:deploy',
-        '--disable-stdin',
       ])
       expect(
         deploy.stderr
@@ -92,7 +89,6 @@ describe('composites', () => {
       const deploy = await execa('glaze', [
         'composite:deploy',
         'test/mocks/encoded.composite.undeployed.json',
-        '--disable-stdin',
       ])
       expect(deploy.stderr.toString().includes(`Deploying the composite... Done!`)).toBe(true)
 
@@ -112,20 +108,18 @@ describe('composites', () => {
         'model:create',
         MODEL1_JSON,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       const model2Create = await execa('glaze', [
         'model:create',
         MODEL2_JSON,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       model1StreamID = model1Create.stdout.toString().trim()
       model2StreamID = model2Create.stdout.toString().trim()
     }, 60000)
 
     test('composite from model fails without the list of models', async () => {
-      const create = await execa('glaze', ['composite:from-model', '--disable-stdin'])
+      const create = await execa('glaze', ['composite:from-model'])
       expect(create.stderr.toString().includes('Missing list of model streamIDs')).toBe(true)
     }, 60000)
 
@@ -135,7 +129,6 @@ describe('composites', () => {
         model1StreamID,
         model2StreamID,
         `--did-key-seed=${seed}`,
-        '--disable-stdin',
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -147,7 +140,7 @@ describe('composites', () => {
 
   describe('composite:models', () => {
     test('composite model listing fails without composite path param', async () => {
-      const models = await execa('glaze', ['composite:models', '--disable-stdin'])
+      const models = await execa('glaze', ['composite:models'])
       expect(
         models.stderr
           .toString()
@@ -161,7 +154,6 @@ describe('composites', () => {
       const models = await execa('glaze', [
         'composite:models',
         'test/mocks/encoded.composite.profiles.json',
-        '--disable-stdin',
       ])
       expect(models.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -171,7 +163,6 @@ describe('composites', () => {
         'composite:models',
         'test/mocks/encoded.composite.profiles.json',
         '--id-only',
-        '--disable-stdin',
       ])
       expect(models.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -181,7 +172,6 @@ describe('composites', () => {
         'composite:models',
         'test/mocks/encoded.composite.profiles.json',
         '--table',
-        '--disable-stdin',
       ])
       expect(stripAnsi(models.stdout.toString())).toMatchSnapshot()
     }, 60000)
@@ -189,7 +179,7 @@ describe('composites', () => {
 
   describe('composite:merge', () => {
     test('composite merge fails without the list of encoded composite paths', async () => {
-      const create = await execa('glaze', ['composite:merge', '--disable-stdin'])
+      const create = await execa('glaze', ['composite:merge'])
       expect(create.stderr.toString().includes('Missing list of composite file paths')).toBe(true)
     }, 60000)
 
@@ -198,7 +188,6 @@ describe('composites', () => {
         'composite:merge',
         'test/mocks/encoded.composite.profiles.json',
         'test/mocks/encoded.composite.picture.post.json',
-        '--disable-stdin',
       ])
       expect(merge.stdout.toString()).toMatchSnapshot()
     }, 60000)
@@ -208,7 +197,6 @@ describe('composites', () => {
     test('composite by extracting models fails without the composite path and at least one model param', async () => {
       const extractModelWithNoParams = await execa('glaze', [
         'composite:extract-model',
-        '--disable-stdin',
       ])
       expect(
         extractModelWithNoParams.stderr
@@ -219,7 +207,6 @@ describe('composites', () => {
       const extractModelWithJustCompositePath = await execa('glaze', [
         'composite:extract-model',
         'test/mocks/encoded.composite.picture.post.json',
-        '--disable-stdin',
       ])
       expect(
         extractModelWithJustCompositePath.stderr
@@ -236,7 +223,6 @@ describe('composites', () => {
       const extractModel = await execa('glaze', [
         'composite:extract-model',
         'test/mocks/encoded.composite.profiles.json',
-        '--disable-stdin',
         streamIDs[0],
         streamIDs[1],
       ])
@@ -264,7 +250,6 @@ describe('composites', () => {
       const extractModel = await execa('glaze', [
         'composite:extract-model',
         'test/mocks/encoded.composite.profiles.json',
-        '--disable-stdin',
         modelNames[0],
         modelNames[1],
       ])
@@ -289,7 +274,7 @@ describe('composites', () => {
 
   describe('composite:compile', () => {
     test('composite compilation fails without the composite path and at least one output path param', async () => {
-      const compileWithNoParams = await execa('glaze', ['composite:compile', '--disable-stdin'])
+      const compileWithNoParams = await execa('glaze', ['composite:compile'])
       expect(
         compileWithNoParams.stderr.toString().includes('Missing composite path and at output path')
       ).toBe(true)
@@ -297,7 +282,6 @@ describe('composites', () => {
       const compileWithJustCompositePath = await execa('glaze', [
         'composite:compile',
         'test/mocks/encoded.composite.profiles.json',
-        '--disable-stdin',
       ])
       expect(
         compileWithJustCompositePath.stderr
@@ -315,7 +299,6 @@ describe('composites', () => {
         `${dirpath}/${filename}.json`,
         `${dirpath}/${filename}.js`,
         `${dirpath}/${filename}.ts`,
-        '--disable-stdin',
       ])
       expect(
         compileWithJustCompositePath.stderr.toString().includes('Compiling the composite... Done!')
