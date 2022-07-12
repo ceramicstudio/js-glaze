@@ -58,7 +58,11 @@ describe('model-instances', () => {
         `--did-key-seed=${modelAccountSeed}`,
         '--disable-stdin',
       ])
-      expect(create.stderr.toString().includes('Created model instance with stream id:')).toBe(true)
+      expect(
+        create.stderr
+          .toString()
+          .includes("Creating the model instance... Done!")
+      ).toBe(true)
     }, 60000)
   })
 
@@ -73,7 +77,7 @@ describe('model-instances', () => {
         `--did-key-seed=${midAccountSeed}`,
         '--disable-stdin',
       ])
-      midStreamID = create.stderr.toString().split('Created model instance with stream id: ')[1]
+      midStreamID = create.stdout.toString().trim()
     }, 60000)
 
     test('model instance replace fails without the streamID', async () => {
@@ -95,8 +99,7 @@ describe('model-instances', () => {
         REPLACED_MODEL_INSTANCE_JSON,
         '--disable-stdin',
       ])
-      const lines = replace.stderr.toString().split('\n')
-      expect(lines[1].includes('No DID provided')).toBe(true)
+      expect(replace.stderr.toString().includes('No DID provided')).toBe(true)
     }, 60000)
 
     test('model instance replace succeeds', async () => {
@@ -107,9 +110,8 @@ describe('model-instances', () => {
         `--did-key-seed=${midAccountSeed}`,
         '--disable-stdin',
       ])
-
       expect(
-        replace.stderr.toString().includes('Replaced content in model instance with stream id:')
+        replace.stderr.toString().includes('Replacing content in the model instance... Done!')
       ).toBe(true)
     }, 60000)
   })
@@ -132,7 +134,7 @@ describe('model-instances', () => {
 
       const content = await execa('glaze', [
         `model-instance:content`,
-        create.stderr.toString().split('with stream id: ')[1].replace('.', ''),
+        create.stdout.toString().trim(),
         `--sync=sync-always`,
         '--disable-stdin',
       ])

@@ -40,6 +40,7 @@ export default class CompositeModels extends Command<
 
   async run(): Promise<void> {
     try {
+      this.spinner.start(`Fetching composite's models...`)
       let composite: Composite | undefined = undefined
       if (this.stdin !== undefined) {
         const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
@@ -71,7 +72,8 @@ export default class CompositeModels extends Command<
             modelDefinition.description || '',
           ])
         })
-        // Not using the spinner here, so that the table is laid out properly
+        this.spinner.succeed(`Fetching composite's models... Done!`)
+        // Logging to stdout, so that the table is laid out properly
         this.log(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
@@ -90,7 +92,8 @@ export default class CompositeModels extends Command<
           }
           result.push(modelInfo)
         })
-        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.spinner.succeed(`Fetching composite's models... Done!`)
+        // Logging the models to stdout, so that they can be piped using standard I/O or redirected to a file
         this.log(JSON.stringify(result))
       }
     } catch (e) {

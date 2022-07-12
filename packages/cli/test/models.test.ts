@@ -89,7 +89,8 @@ describe('models', () => {
         '--disable-stdin',
       ])
 
-      expect(controller.stderr.toString().split("It's controller is ")[1]).toEqual(
+      expect(controller.stderr.toString().includes('Loading the model... Done!')).toBe(true)
+      expect(controller.stdout.toString().trim()).toEqual(
         'did:key:z6MkpRhEWywReoFtQMQGqSmTu5mp9vQVok86Qha2sn6e32Db'
       )
     }, 60000)

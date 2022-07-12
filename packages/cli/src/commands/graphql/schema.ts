@@ -1,11 +1,11 @@
-import { Command } from '../../command.js'
+import { Command, CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import fs from 'fs-extra'
 import { printGraphQLSchema } from '@glazed/graph'
 import { writeGraphQLSchema } from '@glazed/devtools-node'
 import { RuntimeCompositeDefinition } from '@glazed/types'
 
-type GraphQLSchemaFlags = {
+type GraphQLSchemaFlags = CommandFlags & {
   output?: string
   readonly?: boolean
 }
@@ -43,6 +43,7 @@ export default class GraphQLSchema extends Command<
         await writeGraphQLSchema(runtimeDefinition, this.flags.output, this.flags.readonly)
         this.spinner.succeed(`The schema was saved in ${this.flags.output}`)
       } else {
+        // Logging the schema to stdout, so that it can be piped using standard I/O or redirected to a file
         this.log(printGraphQLSchema(runtimeDefinition, this.flags.readonly))
       }
     } catch (e) {

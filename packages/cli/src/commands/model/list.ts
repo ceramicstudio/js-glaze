@@ -38,7 +38,7 @@ export default class ModelList extends Command<ModelListFlags> {
   async run(): Promise<void> {
     try {
       console.clear()
-      this.log('Loading models...')
+      this.spinner.start('Loading models...')
       const page = await this.ceramic.index.queryIndex({
         first: this.getPageSize(),
         model: Model.MODEL,
@@ -49,7 +49,7 @@ export default class ModelList extends Command<ModelListFlags> {
 
       while (this.lastLoadedPageInfo?.hasNextPage) {
         await CliUx.ux.anykey('Press any key to load more models')
-        this.log('Loading models...')
+        this.spinner.start('Loading models...')
         const nextPage: Page<StreamState> = await this.ceramic.index.queryIndex({
           first: this.getPageSize(),
           model: Model.MODEL,
@@ -59,7 +59,7 @@ export default class ModelList extends Command<ModelListFlags> {
         this.fetchedFields = this.fetchedFields.concat(this.getFieldsFromEdges(nextPage.edges))
         this.displayPartialDefinitions(this.fetchedFields)
       }
-      this.log('Finished loading models')
+      this.spinner.succeed('Loading models... Done')
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return

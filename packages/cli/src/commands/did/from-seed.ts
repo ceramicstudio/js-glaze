@@ -35,7 +35,9 @@ export default class DIDFromSeed extends Command<CommandFlags, { didKeySeed: str
       const seed = fromString(hexString, 'base16')
       const did = new DID({ provider: new Ed25519Provider(seed), resolver: this.resolverRegistry })
       await did.authenticate()
-      this.spinner.succeed(`Created DID ${chalk.cyan(did.id)}`)
+      this.spinner.succeed(`Creating DID... Done!`)
+      // Logging the DID to stdout, so that it can be piped using standard I/O or redirected to a file
+      this.log(chalk.cyan(did.id))
     } catch (err) {
       this.spinner.fail((err as Error).message)
     }

@@ -30,8 +30,8 @@ describe('composites', () => {
         'test/mocks/composite.schema',
         '--disable-stdin',
       ])
-      const lines = create.stderr.toString().split('\n')
-      expect(lines[0].includes('No controller specified')).toBe(true)
+
+      expect(create.stderr.toString().includes('No controller specified')).toBe(true)
     }, 60000)
 
     test('composite creation succeeds', async () => {
@@ -94,11 +94,9 @@ describe('composites', () => {
         'test/mocks/encoded.composite.undeployed.json',
         '--disable-stdin',
       ])
-      expect(
-        deploy.stderr
-          .toString()
-          .includes(`Deployed composite's models with streamIDs: ["${nonExistentModelStreamID}"]`)
-      ).toBe(true)
+      expect(deploy.stderr.toString().includes(`Deploying the composite... Done!`)).toBe(true)
+
+      expect(deploy.stdout.toString().includes(nonExistentModelStreamID))
 
       const doesModelExistNow = await checkIfModelExist(ceramic, nonExistentModelStreamID)
       expect(doesModelExistNow).toBeTruthy()
@@ -320,7 +318,7 @@ describe('composites', () => {
         '--disable-stdin',
       ])
       expect(
-        compileWithJustCompositePath.stdout.toString().includes('Runtime representation(s) saved')
+        compileWithJustCompositePath.stderr.toString().includes('Compiling the composite... Done!')
       ).toBe(true)
 
       const jsonRepresentation = await fs.readFile(`${dirpath}/${filename}.json`)

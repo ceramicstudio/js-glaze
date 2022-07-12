@@ -42,10 +42,7 @@ describe('dids', () => {
 
     test('did creation succeeds with seed as positional argument', async () => {
       const create = await execa('glaze', ['did:from-seed', seed, '--disable-stdin'])
-      const lines = stripAnsi(create.stderr.toString()).split('\n')
-      expect(
-        lines[1].includes('Created DID did:key:z6MkmgGP9QZuAV76Dwz2mnsX71HknLjNmw4E8wmwCYoZdX4b')
-      ).toBe(true)
+      expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)
 
     test('did creation succeeds with seed as flag argument', async () => {
@@ -55,10 +52,7 @@ describe('dids', () => {
         seed,
         '--disable-stdin',
       ])
-      const lines = stripAnsi(create.stderr.toString()).split('\n')
-      expect(
-        lines[2].includes('Created DID did:key:z6MkmgGP9QZuAV76Dwz2mnsX71HknLjNmw4E8wmwCYoZdX4b')
-      ).toBe(true)
+      expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)
   })
 })

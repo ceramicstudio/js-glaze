@@ -19,6 +19,7 @@ export default class CompositeDeploy extends Command<
 
   async run(): Promise<void> {
     try {
+      this.spinner.start('Deploying the composite...')
       let composite: Composite | undefined = undefined
       if (this.stdin !== undefined) {
         const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
@@ -31,11 +32,9 @@ export default class CompositeDeploy extends Command<
         )
         return
       }
-      this.spinner.succeed(
-        `Deployed composite's models with streamIDs: ${JSON.stringify(
-          Object.keys(composite.toParams().definition.models)
-        )}`
-      )
+      this.spinner.succeed(`Deploying the composite... Done!`)
+      // Logging the model stream IDs to stdout, so that they can be piped using standard I/O or redirected to a file
+      this.log(JSON.stringify(Object.keys(composite.toParams().definition.models)))
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return

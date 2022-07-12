@@ -31,6 +31,7 @@ export default class CompositeExtractModel extends Command<Flags> {
         return token.input
       })
     try {
+      this.spinner.start('Creating a composite with specified models...')
       let composite: Composite | undefined = undefined
       let modelsToExtract: Array<string> = []
       if (this.stdin !== undefined && allArgs.length >= 1) {
@@ -55,10 +56,11 @@ export default class CompositeExtractModel extends Command<Flags> {
         const output = this.flags.output
         await writeEncodedComposite(newComposite, output)
         this.spinner.succeed(
-          `Composite was created and its encoded representation was saved in ${output}`
+          ` Creating a composite with specified models... Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
-        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.spinner.succeed('Creating a composite with specified models... Done!')
+        // Logging the encoded representation to stdout, so that it can be piped using standard I/O or redirected to a file
         this.log(JSON.stringify(newComposite.toJSON()))
       }
     } catch (e) {

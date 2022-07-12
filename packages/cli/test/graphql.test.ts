@@ -32,7 +32,7 @@ describe('graphql', () => {
         '--disable-stdin',
       ])
       let numChecks = 0
-      serverProcess.stdout?.on('data', (data: Readable) => {
+      serverProcess.stderr?.on('data', (data: Readable) => {
         if (numChecks === 0) {
           expect(
             data
@@ -63,7 +63,7 @@ describe('graphql', () => {
         '--disable-stdin',
       ])
       let numChecks = 0
-      serverProcess.stdout?.on('data', (data: Readable) => {
+      serverProcess.stderr?.on('data', (data: Readable) => {
         if (numChecks === 0) {
           expect(
             data

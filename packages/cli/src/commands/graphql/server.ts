@@ -48,10 +48,10 @@ export default class GraphQLServer extends Command<
         graphiql: this.flags.graphiql,
         port: this.flags.port,
       })
-      this.log(`GraphQL server is listening on ${handler.url}`)
+      this.spinner.info(`GraphQL server is listening on ${handler.url}`)
       process.on('SIGTERM', () => {
         handler.stop(() => {
-          this.log('Server stopped')
+          this.spinner.succeed('Server stopped')
         })
       })
     } catch (e) {

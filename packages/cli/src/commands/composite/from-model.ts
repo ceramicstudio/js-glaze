@@ -21,7 +21,7 @@ export default class CompositeFromModel extends Command<Flags> {
   }
 
   async run(): Promise<void> {
-    this.spinner.start('Creating a composite from models...\n')
+    this.spinner.start('Creating a composite from models...')
     const parsed = await this.parse(CompositeFromModel)
     const modelStreamIDs = parsed.raw
       .filter((token) => {
@@ -49,13 +49,13 @@ export default class CompositeFromModel extends Command<Flags> {
         const output = this.flags.output
         await writeEncodedComposite(composite, output)
         this.spinner.succeed(
-          `Composite was created and its encoded representation was saved in ${output}`
+          `Creating a composite from models... Composite was created and its encoded representation was saved in ${output}`
         )
       } else {
-        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.spinner.succeed('Creating a composite from models... Done!')
+        // Logging the encoded representation to stdout, so that it can be piped using standard I/O or redirected to a file
         this.log(JSON.stringify(composite.toJSON()))
       }
-      this.spinner.succeed('Done!')
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return

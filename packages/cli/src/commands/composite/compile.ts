@@ -14,6 +14,7 @@ export default class CompositeCompile extends Command<Flags> {
   static description = 'create a runtime representation of a composite'
 
   async run(): Promise<void> {
+    this.spinner.start('Compiling the composite...')
     const parsed = await this.parse(CompositeCompile)
     const allArgs = parsed.raw
       .filter((token) => {
@@ -45,19 +46,15 @@ export default class CompositeCompile extends Command<Flags> {
       outputPaths.map(async (outputPath) => {
         await writeRuntimeDefinition(runtimeDefinition, outputPath)
       })
-      let logged = false
+      this.spinner.succeed('Compiling the composite... Done!')
       if (!this.flags['disable-stdin']) {
         outputPaths.forEach((path) => {
           if (path.endsWith('.json')) {
-            // log the first .json path so that it can be piped e.g. to graphql:server
+            // log the first .json path so that it can be piped e.g. to graphql:server or redirected to a file
             this.log(path)
-            logged = true
             return
           }
         })
-      }
-      if (!logged) {
-        this.log('Runtime representation(s) saved')
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
@@ -65,3 +62,4 @@ export default class CompositeCompile extends Command<Flags> {
     }
   }
 }
+
