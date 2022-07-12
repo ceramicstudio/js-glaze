@@ -33,11 +33,7 @@ export default async function globalSetup() {
     },
   }
 
-  const dirExists = await fs.exists(CONFIG_DIR_PATH)
-
-  if (!dirExists){
-    await  fs.mkdirp(CONFIG_DIR_PATH)
-  }
+  await fs.ensureDir(CONFIG_DIR_PATH)
   await fs.writeJson(CONFIG_PATH, TEST_DAEMON_CONFIG)
 
   await setup({
