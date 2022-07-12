@@ -24,15 +24,15 @@
     "graphql": "^16.5.0",
     "jotai": "^1.7.3",
     "key-did-provider-ed25519": "^2.0.0",
-    "key-did-resolver": "^2.0.5-rc.0",
+    "key-did-resolver": "^2.0.5",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.3.0",
     "uint8arrays": "^3.0.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/cli": "^2.4.0-rc.1",
-    "@ceramicnetwork/common": "^2.3.0-rc.0",
+    "@ceramicnetwork/cli": "^2.4.0",
+    "@ceramicnetwork/common": "^2.3.0",
     "@glazed/devtools": "^0.2.0",
     "@glazed/devtools-node": "^0.1.0",
     "@swc/core": "^1.2.209",
