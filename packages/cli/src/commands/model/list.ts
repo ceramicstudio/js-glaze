@@ -3,6 +3,7 @@ import { Flags, CliUx } from '@oclif/core'
 import { Model } from '@ceramicnetwork/stream-model'
 import Table from 'cli-table3'
 import { Edge, Page, PageInfo, StreamState } from '@ceramicnetwork/common'
+import terminalSize from 'term-size'
 
 type PartialModelDefinition = {
   id: string
@@ -15,8 +16,6 @@ type ModelListFlags = QueryCommandFlags & {
 }
 
 export default class ModelList extends Command<ModelListFlags> {
-  PAGE_SIZE = 34
-
   fetchedFields: Array<PartialModelDefinition> = []
   lastLoadedPageInfo: PageInfo | null = null
 
@@ -29,12 +28,19 @@ export default class ModelList extends Command<ModelListFlags> {
     }),
   }
 
+  getPageSize(): number {
+    const rows = terminalSize()['rows']
+    // When we display a table, each row is takes two terminal rows. We subtract additional 3 lines per page, to leave
+    // space for the table header and next page prompt
+    return this.flags.table ? rows / 2 - 3 : rows
+  }
+
   async run(): Promise<void> {
     try {
       console.clear()
       this.log('Loading models...')
       const page = await this.ceramic.index.queryIndex({
-        first: this.PAGE_SIZE,
+        first: this.getPageSize(),
         model: Model.MODEL,
       })
       this.lastLoadedPageInfo = page.pageInfo
@@ -45,7 +51,7 @@ export default class ModelList extends Command<ModelListFlags> {
         await CliUx.ux.anykey('Press any key to load more models')
         this.log('Loading models...')
         const nextPage: Page<StreamState> = await this.ceramic.index.queryIndex({
-          first: this.PAGE_SIZE,
+          first: this.getPageSize(),
           model: Model.MODEL,
           after: this.lastLoadedPageInfo?.endCursor,
         })
