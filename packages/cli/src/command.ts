@@ -70,7 +70,7 @@ const readPipe: () => Promise<string | undefined> = () => {
     } else {
       setTimeout(() => {
         finish()
-      }, 5000)
+      }, 8000)
     }
   })
 }
