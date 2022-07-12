@@ -39,7 +39,7 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@ceramicnetwork/blockchain-utils-linking": "^2.0.7-rc.1",
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.7",
     "@glazed/graph-session": "^0.1.0"
   },
   "devDependencies": {

@@ -40,13 +40,13 @@
   "dependencies": {
     "@ceramicnetwork/http-client": "^2.2.1",
     "@ceramicnetwork/stream-model-instance": "^0.2.1",
-    "@ceramicnetwork/streamid": "^2.2.0-rc.0",
+    "@ceramicnetwork/streamid": "^2.2.0",
     "@glazed/graphql-scalars": "^0.1.0",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/common": "^2.3.0-rc.0",
+    "@ceramicnetwork/common": "^2.3.0",
     "@glazed/devtools": "^0.2.0",
     "@glazed/test-schemas": "^0.1.0",
     "@glazed/types": "^0.2.0",
