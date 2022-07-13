@@ -28,15 +28,17 @@ export default class CreateComposite extends Command<Flags, { schemaFilePath: st
 
   async run(): Promise<void> {
     try {
+      this.spinner.start('Creating the composite...')
       const composite = await createComposite(this.ceramic, this.args.schemaFilePath)
       if (this.flags.output != null) {
         const output = this.flags.output
         await writeEncodedComposite(composite, output)
         this.spinner.succeed(
-          `Composite was created and its encoded representation was saved in ${output}`
+          `Creating the composite... Done! The encoded representation was saved in ${output}`
         )
       } else {
-        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.spinner.succeed('Creating the composite... Done!')
+        // Logging the encoded representation to stdout, so that it can be piped using standard I/O or redirected to a file
         this.log(JSON.stringify(composite.toJSON()))
       }
     } catch (e) {

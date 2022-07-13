@@ -16,17 +16,22 @@ describe('models', () => {
 
     test('model creation fails without the did-key param', async () => {
       const create = await execa('glaze', ['model:create', MY_MODEL_JSON])
-      const lines = create.stderr.toString().split('\n')
       expect(
-        lines[1].includes(
-          'DID is not authenticated, make sure to provide a seed using the "did-key"'
-        )
+        create.stderr
+          .toString()
+          .includes(
+            'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
+          )
       ).toBe(true)
     }, 60000)
 
     test('model creation succeeds', async () => {
-      const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
-      expect(create.stderr.toString().includes('Created MyModel with streamID')).toBe(true)
+      const create = await execa('glaze', [
+        'model:create',
+        MY_MODEL_JSON,
+        `--did-key-seed=${seed}`,
+      ])
+      expect(create.stderr.toString().includes('Done')).toBe(true)
     }, 60000)
   })
 
@@ -38,11 +43,15 @@ describe('models', () => {
     }, 60000)
 
     test('model content display succeeds', async () => {
-      const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
+      const create = await execa('glaze', [
+        'model:create',
+        MY_MODEL_JSON,
+        `--did-key-seed=${seed}`,
+      ])
 
       const content = await execa('glaze', [
         `model:content`,
-        create.stderr.toString().split('with streamID ')[1].replace('.', ''),
+        create.stdout.toString().trim(),
         `--sync=sync-always`,
       ])
       const lines = stripAnsi(content.stdout.toString())
@@ -63,15 +72,20 @@ describe('models', () => {
     }, 60000)
 
     test('model controller display succeeds', async () => {
-      const create = await execa('glaze', ['model:create', MY_MODEL_JSON, `--key=${seed}`])
+      const create = await execa('glaze', [
+        'model:create',
+        MY_MODEL_JSON,
+        `--did-key-seed=${seed}`,
+      ])
 
       const controller = await execa('glaze', [
         `model:controller`,
-        create.stderr.toString().split('with streamID ')[1].replace('.', ''),
+        create.stdout.toString().trim(),
         `--sync=sync-always`,
       ])
 
-      expect(controller.stderr.toString().split("It's controller is ")[1]).toEqual(
+      expect(controller.stderr.toString().includes('Loading the model... Done!')).toBe(true)
+      expect(controller.stdout.toString().trim()).toEqual(
         'did:key:z6MkpRhEWywReoFtQMQGqSmTu5mp9vQVok86Qha2sn6e32Db'
       )
     }, 60000)
@@ -79,7 +93,10 @@ describe('models', () => {
 
   describe('model:list', () => {
     beforeAll(async () => {
-      await execa('glaze', ['composite:deploy', 'test/mocks/encoded.composite.profiles.json'])
+      await execa('glaze', [
+        'composite:deploy',
+        'test/mocks/encoded.composite.profiles.json',
+      ])
     }, 60000)
 
     test('model list succeeds', async () => {

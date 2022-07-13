@@ -18,34 +18,39 @@ describe('dids', () => {
         create.stderr
           .toString()
           .includes(
-            'You need to pass the seed parameter either as a positional arg or as a flag value'
+            'You need to pass the seed parameter as a positional arg, as a flag value, via stdin or as the DID_KEY_SEED environmental variable'
           )
       ).toBe(true)
     }, 60000)
 
     test('did creation fails when seed past as both an arn and a flag value', async () => {
-      const create = await execa('glaze', ['did:from-seed', seed, '--did-key-seed', seed])
+      const create = await execa('glaze', [
+        'did:from-seed',
+        seed,
+        '--did-key-seed',
+        seed,
+      ])
       expect(
         create.stderr
           .toString()
-          .includes("Don't pass the seed parameter as both a positional arg and as a flag value")
+          .includes(
+            "Don't pass the seed parameter in more than one way out of: arg, flag, stdin, DID_KEY_SEED environmental variable"
+          )
       ).toBe(true)
     }, 60000)
 
     test('did creation succeeds with seed as positional argument', async () => {
       const create = await execa('glaze', ['did:from-seed', seed])
-      const lines = stripAnsi(create.stderr.toString()).split('\n')
-      expect(
-        lines[1].includes('Created DID did:key:z6MkmgGP9QZuAV76Dwz2mnsX71HknLjNmw4E8wmwCYoZdX4b')
-      ).toBe(true)
+      expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)
 
     test('did creation succeeds with seed as flag argument', async () => {
-      const create = await execa('glaze', ['did:from-seed', '--did-key-seed', seed])
-      const lines = stripAnsi(create.stderr.toString()).split('\n')
-      expect(
-        lines[1].includes('Created DID did:key:z6MkmgGP9QZuAV76Dwz2mnsX71HknLjNmw4E8wmwCYoZdX4b')
-      ).toBe(true)
+      const create = await execa('glaze', [
+        'did:from-seed',
+        '--did-key-seed',
+        seed,
+      ])
+      expect(stripAnsi(create.stderr.toString()).includes('Creating DID... Done!')).toBe(true)
     }, 60000)
   })
 })

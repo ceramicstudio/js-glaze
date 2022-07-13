@@ -25,16 +25,19 @@ describe('composites', () => {
     }, 60000)
 
     test('composite creation fails without the did-key param', async () => {
-      const create = await execa('glaze', ['composite:create', 'test/mocks/composite.schema'])
-      const lines = create.stderr.toString().split('\n')
-      expect(lines[0].includes('No controller specified')).toBe(true)
+      const create = await execa('glaze', [
+        'composite:create',
+        'test/mocks/composite.schema',
+      ])
+
+      expect(create.stderr.toString().includes('No controller specified')).toBe(true)
     }, 60000)
 
     test('composite creation succeeds', async () => {
       const create = await execa('glaze', [
         'composite:create',
         'test/mocks/composite.schema',
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -61,6 +64,20 @@ describe('composites', () => {
       ])
       return wasModelLoaded
     }
+
+    test('composite deployment fails without composite path param', async () => {
+      const deploy = await execa('glaze', [
+        'composite:deploy',
+      ])
+      expect(
+        deploy.stderr
+          .toString()
+          .includes(
+            `You need to pass the composite definition either in stdin or as the compositePath param`
+          )
+      ).toBe(true)
+    }, 60000)
+
     test('composite deployment succeeds', async () => {
       const nonExistentModelStreamID = Object.keys(
         (undeployedComposite as EncodedCompositeDefinition).models
@@ -73,11 +90,9 @@ describe('composites', () => {
         'composite:deploy',
         'test/mocks/encoded.composite.undeployed.json',
       ])
-      expect(
-        deploy.stderr
-          .toString()
-          .includes(`Deployed composite's models with streamIDs: ["${nonExistentModelStreamID}"]`)
-      ).toBe(true)
+      expect(deploy.stderr.toString().includes(`Deploying the composite... Done!`)).toBe(true)
+
+      expect(deploy.stdout.toString().includes(nonExistentModelStreamID))
 
       const doesModelExistNow = await checkIfModelExist(ceramic, nonExistentModelStreamID)
       expect(doesModelExistNow).toBeTruthy()
@@ -89,10 +104,18 @@ describe('composites', () => {
     let model2StreamID: string
 
     beforeAll(async () => {
-      const model1Create = await execa('glaze', ['model:create', MODEL1_JSON, `--key=${seed}`])
-      const model2Create = await execa('glaze', ['model:create', MODEL2_JSON, `--key=${seed}`])
-      model1StreamID = model1Create.stderr.toString().split('with streamID ')[1]
-      model2StreamID = model2Create.stderr.toString().split('with streamID ')[1]
+      const model1Create = await execa('glaze', [
+        'model:create',
+        MODEL1_JSON,
+        `--did-key-seed=${seed}`,
+      ])
+      const model2Create = await execa('glaze', [
+        'model:create',
+        MODEL2_JSON,
+        `--did-key-seed=${seed}`,
+      ])
+      model1StreamID = model1Create.stdout.toString().trim()
+      model2StreamID = model2Create.stdout.toString().trim()
     }, 60000)
 
     test('composite from model fails without the list of models', async () => {
@@ -105,7 +128,7 @@ describe('composites', () => {
         'composite:from-model',
         model1StreamID,
         model2StreamID,
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -116,6 +139,17 @@ describe('composites', () => {
   })
 
   describe('composite:models', () => {
+    test('composite model listing fails without composite path param', async () => {
+      const models = await execa('glaze', ['composite:models'])
+      expect(
+        models.stderr
+          .toString()
+          .includes(
+            'You need to pass a path to encoded composite either via an arg or through stdin'
+          )
+      ).toBe(true)
+    }, 60000)
+
     test('composite model listing succeeds without formatting params', async () => {
       const models = await execa('glaze', [
         'composite:models',
@@ -161,7 +195,9 @@ describe('composites', () => {
 
   describe('composite:extract-model', () => {
     test('composite by extracting models fails without the composite path and at least one model param', async () => {
-      const extractModelWithNoParams = await execa('glaze', ['composite:extract-model'])
+      const extractModelWithNoParams = await execa('glaze', [
+        'composite:extract-model',
+      ])
       expect(
         extractModelWithNoParams.stderr
           .toString()
@@ -265,9 +301,7 @@ describe('composites', () => {
         `${dirpath}/${filename}.ts`,
       ])
       expect(
-        compileWithJustCompositePath.stderr
-          .toString()
-          .includes('Successfully saved compiled composite into given path(s)')
+        compileWithJustCompositePath.stderr.toString().includes('Compiling the composite... Done!')
       ).toBe(true)
 
       const jsonRepresentation = await fs.readFile(`${dirpath}/${filename}.json`)

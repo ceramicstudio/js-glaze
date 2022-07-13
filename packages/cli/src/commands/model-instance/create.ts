@@ -30,7 +30,9 @@ export default class CreateModelInstance extends Command<
         controller: this.authenticatedDID.id,
         model: this.args.model,
       })
-      this.spinner.succeed(`Created model instance with stream id: ${mid.id.toString()}`)
+      this.spinner.succeed(`Creating the model instance... Done!`)
+      // Logging the stream id to stdout, so that it can be piped using standard I/O or redirected to a file
+      this.log(mid.id.toString())
     } catch (e) {
       this.spinner.fail((e as Error).message)
     }

@@ -4,7 +4,11 @@ describe('pins', () => {
   const seed = '833b0a17492d5a9f0a8c08220877050c3d5ad5f0ea93acd062ed73d0346da63c'
 
   test('stream is pinned', async () => {
-    const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+    const tile = await execa('glaze', [
+      `tile:create`,
+      `--content={"FOO":"BAR"}`,
+      `--did-key-seed=${seed}`,
+    ])
     const pin = await execa('glaze', [
       'pin:add',
       tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
@@ -13,8 +17,15 @@ describe('pins', () => {
   }, 60000)
 
   test('stream removed', async () => {
-    const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
-    await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])
+    const tile = await execa('glaze', [
+      `tile:create`,
+      `--content={"FOO":"BAR"}`,
+      `--did-key-seed=${seed}`,
+    ])
+    await execa('glaze', [
+      'pin:add',
+      tile.stderr.split('Created stream ')[1].replace('.', ''),
+    ])
 
     const remove = await execa('glaze', [
       'pin:rm',
@@ -24,7 +35,11 @@ describe('pins', () => {
   }, 60000)
 
   test('list pins', async () => {
-    const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+    const tile = await execa('glaze', [
+      `tile:create`,
+      `--content={"FOO":"BAR"}`,
+      `--did-key-seed=${seed}`,
+    ])
     await execa('glaze', ['pin:add', tile.stderr.split('Created stream ')[1].replace('.', '')])
 
     const list = await execa('glaze', [

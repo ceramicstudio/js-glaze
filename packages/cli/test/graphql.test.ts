@@ -3,6 +3,17 @@ import { Readable } from 'node:stream'
 
 describe('graphql', () => {
   describe('graphql:schema', () => {
+    test('printing graphql schema fails without runtime definition path pram', async () => {
+      const schema = await execa('glaze', ['graphql:schema'])
+      expect(
+        schema.stderr
+          .toString()
+          .includes(
+            'You need to pass a composite runtime definition path either as an argument or via stdin'
+          )
+      )
+    }, 60000)
+
     test('printing graphql schema succeeds', async () => {
       const schema = await execa('glaze', [
         'graphql:schema',
@@ -22,6 +33,17 @@ describe('graphql', () => {
   })
 
   describe('graphql:server', () => {
+    test('graphql server fails without runtime definition path pram', async () => {
+      const schema = await execa('glaze', ['graphql:server'])
+      expect(
+        schema.stderr
+          .toString()
+          .includes(
+            'You need to pass a composite runtime definition path either as an argument or via stdin'
+          )
+      )
+    }, 60000)
+
     test('graphql server starts', async () => {
       const serverProcess = execa('glaze', [
         'graphql:server',
@@ -29,7 +51,7 @@ describe('graphql', () => {
         '--port=62433',
       ])
       let numChecks = 0
-      serverProcess.stdout?.on('data', (data: Readable) => {
+      serverProcess.stderr?.on('data', (data: Readable) => {
         if (numChecks === 0) {
           expect(
             data
@@ -44,7 +66,7 @@ describe('graphql', () => {
           setTimeout(() => {
             serverProcess.kill()
             resolve(true)
-          }, 10000)
+          }, 40000)
         ),
         serverProcess,
       ])
@@ -59,7 +81,7 @@ describe('graphql', () => {
         '--readonly',
       ])
       let numChecks = 0
-      serverProcess.stdout?.on('data', (data: Readable) => {
+      serverProcess.stderr?.on('data', (data: Readable) => {
         if (numChecks === 0) {
           expect(
             data
@@ -74,7 +96,7 @@ describe('graphql', () => {
           setTimeout(() => {
             serverProcess.kill()
             resolve(true)
-          }, 10000)
+          }, 40000)
         ),
         serverProcess,
       ])

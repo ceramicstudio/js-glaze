@@ -1,11 +1,11 @@
-import { Command } from '../../command.js'
+import { Command, CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import fs from 'fs-extra'
 import { printGraphQLSchema } from '@glazed/graph'
 import { writeGraphQLSchema } from '@glazed/devtools-node'
 import { RuntimeCompositeDefinition } from '@glazed/types'
 
-type GraphQLSchemaFlags = {
+type GraphQLSchemaFlags = CommandFlags & {
   output?: string
   readonly?: boolean
 }
@@ -19,7 +19,7 @@ export default class GraphQLSchema extends Command<
   static args = [
     {
       name: 'runtimeDefinitionPath',
-      required: true,
+      required: false,
       description: 'ID of the stream',
     },
   ]
@@ -37,12 +37,20 @@ export default class GraphQLSchema extends Command<
 
   async run(): Promise<void> {
     try {
-      const definitionFile = await fs.readFile(this.args.runtimeDefinitionPath)
+      const definitionPath = this.stdin || this.args.runtimeDefinitionPath
+      if (definitionPath === undefined) {
+        this.spinner.fail(
+          'You need to pass a composite runtime definition path either as an argument or via stdin'
+        )
+        return
+      }
+      const definitionFile = await fs.readFile(definitionPath)
       const runtimeDefinition = JSON.parse(definitionFile.toString()) as RuntimeCompositeDefinition
       if (this.flags.output != null) {
         await writeGraphQLSchema(runtimeDefinition, this.flags.output, this.flags.readonly)
         this.spinner.succeed(`The schema was saved in ${this.flags.output}`)
       } else {
+        // Logging the schema to stdout, so that it can be piped using standard I/O or redirected to a file
         this.log(printGraphQLSchema(runtimeDefinition, this.flags.readonly))
       }
     } catch (e) {

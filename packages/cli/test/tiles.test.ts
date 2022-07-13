@@ -11,7 +11,7 @@ describe('tiles', () => {
 
       expect(
         lines[1].includes(
-          'DID is not authenticated, make sure to provide a seed using the "did-key"'
+          'DID is not authenticated, make sure to provide a seed using the "did-key-seed"'
         )
       ).toBe(true)
     }, 60000)
@@ -20,7 +20,7 @@ describe('tiles', () => {
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       expect(create.stderr.toString().includes('Created stream ')).toBe(true)
     }, 60000)
@@ -28,7 +28,11 @@ describe('tiles', () => {
 
   describe('tile:content', () => {
     test('displays tile content with syncing option argument', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       const content = await execa('glaze', [
         `tile:content`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
@@ -39,7 +43,11 @@ describe('tiles', () => {
     }, 60000)
 
     test('displays tile content without syncing option argument', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       const content = await execa('glaze', [
         `tile:content`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
@@ -50,7 +58,11 @@ describe('tiles', () => {
     }, 60000)
 
     test('fails when unsupported syncing option is passed', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       await expect(
         execa('glaze', [
           `tile:content`,
@@ -63,7 +75,11 @@ describe('tiles', () => {
 
   describe('tile:show', () => {
     test('displays tile content with syncing option argument', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       const content = await execa('glaze', [
         `tile:show`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
@@ -74,7 +90,11 @@ describe('tiles', () => {
     }, 60000)
 
     test('displays tile content without syncing option argument', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       const content = await execa('glaze', [
         `tile:show`,
         tile.stderr.toString().split('Created stream ')[1].replace('.', ''),
@@ -85,7 +105,11 @@ describe('tiles', () => {
     }, 60000)
 
     test('fails when unsupported syncing option is passed', async () => {
-      const tile = await execa('glaze', [`tile:create`, `--content={"FOO":"BAR"}`, `--key=${seed}`])
+      const tile = await execa('glaze', [
+        `tile:create`,
+        `--content={"FOO":"BAR"}`,
+        `--did-key-seed=${seed}`,
+      ])
       await expect(
         execa('glaze', [
           `tile:show`,
@@ -101,13 +125,13 @@ describe('tiles', () => {
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       const update = await execa('glaze', [
         'tile:update',
         create.stderr.toString().split('Created stream ')[1].replace('.', ''),
         '--content={"FOO":"BAZ"}',
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       expect(update.stderr.toString().includes('Updated stream')).toBe(true)
     }, 60000)
@@ -117,7 +141,11 @@ describe('tiles', () => {
     const did = 'did:key:z6MknwirpC4SjiesG1p63ZbQ2D2yanpVxxqXUHdgnE4L4qQ5'
 
     test('does not create a deterministic tile', async () => {
-      const tile = await execa('glaze', ['tile:deterministic', '{}', `--key=${seed}`])
+      const tile = await execa('glaze', [
+        'tile:deterministic',
+        '{}',
+        `--did-key-seed=${seed}`,
+      ])
       expect(
         tile.stderr
           .toString()
@@ -133,7 +161,7 @@ describe('tiles', () => {
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
         `--sync=never-sync`,
       ])
       const stdOut = tile.stderr.toString()
@@ -148,7 +176,7 @@ describe('tiles', () => {
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--key=${seed}`,
+        `--did-key-seed=${seed}`,
       ])
       const stdOut = tile.stderr.toString()
       expect(stdOut.includes('Loaded tile')).toBe(true)
@@ -164,7 +192,7 @@ describe('tiles', () => {
             tags: ['foo', 'bar'],
             family: ['test'],
           }),
-          `--key=${seed}`,
+          `--did-key-seed=${seed}`,
           `--sync=unsupportedArgument`,
         ])
       ).rejects.toThrow('Expected --sync=unsupportedArgument to be one of:')

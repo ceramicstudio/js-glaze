@@ -2,6 +2,8 @@ import { Command, type CommandFlags } from '../../command.js'
 import { Flags } from '@oclif/core'
 import Table from 'cli-table3'
 import { readEncodedComposite } from '@glazed/devtools-node'
+import { Composite } from '@glazed/devtools'
+import { EncodedCompositeDefinition } from '@glazed/types'
 
 type CompositeModelInfo = {
   id: string
@@ -10,13 +12,16 @@ type CompositeModelInfo = {
   alias?: string
 }
 
-export default class CompositeModels extends Command<CommandFlags, { compositePath: string }> {
+export default class CompositeModels extends Command<
+  CommandFlags,
+  { compositePath: string | undefined }
+> {
   static description = 'display the list of models included in a composite'
 
   static args = [
     {
       name: 'compositePath',
-      required: true,
+      required: false,
       description: 'A path to encoded composite definition',
     },
   ]
@@ -35,7 +40,19 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
 
   async run(): Promise<void> {
     try {
-      const composite = await readEncodedComposite(this.ceramic, this.args.compositePath)
+      this.spinner.start(`Fetching composite's models...`)
+      let composite: Composite | undefined = undefined
+      if (this.stdin !== undefined) {
+        const definition = JSON.parse(this.stdin) as EncodedCompositeDefinition
+        composite = await Composite.fromJSON({ ceramic: this.ceramic, definition })
+      } else if (this.args.compositePath !== undefined) {
+        composite = await readEncodedComposite(this.ceramic, this.args.compositePath)
+      } else {
+        this.spinner.fail(
+          'You need to pass a path to encoded composite either via an arg or through stdin'
+        )
+        return
+      }
       if (this.flags['id-only'] === true) {
         // Not using the spinner here, so that the output can be piped using standard I/O
         this.log(JSON.stringify(Object.keys(composite.toParams().definition.models)))
@@ -55,7 +72,8 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
             modelDefinition.description || '',
           ])
         })
-        // Not using the spinner here, so that the table is laid out properly
+        this.spinner.succeed(`Fetching composite's models... Done!`)
+        // Logging to stdout, so that the table is laid out properly
         this.log(table.toString())
       } else {
         const result: Array<CompositeModelInfo> = []
@@ -74,7 +92,8 @@ export default class CompositeModels extends Command<CommandFlags, { compositePa
           }
           result.push(modelInfo)
         })
-        // Not using the spinner here, so that the output can be piped using standard I/O
+        this.spinner.succeed(`Fetching composite's models... Done!`)
+        // Logging the models to stdout, so that they can be piped using standard I/O or redirected to a file
         this.log(JSON.stringify(result))
       }
     } catch (e) {

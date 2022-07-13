@@ -22,7 +22,9 @@ export default class CreateModel extends Command<CommandFlags, { content: string
           controller: this.authenticatedDID.id,
         }
       )
-      this.spinner.succeed(`Created ${model.content.name} with streamID ${model.id.toString()}`)
+      this.spinner.succeed('Creating the model... Done!')
+      // Logging the stream id to stdout, so that it can be piped using standard I/O or redirected to a file
+      this.log(model.id.toString())
     } catch (e) {
       this.spinner.fail((e as Error).message)
       return
