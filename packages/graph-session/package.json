@@ -39,12 +39,12 @@
     "prepublishOnly": "package-check"
   },
   "dependencies": {
-    "@glazed/did-session": "^0.0.1-rc.0",
+    "@glazed/did-session": "^0.1.1",
     "@glazed/graph": "^0.1.0"
   },
   "devDependencies": {
-    "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
-    "@ceramicnetwork/common": "^2.2.1",
+    "@ceramicnetwork/blockchain-utils-linking": "^2.0.7",
+    "@ceramicnetwork/common": "^2.3.0",
     "@glazed/types": "^0.2.0"
   },
   "jest": {

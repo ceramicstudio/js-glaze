@@ -9,3 +9,4 @@
 node_modules
 /test/statestore
 /test/test_output_files
+/test/config/*
