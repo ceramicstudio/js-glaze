@@ -24,7 +24,7 @@ export const SYNC_OPTIONS_MAP: Record<string, SyncOptions | undefined> = {
 
 export interface CommandFlags {
   'ceramic-url': string
-  'did-key-seed': string
+  'did-private-key': string
   [key: string]: unknown
 }
 
@@ -85,7 +85,11 @@ export abstract class Command<
       description: 'Ceramic API URL',
       env: 'CERAMIC_URL',
     }),
-    'did-key-seed': Flags.string({ char: 's', description: 'DID key seed', env: 'DID_KEY_SEED' }),
+    'did-private-key': Flags.string({
+      char: 'k',
+      description: 'DID private key',
+      env: 'DID_PRIVATE_KEY',
+    }),
   }
 
   #authenticatedDID: DID | null = null
@@ -106,8 +110,8 @@ export abstract class Command<
     this.spinner = ora()
     this.stdin = await readPipe()
     // Authenticate the Ceramic instance whenever a key is provided
-    if (this.flags['did-key-seed'] != null) {
-      const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])
+    if (this.flags['did-private-key'] != null) {
+      const did = await this.getAuthenticatedDID(this.flags['did-private-key'])
       this.spinner.info(`Using DID ${chalk.cyan(did.id)}`)
       this.#authenticatedDID = did
       this.ceramic.did = did
@@ -123,7 +127,7 @@ export abstract class Command<
   get authenticatedDID(): DID {
     if (this.#authenticatedDID == null) {
       throw new Error(
-        'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
+        'DID is not authenticated, make sure to provide a private key using the "did-private-key" flag'
       )
     }
     return this.#authenticatedDID

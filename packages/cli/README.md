@@ -17,8 +17,8 @@ glaze COMMAND
 
 <!-- commands -->
 
-- [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
-- [`glaze did:from-seed`](#glaze-didfromseed)
+- [`glaze did:generate-private-key`](#glaze-didgenerateprivatekey)
+- [`glaze did:from-private-key`](#glaze-didfromprivatekey)
 - [`glaze help [COMMAND]`](#glaze-help-command)
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
@@ -47,25 +47,25 @@ glaze COMMAND
 - [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
 - [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
 
-### `glaze did:generate-seed`
+### `glaze did:generate-private-key`
 
-generate a new random 32 byte seed and return its base 16 representation
-
-```
-USAGE
-  $ glaze did:generate-seed
-```
-
-### `glaze did:from-seed`
-
-create a new DID from seed passed either as an argument or as a value of the flag
+generate a new random 32 byte private key and return its base 16 representation
 
 ```
 USAGE
-  $ glaze did:from-seed SEED
+  $ glaze did:generate-private-key
+```
+
+### `glaze did:from-private-key`
+
+create a new DID from a private key passed either as an argument or as a value of the flag
+
+```
+USAGE
+  $ glaze did:from-private-key KEY
   
 OPTIONS
-  --did-key-seed  A random 32 byte seed represented as a base16 string (pass only if not passed as positional argument)
+  --did-private-key  A random 32 byte private key represented as a base16 string (pass only if not passed as positional argument)
 ```
 
 ### `glaze help [COMMAND]`
@@ -114,7 +114,8 @@ ARGUMENTS
   CONTENT contents of the model encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
 ```
 
 ### `glaze model:content STREAMID`
@@ -174,6 +175,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key  DID Private Key
   -o, --output               a path to file where the resulting encoded composite definition should be saved
 ```
 
@@ -190,7 +192,8 @@ ARGUMENTS
   MODELS  a list of models (identified by names of stream IDs) to extract from the given composite
 
 OPTIONS
-  -o, --output a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:extract-model`
@@ -206,7 +209,8 @@ ARGUMENTS
   MODELS    one or more models to use when extracting a new composite, identified by name or stream ID
 
 OPTIONS
-  -o, --output a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:merge`
@@ -221,8 +225,9 @@ ARGUMENTS
   PATHS  a list of paths to files containing encoded composites, separated by spaces
 
 OPTIONS
-  -e, --common-embeds  'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
-  -o, --output         a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -e, --common-embeds          'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:models`
@@ -279,7 +284,8 @@ ARGUMENTS
   CONTENT        contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  -c, --ceramic-url=ceramic    Ceramic API URL
 ```
 
 ### `glaze model-instance:replace STREAMID CONTENT`
@@ -295,7 +301,8 @@ ARGUMENTS
   CONTENT   new contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  -c, --ceramic-url=ceramic    Ceramic API URL
 ```
 
 ### `glaze model-instance:content STREAMID`
@@ -436,7 +443,7 @@ USAGE
 OPTIONS
   -b, --content=content        stream contents (JSON encoded as string)
   -c, --ceramic-url=ceramic    Ceramic API URL
-  -k, --key=key                DID Private Key
+  -k, --did-private-key=key    DID Private Key
   -m, --metadata=metadata      stream metadata
 ```
 
@@ -452,9 +459,9 @@ ARGUMENTS
   METADATA  stream metadata
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
-  -k, --key=key              DID Private Key
-  --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  --sync                       Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:content STREAMID`
@@ -487,7 +494,7 @@ ARGUMENTS
 OPTIONS
   -b, --content=content        new contents for the stream
   -c, --ceramic-url=ceramic    Ceramic API URL
-  -k, --key=key                DID Private Key
+  -k, --did-private-key=key    DID Private Key
   -m, --metadata=metadata      Optional metadata for the stream
 ```
 

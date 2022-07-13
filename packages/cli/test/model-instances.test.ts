@@ -16,7 +16,7 @@ describe('model-instances', () => {
     const create = await execa('glaze', [
       'model:create',
       MY_MODEL_JSON,
-      `--did-key-seed=${modelAccountSeed}`,
+      `--did-private-key=${modelAccountSeed}`,
     ])
     modelStreamID = create.stdout.toString().trim()
   }, 60000)
@@ -43,7 +43,7 @@ describe('model-instances', () => {
       const lines = create.stderr.toString().split('\n')
       expect(
         lines[1].includes(
-          'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
+          'DID is not authenticated, make sure to provide a private key using the "did-private-key" flag'
         )
       ).toBe(true)
     }, 60000)
@@ -53,7 +53,7 @@ describe('model-instances', () => {
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--did-key-seed=${modelAccountSeed}`,
+        `--did-private-key=${modelAccountSeed}`,
       ])
       expect(
         create.stderr
@@ -71,7 +71,7 @@ describe('model-instances', () => {
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--did-key-seed=${midAccountSeed}`,
+        `--did-private-key=${midAccountSeed}`,
       ])
       midStreamID = create.stdout.toString().trim()
     }, 60000)
@@ -102,7 +102,7 @@ describe('model-instances', () => {
         'model-instance:replace',
         midStreamID,
         REPLACED_MODEL_INSTANCE_JSON,
-        `--did-key-seed=${midAccountSeed}`,
+        `--did-private-key=${midAccountSeed}`,
       ])
       expect(
         replace.stderr.toString().includes('Replacing content in the model instance... Done!')
@@ -122,7 +122,7 @@ describe('model-instances', () => {
         'model-instance:create',
         modelStreamID,
         MODEL_INSTANCE_JSON,
-        `--did-key-seed=${midAccountSeed}`,
+        `--did-private-key=${midAccountSeed}`,
       ])
 
       const content = await execa('glaze', [

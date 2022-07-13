@@ -37,7 +37,7 @@ describe('composites', () => {
       const create = await execa('glaze', [
         'composite:create',
         'test/mocks/composite.schema',
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -107,12 +107,12 @@ describe('composites', () => {
       const model1Create = await execa('glaze', [
         'model:create',
         MODEL1_JSON,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const model2Create = await execa('glaze', [
         'model:create',
         MODEL2_JSON,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       model1StreamID = model1Create.stdout.toString().trim()
       model2StreamID = model2Create.stdout.toString().trim()
@@ -128,7 +128,7 @@ describe('composites', () => {
         'composite:from-model',
         model1StreamID,
         model2StreamID,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(create.stdout.toString().includes('"version":"1.0"')).toBe(true)
       expect(create.stdout.toString().includes('"aliases":')).toBe(true)
@@ -195,9 +195,7 @@ describe('composites', () => {
 
   describe('composite:extract-model', () => {
     test('composite by extracting models fails without the composite path and at least one model param', async () => {
-      const extractModelWithNoParams = await execa('glaze', [
-        'composite:extract-model',
-      ])
+      const extractModelWithNoParams = await execa('glaze', ['composite:extract-model'])
       expect(
         extractModelWithNoParams.stderr
           .toString()
@@ -207,6 +205,8 @@ describe('composites', () => {
       const extractModelWithJustCompositePath = await execa('glaze', [
         'composite:extract-model',
         'test/mocks/encoded.composite.picture.post.json',
+
+        
       ])
       expect(
         extractModelWithJustCompositePath.stderr

@@ -21,6 +21,7 @@ export default class ModelInstanceReplace extends Command<
     this.spinner.start('Replacing content in the model instance...')
     try {
       const mid = await ModelInstanceDocument.load(this.ceramic, this.args.streamId)
+      this.log('CONTENT', this.args.content)
       await mid.replace(this.args.content)
       this.spinner.succeed(`Replacing content in the model instance... Done!`)
     } catch (e) {
