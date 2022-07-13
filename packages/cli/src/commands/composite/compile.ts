@@ -48,13 +48,13 @@ export default class CompositeCompile extends Command<Flags> {
       })
       this.spinner.succeed('Compiling the composite... Done!')
       if (!this.flags['disable-stdin']) {
-        outputPaths.forEach((path) => {
+        for (const path of outputPaths) {
           if (path.endsWith('.json')) {
             // log the first .json path so that it can be piped e.g. to graphql:server or redirected to a file
             this.log(path)
             return
           }
-        })
+        }
       }
     } catch (e) {
       this.spinner.fail((e as Error).message)
