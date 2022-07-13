@@ -1,5 +1,3 @@
-import chalk from 'chalk'
-
 import { Command, CommandFlags } from '../../command.js'
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
@@ -37,7 +35,7 @@ export default class DIDFromSeed extends Command<CommandFlags, { didKeySeed: str
       await did.authenticate()
       this.spinner.succeed(`Creating DID... Done!`)
       // Logging the DID to stdout, so that it can be piped using standard I/O or redirected to a file
-      this.log(chalk.cyan(did.id))
+      this.log(did.id)
     } catch (err) {
       this.spinner.fail((err as Error).message)
     }

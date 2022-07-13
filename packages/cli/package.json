@@ -87,7 +87,6 @@
     "@oclif/core": "^1.9.3",
     "@oclif/plugin-help": "^5.1.11",
     "@oclif/plugin-version": "^1.0.4",
-    "chalk": "^5.0.0",
     "cli-table3": "^0.6.2",
     "did-resolver": "^3.2.2",
     "dids": "^3.2.0",
