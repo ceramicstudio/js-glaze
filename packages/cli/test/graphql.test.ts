@@ -66,7 +66,7 @@ describe('graphql', () => {
           setTimeout(() => {
             serverProcess.kill()
             resolve(true)
-          }, 10000)
+          }, 40000)
         ),
         serverProcess,
       ])
@@ -96,7 +96,7 @@ describe('graphql', () => {
           setTimeout(() => {
             serverProcess.kill()
             resolve(true)
-          }, 10000)
+          }, 40000)
         ),
         serverProcess,
       ])
