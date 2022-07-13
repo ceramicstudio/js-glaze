@@ -406,7 +406,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
-  -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze stream:state STREAMID`
@@ -422,7 +422,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
-  -s, --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  --sync  Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:create`
@@ -454,7 +454,7 @@ ARGUMENTS
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
   -k, --key=key              DID Private Key
-  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:content STREAMID`
@@ -470,7 +470,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
-  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:update STREAMID`
@@ -504,7 +504,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
-  -s, --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 <!-- commandsstop -->
