@@ -205,6 +205,8 @@ describe('composites', () => {
       const extractModelWithJustCompositePath = await execa('glaze', [
         'composite:extract-model',
         'test/mocks/encoded.composite.picture.post.json',
+
+        
       ])
       expect(
         extractModelWithJustCompositePath.stderr

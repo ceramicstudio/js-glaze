@@ -114,7 +114,8 @@ ARGUMENTS
   CONTENT contents of the model encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
 ```
 
 ### `glaze model:content STREAMID`
@@ -174,6 +175,7 @@ ARGUMENTS
 
 OPTIONS
   -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key  DID Private Key
   -o, --output               a path to file where the resulting encoded composite definition should be saved
 ```
 
@@ -190,7 +192,8 @@ ARGUMENTS
   MODELS  a list of models (identified by names of stream IDs) to extract from the given composite
 
 OPTIONS
-  -o, --output a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:extract-model`
@@ -206,7 +209,8 @@ ARGUMENTS
   MODELS    one or more models to use when extracting a new composite, identified by name or stream ID
 
 OPTIONS
-  -o, --output a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:merge`
@@ -221,8 +225,9 @@ ARGUMENTS
   PATHS  a list of paths to files containing encoded composites, separated by spaces
 
 OPTIONS
-  -e, --common-embeds  'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
-  -o, --output         a path to file where the resulting encoded composite definition should be saved
+  -k, --did-private-key=key    DID Private Key
+  -e, --common-embeds          'all','none' or a list of comma-separated embeds to extract from input composites into the output composite
+  -o, --output                 a path to file where the resulting encoded composite definition should be saved
 ```
 
 ### `glaze composite:models`
@@ -279,7 +284,8 @@ ARGUMENTS
   CONTENT        contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  -c, --ceramic-url=ceramic    Ceramic API URL
 ```
 
 ### `glaze model-instance:replace STREAMID CONTENT`
@@ -295,7 +301,8 @@ ARGUMENTS
   CONTENT   new contents of the model instance encoded as JSON
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  -c, --ceramic-url=ceramic    Ceramic API URL
 ```
 
 ### `glaze model-instance:content STREAMID`
@@ -436,7 +443,7 @@ USAGE
 OPTIONS
   -b, --content=content        stream contents (JSON encoded as string)
   -c, --ceramic-url=ceramic    Ceramic API URL
-  -k, --key=key                DID Private Key
+  -k, --did-private-key=key    DID Private Key
   -m, --metadata=metadata      stream metadata
 ```
 
@@ -452,9 +459,9 @@ ARGUMENTS
   METADATA  stream metadata
 
 OPTIONS
-  -c, --ceramic-url=ceramic  Ceramic API URL
-  -k, --key=key              DID Private Key
-  --sync                 Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
+  -c, --ceramic-url=ceramic    Ceramic API URL
+  -k, --did-private-key=key    DID Private Key
+  --sync                       Controls if the current stream state should be synced over the network or not. 'prefer-cache' will return the state from the node's local cache if present, and will sync from the network if the stream isn't in the cache. 'always-sync' always syncs from the network, even if there is cached state for the stream. 'never-sync' never syncs from the network.
 ```
 
 ### `glaze tile:content STREAMID`
@@ -487,7 +494,7 @@ ARGUMENTS
 OPTIONS
   -b, --content=content        new contents for the stream
   -c, --ceramic-url=ceramic    Ceramic API URL
-  -k, --key=key                DID Private Key
+  -k, --did-private-key=key    DID Private Key
   -m, --metadata=metadata      Optional metadata for the stream
 ```
 
