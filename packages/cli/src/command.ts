@@ -12,6 +12,7 @@ import { getResolver as getKeyResolver } from 'key-did-resolver'
 import ora from 'ora'
 import type { Ora } from 'ora'
 import { fromString } from 'uint8arrays'
+import getStdin from 'get-stdin';
 
 type StringRecord = Record<string, unknown>
 
@@ -47,34 +48,6 @@ export const SYNC_OPTION_FLAG = Flags.integer({
   },
 })
 
-const readPipe: () => Promise<string | undefined> = () => {
-  return new Promise((resolve) => {
-    let data = ''
-    const stdin = process.openStdin()
-    const finish = () => {
-      resolve(data.length > 0 ? data.trim() : undefined)
-      stdin.pause()
-    }
-
-    stdin.setEncoding('utf-8')
-    stdin.on('data', (chunk) => {
-      data += chunk
-    })
-
-    stdin.on('end', () => {
-      finish()
-    })
-
-    if (stdin.isTTY) {
-      finish()
-    } else {
-      setTimeout(() => {
-        finish()
-      }, 8000)
-    }
-  })
-}
-
 export abstract class Command<
   Flags extends CommandFlags = CommandFlags,
   Args extends StringRecord = StringRecord
@@ -104,7 +77,7 @@ export abstract class Command<
     this.args = args as Args
     this.flags = flags as Flags
     this.spinner = ora()
-    this.stdin = await readPipe()
+    this.stdin = await getStdin()
     // Authenticate the Ceramic instance whenever a key is provided
     if (this.flags['did-key-seed'] != null) {
       const did = await this.getAuthenticatedDID(this.flags['did-key-seed'])

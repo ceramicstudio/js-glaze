@@ -92,6 +92,7 @@
     "dids": "^3.2.0",
     "env-paths": "^3.0.0",
     "fs-extra": "^10.0.1",
+    "get-stdin": "^9.0.0",
     "inquirer": "^8.2.4",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.5",
