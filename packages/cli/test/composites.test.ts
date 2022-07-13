@@ -195,9 +195,7 @@ describe('composites', () => {
 
   describe('composite:extract-model', () => {
     test('composite by extracting models fails without the composite path and at least one model param', async () => {
-      const extractModelWithNoParams = await execa('glaze', [
-        'composite:extract-model',
-      ])
+      const extractModelWithNoParams = await execa('glaze', ['composite:extract-model'])
       expect(
         extractModelWithNoParams.stderr
           .toString()
