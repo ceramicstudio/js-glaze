@@ -7,7 +7,7 @@ describe('streams', () => {
     const tile = await execa('glaze', [
       `tile:create`,
       `--content={"FOO":"BAR"}`,
-      `--did-key-seed=${seed}`,
+      `--did-private-key=${seed}`,
     ])
     const commits = await execa('glaze', [
       'stream:commits',
@@ -20,7 +20,7 @@ describe('streams', () => {
     const tile = await execa('glaze', [
       `tile:create`,
       `--content={"FOO":"BAR"}`,
-      `--did-key-seed=${seed}`,
+      `--did-private-key=${seed}`,
     ])
     const tileOutput = tile.stderr.toString()
 

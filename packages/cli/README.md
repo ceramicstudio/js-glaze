@@ -17,8 +17,8 @@ glaze COMMAND
 
 <!-- commands -->
 
-- [`glaze did:generate-seed SEED`](#glaze-didgenerateseed)
-- [`glaze did:from-seed`](#glaze-didfromseed)
+- [`glaze did:generate-private-key`](#glaze-didgenerateprivatekey)
+- [`glaze did:from-private-key`](#glaze-didfromprivatekey)
 - [`glaze help [COMMAND]`](#glaze-help-command)
 - [`glaze model:create CONTENT`](#glaze-modelcreate-content)
 - [`glaze model:content STREAMID`](#glaze-modelcontent-streamid)
@@ -47,25 +47,25 @@ glaze COMMAND
 - [`glaze tile:update STREAMID CONTENT`](#glaze-tileupdate-streamid-content)
 - [`glaze tile:show STREAMID`](#glaze-tileshow-streamid)
 
-### `glaze did:generate-seed`
+### `glaze did:generate-private-key`
 
-generate a new random 32 byte seed and return its base 16 representation
-
-```
-USAGE
-  $ glaze did:generate-seed
-```
-
-### `glaze did:from-seed`
-
-create a new DID from seed passed either as an argument or as a value of the flag
+generate a new random 32 byte private key and return its base 16 representation
 
 ```
 USAGE
-  $ glaze did:from-seed SEED
+  $ glaze did:generate-private-key
+```
+
+### `glaze did:from-private-key`
+
+create a new DID from a private key passed either as an argument or as a value of the flag
+
+```
+USAGE
+  $ glaze did:from-private-key KEY
   
 OPTIONS
-  --did-key-seed  A random 32 byte seed represented as a base16 string (pass only if not passed as positional argument)
+  --did-private-key  A random 32 byte private key represented as a base16 string (pass only if not passed as positional argument)
 ```
 
 ### `glaze help [COMMAND]`

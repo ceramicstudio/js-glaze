@@ -20,7 +20,7 @@ describe('models', () => {
         create.stderr
           .toString()
           .includes(
-            'DID is not authenticated, make sure to provide a seed using the "did-key-seed" flag'
+            'DID is not authenticated, make sure to provide a private key using the "did-private-key" flag'
           )
       ).toBe(true)
     }, 60000)
@@ -29,7 +29,7 @@ describe('models', () => {
       const create = await execa('glaze', [
         'model:create',
         MY_MODEL_JSON,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(create.stderr.toString().includes('Done')).toBe(true)
     }, 60000)
@@ -46,7 +46,7 @@ describe('models', () => {
       const create = await execa('glaze', [
         'model:create',
         MY_MODEL_JSON,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
 
       const content = await execa('glaze', [
@@ -75,7 +75,7 @@ describe('models', () => {
       const create = await execa('glaze', [
         'model:create',
         MY_MODEL_JSON,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
 
       const controller = await execa('glaze', [

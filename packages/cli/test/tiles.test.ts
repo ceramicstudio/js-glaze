@@ -11,7 +11,7 @@ describe('tiles', () => {
 
       expect(
         lines[1].includes(
-          'DID is not authenticated, make sure to provide a seed using the "did-key-seed"'
+          'DID is not authenticated, make sure to provide a private key using the "did-private-key"'
         )
       ).toBe(true)
     }, 60000)
@@ -20,7 +20,7 @@ describe('tiles', () => {
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(create.stderr.toString().includes('Created stream ')).toBe(true)
     }, 60000)
@@ -31,7 +31,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const content = await execa('glaze', [
         `tile:content`,
@@ -46,7 +46,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const content = await execa('glaze', [
         `tile:content`,
@@ -61,7 +61,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       await expect(
         execa('glaze', [
@@ -78,7 +78,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const content = await execa('glaze', [
         `tile:show`,
@@ -93,7 +93,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const content = await execa('glaze', [
         `tile:show`,
@@ -108,7 +108,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       await expect(
         execa('glaze', [
@@ -125,13 +125,13 @@ describe('tiles', () => {
       const create = await execa('glaze', [
         `tile:create`,
         `--content={"FOO":"BAR"}`,
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const update = await execa('glaze', [
         'tile:update',
         create.stderr.toString().split('Created stream ')[1].replace('.', ''),
         '--content={"FOO":"BAZ"}',
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(update.stderr.toString().includes('Updated stream')).toBe(true)
     }, 60000)
@@ -144,7 +144,7 @@ describe('tiles', () => {
       const tile = await execa('glaze', [
         'tile:deterministic',
         '{}',
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       expect(
         tile.stderr
@@ -161,7 +161,7 @@ describe('tiles', () => {
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
         `--sync=never-sync`,
       ])
       const stdOut = tile.stderr.toString()
@@ -176,7 +176,7 @@ describe('tiles', () => {
           tags: ['foo', 'bar'],
           family: ['test'],
         }),
-        `--did-key-seed=${seed}`,
+        `--did-private-key=${seed}`,
       ])
       const stdOut = tile.stderr.toString()
       expect(stdOut.includes('Loaded tile')).toBe(true)
@@ -192,7 +192,7 @@ describe('tiles', () => {
             tags: ['foo', 'bar'],
             family: ['test'],
           }),
-          `--did-key-seed=${seed}`,
+          `--did-private-key=${seed}`,
           `--sync=unsupportedArgument`,
         ])
       ).rejects.toThrow('Expected --sync=unsupportedArgument to be one of:')

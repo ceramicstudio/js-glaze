@@ -4,7 +4,8 @@ import { Readable } from 'node:stream'
 describe('graphql', () => {
   describe('graphql:schema', () => {
     test('printing graphql schema fails without runtime definition path pram', async () => {
-      const schema = await execa('glaze', ['graphql:schema'])
+      const schema = await execa('glaze', [
+        'graphql:schema'])
       expect(
         schema.stderr
           .toString()
