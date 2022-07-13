@@ -3,7 +3,6 @@ import { Flags, CliUx } from '@oclif/core'
 import { Model } from '@ceramicnetwork/stream-model'
 import Table from 'cli-table3'
 import { Edge, Page, PageInfo, StreamState } from '@ceramicnetwork/common'
-import terminalSize from 'term-size'
 
 type PartialModelDefinition = {
   id: string
@@ -29,10 +28,10 @@ export default class ModelList extends Command<ModelListFlags> {
   }
 
   getPageSize(): number {
-    const rows = terminalSize()['rows']
+    // const rows = terminalSize()['rows']
     // When we display a table, each row is takes two terminal rows. We subtract additional 3 lines per page, to leave
     // space for the table header and next page prompt
-    return Math.max(3, this.flags.table ? rows / 2 - 3 : rows)
+    return 50
   }
 
   async run(): Promise<void> {
